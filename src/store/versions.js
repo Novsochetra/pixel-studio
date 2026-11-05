@@ -1,0 +1,69 @@
+import { projectFileText, readProjectFile } from './project-file.js';
+import { newId } from '../model/project.js';
+import { keysFor } from './keys.js';
+
+// a stored document holds at most 256 KiB, so a big project is kept in pieces
+const CHUNK = 200000;
+const KEEP = 30;
+
+export async function listVersions(backend, keys = keysFor('')) {
+  return (await backend.read(keys.versions))?.list ?? [];
+}
+
+export async function saveVersion(backend, project, name, keys = keysFor('')) {
+  const text = projectFileText(project);
+  const id = newId('v');
+  const chunks = Math.ceil(text.length / CHUNK);
+
+  for (let n = 0; n < chunks; n++) {
+    await backend.write(keys.versionChunk(id, n), { text: text.slice(n * CHUNK, (n + 1) * CHUNK) });
+  }
+
+  const list = [{ id, name, savedAt: Date.now(), chunks, size: text.length }, ...(await listVersions(backend, keys))];
+
+  for (const old of list.slice(KEEP)) {
+    await deleteVersionChunks(backend, old, keys);
+  }
+
+  await backend.write(keys.versions, { list: list.slice(0, KEEP) });
+
+  return id;
+}
+
+async function deleteVersionChunks(backend, entry, keys) {
+  for (let n = 0; n < entry.chunks; n++) {
+    await backend.remove(keys.versionChunk(entry.id, n));
+  }
+}
+
+export async function deleteVersion(backend, id, keys = keysFor('')) {
+  const list = await listVersions(backend, keys);
+  const entry = list.find((v) => v.id === id);
+
+  if (entry) {
+    await deleteVersionChunks(backend, entry, keys);
+    await backend.write(keys.versions, { list: list.filter((v) => v.id !== id) });
+  }
+}
+
+export async function deleteAllVersions(backend, keys) {
+  for (const entry of await listVersions(backend, keys)) {
+    await deleteVersionChunks(backend, entry, keys);
+  }
+
+  await backend.remove(keys.versions);
+}
+
+export async function versionText(backend, entry, keys = keysFor('')) {
+  let text = '';
+
+  for (let n = 0; n < entry.chunks; n++) {
+    text += (await backend.read(keys.versionChunk(entry.id, n)))?.text ?? '';
+  }
+
+  return text;
+}
+
+export async function loadVersion(backend, entry, keys = keysFor('')) {
+  return readProjectFile(await versionText(backend, entry, keys));
+}

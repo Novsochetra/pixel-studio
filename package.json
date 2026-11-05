@@ -1,0 +1,14 @@
+{
+  "name": "pixel-clean-studio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "python3 build/build.py",
+    "serve": "python3 build/build.py && python3 test/wrap.py && python3 -m http.server 8811 --directory dist",
+    "test": "node --test test/*.test.js",
+    "test:all": "bash test/run-all.sh"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}
