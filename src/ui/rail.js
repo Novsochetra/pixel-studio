@@ -9,6 +9,7 @@ export function renderRail(el, app) {
       `button.btn.quiet${state.tool === tool.id ? '.on' : ''}`,
       {
         title: `${tool.label} (${tool.key.toUpperCase()})`,
+        'data-key': tool.key.toUpperCase(),
         'aria-label': tool.label,
         'aria-pressed': String(state.tool === tool.id),
         onclick: () => app.store.set({ tool: tool.id, mode: 'edit' }),

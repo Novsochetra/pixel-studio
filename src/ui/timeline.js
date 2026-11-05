@@ -2,11 +2,12 @@ import { h, replace } from './dom.js';
 import { currentAnimation, currentFrames, selectFrame } from './actions.js';
 import { moveFrame } from '../model/frames.js';
 import { compositeFrame } from '../model/composite.js';
-import { directionLabel } from '../model/project.js';
+import { VIEW_FILTERS } from '../views/filters.js';
 import { drawThumbnail } from './views-panel.js';
 import { bounds } from '../model/sprite.js';
 import { bindFrameDrag } from './frame-drag.js';
 import { frameButtons, frameStructure, playButtons } from './timeline-controls.js';
+import { animationPicker, newAnimationForm } from './animation-panel.js';
 
 function unionBounds(boxes) {
   const found = boxes.filter(Boolean);
@@ -25,7 +26,7 @@ function unionBounds(boxes) {
 
 function frameButton(app, sprite, box, i, index) {
   const thumb = h('canvas', { 'aria-hidden': 'true' });
-  drawThumbnail(thumb, sprite, 56, box);
+  drawThumbnail(thumb, sprite, 48, box);
   const empty = !bounds(sprite);
 
   return h(`button.frame${empty ? '.empty' : ''}`, {
@@ -38,16 +39,17 @@ function frameButton(app, sprite, box, i, index) {
 
 // The animation's frames, in order, seen in the view being edited; every view has the same frames.
 export function mountTimeline(app) {
-  const title = h('div.timeline-title');
-  const strip = h('div.frames', { role: 'listbox', 'aria-label': 'Frames' });
+  const strip = h('div.frames', { role: 'listbox', 'aria-label': 'Frames', title: 'Every view has these frames. Drag a frame to move it.' });
   const controls = h('div.timeline-controls');
   const player = h('canvas.player', { 'aria-label': 'Animation preview' });
-  const el = h('div.timeline', {}, h('div.timeline-main', {}, title, controls, strip), player);
+  const playback = h('div.timeline-controls.playback');
+  const el = h('div.timeline', {}, h('div.timeline-main', {}, controls, h('div.timeline-row', {}, strip, playback)), player);
   let playing = false;
   let shown = 0;
   let last = 0;
   let box = null;
-  const frameSprite = (frame) => compositeFrame(frame, app.store.state.project.canvas.width, app.store.state.project.canvas.height);
+  // the strip and the player show the art as the canvas does: colour, silhouette or grey
+  const frameSprite = (frame) => VIEW_FILTERS[app.store.state.viewFilter](compositeFrame(frame, app.store.state.project.canvas.width, app.store.state.project.canvas.height));
 
   function tick(time) {
     if (!playing || !el.isConnected) {
@@ -61,7 +63,7 @@ export function mountTimeline(app) {
     if (time - last >= 1000 / currentAnimation(app.store.state).fps) {
       last = time;
       shown = (shown + 1) % frames.length;
-      drawThumbnail(player, frameSprite(frames[shown]), 120, box);
+      drawThumbnail(player, frameSprite(frames[shown]), 96, box);
     }
 
     requestAnimationFrame(tick);
@@ -86,12 +88,12 @@ export function mountTimeline(app) {
     };
     box = unionBounds(sprites.map(bounds));
 
-    replace(title, h('strong', {}, `Frames of ${animation.name}`), h('span.hint', {}, `${frames.length} in every view, showing ${directionLabel(state.at.direction)}. Drag a frame to move it.`));
     replace(strip, sprites.map((sprite, i) => frameButton(app, sprite, box, i, index)));
-    replace(controls, ...frameButtons(app, index), h('span.spacer'), ...playButtons(app, playing, togglePlay));
+    replace(controls, animationPicker(app), newAnimationForm(app), h('span.sep'), ...frameButtons(app, index));
+    replace(playback, ...playButtons(app, playing, togglePlay));
 
     if (!playing) {
-      drawThumbnail(player, sprites[index], 120, box);
+      drawThumbnail(player, sprites[index], 96, box);
     }
   }
 

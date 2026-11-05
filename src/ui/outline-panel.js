@@ -26,7 +26,7 @@ export function renderOutlinePanel(el, app) {
 
   replace(
     el,
-    h('h2', {}, 'Outline'),
+    h('h2', { tabindex: '0' }, 'Outline'),
     h('label.field', { for: 'outline-colour' }, h('span', {}, 'Outline colour (found on the edge)'), h('select.input.mono', { id: 'outline-colour', onchange: (event) => { state.outline = { ...state.outline, colour: Number(event.target.value) }; app.store.touch('outline'); } }, colours.map((c) => h('option', { value: String(c), selected: c === colour }, toHex(c))))),
     OPERATIONS.map((operation) => {
       const { count, points } = colour === null ? { count: 0, points: [] } : previewOutline(layer.sprite, operation.run, colour);

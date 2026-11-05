@@ -3,6 +3,7 @@ import { allLayers, frameAt, layerAt } from '../model/project.js';
 import { compositeFrame } from '../model/composite.js';
 import { changedLayers, snapshotAnimations } from '../editor/history.js';
 import { referenceOf } from '../model/reference.js';
+import { clampShift, shiftFrame } from '../model/frame-shift.js';
 
 export function currentAnimation(state) {
   return state.project.animations.find((a) => a.id === state.at.animation) ?? state.project.animations[0];
@@ -115,6 +116,18 @@ export function restructure(app, label, mutate) {
   app.saver.markStructure();
   app.store.set({ at: settleAt({ ...state, at: { ...state.at, ...at } }), selection: null });
   app.store.touch('animations');
+}
+
+// the open frame moved, stopping at the canvas edge; one undo step
+export function shiftCurrentFrame(app, dx, dy) {
+  const { project, at } = app.store.state;
+  const [x, y] = clampShift(frameAt(project, at), project.canvas.width, project.canvas.height, dx, dy);
+
+  if (x || y) {
+    restructure(app, 'Move frame', (state) => {
+      shiftFrame(frameAt(state.project, state.at), x, y);
+    });
+  }
 }
 
 export function flipCurrent(app) {

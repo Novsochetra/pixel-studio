@@ -83,7 +83,7 @@ function outfitNames(app, redraw) {
 export function openOutfitsSheet(app) {
   const { state } = app.store;
   const teams = profileOf(state.project).teamKits;
-  const sheet = openSheet(teams ? 'Team kits and outfits' : 'Outfits');
+  const sheet = openSheet(teams ? 'Team kits and outfits' : 'Outfits', null, { wide: true });
   const slot = h('div', { style: { display: 'grid', gap: '14px' } });
   let partsOpen = !state.project.parts.some((part) => part.colours.length);
   const choice = { source: teams ? 'team' : 'custom', team: 'cambodia', kit: 'home', outfit: null, custom: {} };
@@ -95,7 +95,7 @@ export function openOutfitsSheet(app) {
 
     const mapping = kitMapping(state.project.parts, chosenRamps(state.project, choice));
     const name = chosenName(state.project, choice);
-    const preview = boardPreview(state, 860, { overlay: null, mapping });
+    const preview = boardPreview(state, 860, { overlay: null, mapping, onScreen: true });
     const wear = () => {
       keepVersion(app, `Before ${name}`);
       const layers = allArtLayers(state);

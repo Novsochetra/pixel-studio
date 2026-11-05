@@ -113,10 +113,9 @@ export function renderLayersPanel(el, app) {
 
   replace(
     el,
-    h('h2', {}, 'Layers', h('span.hint', {}, 'top first')),
+    h('h2', { tabindex: '0' }, 'Layers', h('span.hint', {}, 'top first')),
     h('div.view-list', {}, [...layerStack(animation)].reverse().map((entry) => layerRow(app, entry, entry.key === active.key))),
     active.kind === 'reference' ? referenceStrength(app, active) : null,
-    h('p.hint', {}, 'Layers are see-through sheets stacked inside every frame: your art, and pictures to trace. The frames below the canvas are the steps of the animation.'),
     h(
       'div.group',
       { style: { gap: '6px', flexWrap: 'wrap' } },

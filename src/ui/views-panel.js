@@ -99,12 +99,12 @@ function viewRow(app, direction) {
 export function renderViewsPanel(el, app) {
   replace(
     el,
-    h('h2', {}, 'Views'),
+    h('h2', { tabindex: '0' }, 'Views'),
     h('div.view-list', {}, directionsInUse(app.store.state).map((direction) => viewRow(app, direction))),
-    h('div.group', { style: { gap: '6px', flexWrap: 'wrap' } },
-      h('button.btn', { onclick: () => openChatgptSheet(app) }, 'Ask ChatGPT for a view…'),
-      h('button.btn', { onclick: () => chooseFiles((files) => openBatchSheet(app, files)) }, icon('upload'), 'Clean several…')),
-    h('p.hint', {}, `Drop a ChatGPT image on the canvas to clean it into the view you are editing, or drop several at once. ${directionLabel(referenceOf(app.store.state.project))} is the reference every view is matched to.`),
+    h('div.group', { style: { gap: '6px' } },
+      h('button.btn', { style: { flex: '1' }, onclick: () => openChatgptSheet(app) }, 'Ask ChatGPT…'),
+      h('button.btn', { style: { flex: '1' }, onclick: () => chooseFiles((files) => openBatchSheet(app, files)) }, icon('upload'), 'Clean several…')),
+    h('p.hint', {}, 'Drop a ChatGPT image on the canvas to clean it into the view you are editing.'),
   );
 }
 

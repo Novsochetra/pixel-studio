@@ -2,7 +2,8 @@ import { h, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
 import { currentAnimation } from './actions.js';
 import { buildSheet } from '../export/sheet.js';
-import { spritePng, checkerPainter } from '../io/images.js';
+import { spritePng } from '../io/images.js';
+import { drawChecker } from './draw.js';
 import { saveFile } from './save-file.js';
 import { characterHeight, presetSettings, presetsFor, sane } from './export-settings.js';
 import { saveFrames, saveGamePack, saveGifs, saveSheetsWithJson } from './export-files.js';
@@ -24,7 +25,7 @@ function preview(result) {
   canvas.width = result.sheet.width * scale;
   canvas.height = result.sheet.height * scale;
   const context = canvas.getContext('2d');
-  checkerPainter(scale * 2)(context, canvas.width, canvas.height);
+  drawChecker(context, 0, 0, canvas.width, canvas.height, scale * 4);
   const native = document.createElement('canvas');
   native.width = result.sheet.width;
   native.height = result.sheet.height;
@@ -40,7 +41,7 @@ function preview(result) {
 export function openExportSheet(app) {
   const { state } = app.store;
   const animation = currentAnimation(state);
-  const sheet = openSheet(`Sprite sheet: ${animation.name}`);
+  const sheet = openSheet(`Sprite sheet: ${animation.name}`, null, { wide: true });
   const slot = h('div', { style: { display: 'grid', gap: '12px' } });
   let preset = presetsFor(state.project).some(([id]) => id === state.project.exportSettings?.preset) ? state.project.exportSettings.preset : 'fit';
   let settings = sane({ ...presetSettings(state, preset), ...(state.project.exportSettings?.custom ?? {}) });
@@ -75,7 +76,7 @@ export function openExportSheet(app) {
         numberField('Feet y in frame', settings.anchorY, 'anchor-y', (v) => set({ anchorY: v }))),
       h('label.toggle-row', { for: 'mirrored' }, h('span', {}, h('div', {}, 'Add the mirrored rows'), h('div.hint', {}, naga ? 'Off: the game mirrors them itself (mirrorOf), like run and kick' : 'Off: flip them in your game; on: drawn into the sheet')), h('input.switch', { type: 'checkbox', role: 'switch', id: 'mirrored', checked: includeMirrored, onchange: (event) => { includeMirrored = event.target.checked; remember(); draw(); } })),
       h('div', { style: { overflowX: 'auto' } }, preview(result)),
-      h('p.hint', {}, `${result.frames} frames × ${result.rows.length} rows (${result.rows.map((row) => row.direction).join(', ')}) · ${result.sheet.width}×${result.sheet.height} px · ${animation.fps} fps`),
+      h('p.hint', {}, `${result.frames} ${result.frames === 1 ? 'frame' : 'frames'} × ${result.rows.length} ${result.rows.length === 1 ? 'row' : 'rows'} (${result.rows.map((row) => row.direction).join(', ')}) · ${result.sheet.width}×${result.sheet.height} px · ${animation.fps} fps`),
       result.warnings.some((w) => w.includes('outside')) ? h('p.hint', {}, `Some art does not fit this frame; this character is ${characterHeight(state)} px tall. "Fit the art" makes a frame that holds it.`) : null,
       result.warnings.length ? h('pre.report', {}, result.warnings.join('\n')) : null,
       naga ? h('div.field', {}, h('span', {}, 'For the game\'s manifest'), h('pre.report', {}, manifestText(result, settings)), h('div.group', {}, copy)) : null,

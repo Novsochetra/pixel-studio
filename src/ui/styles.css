@@ -90,7 +90,12 @@ body {
   height: 100%;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--label);
   font: 13px/1.4 var(--font-ui);
@@ -112,19 +117,32 @@ textarea {
 
 .app {
   display: grid;
-  grid-template: 'bar bar bar' auto 'rail stage inspector' 1fr 'status status status' auto / auto 1fr 300px;
+  grid-template: 'bar bar bar' auto 'rail stage inspector' minmax(0, 1fr) 'status status status' auto / auto minmax(0, 1fr) 300px;
   height: 100%;
   padding-left: max(0px, env(safe-area-inset-left, 0px));
   padding-right: max(0px, env(safe-area-inset-right, 0px));
+}
+
+/* tools draw on the canvas, so they show only where the canvas is; the pitch takes the whole window */
+.app:not([data-mode='edit']) .rail {
+  display: none;
+}
+
+.app[data-mode='game'] {
+  grid-template-columns: auto minmax(0, 1fr) 0;
+}
+
+.app[data-mode='game'] .inspector {
+  display: none;
 }
 
 .toolbar {
   grid-area: bar;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding-block: 8px;
-  padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  gap: 6px 12px;
+  padding-block: 6px;
+  padding-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px));
   background: var(--chrome);
   border-bottom: 1px solid var(--separator);
   min-width: 0;
@@ -138,9 +156,9 @@ textarea {
   cursor: pointer;
   padding: 4px 6px;
   border-radius: var(--radius-sm);
-  font: 700 13px/1 var(--font-pixel);
-  letter-spacing: 0.04em;
-  margin-right: 8px;
+  /* Silkscreen is drawn on an 8 px grid: 16 px keeps its pixels square */
+  font: 700 16px/1 var(--font-pixel);
+  margin-right: 4px;
   white-space: nowrap;
 }
 
@@ -150,7 +168,7 @@ textarea {
 
 .wordmark small {
   display: block;
-  font: 400 10px/1.4 var(--font-ui);
+  font: 400 11px/1.4 var(--font-ui);
   letter-spacing: 0;
   color: var(--label-muted);
 }
@@ -225,6 +243,11 @@ textarea {
   padding: 3px 12px;
   border-radius: 6px;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.segmented button:hover {
+  background: var(--fill-quiet);
 }
 
 .segmented button[aria-pressed='true'] {
@@ -261,9 +284,26 @@ textarea {
 }
 
 .rail .btn {
+  position: relative;
+  flex: none;
   width: 40px;
   height: 40px;
   padding: 0;
+}
+
+/* the key that picks the tool, so it is learned by looking */
+.rail .btn[data-key]::after {
+  content: attr(data-key);
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-size: 9px;
+  line-height: 1.2;
+  color: var(--label-muted);
+}
+
+.rail .btn.on[data-key]::after {
+  color: var(--tint);
 }
 
 .rail .btn svg {
@@ -307,6 +347,7 @@ textarea {
   inset: 12px;
   display: grid;
   place-items: center;
+  z-index: 3;
   border: 2px dashed var(--tint);
   border-radius: var(--radius-lg);
   background: var(--tint-quiet);
@@ -314,15 +355,50 @@ textarea {
   pointer-events: none;
 }
 
-.stage-inner.edit {
+/* edit mode: the canvas scrolls by itself and the frames stay docked under it */
+.app[data-mode='edit'] .stage {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.canvas-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: grid;
+}
+
+.canvas-area {
+  overflow: auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.canvas-holder {
+  box-shadow: 0 0 0 1px var(--separator), 0 10px 30px rgb(0 0 0 / 14%);
+}
+
+/* controls that wrap inside the stage instead of widening it */
+.stage-bar {
+  contain: inline-size;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 8px 12px;
 }
 
 .selection-bar {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
@@ -334,31 +410,61 @@ textarea {
 }
 
 .timeline {
-  /* the stage grows to fit a zoomed canvas; its own buttons must wrap instead of widening it */
-  contain: inline-size;
-  display: flex;
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
-  align-items: stretch;
-  width: min(100%, 900px);
+  align-items: center;
   background: var(--chrome);
-  border: 1px solid var(--separator);
-  border-radius: var(--radius-lg);
-  padding: 10px;
+  border-top: 1px solid var(--separator);
+  padding: 8px 12px;
   box-sizing: border-box;
 }
 
 .timeline-main {
-  flex: 1;
   min-width: 0;
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .timeline-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px 4px;
   flex-wrap: wrap;
+}
+
+.timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.timeline-row .frames {
+  flex: 1;
+  min-width: 0;
+}
+
+.playback {
+  flex: none;
+  flex-wrap: nowrap;
+}
+
+.timeline-controls select.input {
+  max-width: 112px;
+}
+
+.timeline-controls .btn {
+  padding: 0 8px;
+}
+
+.sep {
+  flex: none;
+  width: 1px;
+  height: 18px;
+  margin: 0 2px;
+  background: var(--separator);
 }
 
 .frames {
@@ -430,17 +536,13 @@ textarea {
   right: -5px;
 }
 
-.timeline-title {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 13px;
-}
-
 .empty-frame {
-  contain: inline-size;
-  width: min(100%, 620px);
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: min(calc(100% - 24px), 720px);
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
@@ -455,26 +557,6 @@ textarea {
   font-size: 13px;
 }
 
-.empty-frame[hidden] {
-  display: none;
-}
-
-/* on a wide screen the card floats over the stage, so the canvas and frames never move for it */
-@media (min-width: 700px) {
-  .stage-inner.edit {
-    position: relative;
-  }
-
-  .empty-frame {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(calc(100% - 24px), 620px);
-    z-index: 2;
-  }
-}
-
 .frame canvas {
   width: 48px;
   height: 48px;
@@ -482,8 +564,8 @@ textarea {
 }
 
 .player {
-  width: 120px;
-  height: 120px;
+  width: 96px;
+  height: 96px;
   flex: none;
   border-radius: var(--radius);
   background: var(--well);
@@ -493,7 +575,7 @@ textarea {
 
 .batch-row {
   display: grid;
-  grid-template-columns: 72px 1fr 96px;
+  grid-template-columns: 72px minmax(0, 1fr) 96px;
   gap: 12px;
   align-items: center;
 }
@@ -568,7 +650,7 @@ textarea {
 }
 
 .section {
-  padding: 14px 16px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--separator);
   display: grid;
   gap: 10px;
@@ -576,10 +658,8 @@ textarea {
 
 .section h2 {
   margin: 0;
-  font: 700 10px/1 var(--font-pixel);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--label-muted);
+  font: 600 13px/1.3 var(--font-ui);
+  color: var(--label);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -628,13 +708,11 @@ textarea {
 }
 
 .badge {
-  font: 700 9px/1 var(--font-pixel);
-  letter-spacing: 0.06em;
+  font: 600 10px/1 var(--font-ui);
   padding: 3px 5px;
   border-radius: 4px;
   background: var(--fill-quiet);
   color: var(--label-secondary);
-  text-transform: uppercase;
 }
 
 .swatches {
@@ -730,8 +808,9 @@ textarea.input {
   appearance: none;
   width: 36px;
   height: 22px;
+  margin: 0;
   border-radius: 11px;
-  background: var(--fill-quiet);
+  background: color-mix(in srgb, var(--label-muted), transparent 45%);
   position: relative;
   cursor: pointer;
   flex: none;
@@ -793,7 +872,7 @@ textarea.input {
   grid-area: status;
   display: flex;
   gap: 16px;
-  padding-block: 5px;
+  padding-block: 4px;
   padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
   background: var(--chrome);
   border-top: 1px solid var(--separator);
@@ -802,6 +881,14 @@ textarea.input {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.statusbar span:empty {
+  display: none;
+}
+
+.status-help {
+  margin-left: auto;
 }
 
 .sheet-backdrop {
@@ -820,19 +907,37 @@ textarea.input {
   border: 1px solid var(--separator);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  width: min(920px, 100%);
+  width: min(600px, 100%);
   max-height: 100%;
   overflow: auto;
   display: grid;
+  align-content: start;
   gap: 16px;
   padding: 20px;
   box-sizing: border-box;
 }
 
+.sheet.wide {
+  width: min(920px, 100%);
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .sheet h3 {
   margin: 0;
-  font: 700 14px/1.2 var(--font-pixel);
-  letter-spacing: 0.02em;
+  font: 700 16px/1.2 var(--font-pixel);
+}
+
+.sheet-close {
+  flex: none;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 8px;
 }
 
 .sheet-actions {
@@ -848,9 +953,14 @@ textarea.input {
   gap: 12px;
 }
 
+.compare > * {
+  min-width: 0;
+}
+
 .compare figure {
   margin: 0;
   display: grid;
+  align-content: start;
   gap: 6px;
 }
 
@@ -881,7 +991,7 @@ textarea.input {
 
 .map-table {
   display: grid;
-  gap: 4px;
+  gap: 8px;
   max-height: 46vh;
   overflow: auto;
   padding-right: 4px;
@@ -965,7 +1075,7 @@ textarea.input {
 
 @media (max-width: 860px) {
   .app {
-    grid-template: 'bar' auto 'rail' auto 'stage' minmax(360px, 70vh) 'inspector' auto 'status' auto / 1fr;
+    grid-template: 'bar' auto 'rail' auto 'stage' auto 'inspector' auto 'status' auto / minmax(0, 1fr);
     height: auto;
     min-height: 100%;
   }
@@ -978,10 +1088,83 @@ textarea.input {
     overflow: auto;
   }
 
-  .rail {
+  .app[data-mode='edit'] .stage {
     overflow: visible;
-    flex-direction: row;
+  }
+
+  .canvas-wrap {
+    flex: none;
+    height: min(58vh, 520px);
+  }
+
+  .timeline {
+    grid-template-columns: minmax(0, 1fr) 72px;
+  }
+
+  .player {
+    width: 72px;
+    height: 72px;
+  }
+
+  .sep {
+    display: none;
+  }
+
+  .timeline-row {
     flex-wrap: wrap;
+  }
+
+  .timeline-row .frames {
+    flex-basis: 100%;
+  }
+
+  .playback {
+    flex-wrap: wrap;
+  }
+
+  .status-help {
+    display: none;
+  }
+
+  .toolbar .spacer {
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  .toolbar .btn.primary {
+    margin-left: auto;
+  }
+
+  .batch-row {
+    grid-template-columns: 56px minmax(0, 1fr) 72px;
+  }
+
+  .batch-row img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .batch-row canvas {
+    width: 72px;
+    height: 72px;
+  }
+
+  .map-row {
+    grid-template-columns: 22px minmax(0, 1fr) 16px;
+  }
+
+  .target-picker {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .map-row > span:nth-child(3) {
+    display: none;
+  }
+
+  .rail {
+    overflow-x: auto;
+    flex-direction: row;
     border-right: 0;
     border-bottom: 1px solid var(--separator);
     padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
@@ -1003,14 +1186,6 @@ textarea.input {
   }
 }
 
-@media (max-width: 860px) {
-  .quick-start {
-    top: auto;
-    right: 16px;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
@@ -1024,7 +1199,7 @@ body.panning .stage canvas {
 .quick-start {
   position: fixed;
   top: calc(64px + env(safe-area-inset-top, 0px));
-  right: calc(316px + env(safe-area-inset-right, 0px));
+  left: calc(72px + env(safe-area-inset-left, 0px));
   width: min(340px, calc(100% - 32px));
   box-sizing: border-box;
   background: var(--chrome-raised);
@@ -1037,13 +1212,19 @@ body.panning .stage canvas {
   z-index: 5;
 }
 
+@media (max-width: 860px) {
+  .quick-start {
+    top: auto;
+    left: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 .quick-start h3,
 .eyebrow {
   margin: 0;
-  font: 700 11px/1.2 var(--font-pixel);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--label-muted);
+  font: 600 13px/1.3 var(--font-ui);
+  color: var(--label);
 }
 
 .quick-start ol {
@@ -1093,3 +1274,94 @@ kbd {
 .section[data-collapsed='true'] > h2::before {
   content: '▸';
 }
+
+.section > h2:focus-visible {
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* a narrower window keeps one toolbar row: the words go first, their meaning stays in the tooltip */
+@media (max-width: 1360px) {
+  .save-status {
+    font-size: 0;
+  }
+
+  .save-status::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+  }
+
+  .save-status[data-state='pending']::before,
+  .save-status[data-state='saving']::before {
+    background: var(--warn);
+  }
+
+  .save-status[data-state='error']::before {
+    background: var(--bad);
+  }
+}
+
+@media (max-width: 1240px) {
+  .btn-text {
+    display: none;
+  }
+}
+
+/* fingers need bigger targets than a pointer */
+@media (pointer: coarse) {
+  .btn {
+    min-height: 40px;
+  }
+
+  .segmented button {
+    padding: 8px 12px;
+  }
+
+  .layer-row .btn {
+    min-height: 36px;
+  }
+}
+
+/* a window never grows past the screen: its content wraps instead */
+.sheet {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.sheet .segmented {
+  flex-wrap: wrap;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.target-picker {
+  align-items: center;
+}
+
+/* long words wrap inside a window; the batch rows' menus share their column */
+.sheet .btn {
+  white-space: normal;
+  min-width: 0;
+}
+
+.batch-row .group {
+  flex-wrap: wrap;
+}
+
+.batch-row select.input {
+  max-width: 100%;
+}
+
+/* in a long window the main buttons stay in sight */
+.sheet .sheet-actions {
+  position: sticky;
+  bottom: -20px;
+  z-index: 1;
+  margin-bottom: -20px;
+  padding-block: 12px 20px;
+  background: var(--chrome);
+}
+

@@ -25,7 +25,7 @@ export function newProjectForm(onCreate) {
   const width = numberInput('project-width', 64, 8, 512);
   const height = numberInput('project-height', 64, 8, 512);
   const scale = numberInput('project-scale', 4, 1, 16);
-  const sizes = h('div.group', { style: { gap: '4px', flexWrap: 'wrap' } }, SIZES.map((size) => h('button.btn.quiet', { type: 'button', onclick: () => { width.value = String(size); height.value = String(size); } }, `${size}`)));
+  const sizes = h('div.group', { style: { gap: '4px', flexWrap: 'wrap' } }, SIZES.map((size) => h('button.btn', { type: 'button', onclick: () => { width.value = String(size); height.value = String(size); } }, `${size}`)));
 
   profile.addEventListener('change', () => {
     const naga = profile.value === 'naga-eleven';

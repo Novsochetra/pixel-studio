@@ -7,7 +7,7 @@ const page = await (await browser.newContext({ viewport: { width: 1440, height: 
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-await page.addInitScript(() => localStorage.setItem('pixel-clean-quick-start', '1'));
+await page.addInitScript(() => { localStorage.setItem('pixel-clean-quick-start', '1'); localStorage.setItem('pixel-clean-folded', '[]'); });
 await page.goto(url); await page.waitForTimeout(1200);
 // kits
 await page.getByRole('button', { name: 'Team kits…' }).click(); await page.waitForTimeout(300);

@@ -5,23 +5,25 @@ import { directionLabel } from '../model/project.js';
 import { toHex } from '../model/sprite.js';
 import { characterColors } from './character-colours.js';
 
-function checks(app, guide) {
-  const { state } = app.store;
+// views that all say the same say it once; a view that differs gets its own chip
+export function guideChips(state, guide) {
+  const found = directionsInUse(state).map((direction) => {
+    const sprite = directionSprite(state, direction);
 
-  if (guide.rule === 'fixed') {
-    return null;
+    return { direction, check: sprite ? checkGuide(sprite, guide) : { state: 'missing' } };
+  });
+
+  const words = found.map(({ check }) => describeCheck(check));
+
+  if (found.length > 1 && words.every((word) => word === words[0])) {
+    return h('span.chip', { 'data-state': found[0].check.state }, `All views: ${words[0]}`);
   }
 
-  return h(
-    'div.guide-checks',
-    {},
-    directionsInUse(state).map((direction) => {
-      const sprite = directionSprite(state, direction);
-      const check = sprite ? checkGuide(sprite, guide) : { state: 'missing' };
+  return found.map(({ direction, check }) => h('span.chip', { 'data-state': check.state }, `${directionLabel(direction)}: ${describeCheck(check)}`));
+}
 
-      return h('span.chip', { 'data-state': check.state }, `${directionLabel(direction)}: ${describeCheck(check)}`);
-    }),
-  );
+function checks(app, guide) {
+  return guide.rule === 'fixed' ? null : h('div.guide-checks', {}, guideChips(app.store.state, guide));
 }
 
 function ruleFields(app, guide) {
@@ -100,12 +102,12 @@ export function renderGuidesPanel(el, app) {
     el,
     h(
       'h2',
-      {},
+      { tabindex: '0' },
       'Guide lines',
       h('label.group', { for: 'show-guides' }, h('input', { type: 'checkbox', id: 'show-guides', checked: state.showGuides, onchange: (event) => app.store.set({ showGuides: event.target.checked }) }), 'Show'),
     ),
     state.project.guides.map((guide) => guideRow(app, guide)),
     h('div.group', { style: { gap: '6px' } }, h('button.btn', { onclick: add }, 'Add guide'), h('button.btn', { onclick: snapToReference, title: 'Move each checked guide to where the front view has it' }, 'Match the front')),
-    h('p.hint', {}, 'A guide that marks the top or bottom of the sprite, or the top of a colour, checks every view and says how many rows off it is.'),
+    h('p.hint', {}, 'A guide on the top or bottom of the sprite, or on the top of a colour, checks every view and says how many rows off it is.'),
   );
 }

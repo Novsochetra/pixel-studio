@@ -1,6 +1,6 @@
 import { h, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
-import { currentAnimation, referenceSprite } from './actions.js';
+import { artSprite, currentAnimation, directionsInUse, referenceSprite } from './actions.js';
 import { boardCanvas, boardPreview } from './board-canvas.js';
 import { characterColors } from './character-colours.js';
 import { directionLabel } from '../model/project.js';
@@ -26,7 +26,7 @@ const VIEW_WORDS = {
 const viewWords = (direction) => VIEW_WORDS[direction] ?? `${directionLabel(direction).toLowerCase()} view`;
 
 // the numbers that make a new view fit: canvas, scale, height, feet and top rows, colours
-export function promptText(state, direction, task) {
+export function promptText(state, direction, task, pose = '') {
   const { width, height, scale } = state.project.canvas;
   const ref = referenceSprite(state);
   const box = bounds(ref);
@@ -45,12 +45,13 @@ export function promptText(state, direction, task) {
     outline ? `A 1-pixel outline in ${toHex(outline)}. No anti-aliasing, no gradients, no soft edges.` : 'No anti-aliasing, no gradients, no soft edges.',
     'A flat magenta (#FF00FF) background, nothing else in the picture.',
     ...(hasMarks(state.project) ? ['The red marks and notes on the sheet show what to change.'] : []),
+    ...(task === 'frame' && pose.trim() ? [`Pose: ${pose.trim()}`] : []),
   ].join('\n');
 }
 
 export function openChatgptSheet(app) {
   const { state } = app.store;
-  const sheet = openSheet('Ask ChatGPT for a new view');
+  const sheet = openSheet('Ask ChatGPT for a view or frame', null, { wide: true });
   const ref = referenceSprite(state);
 
   // the prompt is made of the reference view's numbers, so that view has to be drawn first
@@ -66,14 +67,28 @@ export function openChatgptSheet(app) {
   const slot = h('div', { style: { display: 'grid', gap: '12px' } });
   let direction = Object.keys(currentAnimation(state).directions).find((d) => d !== referenceOf(state.project)) ?? 'east';
   let task = 'view';
+  // ChatGPT needs to see the character: a frame not drawn in every view shows the first frame instead
+  const unfinished = directionsInUse(state).some((d) => !bounds(artSprite(state, d)));
+  const shown = unfinished ? { ...state, at: { ...state.at, frame: 0 } } : state;
+  let pose = '';
   const scale = state.project.canvas.scale;
 
   const draw = () => {
-    const board = boardCanvas(state, scale, { overlay: null, mapping: null });
-    const preview = boardPreview(state, 860, { overlay: null, mapping: null });
-    const text = promptText(state, direction, task);
-    const box = h('textarea.input.mono', { rows: 9, id: 'prompt-text', 'aria-label': 'Prompt', readonly: true }, text);
-    const copy = () => navigator.clipboard.writeText(text).then(() => toast('Prompt copied'), () => { box.select(); toast('Press ⌘C to copy'); });
+    const board = boardCanvas(shown, scale, { overlay: null, mapping: null });
+    const preview = boardPreview(shown, 860, { overlay: null, mapping: null });
+    const box = h('textarea.input.mono', { rows: 9, id: 'prompt-text', 'aria-label': 'Prompt', readonly: true }, promptText(state, direction, task, pose));
+    const poseField = task === 'frame'
+      ? h('label.field', { for: 'prompt-pose' }, h('span', {}, 'Pose of this frame'), h('input.input', {
+          id: 'prompt-pose',
+          value: pose,
+          placeholder: 'Right foot forward, left arm forward, knees bent',
+          oninput: (event) => {
+            pose = event.target.value;
+            box.value = promptText(state, direction, task, pose);
+          },
+        }))
+      : null;
+    const copy = () => navigator.clipboard.writeText(box.value).then(() => toast('Prompt copied'), () => { box.select(); toast('Press ⌘C to copy'); });
 
     replace(
       slot,
@@ -82,6 +97,7 @@ export function openChatgptSheet(app) {
         h('div.segmented', { role: 'group', 'aria-label': 'Ask for' }, [['view', 'A new view'], ['frame', 'An animation frame']].map(([id, label]) => h('button', { 'aria-pressed': String(task === id), onclick: () => { task = id; draw(); } }, label)))),
       h('div', { style: { overflowX: 'auto' } }, preview),
       h('p.hint', {}, `Attach the reference sheet (${board.width}×${board.height}, ${scale}× pixels${hasMarks(state.project) ? ', with your marks' : ''}) and paste the prompt. Then drop ChatGPT's answer on the canvas to clean it.`),
+      poseField,
       box,
       h('div.sheet-actions', {},
         h('button.btn', { onclick: sheet.close }, 'Close'),

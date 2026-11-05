@@ -99,7 +99,7 @@ function placeName(app, direction, frame) {
 
 export async function openImport(app, direction, file, frame = app.store.state.at.frame) {
   const place = placeName(app, direction, frame);
-  const sheet = openSheet(`Clean into ${place}`);
+  const sheet = openSheet(`Clean into ${place}`, null, { wide: true });
   const { project } = app.store.state;
   const firstWithIt = project.animations.find((animation) => animation.directions[direction]);
   sheet.isReference = direction === referenceOf(project) && frame === 0 && firstWithIt === currentAnimation(app.store.state);

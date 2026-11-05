@@ -33,7 +33,7 @@ function setPreview(app, mapping, on) {
 
 // every view with the swap applied, inside the sheet, since the sheet covers the canvas
 function previewFigure(app, mapping) {
-  const canvas = boardPreview(app.store.state, 420, { overlay: null, mapping });
+  const canvas = boardPreview(app.store.state, 420, { overlay: null, mapping, onScreen: true });
 
   return h('figure', { style: { margin: '0', display: 'grid', gap: '6px' } }, canvas, h('figcaption.hint', {}, 'With the swap applied'));
 }
@@ -82,7 +82,7 @@ function makeReducedPalette(app, size) {
 
 export function openSwapSheet(app) {
   const { state } = app.store;
-  const sheet = openSheet('Swap colours', () => app.store.set({ swapPreview: null }));
+  const sheet = openSheet('Swap colours', () => app.store.set({ swapPreview: null }), { wide: true });
   const slot = h('div', { style: { display: 'grid', gap: '12px' } });
   let paletteId = state.project.palettes.at(-1)?.id ?? null;
   let previewOn = true;
@@ -127,7 +127,7 @@ export function openSwapSheet(app) {
 
     replace(
       slot,
-      h('div.compare', {}, h('label.field', {}, h('span', {}, 'Change to this palette'), choose), h('div.field', {}, h('span', {}, 'Each colour goes to the one you pick; Keep leaves it'), h('div.group', {}, h('button.btn', { onclick: suggest }, 'Suggest nearest'), reduce8))),
+      h('div.compare', {}, h('label.field', {}, h('span', {}, 'Change to this palette'), choose), h('div.field', {}, h('span', {}, 'Each colour goes to the one you pick; Keep leaves it'), h('div.group', { style: { gap: '6px', flexWrap: 'wrap' } }, h('button.btn', { onclick: suggest }, 'Suggest nearest'), reduce8))),
       h('div.compare', {}, h('div.map-table', {}, mappingRows(state, palette, mapping, onChange)), previewFigure(app, mapping)),
       previewToggle,
       h('details', {}, h('summary', {}, 'Add another palette'), addForm),

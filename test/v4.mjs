@@ -9,7 +9,7 @@ const errors = [];
 const log = (...a) => console.log(...a);
 page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-await page.addInitScript(() => localStorage.setItem('pixel-clean-quick-start', '1'));
+await page.addInitScript(() => { localStorage.setItem('pixel-clean-quick-start', '1'); localStorage.setItem('pixel-clean-folded', '[]'); });
 await page.goto(url); await page.waitForTimeout(1200);
 const drop = async (path, name) => {
   const dt = await page.evaluateHandle(([bytes, n]) => { const d = new DataTransfer(); d.items.add(new File([new Uint8Array(bytes)], n, { type: 'image/webp' })); return d; }, [[...readFileSync(path)], name]);

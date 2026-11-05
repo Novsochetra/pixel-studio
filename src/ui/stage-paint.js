@@ -24,6 +24,7 @@ export function drawOnion(context, state, scale) {
 
 export function drawLayers(context, state, scale) {
   const frame = frameAt(state.project, state.at);
+  const drag = state.frameDrag ?? { x: 0, y: 0 };
 
   for (const layer of frame.layers) {
     if (!layer.visible || !layer.sprite) {
@@ -32,7 +33,7 @@ export function drawLayers(context, state, scale) {
 
     const mapped = state.swapPreview && layer.kind !== 'reference' ? applyMapping(layer.sprite, state.swapPreview) : layer.sprite;
     const sprite = layer.kind === 'reference' ? mapped : VIEW_FILTERS[state.viewFilter](mapped);
-    drawSprite(context, sprite, 0, 0, scale, layer.kind === 'reference' ? layer.opacity : 1);
+    drawSprite(context, sprite, drag.x * scale, drag.y * scale, scale, layer.kind === 'reference' ? layer.opacity : 1);
   }
 }
 
@@ -77,7 +78,7 @@ export function paint(canvas, app) {
     drawSprite(context, ghost, 0, 0, scale, state.overlay.opacity);
   }
 
-  if (state.onion) {
+  if (state.onion || state.tool === 'moveframe') {
     drawOnion(context, state, scale);
   }
 

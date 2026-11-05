@@ -76,7 +76,7 @@ function place(app, items) {
 export function openBatchSheet(app, files) {
   const { state } = app.store;
   const animation = currentAnimation(state);
-  const sheet = openSheet(`Clean ${files.length} images`);
+  const sheet = openSheet(`Clean ${files.length} images`, null, { wide: true });
   const list = h('div.view-list');
   const seen = {};
   // run-2 before run-10, so numbered images become frames in their order

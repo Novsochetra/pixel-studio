@@ -6,7 +6,7 @@ const browser = await chromium.launch();
 const page = await (await browser.newContext({ viewport: { width: 1440, height: 960 }, acceptDownloads: true })).newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
-await page.addInitScript(() => localStorage.setItem('pixel-clean-quick-start', '1'));
+await page.addInitScript(() => { localStorage.setItem('pixel-clean-quick-start', '1'); localStorage.setItem('pixel-clean-folded', '[]'); });
 await page.goto(url); await page.waitForTimeout(1200);
 for (const [set, w, h] of [['eight', 32, 32], ['four-drawn', 96, 64]]) {
   await page.locator('button.wordmark').click();

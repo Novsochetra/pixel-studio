@@ -42,7 +42,7 @@ function controls(app, view, playing, onPlay) {
 
 export function mountGamePreview(container, app) {
   const canvas = h('canvas', { 'aria-label': 'The character in a game scene' });
-  const bar = h('div.group', { style: { gap: '10px', flexWrap: 'wrap', justifyContent: 'center' } });
+  const bar = h('div.stage-bar');
   const note = h('p.hint', { style: { maxWidth: '680px', textAlign: 'center', margin: '0' } });
   const inner = h('div.stage-inner', { style: { gap: '14px', alignContent: 'center' } }, bar, canvas, note);
   container.replaceChildren(inner);

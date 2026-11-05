@@ -1,4 +1,4 @@
-import { cssVar, drawGuide, drawSprite } from './draw.js';
+import { cssVar, drawChecker, drawGuide, drawSprite } from './draw.js';
 import { directionSprite, directionsInUse } from './actions.js';
 import { drawMarks } from './markup.js';
 import { checkerPainter } from '../io/images.js';
@@ -10,9 +10,10 @@ export const CAPTION = 30;
 
 export const GAP = 16;
 
-// Every view of the current animation side by side on the green checkerboard, with the guide
-// lines across all of them, your marks and, optionally, one view laid see-through over the others.
-export function boardCanvas(state, scale, { overlay = state.overlay, mapping = state.swapPreview, marks = true } = {}) {
+// Every view of the current animation side by side, with the guide lines across all of them, your
+// marks and, optionally, one view laid see-through over the others. The files you download and the
+// sheet for ChatGPT keep the green checkerboard; the screen uses the app's own quiet one.
+export function boardCanvas(state, scale, { overlay = state.overlay, mapping = state.swapPreview, marks = true, onScreen = false } = {}) {
   const directions = directionsInUse(state);
   const { width, height } = state.project.canvas;
   const canvas = document.createElement('canvas');
@@ -28,7 +29,12 @@ export function boardCanvas(state, scale, { overlay = state.overlay, mapping = s
     const sprite = directionSprite(state, direction);
     context.save();
     context.translate(x, CAPTION);
-    checkerPainter(scale * 2)(context, width * scale, height * scale);
+
+    if (onScreen) {
+      drawChecker(context, 0, 0, width * scale, height * scale, scale * 4);
+    } else {
+      checkerPainter(scale * 2)(context, width * scale, height * scale);
+    }
 
     if (ghost && direction !== overlay.direction) {
       drawSprite(context, ghost, 0, 0, scale, overlay.opacity);
@@ -45,7 +51,7 @@ export function boardCanvas(state, scale, { overlay = state.overlay, mapping = s
     }
 
     context.restore();
-    context.font = '700 11px Silkscreen, ui-monospace, monospace';
+    context.font = '700 16px Silkscreen, ui-monospace, monospace';
     context.fillStyle = cssVar('--label') || '#ffffff';
     context.fillText(directionLabel(direction).toUpperCase(), x, 18);
   });

@@ -1,8 +1,8 @@
 import { h, replace } from './dom.js';
 import { changeStructure, directionSprite, directionsInUse, selectDirection } from './actions.js';
 import { GAP, boardCanvas, boardPoint } from './board-canvas.js';
+import { guideChips } from './guides-panel.js';
 import { directionLabel } from '../model/project.js';
-import { checkGuide, describeCheck } from '../views/guides.js';
 function boardControls(app, note) {
   const { state } = app.store;
   const directions = directionsInUse(state);
@@ -13,8 +13,8 @@ function boardControls(app, note) {
   };
 
   return h(
-    'div',
-    { style: { display: 'grid', gap: '10px', justifyItems: 'center' } },
+    'div.stage-bar',
+    {},
     h(
       'div.group',
       { style: { gap: '10px', flexWrap: 'wrap', justifyContent: 'center' } },
@@ -38,16 +38,9 @@ function boardControls(app, note) {
 function guideSummary(state) {
   const lines = state.project.guides
     .filter((guide) => guide.rule !== 'fixed')
-    .map((guide) =>
-      h('div.guide-checks', {}, h('span.chip', {}, guide.name), directionsInUse(state).map((direction) => {
-        const sprite = directionSprite(state, direction);
-        const check = sprite ? checkGuide(sprite, guide) : { state: 'missing' };
+    .map((guide) => h('div.guide-checks', {}, h('span.chip', {}, guide.name), guideChips(state, guide)));
 
-        return h('span.chip', { 'data-state': check.state }, `${directionLabel(direction)}: ${describeCheck(check)}`);
-      })),
-    );
-
-  return h('div', { style: { display: 'grid', gap: '6px', justifyItems: 'center' } }, lines);
+  return h('div.stage-bar', {}, lines);
 }
 
 function bindBoardPointer(app, canvas, scale) {
@@ -103,9 +96,10 @@ export function mountBoard(container, app) {
     render() {
       const { state } = app.store;
       const count = directionsInUse(state).length;
-      const fit = Math.floor((container.clientWidth - 64 - (count - 1) * GAP) / (count * state.project.canvas.width));
+      const across = (container.clientWidth - 64 - (count - 1) * GAP) / (count * state.project.canvas.width);
+      const fit = Math.floor(Math.min(across, (container.clientHeight - 200) / state.project.canvas.height));
       const scale = Math.max(1, Math.min(5, fit));
-      const next = boardCanvas(state, scale);
+      const next = boardCanvas(state, scale, { onScreen: true });
 
       // repaint in place when the size holds, so a mark being drawn keeps its pointer
       if (shown && shown.width === next.width && shown.height === next.height && shownScale === scale) {

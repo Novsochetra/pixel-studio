@@ -40,6 +40,7 @@ function zoomControls(app) {
     h('button.btn.quiet', { title: 'Zoom out (−)', 'aria-label': 'Zoom out', onclick: () => setZoom(state.zoom - 1) }, icon('minus')),
     h('span.zoom-label', {}, `${state.zoom * 100}%`),
     h('button.btn.quiet', { title: 'Zoom in (+)', 'aria-label': 'Zoom in', onclick: () => setZoom(state.zoom + 1) }, icon('plus')),
+    h('button.btn.quiet', { title: 'Fit the canvas in the window', onclick: () => app.fitCanvas() }, 'Fit'),
     h(
       `button.btn.quiet${state.showGrid ? '.on' : ''}`,
       { title: 'Pixel grid', 'aria-label': 'Pixel grid', 'aria-pressed': String(state.showGrid), onclick: () => app.store.set({ showGrid: !state.showGrid }) },
@@ -83,8 +84,8 @@ export function renderToolbar(el, app) {
     state.mode === 'edit' ? zoomControls(app) : null,
     state.mode !== 'game' ? viewFilter(app) : null,
     h('div.spacer'),
-    h('span.save-status', { 'data-state': state.saveStatus }, saveText(state)),
-    h('button.btn.quiet', { title: 'Saved versions', onclick: () => openVersionsSheet(app) }, icon('history'), 'History'),
+    h('span.save-status', { 'data-state': state.saveStatus, title: saveText(state) }, saveText(state)),
+    h('button.btn.quiet', { title: 'Saved versions', 'aria-label': 'History', onclick: () => openVersionsSheet(app) }, icon('history'), h('span.btn-text', {}, 'History')),
     h('button.btn.quiet', { title: 'Keyboard shortcuts (?)', 'aria-label': 'Keyboard shortcuts', onclick: () => openShortcuts() }, '?'),
     h('button.btn.primary', { onclick: (event) => openDownloadMenu(app, event.currentTarget) }, icon('download'), 'Download'),
   );

@@ -7,7 +7,7 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, col
 const errors = [];
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`); });
 page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
-await page.addInitScript(() => localStorage.setItem('pixel-clean-quick-start', '1'));
+await page.addInitScript(() => { localStorage.setItem('pixel-clean-quick-start', '1'); localStorage.setItem('pixel-clean-folded', '[]'); });
 await page.goto(url);
 await page.waitForTimeout(1500);
 await page.screenshot({ path: `${out}/01-edit.png` });

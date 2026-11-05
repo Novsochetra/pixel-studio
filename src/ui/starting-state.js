@@ -26,6 +26,7 @@ export function startingState(project) {
     swapPreview: null,
     cursor: null,
     onion: false,
+    frameDrag: null,
     viewFilter: 'colour',
     showPins: false,
     pinName: 'Head',

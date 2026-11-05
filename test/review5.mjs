@@ -12,7 +12,7 @@ const problems = [];
 const expect = (ok, what) => { if (!ok) problems.push(what); console.log(ok ? 'ok  ' : 'FAIL', what); };
 page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-await page.addInitScript(() => localStorage.setItem('pixel-clean-quick-start', '1'));
+await page.addInitScript(() => { localStorage.setItem('pixel-clean-quick-start', '1'); localStorage.setItem('pixel-clean-folded', '[]'); });
 await page.goto(url); await page.waitForTimeout(1200);
 
 // a background on the sample, then Duplicate: the copy has it too

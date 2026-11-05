@@ -5,7 +5,7 @@ const context = await browser.newContext({ viewport: { width: 1440, height: 960 
 const page = await context.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
-await page.addInitScript(() => localStorage.setItem('pixel-clean-quick-start', '1'));
+await page.addInitScript(() => { localStorage.setItem('pixel-clean-quick-start', '1'); localStorage.setItem('pixel-clean-folded', '[]'); });
 await page.goto(process.argv[2]); await page.waitForTimeout(1200);
 // make an edit so the sample is saved, then wait for the save
 const canvas = page.getByLabel('Pixel canvas'); const box = await canvas.boundingBox(); const z = box.width / 160;

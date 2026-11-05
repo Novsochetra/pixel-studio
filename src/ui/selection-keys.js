@@ -1,4 +1,4 @@
-import { commit, currentFrames, currentLayer, selectFrame } from './actions.js';
+import { commit, currentFrames, currentLayer, selectFrame, shiftCurrentFrame } from './actions.js';
 import { clearSelected, liftPixels, moveSelected, rectSelection, stampPixels } from '../editor/selection.js';
 import { toast } from './dom.js';
 
@@ -41,6 +41,8 @@ export function handleSelectionKey(app, event, key, command) {
     paste(app);
   } else if (ARROWS[key] && state.selection && !command) {
     nudge(app, ARROWS[key], event.shiftKey);
+  } else if (ARROWS[key] && state.tool === 'moveframe' && !command) {
+    shiftCurrentFrame(app, ARROWS[key][0] * (event.shiftKey ? 10 : 1), ARROWS[key][1] * (event.shiftKey ? 10 : 1));
   } else if ((key === 'delete' || key === 'backspace') && state.selection) {
     commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection));
   } else if (key === 'escape' && state.selection) {

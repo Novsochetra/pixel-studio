@@ -1,5 +1,5 @@
 import { h, icon } from './dom.js';
-import { currentAnimation, restructure } from './actions.js';
+import { currentAnimation, restructure, shiftCurrentFrame } from './actions.js';
 import { addFrame, frameCount, moveFrame, removeFrame } from '../model/frames.js';
 import { copyFrameToViews } from '../model/structure.js';
 import { directionLabel } from '../model/project.js';
@@ -45,8 +45,20 @@ export function frameButtons(app, index) {
     h('button.btn.quiet', { title: 'Move this frame earlier (or drag it)', 'aria-label': 'Move frame earlier', disabled: index === 0, onclick: () => move(-1) }, '←'),
     h('button.btn.quiet', { title: 'Move this frame later (or drag it)', 'aria-label': 'Move frame later', disabled: index >= count - 1, onclick: () => move(1) }, '→'),
     deleteButton(app, index, count),
-    h('button.btn.quiet', { title: `Clean a ChatGPT image into frame ${index + 1} of the ${directionLabel(direction).toLowerCase()} view`, onclick: () => chooseFile((file) => openImport(app, direction, file, index)) }, icon('upload'), 'Image into this frame…'),
-    views > 1 ? h('button.btn.quiet', { title: `Copy the ${directionLabel(direction).toLowerCase()} view's frame ${index + 1} into frame ${index + 1} of every other view, as a start for them`, onclick: () => frameStructure(app, 'Copy frame to every view', (s) => { copyFrameToViews(s.project, currentAnimation(s), direction, index); return index; }) }, 'Copy to other views') : null,
+    h('span.sep'),
+    h('button.btn.quiet', { title: `Clean a ChatGPT image into frame ${index + 1} of the ${directionLabel(direction).toLowerCase()} view`, 'aria-label': 'Image into this frame', onclick: () => chooseFile((file) => openImport(app, direction, file, index)) }, icon('upload'), 'Image into frame…'),
+    views > 1 ? h('button.btn.quiet', { title: `Copy the ${directionLabel(direction).toLowerCase()} view's frame ${index + 1} into frame ${index + 1} of every other view, as a start for them`, 'aria-label': 'Copy to other views', onclick: () => frameStructure(app, 'Copy frame to every view', (s) => { copyFrameToViews(s.project, currentAnimation(s), direction, index); return index; }) }, 'Copy to views') : null,
+  ];
+}
+
+// the Move frame tool, and its four arrows while it is on
+function moveFrameButtons(app) {
+  const on = app.store.state.tool === 'moveframe';
+  const arrow = (label, text, dx, dy) => h('button.btn.quiet', { title: `Move this frame 1 px ${label}`, 'aria-label': `Move this frame ${label}`, onclick: () => shiftCurrentFrame(app, dx, dy) }, text);
+
+  return [
+    h(`button.btn.quiet${on ? '.on' : ''}`, { 'aria-pressed': String(on), title: 'Drag the frame on the canvas, or use the arrow keys (V). The faded frames are your guide.', onclick: () => app.store.set({ tool: on ? 'pencil' : 'moveframe', mode: 'edit' }) }, 'Move frame'),
+    ...(on ? [arrow('left', '◀', -1, 0), arrow('up', '▲', 0, -1), arrow('down', '▼', 0, 1), arrow('right', '▶', 1, 0)] : []),
   ];
 }
 
@@ -56,6 +68,7 @@ export function playButtons(app, playing, onPlay) {
   const animation = currentAnimation(state);
 
   return [
+    ...moveFrameButtons(app),
     h(`button.btn.quiet${state.showPins ? '.on' : ''}`, { 'aria-pressed': String(state.showPins), title: 'Pins mark the head, hands, hips and feet in each frame (tool P)', onclick: () => app.store.set({ showPins: !state.showPins }) }, 'Pins'),
     state.tool === 'pin' ? h('select.input', { id: 'pin-name', 'aria-label': 'Pin to place', onchange: (event) => app.store.set({ pinName: event.target.value }) }, PIN_NAMES.map((name) => h('option', { value: name, selected: state.pinName === name }, name))) : null,
     h(`button.btn.quiet${state.onion ? '.on' : ''}`, { 'aria-pressed': String(state.onion), title: 'Show the frames before and after, faded', onclick: () => app.store.set({ onion: !state.onion }) }, 'Onion skin'),

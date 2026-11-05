@@ -4,7 +4,7 @@ const browser = await chromium.launch();
 const page = await (await browser.newContext({ viewport: { width: 1440, height: 960 } })).newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
-await page.addInitScript(() => localStorage.setItem('pixel-clean-quick-start', '1'));
+await page.addInitScript(() => { localStorage.setItem('pixel-clean-quick-start', '1'); localStorage.setItem('pixel-clean-folded', '[]'); });
 await page.goto(process.argv[2]); await page.waitForTimeout(1200);
 const canvas = page.getByLabel('Pixel canvas'); const box = await canvas.boundingBox(); const z = box.width / 160;
 await page.mouse.click(box.x + 10 * z, box.y + 10 * z); await page.waitForTimeout(2500);

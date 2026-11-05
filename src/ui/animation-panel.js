@@ -53,13 +53,13 @@ function startAnimation(state, name) {
   return { animation: animation.id, frame: 0, layer: null };
 }
 
-function newAnimationForm(app) {
+export function newAnimationForm(app) {
   const { state } = app.store;
   const used = new Set(state.project.animations.map((a) => a.name));
   const choice = h(
     'select.input',
-    { id: 'new-animation', 'aria-label': 'New animation' },
-    h('option', { value: '' }, 'New animation…'),
+    { id: 'new-animation', 'aria-label': 'New animation', title: 'Start a new animation from the first frame of this one' },
+    h('option', { value: '' }, 'New…'),
     PRESETS.filter((name) => !used.has(name)).map((name) => h('option', { value: name }, name)),
     h('option', { value: '*' }, 'Another name…'),
   );
@@ -74,15 +74,21 @@ function newAnimationForm(app) {
   return choice;
 }
 
+export function animationPicker(app) {
+  const { state } = app.store;
+  const animation = currentAnimation(state);
+
+  return h(
+    'select.input',
+    { id: 'animation', 'aria-label': 'Animation', title: 'The animation these frames belong to', onchange: (event) => app.store.set({ at: { ...state.at, animation: event.target.value, frame: 0, layer: null }, selection: null }) },
+    state.project.animations.map((a) => h('option', { value: a.id, selected: a.id === animation.id }, a.name)),
+  );
+}
+
 export function renderAnimationPanel(el, app) {
   const { state } = app.store;
   const animation = currentAnimation(state);
   let confirmDelete = false;
-  const pick = h(
-    'select.input',
-    { id: 'animation', 'aria-label': 'Animation', onchange: (event) => app.store.set({ at: { ...state.at, animation: event.target.value, frame: 0, layer: null }, selection: null }) },
-    state.project.animations.map((a) => h('option', { value: a.id, selected: a.id === animation.id }, a.name)),
-  );
   const rename = h('input.input', {
     value: animation.name,
     id: 'animation-name',
@@ -110,8 +116,7 @@ export function renderAnimationPanel(el, app) {
 
   replace(
     el,
-    h('h2', {}, 'Animation'),
-    h('div.compare', { style: { gridTemplateColumns: '1fr 1fr' } }, pick, newAnimationForm(app)),
+    h('h2', { tabindex: '0' }, 'Animation settings'),
     h('div.group', { style: { gap: '6px' } }, rename, remove),
     h('div.field', {}, h('span', {}, Object.keys(mirrorsOf(state.project)).length ? 'Directions drawn (the left side is mirrored from the right)' : 'Directions drawn'), directionChips(app, animation)),
   );

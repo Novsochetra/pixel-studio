@@ -5,7 +5,7 @@ import { fitZoom, mountEditStage } from './edit-stage.js';
 import { mountBoard } from './board.js';
 import { mountGamePreview } from './game-preview.js';
 import { renderViewsPanel } from './views-panel.js';
-import { renderColourPanel } from './colour-panel.js';
+import { renderColourPanel, renderDrawingPanel } from './colour-panel.js';
 import { renderGuidesPanel } from './guides-panel.js';
 import { renderAnimationPanel } from './animation-panel.js';
 import { renderLayersPanel } from './layers-panel.js';
@@ -21,11 +21,12 @@ import { bounds, colorCounts } from '../model/sprite.js';
 const ROUTES = {
   toolbar: ['mode', 'zoom', 'showGrid', 'saveStatus', 'storage', 'pixels', 'project', 'viewFilter'],
   rail: ['tool', 'symmetry', 'mode'],
-  stage: ['swapPreview', 'background', 'showPins', 'pinName', 'tool', 'highlight', 'viewFilter', 'markup', 'markupMode', 'mode', 'zoom', 'pixels', 'stroke', 'overlay', 'showGrid', 'showGuides', 'symmetry', 'mirror', 'at', 'preview', 'guides', 'game', 'project', 'onion', 'selection', 'frames', 'layers', 'animations'],
+  stage: ['frameDrag', 'swapPreview', 'background', 'showPins', 'pinName', 'tool', 'highlight', 'viewFilter', 'markup', 'markupMode', 'mode', 'zoom', 'pixels', 'stroke', 'overlay', 'showGrid', 'showGuides', 'symmetry', 'mirror', 'at', 'preview', 'guides', 'game', 'project', 'onion', 'selection', 'frames', 'layers', 'animations'],
   views: ['at', 'mode', 'pixels', 'project', 'frames', 'layers', 'animations'],
   animation: ['at', 'project', 'animations', 'frames'],
   layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations'],
   colours: ['color', 'paintOver', 'paletteLock', 'cleanLines', 'symmetry', 'pixels', 'project', 'tool', 'at', 'frames', 'layers', 'animations'],
+  drawing: ['paintOver', 'paletteLock', 'cleanLines', 'symmetry', 'pixels', 'project', 'at', 'frames', 'layers', 'animations'],
   guides: ['guides', 'pixels', 'showGuides', 'project', 'at', 'frames', 'layers', 'animations'],
   outline: ['outline', 'pixels', 'at', 'project', 'layers'],
   status: ['cursor', 'at', 'zoom', 'pixels', 'project', 'tool'],
@@ -44,17 +45,21 @@ function renderStatus(el, app) {
     h('span', {}, box ? `sprite ${box.right - box.left}×${box.bottom - box.top}, rows ${box.top}–${box.bottom - 1}` : 'empty'),
     h('span', {}, `${colorCounts(sprite).length} colours`),
     h('span', {}, cursor ? `x ${cursor.x}, y ${cursor.y} · ${cursor.color}` : ''),
-    h('span', {}, 'Alt-click picks a colour · ⌘Z undo · B E I G R S W tools · M symmetry · , . frames · arrows nudge a selection'),
+    h('span.status-help', {}, 'Press ? for shortcuts'),
   );
 }
 
 const FOLDED = 'pixel-clean-folded';
+// what is used on every visit stays open; the rest waits one click away
+const FOLDED_AT_FIRST = ['layers', 'animation', 'outline', 'guides'];
 
 function readFolded() {
   try {
-    return JSON.parse(localStorage.getItem(FOLDED) ?? '[]');
+    const saved = localStorage.getItem(FOLDED);
+
+    return saved === null ? FOLDED_AT_FIRST : JSON.parse(saved);
   } catch {
-    return [];
+    return FOLDED_AT_FIRST;
   }
 }
 
@@ -67,13 +72,7 @@ function bindCollapsing(inspector, sections) {
     section.dataset.collapsed = String(folded.has(name));
   }
 
-  inspector.addEventListener('click', (event) => {
-    const title = event.target.closest('.section > h2');
-
-    if (!title || event.target.closest('input, button, label, select')) {
-      return;
-    }
-
+  const toggle = (title) => {
     const section = title.parentElement;
     const now = section.dataset.collapsed !== 'true';
     section.dataset.collapsed = String(now);
@@ -83,6 +82,20 @@ function bindCollapsing(inspector, sections) {
       localStorage.setItem(FOLDED, JSON.stringify([...folded]));
     } catch {
       // nothing to remember it in: it stays folded for this visit
+    }
+  };
+
+  inspector.addEventListener('click', (event) => {
+    const title = event.target.closest('.section > h2');
+
+    if (title && !event.target.closest('input, button, label, select')) {
+      toggle(title);
+    }
+  });
+  inspector.addEventListener('keydown', (event) => {
+    if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('.section > h2')) {
+      event.preventDefault();
+      toggle(event.target);
     }
   });
 }
@@ -96,10 +109,11 @@ export function mountApp(app) {
   };
   const inspector = document.getElementById('inspector');
   const sections = {
-    animation: h('section.section'),
     views: h('section.section'),
-    layers: h('section.section'),
     colours: h('section.section'),
+    drawing: h('section.section'),
+    layers: h('section.section'),
+    animation: h('section.section'),
     outline: h('section.section'),
     guides: h('section.section'),
   };
@@ -116,6 +130,7 @@ export function mountApp(app) {
 
       if (mode !== stageMode) {
         stageMode = mode;
+        document.getElementById('app').dataset.mode = mode;
         stage = { edit: mountEditStage, board: mountBoard, game: mountGamePreview }[mode](parts.stage, app);
       }
 
@@ -125,6 +140,7 @@ export function mountApp(app) {
     views: () => renderViewsPanel(sections.views, app),
     layers: () => renderLayersPanel(sections.layers, app),
     colours: () => renderColourPanel(sections.colours, app),
+    drawing: () => renderDrawingPanel(sections.drawing, app),
     outline: () => renderOutlinePanel(sections.outline, app),
     guides: () => renderGuidesPanel(sections.guides, app),
     status: () => renderStatus(parts.status, app),
@@ -141,9 +157,22 @@ export function mountApp(app) {
   });
 
   Object.values(draw).forEach((fn) => fn());
-  app.store.set({ zoom: fitZoom(parts.stage, currentLayer(app.store.state).sprite) });
+  // the zoom that fills the window; a resize follows it unless you chose another zoom
+  app.fitCanvas = () => {
+    if (app.store.state.mode === 'edit') {
+      app.fittedZoom = fitZoom(stage.area, currentLayer(app.store.state).sprite);
+      app.store.set({ zoom: app.fittedZoom });
+    }
+  };
+  app.fitCanvas();
   bindKeyboard(app);
   bindDrop(parts.stage, app);
   showQuickStart(document.body);
-  window.addEventListener('resize', () => app.store.state.mode !== 'edit' && draw.stage());
+  window.addEventListener('resize', () => {
+    if (app.store.state.mode !== 'edit') {
+      draw.stage();
+    } else if (app.store.state.zoom === app.fittedZoom) {
+      app.fitCanvas();
+    }
+  });
 }

@@ -9,7 +9,7 @@ page.on('pageerror', (e) => errors.push(`${e.message}`));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 page.on('filechooser', () => {});
 page.on('download', () => {});
-await page.addInitScript(() => localStorage.setItem('pixel-clean-quick-start', '1'));
+await page.addInitScript(() => { localStorage.setItem('pixel-clean-quick-start', '1'); localStorage.setItem('pixel-clean-folded', '[]'); });
 await page.goto(url); await page.waitForTimeout(1200);
 let clicks = 0;
 const closeSheets = async () => { for (let i = 0; i < 3; i++) { if (await page.locator('.sheet-backdrop').count()) await page.keyboard.press('Escape'); } await page.locator('.menu').evaluateAll((m) => m.forEach((x) => x.remove())); };

@@ -119,11 +119,20 @@ export function renderColourPanel(el, app) {
 
   replace(
     el,
-    h('h2', {}, 'Colours', h('span.mono', {}, `${colors.length}`)),
+    h('h2', { tabindex: '0' }, 'Colours', h('span.mono', {}, `${colors.length}`)),
     currentColour(app, colors),
     h('div.swatches', { role: 'group', 'aria-label': 'Character colours' }, colors.map((color) => swatch(color, state.color === color, () => pickColor(color), toHex(color)))),
     h('div.group', { style: { gap: '6px' } }, h('button.btn', { style: { flex: '1' }, onclick: () => openSwapSheet(app) }, icon('swap'), 'Swap colours…'), h('button.btn', { style: { flex: '1' }, onclick: () => openOutfitsSheet(app) }, profileOf(state.project).teamKits ? 'Team kits…' : 'Outfits…')),
-    h('h2', {}, 'Drawing'),
+  );
+}
+
+export function renderDrawingPanel(el, app) {
+  const { state } = app.store;
+  const colors = characterColors(state);
+
+  replace(
+    el,
+    h('h2', { tabindex: '0' }, 'Drawing'),
     toggle('Clean lines', 'Removes doubled corners while you draw', state.cleanLines, (on) => app.store.set({ cleanLines: on }), 'clean-lines'),
     toggle('Palette lock', 'Draw only with the character colours', state.paletteLock, (on) => app.store.set({ paletteLock: on, color: on && !colors.includes(state.color) ? colors[0] : state.color }), 'palette-lock'),
     paintOverField(app, colors),

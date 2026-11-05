@@ -125,6 +125,16 @@ export function openDownloadMenu(app, anchor) {
   }
 
   document.body.append(menu);
+
+  // the whole menu stays on screen, wherever the button has wrapped to
+  if (menu.getBoundingClientRect().left < 16) {
+    menu.style.left = '16px';
+    menu.style.right = 'auto';
+  }
+
+  menu.style.maxWidth = 'calc(100vw - 32px)';
+  menu.style.maxHeight = `${Math.max(160, window.innerHeight - box.bottom - 22)}px`;
+  menu.style.overflowY = 'auto';
   document.addEventListener('pointerdown', outside, true);
   menu.querySelector('button')?.focus();
 }

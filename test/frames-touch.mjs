@@ -6,7 +6,7 @@ const context = await browser.newContext({ ...devices['Pixel 7'] });
 const page = await context.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
-await page.addInitScript(() => localStorage.setItem('pixel-clean-quick-start', '1'));
+await page.addInitScript(() => { localStorage.setItem('pixel-clean-quick-start', '1'); localStorage.setItem('pixel-clean-folded', '[]'); });
 await page.goto(process.argv[2]); await page.waitForTimeout(1500);
 await page.getByRole('button', { name: 'New frame' }).click(); await page.waitForTimeout(300);
 await page.getByRole('button', { name: 'New frame' }).click(); await page.waitForTimeout(300);
