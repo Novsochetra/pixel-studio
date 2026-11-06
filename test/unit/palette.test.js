@@ -15,6 +15,7 @@ test('a kit recolours each part shade for shade, darkest to darkest', () => {
   ];
   const kit = GAME.kits.cambodia.away;
   const mapping = kitMapping(parts, kit);
+
   assert.equal(mapping[fromHex('#850d19')], fromHex(kit.shirt[0]));
   assert.equal(mapping[fromHex('#df2321')], fromHex(kit.shirt[3]));
   assert.equal(

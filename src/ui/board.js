@@ -32,6 +32,7 @@ export function mountBoard(container, app) {
   const inner = node('div.stage-inner.board');
   const note = noteField(app);
   const shown = { canvas: null, scale: 0 };
+
   container.replaceChildren(inner);
 
   return {

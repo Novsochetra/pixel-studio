@@ -18,6 +18,7 @@ const BLUE = pack(0, 0, 255);
 test('a sprite sheet puts the feet on the frame anchor, frames across, directions down', () => {
   const project = newProject();
   const animation = project.animations[0];
+
   addFrame(project, animation, 0);
   const art = animation.directions.south.frames[1].layers[0].sprite;
   setPixel(art, 80, 128, RED);
@@ -43,6 +44,7 @@ test('a sprite sheet puts the feet on the frame anchor, frames across, direction
 test('the Aseprite JSON names every frame and tags each direction', () => {
   const project = newProject();
   const animation = project.animations[0];
+
   addFrame(project, animation, 0);
   setPixel(animation.directions.east.frames[0].layers[0].sprite, 80, 128, RED);
   const settings = {
@@ -77,14 +79,17 @@ test('the Aseprite JSON names every frame and tags each direction', () => {
 test('GIFs decode in Pillow with the right frames, colours and transparency', () => {
   const frames = [0, 1, 2].map((frameIndex) => {
     const sprite = { width: 9, height: 7, pixels: new Uint8ClampedArray(9 * 7 * 4) };
+
     for (let i = 0; i < 9 * 7; i++) {
       if ((i + frameIndex) % 3) {
         sprite.pixels.set([(i * 40) % 256, (frameIndex * 90) % 256, 120, 255], i * 4);
       }
     }
+
     return sprite;
   });
   const dir = mkdtempSync(join(tmpdir(), 'gif-'));
+
   writeFileSync(join(dir, 'a.gif'), encodeGif(frames, 100));
   writeFileSync(
     join(dir, 'a.json'),
@@ -106,4 +111,24 @@ print('ok' if ok else 'bad', im.info.get('loop'))`,
     .toString()
     .trim();
   assert.equal(out, 'ok 0');
+});
+
+test('a sheet warns of views and frames not drawn yet', () => {
+  const project = newProject({ kind: 'character', directionSet: 'four', width: 16, height: 16 });
+  const animation = project.animations[0];
+  const settings = {
+    frameWidth: 16,
+    frameHeight: 16,
+    anchorX: 8,
+    anchorY: 15,
+    artAnchor: { x: 8, y: 15 },
+    includeMirrored: true,
+  };
+  addFrame(project, animation, 0);
+  setPixel(animation.directions.south.frames[0].layers[0].sprite, 8, 8, pack(255, 0, 0));
+  const { warnings } = buildSheet(project, animation, settings);
+
+  assert.ok(warnings.includes('south: frame 2 is empty.'));
+  assert.ok(warnings.includes('east is empty: it ships as a blank row.'));
+  assert.ok(!warnings.some((warning) => warning.startsWith('west')), 'a flipped row says nothing');
 });

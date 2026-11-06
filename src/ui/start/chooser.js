@@ -57,17 +57,21 @@ function card(choice, picked, handlers) {
 function drawCards(el, saved, picked, handlers) {
   const { kinds, presets } = startChoices(saved);
   const order = [...kinds, ...presets];
-  const one = (choice) => card(choice, choice.id === picked.id, { ...handlers, order });
+  const drawCard = (choice) => card(choice, choice.id === picked.id, { ...handlers, order });
 
   replace(
     el,
     node(
       'div.start-cards',
       { role: 'radiogroup', 'aria-label': 'What are you making?' },
-      kinds.map(one),
+      kinds.map(drawCard),
     ),
     node('h4.start-heading', {}, 'Or start from a game preset'),
-    node('div.start-cards', { role: 'radiogroup', 'aria-label': 'Game presets' }, presets.map(one)),
+    node(
+      'div.start-cards',
+      { role: 'radiogroup', 'aria-label': 'Game presets' },
+      presets.map(drawCard),
+    ),
   );
 }
 

@@ -14,6 +14,7 @@ const BLUE = pack(0, 0, 255);
 test('layers stay in step across every frame of an animation', () => {
   const project = newProject();
   const animation = project.animations[0];
+
   addFrame(project, animation, 0);
   const key = addLayer(project, animation, { name: 'Shading' });
   for (const entry of Object.values(animation.directions)) {
@@ -24,6 +25,7 @@ test('layers stay in step across every frame of an animation', () => {
       );
     }
   }
+
   moveLayer(animation, key, -1);
   assert.equal(layerStack(animation)[0].key, key);
   assert.equal(removeLayer(animation, key), true);
@@ -39,6 +41,7 @@ test('the composite stacks visible art layers and leaves out pictures to trace',
   const animation = project.animations[0];
   const traceKey = addLayer(project, animation, { name: 'Trace', kind: 'reference' });
   const frame = animation.directions.south.frames[0];
+
   setPixel(frame.layers[0].sprite, 1, 1, RED);
   setPixel(frame.layers.find((layer) => layer.key === traceKey).sprite, 2, 2, BLUE);
   const out = compositeFrame(frame, 160, 160);
@@ -54,6 +57,7 @@ test('a side-scroller project draws one direction and mirrors the other', () => 
     width: 48,
     height: 32,
   });
+
   assert.deepEqual(Object.keys(project.animations[0].directions), ['east']);
   assert.equal(project.referenceDirection, 'east');
   assert.deepEqual(project.canvas, { width: 48, height: 32, scale: 5 });
@@ -77,6 +81,7 @@ test('every direction set starts with directions it can draw', () => {
   for (const set of ['side', 'four', 'four-drawn', 'naga', 'eight']) {
     const project = newProject({ profile: 'generic', directionSet: set });
     const drawn = Object.keys(project.animations[0].directions);
+
     assert.ok(drawn.length >= 1);
     assert.ok(
       drawn.every((direction) => drawableDirections(project).includes(direction)),

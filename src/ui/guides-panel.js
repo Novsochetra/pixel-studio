@@ -9,6 +9,7 @@ function addGuide(app) {
   const { state } = app.store;
   const ref = referenceSprite(state);
   const guide = newGuide('Guide', 0, 'fixed');
+
   guide.row = ref ? Math.floor(ref.height / 2) : 0;
   state.project.guides.push(guide);
   changeStructure(app, 'guides');
@@ -18,8 +19,10 @@ function addGuide(app) {
 function matchReference(app) {
   const { state } = app.store;
   const ref = referenceSprite(state);
+
   state.project.guides.forEach((guide) => {
     const row = ref ? measureGuide(ref, guide) : null;
+
     guide.row = row ?? guide.row;
   });
   changeStructure(app, 'guides');

@@ -9,11 +9,11 @@ function targetPicker(palette, current, onPick) {
     'div.target-picker',
     { role: 'group' },
     node(
-      'button.btn.quiet',
+      'button.btn.quiet.keep',
       {
         'aria-pressed': String(current === undefined),
         onclick: () => onPick(undefined),
-        title: 'Keep this colour',
+        title: 'Keep this colour as it is',
       },
       'Keep',
     ),

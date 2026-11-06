@@ -34,6 +34,7 @@ async function restore(app, entry, close) {
 async function download(app, entry) {
   const text = await versionText(app.backend, entry, app.keys);
   const name = `${entry.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.json`;
+
   await saveFile(name, new Blob([text], { type: 'application/json' }));
 }
 
@@ -93,10 +94,12 @@ export function openVersionsSheet(app) {
   const redraw = async () => {
     const versions = await listVersions(app.backend, app.keys);
     const rows = versions.map((entry) => row(app, entry, { redraw, close: sheet.close }));
+
     replace(list, versions.length ? rows : node('p.hint', {}, NONE_YET));
   };
   const save = async () => {
     const named = name.value.trim() || `Version of ${when(Date.now())}`;
+
     await saveVersion(app.backend, app.store.state.project, named, app.keys);
     name.value = '';
     toast('Version saved');

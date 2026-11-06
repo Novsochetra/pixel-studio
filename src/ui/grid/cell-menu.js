@@ -17,7 +17,7 @@ export function openCellMenu(app, anchor, direction, index) {
   const animation = currentAnimation(state);
   const frames = animation.directions[direction].frames;
   const count = frameCount(animation);
-  const views = Object.keys(animation.directions).length;
+  const viewCount = Object.keys(animation.directions).length;
   const previous = index > 0 && hasArt(frames[index - 1]);
 
   const deleteOptions = { danger: true, disabled: count < 2, title: 'From every view' };
@@ -26,8 +26,8 @@ export function openCellMenu(app, anchor, direction, index) {
     ['Image into this frame…', () => imageIntoFrame(app, direction, index)],
     previous && [`Start from frame ${index}`, () => startFromPrevious(app, direction, index)],
     ['Duplicate frame', () => duplicateFrame(app, index)],
-    views > 1 && [
-      `Copy ${viewName(state.project, direction)}'s frame to the other views`,
+    viewCount > 1 && [
+      `Copy ${viewName(state.project, direction)}'s frame to the other viewCount`,
       () => copyToOtherViews(app, direction, index),
     ],
     null,

@@ -59,6 +59,7 @@ function sourcePicker(project, choice, onChange) {
   const option = (id, label) => node('option', { value: id, selected: value === id }, label);
   const pick = (event) => {
     const [source, id] = event.target.value.split(':');
+
     onChange(CHOICE_OF[source](id));
   };
 
@@ -122,6 +123,7 @@ function keepButton(app, choice, onChange) {
       name: `Outfit ${project.outfits.length + 1}`,
       bases: { ...choice.custom },
     };
+
     project.outfits.push(outfit);
     changeStructure(app, 'parts');
     onChange({ source: 'outfit', outfit: outfit.id });

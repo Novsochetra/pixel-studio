@@ -33,6 +33,7 @@ const order = (animation, direction) =>
 test('a new frame is added to every view, so frame 2 exists wherever you upload to it', () => {
   const project = newProject();
   const animation = project.animations[0];
+
   assert.equal(addFrame(project, animation, 0), 1);
   assert.deepEqual(counts(animation), [2, 2, 2]);
   assert.equal(frameCount(animation), 2);
@@ -41,6 +42,7 @@ test('a new frame is added to every view, so frame 2 exists wherever you upload 
 test('duplicating a frame copies each view its own pose', () => {
   const project = newProject();
   const animation = project.animations[0];
+
   setPixel(art(animation, 'east', 0), 5, 5, RED);
   addFrame(project, animation, 0, true);
   assert.equal(getPixel(art(animation, 'east', 1), 5, 5), RED);
@@ -51,6 +53,7 @@ test('duplicating a frame copies each view its own pose', () => {
 test('dragging a frame moves it in every view, to any place in the strip', () => {
   const project = newProject();
   const animation = project.animations[0];
+
   addFrame(project, animation, 0);
   addFrame(project, animation, 1);
   addFrame(project, animation, 2);
@@ -67,6 +70,7 @@ test('dragging a frame moves it in every view, to any place in the strip', () =>
 test('deleting a frame removes it from every view, and the last frame stays', () => {
   const project = newProject();
   const animation = project.animations[0];
+
   addFrame(project, animation, 0);
   assert.equal(removeFrame(animation, 1), 0);
   assert.deepEqual(counts(animation), [1, 1, 1]);
@@ -77,6 +81,7 @@ test('deleting a frame removes it from every view, and the last frame stays', ()
 test('a view switched on later gets every frame the others have', () => {
   const project = newProject({ directionSet: 'eight' });
   const animation = project.animations[0];
+
   removeDirection(animation, 'west');
   addFrame(project, animation, 0);
   addFrame(project, animation, 0);
@@ -87,6 +92,7 @@ test('a view switched on later gets every frame the others have', () => {
 test("an older project with uneven views is evened out with copies of each short view's last frame", () => {
   const project = newProject();
   const animation = project.animations[0];
+
   setPixel(art(animation, 'east', 0), 1, 1, RED);
   animation.directions.south.frames.push(structuredClone(animation.directions.south.frames[0]));
   animation.directions.south.frames.push(structuredClone(animation.directions.south.frames[0]));
@@ -99,6 +105,7 @@ test("an older project with uneven views is evened out with copies of each short
 
 test('frames added to even out a loaded project are saved, so they never come back empty', () => {
   const project = newProject();
+
   delete project.id;
   const animation = project.animations[0];
   animation.directions.south.frames.push(structuredClone(animation.directions.south.frames[0]));
@@ -141,6 +148,7 @@ test('a new animation is offered untaken names and the drawn poses, the open one
   const [idle] = project.animations;
   const walk = startAnimation(project, idle, { name: 'Walk' });
   const run = startAnimation(project, idle, { name: 'Run' });
+
   setPixel(idle.directions.south.frames[0].layers[0].sprite, 1, 1, RED);
   setPixel(run.directions.south.frames[0].layers[0].sprite, 1, 1, RED);
 

@@ -11,6 +11,7 @@ const CANVAS = { width: SIZE, height: SIZE };
 
 function frameWith([x, y], kind = 'art') {
   const layer = newLayer(SIZE, SIZE, { name: 'Art', kind });
+
   setPixel(layer.sprite, x, y, RED);
 
   return newFrame(SIZE, SIZE, [layer]);
@@ -18,6 +19,7 @@ function frameWith([x, y], kind = 'art') {
 
 function addTopLayer(frame, [x, y]) {
   const top = newLayer(SIZE, SIZE, { name: 'Top' });
+
   setPixel(top.sprite, x, y, BLUE);
   frame.layers.push(top);
 }
@@ -34,6 +36,7 @@ test('a shift moves the pixel by exactly that much, in every direction', () => {
 
   for (const [dx, dy] of shifts) {
     const frame = frameWith([10, 10]);
+
     shiftFrame(frame, [dx, dy]);
     const box = { left: 10 + dx, top: 10 + dy, right: 11 + dx, bottom: 11 + dy };
 
@@ -44,6 +47,7 @@ test('a shift moves the pixel by exactly that much, in every direction', () => {
 
 test('every layer and pin moves together', () => {
   const frame = frameWith([5, 5]);
+
   addTopLayer(frame, [6, 7]);
   frame.marks = [{ name: 'Hip', x: 8, y: 9 }];
   shiftFrame(frame, [2, 1]);
@@ -67,6 +71,7 @@ test('a move stops at the canvas edge, each way', () => {
 
 test('the edge counts the art of all layers together', () => {
   const frame = frameWith([2, 10]);
+
   addTopLayer(frame, [17, 10]);
 
   assert.deepEqual(clampShift(frame, CANVAS, [50, 0]), [2, 0]);

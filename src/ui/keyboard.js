@@ -28,6 +28,7 @@ const PLAIN_KEYS = {
   '-': (app) => zoomBy(app, -1),
   m: (app) => {
     const { symmetry } = app.store.state;
+
     app.store.set({ symmetry: { ...symmetry, on: !symmetry.on } });
   },
 };

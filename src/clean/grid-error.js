@@ -12,6 +12,7 @@ function innerShade(rgb, width, [ya, yb], [xa, xb]) {
   for (let y = ya; y < yb; y++) {
     for (let x = xa; x < xb; x++) {
       const i = (y * width + x) * 3;
+
       channels[0].push(rgb[i]);
       channels[1].push(rgb[i + 1]);
       channels[2].push(rgb[i + 2]);
@@ -68,6 +69,7 @@ export function gridError(image, isBg, profs, [sx, sy]) {
         rowInner[rowIndex],
         colInner[columnIndex],
       ]);
+
       total += cellTotal;
       count += cellCount;
     });

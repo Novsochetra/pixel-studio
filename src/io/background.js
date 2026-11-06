@@ -10,6 +10,7 @@ export async function backgroundDataUrl(file) {
   const image = await decodeImage(file);
   const scale = Math.min(1, MAX_WIDTH / image.width, MAX_HEIGHT / image.height);
   const source = document.createElement('canvas');
+
   source.width = image.width;
   source.height = image.height;
   source.getContext('2d').putImageData(new ImageData(image.data, image.width, image.height), 0, 0);
@@ -26,6 +27,7 @@ export async function backgroundDataUrl(file) {
 
 export function imageFrom(url) {
   const image = new Image();
+
   image.src = url;
 
   return image.decode().then(() => image);

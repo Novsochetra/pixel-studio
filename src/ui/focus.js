@@ -12,7 +12,7 @@ export function focusables(container) {
 export function rememberFocus() {
   const opener = document.activeElement;
   const label = opener?.getAttribute?.('aria-label');
-  const stand = () => {
+  const findReplacement = () => {
     if (opener?.id) {
       return document.getElementById(opener.id);
     }
@@ -23,7 +23,8 @@ export function rememberFocus() {
   };
 
   return () => {
-    const target = opener?.isConnected ? opener : stand();
+    const target = opener?.isConnected ? opener : findReplacement();
+
     target?.focus?.();
   };
 }

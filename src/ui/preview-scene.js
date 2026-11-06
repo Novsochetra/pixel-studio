@@ -6,6 +6,7 @@ export const PLAIN_SIZE = { width: 768, height: 432 };
 
 const nativeOf = (sprite) => {
   const canvas = document.createElement('canvas');
+
   canvas.width = sprite.width;
   canvas.height = sprite.height;
   canvas

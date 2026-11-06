@@ -3,6 +3,7 @@ import { node } from './dom.js';
 // the browser's file picker, from a click: onFiles gets the chosen files, nothing on cancel
 function pick({ accept, multiple }, onFiles) {
   const input = node('input', { type: 'file', accept, multiple, hidden: true });
+
   input.addEventListener('change', () => {
     if (input.files.length) {
       onFiles([...input.files]);

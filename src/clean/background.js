@@ -5,6 +5,7 @@ function borderPixels(image, depth = 4) {
   const pixels = [];
   const add = (x, y) => {
     const i = (y * width + x) * 3;
+
     pixels.push([rgb[i], rgb[i + 1], rgb[i + 2]]);
   };
 
@@ -73,6 +74,7 @@ export function backgroundMask(image, backgrounds, tolerance) {
         (bg) => Math.abs(red - bg[0]) + Math.abs(green - bg[1]) + Math.abs(blue - bg[2]),
       ),
     );
+
     mask[i] = nearest <= tolerance ? 1 : 0;
   }
 

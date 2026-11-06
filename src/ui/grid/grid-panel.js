@@ -9,6 +9,7 @@ const FOCUS_FOLLOWS = { '.cell': '.cell.selected', '.grid-tab': '.grid-tab[aria-
 function keepFocus(el, draw) {
   const focused = el.contains(document.activeElement) ? document.activeElement : null;
   const kind = Object.keys(FOCUS_FOLLOWS).find((selector) => focused?.closest(selector));
+
   draw();
 
   if (kind) {
@@ -21,6 +22,7 @@ function keepFocus(el, draw) {
 function markPlayFrame(el, frame) {
   for (const cells of el.querySelectorAll('.grid-cells')) {
     const columns = cells.querySelectorAll(':scope > .cell:not(.mirror), :scope > .grid-number');
+
     columns.forEach((column, index) => column.classList.toggle('playing', index === frame));
   }
 }
@@ -37,8 +39,6 @@ function showOpenTab(el) {
   strip.scrollLeft = Math.max(0, open.offsetLeft + open.offsetWidth - strip.clientWidth);
 }
 
-// The animation panel under the canvas: tabs, the frame grid, and play. onPlayFrame repaints the
-// canvas while playing.
 export function mountGridPanel(app, { isShown, onPlayFrame }) {
   const el = node('section.grid-panel', { 'aria-label': 'Animation' });
   let shownPlaying = false;
@@ -51,7 +51,9 @@ export function mountGridPanel(app, { isShown, onPlayFrame }) {
       render();
     }
   };
+  // a tab name being typed is never drawn over; the rename draws the panel when it is done
   const render = () =>
+    !el.querySelector('.tab-rename') &&
     keepFocus(el, () => {
       shownPlaying = isPlaying(app);
       const onPlay = () => togglePlayback(app, { isShown, onFrame });

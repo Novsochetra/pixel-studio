@@ -26,6 +26,7 @@ function showResult(job, result, ref, alone) {
     refHeight: artHeight(ref),
     refName: refName.toLowerCase(),
   });
+
   replace(
     job.slot,
     node(
@@ -44,6 +45,7 @@ function showResult(job, result, ref, alone) {
 export async function runClean(job, options) {
   const { state } = job.app.store;
   const ref = referenceSprite(state);
+
   replace(job.slot, node('p.report', {}, 'Cleaning… this takes a second or two.'));
   // an empty reference has nothing to match
   const alone = job.alone || !artHeight(ref);
@@ -55,6 +57,7 @@ export async function runClean(job, options) {
       { width: ref.width, height: ref.height, data: ref.pixels },
       { ...options, ...placement, alone },
     );
+
     showResult(job, result, ref, alone);
   } catch (error) {
     replace(

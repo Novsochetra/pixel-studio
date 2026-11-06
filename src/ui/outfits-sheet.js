@@ -14,6 +14,7 @@ import { gameOf } from '../model/presets.js';
 // the whole character in the outfit, kept as a version first so it can come off
 function wear(job, mapping, name) {
   const { app } = job;
+
   keepVersion(app, `Before ${name}`);
   const layers = allArtLayers(app.store.state);
   commit(app, name, layers, () =>
@@ -28,6 +29,7 @@ function wear(job, mapping, name) {
 function actions(job, mapping, name) {
   const { app } = job;
   const nothing = !Object.keys(mapping).length;
+  const why = nothing ? 'Tick which colours make up each part first, below' : undefined;
   const download = () =>
     downloadOutfit(app.store.state, mapping, name).catch((error) => toast(error.message));
 
@@ -37,13 +39,13 @@ function actions(job, mapping, name) {
     node('button.btn', { onclick: job.close }, 'Close'),
     node(
       'button.btn',
-      { disabled: nothing, onclick: () => keepAsSwap(app, mapping, name) },
+      { disabled: nothing, title: why, onclick: () => keepAsSwap(app, mapping, name) },
       'Keep as a colour swap',
     ),
     node('button.btn', { onclick: download }, 'Download it'),
     node(
       'button.btn.primary',
-      { disabled: nothing, onclick: () => wear(job, mapping, name) },
+      { disabled: nothing, title: why, onclick: () => wear(job, mapping, name) },
       'Wear it (whole character)',
     ),
   );
@@ -119,6 +121,7 @@ export function openOutfitsSheet(app) {
     close: sheet.close,
     partsOpen: !project.parts.some((part) => part.colours.length),
   };
+
   job.draw = () => drawOutfits(job);
 
   sheet.body.append(slot);

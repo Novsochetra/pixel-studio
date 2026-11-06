@@ -33,6 +33,7 @@ export async function downloadOutfit(state, mapping, name) {
 export function keepAsSwap(app, mapping, name) {
   const { project } = app.store.state;
   const palette = { id: newId('p'), name, colors: [...new Set(Object.values(mapping))] };
+
   project.palettes.push(palette);
   project.mappings[palette.id] = { ...mapping };
   changeStructure(app, 'palettes');

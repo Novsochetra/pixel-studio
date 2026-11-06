@@ -10,15 +10,15 @@ import { isSingleView, kindOf } from '../../model/kinds.js';
 import { wholeNumber } from '../../model/numbers.js';
 
 function toggle(app, { key, iconName, label, title }) {
-  const on = Boolean(app.store.state[key]);
+  const pressed = Boolean(app.store.state[key]);
 
   return node(
-    `button.btn.quiet.icon-toggle${on ? '.on' : ''}`,
+    `button.btn.quiet.icon-toggle${pressed ? '.on' : ''}`,
     {
-      'aria-pressed': String(on),
+      'aria-pressed': String(pressed),
       'aria-label': label,
       title,
-      onclick: () => app.store.set({ [key]: !on }),
+      onclick: () => app.store.set({ [key]: !pressed }),
     },
     icon(iconName),
   );
@@ -45,9 +45,11 @@ function viewSwitch(app) {
 
 function fpsField(app) {
   const animation = currentAnimation(app.store.state);
+
   // the frame rate is tuned while watching, so playing goes on at the new rate
   const setFps = (event) => {
     const playback = app.playback;
+
     restructure(app, 'Frame rate', (draft) => {
       currentAnimation(draft).fps = wholeNumber(event.target.value, {
         min: 1,

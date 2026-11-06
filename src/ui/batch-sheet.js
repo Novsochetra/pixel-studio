@@ -32,6 +32,7 @@ async function cleanOne(state, item, ref) {
       { width: ref.width, height: ref.height, data: ref.pixels },
       cleanOptions(state.project, item),
     );
+
     item.sprite = {
       width: result.width,
       height: result.height,

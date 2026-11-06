@@ -51,6 +51,7 @@ await board.evaluate((canvas) => {
     clientX: area.left + area.width * x,
     clientY: area.top + area.height * y,
   });
+
   canvas.dispatchEvent(new window.PointerEvent('pointerdown', at(1, 0.2, 0.5)));
   // a second finger lands on the captions, off the art
   canvas.dispatchEvent(new window.PointerEvent('pointerdown', at(2, 0.2, 0.01)));

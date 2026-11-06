@@ -17,6 +17,7 @@ test('Fit the art also holds a foot below the standing feet', () => {
   const project = newProject();
   const animation = project.animations[0];
   const anchor = { x: 80, y: 128 };
+
   addFrame(project, animation, 0);
   setPixel(animation.directions.south.frames[0].layers[0].sprite, 80, 128, RED);
   setPixel(animation.directions.south.frames[1].layers[0].sprite, 80, 131, RED);
@@ -37,6 +38,7 @@ test('Fit the art also holds a foot below the standing feet', () => {
 test('a flipped west row keeps the feet on the anchor column, even frame width too', () => {
   const project = newProject();
   const animation = project.animations[0];
+
   setPixel(animation.directions.east.frames[0].layers[0].sprite, 80, 128, RED);
   const { sheet, rows } = buildSheet(project, animation, {
     ...GAME_FRAME,
@@ -56,6 +58,7 @@ test('a structural change reports every layer whose pixels it changed', () => {
   const project = newProject();
   const before = snapshotAnimations(project.animations);
   const layer = project.animations[0].directions.north.frames[0].layers[0];
+
   setPixel(layer.sprite, 1, 1, RED);
   addFrame(project, project.animations[0], 0);
   const ids = changedLayers(before, project.animations);

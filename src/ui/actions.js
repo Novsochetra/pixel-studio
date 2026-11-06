@@ -3,6 +3,7 @@ import { allLayers, frameAt, layerAt } from '../model/project.js';
 import { compositeFrame } from '../model/composite.js';
 import { changedLayers, snapshotAnimations } from '../editor/history.js';
 import { referenceOf } from '../model/reference.js';
+import { toast } from './dom.js';
 
 export function currentAnimation(state) {
   return (
@@ -72,6 +73,7 @@ export function referenceSprite(state) {
 // Change some layers as one undoable step, then save and redraw.
 export function commit(app, label, layers, mutate) {
   const before = layers.map((layer) => ({ layer, before: cloneSprite(layer.sprite) }));
+
   mutate();
 
   if (app.history.record(label, before)) {
@@ -125,12 +127,21 @@ function afterHistory(app, step) {
   app.store.touch('pixels');
 }
 
+// says what went back or came again, as the canvas alone may not show it (a frame elsewhere)
+function tellStep(step, done) {
+  toast(step ? `${done}: ${step.label}` : `Nothing to ${done === 'Undone' ? 'undo' : 'redo'}`);
+}
+
 export function undo(app) {
-  afterHistory(app, app.history.undo(app.store.state.project));
+  const step = app.history.undo(app.store.state.project);
+  afterHistory(app, step);
+  tellStep(step, 'Undone');
 }
 
 export function redo(app) {
-  afterHistory(app, app.history.redo(app.store.state.project));
+  const step = app.history.redo(app.store.state.project);
+  afterHistory(app, step);
+  tellStep(step, 'Redone');
 }
 
 // An undoable change to frames, layers or animations: `mutate` returns where to go after it.
@@ -138,6 +149,7 @@ export function restructure(app, label, mutate) {
   const { state } = app.store;
   const before = snapshotAnimations(state.project.animations);
   const at = mutate(state) ?? state.at;
+
   app.history.recordStructure(label, before, state.project);
   app.saver.markLayers(changedLayers(before, state.project.animations));
   app.saver.markNewLayers(state.project);
@@ -148,6 +160,7 @@ export function restructure(app, label, mutate) {
 
 export function flipCurrent(app) {
   const layer = currentLayer(app.store.state);
+
   commit(app, 'Flip', [layer], () => {
     layer.sprite = flipHorizontal(layer.sprite);
   });

@@ -22,7 +22,6 @@ function renameTo(app, animation, name) {
   });
 }
 
-// the tab turns into a text field; Enter or leaving it renames, Escape keeps the name
 export function rename(app, tabButton, animation) {
   const field = node('input.input.tab-rename', { value: animation.name, 'aria-label': 'Name' });
   let pressed = false;
@@ -30,9 +29,11 @@ export function rename(app, tabButton, animation) {
   const release = () => (pressed = false);
   const done = (keep) => {
     const name = field.value.trim();
+
     document.removeEventListener('pointerdown', press, true);
     document.removeEventListener('pointerup', release, true);
     field.onblur = null;
+    field.replaceWith(tabButton);
 
     if (keep && name && name !== animation.name) {
       renameTo(app, animation, name);
@@ -40,6 +41,7 @@ export function rename(app, tabButton, animation) {
       app.store.touch('animations');
     }
   };
+
   field.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === 'Escape') {
       event.preventDefault();

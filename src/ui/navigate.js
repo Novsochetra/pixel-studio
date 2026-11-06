@@ -25,6 +25,7 @@ export function zoomAround(app, { stage, canvas }, zoom, [clientX, clientY]) {
 
 export function bindWheelZoom(stage, canvas, app) {
   let pending = 0;
+
   stage.addEventListener(
     'wheel',
     (event) => {

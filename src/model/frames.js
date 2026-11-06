@@ -16,6 +16,7 @@ export function frameCount(animation) {
 export function addFrame(project, animation, after, duplicate = false) {
   for (const entry of entriesOf(animation)) {
     const at = Math.min(after, entry.frames.length - 1);
+
     entry.frames.splice(
       at + 1,
       0,
@@ -49,6 +50,7 @@ export function moveFrame(animation, from, to) {
 
   for (const entry of entriesOf(animation)) {
     const [frame] = entry.frames.splice(from, 1);
+
     entry.frames.splice(target, 0, frame);
   }
 
@@ -81,6 +83,7 @@ export function evenFrames(project) {
     for (const entry of entriesOf(animation)) {
       while (entry.frames.length < count) {
         const frame = copyOfFrame(entry.frames[entry.frames.length - 1], project.canvas);
+
         entry.frames.push(frame);
         added.push(...frame.layers.map((layer) => layer.id));
       }

@@ -32,6 +32,7 @@ export function showOpening() {
   const timer = setTimeout(() => {
     note.textContent = SLOW_NOTE;
   }, SLOW_MS);
+
   document.body.append(screen);
 
   return {

@@ -28,7 +28,7 @@ export function startingState(project) {
     showGrid: true,
     showGuides: true,
     overlay: { direction: null, opacity: 0.4 },
-    game: { size: 'match', zoom: 1, mirrored: false, runAcross: false },
+    game: { size: 'match', zoom: null, mirrored: false, runAcross: false },
     swapPreview: null,
     cursor: null,
     onion: false,

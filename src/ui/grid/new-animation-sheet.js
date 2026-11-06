@@ -30,10 +30,12 @@ function startChoice(project, open) {
 
 function nameField(project, item) {
   const names = nameSuggestions(project);
+  const fallback =
+    names[0] ?? `${item[0].toUpperCase()}${item.slice(1)} ${project.animations.length + 1}`;
   const input = node('input.input', {
     id: 'new-animation-name',
     'aria-label': 'Name',
-    placeholder: names[0] ?? `${item} ${project.animations.length + 1}`,
+    placeholder: `Left empty: ${fallback}`,
   });
   const pick = (name) => {
     input.value = name;
@@ -42,25 +44,26 @@ function nameField(project, item) {
     'div.start-sizes',
     { role: 'group', 'aria-label': 'Names' },
     names.map((name) =>
-      node('button.btn.quiet', { type: 'button', onclick: () => pick(name) }, name),
+      node('button.btn.chip', { type: 'button', onclick: () => pick(name) }, name),
     ),
   );
 
   return {
     input,
+    fallback,
     el: node('div', {}, node('label.field', {}, node('span', {}, 'Name'), input), chips),
   };
 }
 
-// the animation the sheet's fields describe, made and opened
 function createAnimation(app, { name, frames, fps, start, item }, close) {
   const pose = start.select.value;
   const options = {
-    name: name.input.value.trim() || name.input.placeholder,
+    name: name.input.value.trim() || name.fallback,
     frames: wholeNumber(frames.input.value, { min: 1, max: 48 }),
     fps: wholeNumber(fps.input.value, { min: 1, max: 30, fallback: 8 }),
     start: pose ? 'pose' : 'empty',
   };
+
   restructure(app, `New ${item}: ${options.name}`, (draft) => {
     const from =
       draft.project.animations.find((animation) => animation.id === pose) ??
@@ -71,11 +74,9 @@ function createAnimation(app, { name, frames, fps, start, item }, close) {
   close();
 }
 
-// A new animation (or tile, or icon) with the views of the one open: its name, how many frames,
-// how fast, and whether its frames start empty or from the open one's first frame.
 export function openNewAnimationSheet(app) {
   const { state } = app.store;
-  const like = currentAnimation(state);
+  const openAnimation = currentAnimation(state);
   const item = kindOf(state.project).itemName;
   const sheet = openSheet(`New ${item}`);
   const name = nameField(state.project, item);
@@ -89,9 +90,9 @@ export function openNewAnimationSheet(app) {
     id: 'new-animation-fps',
     label: 'Frames per second',
     max: 30,
-    value: like.fps,
+    value: openAnimation.fps,
   });
-  const start = startChoice(state.project, like);
+  const start = startChoice(state.project, openAnimation);
   const create = () => createAnimation(app, { name, frames, fps, start, item }, sheet.close);
 
   sheet.body.addEventListener('keydown', (event) => {

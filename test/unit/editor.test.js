@@ -21,6 +21,7 @@ function square(sprite, [x0, y0], size, color) {
 
 test('moving a selection carries its pixels and leaves the gap clear', () => {
   const sprite = createSprite(8, 8);
+
   setPixel(sprite, 2, 2, RED);
   const moved = moveSelected(sprite, rectSelection({ width: 8, height: 8 }, [2, 2], [2, 2]), 3, 1);
   assert.equal(getPixel(sprite, 2, 2), 0);
@@ -35,6 +36,7 @@ test('moving a selection carries its pixels and leaves the gap clear', () => {
 test('clean lines removes the L corner a diagonal stroke leaves', () => {
   const sprite = createSprite(8, 8);
   const stroke = new Stroke(sprite, RED, { cleanLines: true });
+
   stroke.add(1, 1);
   stroke.add(2, 1);
   stroke.add(2, 2);
@@ -44,6 +46,7 @@ test('clean lines removes the L corner a diagonal stroke leaves', () => {
 
 test('outline tools: add, thin a doubled one, close a gap', () => {
   const sprite = createSprite(12, 12);
+
   square(sprite, [4, 4], 4, FILL);
   assert.equal(addOutline(sprite, INK), 16);
   assert.equal(outlineColour(sprite), INK);
@@ -69,6 +72,7 @@ test('outline tools: add, thin a doubled one, close a gap', () => {
 test('the light and dark brush steps along a shade family', () => {
   const reds = ['#850d19', '#b7101c', '#df2321'].map(fromHex);
   const families = shadeFamilies([...reds, fromHex('#283ca0'), fromHex('#ffffff')]);
+
   assert.equal(shiftShade(reds[1], families, 1), reds[2]);
   assert.equal(shiftShade(reds[1], families, -1), reds[0]);
   assert.equal(shiftShade(reds[2], families, 1), reds[2], 'the lightest stays');

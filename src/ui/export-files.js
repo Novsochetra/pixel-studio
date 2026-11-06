@@ -23,6 +23,7 @@ function upscale(sprite, scale) {
   for (let y = 0; y < out.height; y++) {
     for (let x = 0; x < out.width; x++) {
       const from = (Math.floor(y / scale) * sprite.width + Math.floor(x / scale)) * 4;
+
       out.pixels.set(sprite.pixels.subarray(from, from + 4), (y * out.width + x) * 4);
     }
   }
@@ -57,6 +58,7 @@ export async function saveSheetsWithJson(state, settings) {
 
   for (const [i, result] of results.entries()) {
     const animation = state.project.animations[i];
+
     files.push({ name: `${result.name}.png`, data: await pngBytes(result.sheet) });
     files.push({
       name: `${result.name}.json`,

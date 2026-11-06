@@ -59,6 +59,7 @@ export function boardCanvas(state, scale, overrides = {}) {
   const directions = directionsInUse(state);
   const { width, height } = state.project.canvas;
   const canvas = document.createElement('canvas');
+
   canvas.width = directions.length * width * scale + (directions.length - 1) * GAP;
   canvas.height = height * scale + CAPTION;
   const context = canvas.getContext('2d');
@@ -70,6 +71,7 @@ export function boardCanvas(state, scale, overrides = {}) {
 
   directions.forEach((direction, i) => {
     const x = i * (width * scale + GAP);
+
     context.save();
     context.translate(x, CAPTION);
     drawView(context, state, { direction, scale, ghost, options, first: i === 0 });
@@ -105,6 +107,7 @@ export function boardPreview(state, room, options = {}) {
     Math.min(6, Math.floor((room - (count - 1) * GAP) / (count * state.project.canvas.width))),
   );
   const canvas = boardCanvas(state, scale, options);
+
   canvas.style.maxWidth = '100%';
   canvas.style.height = 'auto';
   canvas.style.imageRendering = 'pixelated';

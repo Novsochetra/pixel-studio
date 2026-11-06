@@ -6,15 +6,14 @@ import { moveFrameTo } from '../frame-actions.js';
 import { bounds } from '../../model/sprite.js';
 import { viewName } from '../../model/kinds.js';
 
-const THUMB = 52;
+const THUMB_SIZE = 52;
 
 const selectCell = (app, direction, index) => goTo(app, { direction, frame: index });
 
 const ACROSS = { ArrowLeft: -1, ArrowRight: 1 };
 const DOWN = { ArrowUp: -1, ArrowDown: 1 };
 
-// where an arrow, Home or End goes from a cell: along its row, or to the same frame a row up or down
-function neighbour(event, { direction, index }) {
+function cellAfterKey(event, { direction, index }) {
   const row = event.currentTarget.closest('.grid-row');
   const count = row.querySelectorAll('.cell:not(.mirror)').length;
   const along = { Home: 0, End: count - 1 }[event.key] ?? index + (ACROSS[event.key] ?? 0);
@@ -31,8 +30,6 @@ function neighbour(event, { direction, index }) {
 
 const MOVES_FOCUS = new Set([...Object.keys(ACROSS), ...Object.keys(DOWN), 'Home', 'End']);
 
-// The arrows, Home and End walk the frames; Alt+← and Alt+→ move the frame; Enter opens the
-// selected frame's menu (or selects it).
 function onCellKey(app, event, place) {
   const { direction, index, selected } = place;
   const step = ACROSS[event.key];
@@ -44,7 +41,7 @@ function onCellKey(app, event, place) {
   } else if (MOVES_FOCUS.has(event.key) && !event.metaKey && !event.ctrlKey) {
     event.preventDefault();
     event.stopPropagation();
-    const to = neighbour(event, place);
+    const to = cellAfterKey(event, place);
 
     if (to) {
       selectCell(app, to.direction, to.index);
@@ -74,13 +71,12 @@ function moreButton(app, place) {
   );
 }
 
-// one picture of the animation: a view at a frame. place: { direction, index, sprite, box,
-// selected, playing }
 export function cell(app, place) {
   const empty = !bounds(place.sprite);
   const name = viewName(app.store.state.project, place.direction);
   const thumb = node('canvas', { 'aria-hidden': 'true' });
-  drawThumbnail(thumb, place.sprite, THUMB, { box: place.box });
+
+  drawThumbnail(thumb, place.sprite, THUMB_SIZE, { box: place.box });
   const classes = `${empty ? '.empty' : ''}${place.selected ? '.selected' : ''}${place.playing ? '.playing' : ''}`;
 
   return node(
@@ -107,7 +103,8 @@ export function cell(app, place) {
 // a frame of a side the game mirrors: shown flipped and faded, as the game will draw it
 export function mirrorCell(sprite, box) {
   const thumb = node('canvas', { 'aria-hidden': 'true' });
-  drawThumbnail(thumb, sprite, THUMB, { box, flip: true });
+
+  drawThumbnail(thumb, sprite, THUMB_SIZE, { box, flip: true });
 
   return node(
     `div.cell.mirror${bounds(sprite) ? '' : '.empty'}`,

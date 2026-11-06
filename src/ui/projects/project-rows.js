@@ -17,6 +17,7 @@ async function duplicate(app, redraw) {
   try {
     const background = await backgroundUrl(app);
     const copy = await readProjectFile(projectFileText(project));
+
     copy.name = `${project.name} copy`;
     await addProject(app, copy, background);
     toast(`Made "${copy.name}" and opened it`);
@@ -29,6 +30,7 @@ async function duplicate(app, redraw) {
 // its kind, views, canvas, parts, animation names and game settings start new projects
 function keepAsPreset(app) {
   const preset = presetFromProject(app.store.state.project);
+
   savePreset(app.backend, preset).then(
     () => toast(`"${preset.label}" is now a preset: pick it when you start a new project.`),
     (error) => toast(`The preset could not be saved: ${error.message}`),

@@ -15,6 +15,7 @@ function position(menu, anchor, align) {
   const box = anchor.getBoundingClientRect();
   const height = menu.offsetHeight;
   const below = box.bottom + 6 + height <= window.innerHeight - 8;
+
   menu.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - height)}px`;
 
   // a right-aligned menu under a button near the left edge (a phone's wrapped toolbar) would run
@@ -52,6 +53,7 @@ function moveFocus(menu, key) {
   const at = items.indexOf(document.activeElement);
   const jumps = { Home: 0, End: items.length - 1 };
   const next = key in jumps ? jumps[key] : (at + STEPS[key] + items.length) % items.length;
+
   items[next]?.focus();
 }
 
@@ -67,8 +69,6 @@ function menuKey(menu, event, close) {
   }
 }
 
-// A small menu of actions: entries are [label, action, { danger, disabled, title }] or null for
-// a line between groups. Escape, a click outside or a choice closes it.
 let closeOpenMenu = null;
 
 // the whole menu stays on screen, wherever its button has wrapped to
@@ -81,8 +81,10 @@ const MENU_STYLE = {
 };
 
 export function openMenu(anchor, entries, { align = 'left', onError = () => {} } = {}) {
-  closeOpenMenu?.();
+  // remembered before the menu open before closes, which gives focus back to its own button
   const restoreFocus = rememberFocus();
+  closeOpenMenu?.();
+
   const menu = node('div.menu', { role: 'menu', style: MENU_STYLE });
   const close = () => {
     menu.remove();
@@ -105,6 +107,8 @@ export function openMenu(anchor, entries, { align = 'left', onError = () => {} }
     }
   };
 
+  // a message from before would cover the menu's lower items on a phone
+  document.querySelector('.toast')?.remove();
   menu.append(...entries.map((entry) => (entry ? item(entry, close, onError) : node('hr'))));
   document.body.append(menu);
   position(menu, anchor, align);

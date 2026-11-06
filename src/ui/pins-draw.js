@@ -8,12 +8,14 @@ const centre = (mark, scale) => [(mark.x + 0.5) * scale, (mark.y + 0.5) * scale]
 // This frame's pins, and a faded trail from where the previous frame had them.
 export function drawPins(context, frame, previous, scale) {
   const radius = Math.max(3, scale * 0.7);
+
   context.save();
   context.lineWidth = 2;
 
   for (const mark of pinsOf(previous)) {
     const now = pinsOf(frame).find((pin) => pin.name === mark.name);
     const [px, py] = centre(mark, scale);
+
     context.globalAlpha = 0.45;
     context.strokeStyle = colourOf(mark.name);
     context.setLineDash([3, 3]);
@@ -34,6 +36,7 @@ export function drawPins(context, frame, previous, scale) {
 
   for (const mark of pinsOf(frame)) {
     const [x, y] = centre(mark, scale);
+
     context.fillStyle = colourOf(mark.name);
     context.strokeStyle = PIN_RING;
     context.beginPath();

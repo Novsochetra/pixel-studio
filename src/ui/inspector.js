@@ -12,14 +12,14 @@ const FOLDED_AT_FIRST = ['layers', 'outline', 'guides'];
 function folding(folded) {
   return (title) => {
     const section = title.parentElement;
-    const now = section.dataset.collapsed !== 'true';
-    section.dataset.collapsed = String(now);
-    now ? folded.add(section.dataset.name) : folded.delete(section.dataset.name);
+    const collapsed = section.dataset.collapsed !== 'true';
+
+    section.dataset.collapsed = String(collapsed);
+    collapsed ? folded.add(section.dataset.name) : folded.delete(section.dataset.name);
     keepSetting(FOLDED, [...folded]);
   };
 }
 
-// a click, or Enter or Space, on a section's title folds it away; which are folded is remembered
 function bindCollapsing(inspector, sections) {
   const folded = new Set(readSetting(FOLDED, FOLDED_AT_FIRST));
   const toggle = folding(folded);
@@ -44,7 +44,6 @@ function bindCollapsing(inspector, sections) {
   });
 }
 
-// The panels on the right, each folding away from its title. Returns a drawer for each.
 export function mountInspector(app) {
   const inspector = document.getElementById('inspector');
   const sections = {
@@ -54,6 +53,7 @@ export function mountInspector(app) {
     outline: node('section.section'),
     guides: node('section.section'),
   };
+
   inspector.replaceChildren(...Object.values(sections));
   bindCollapsing(inspector, sections);
 

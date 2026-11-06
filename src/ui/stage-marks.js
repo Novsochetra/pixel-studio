@@ -4,6 +4,7 @@ import { cssVar } from './draw.js';
 export function drawSelection(context, selection, scale) {
   const { width, height, cells } = selection;
   const on = (x, y) => x >= 0 && y >= 0 && x < width && y < height && cells[y * width + x];
+
   context.save();
   context.beginPath();
 
@@ -16,12 +17,15 @@ export function drawSelection(context, selection, scale) {
       if (!on(x, y - 1)) {
         context.rect(x * scale, y * scale, scale, 0);
       }
+
       if (!on(x, y + 1)) {
         context.rect(x * scale, (y + 1) * scale, scale, 0);
       }
+
       if (!on(x - 1, y)) {
         context.rect(x * scale, y * scale, 0, scale);
       }
+
       if (!on(x + 1, y)) {
         context.rect((x + 1) * scale, y * scale, 0, scale);
       }

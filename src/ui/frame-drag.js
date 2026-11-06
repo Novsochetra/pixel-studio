@@ -36,6 +36,7 @@ function scrollNear(row, x) {
 
 function startDrag(drag) {
   const { row, press } = drag;
+
   press.dragging = true;
   row.classList.add('sorting');
 
@@ -104,6 +105,7 @@ function onMove(drag, event) {
 
 function onUp(drag) {
   const press = drag.press;
+
   endDrag(drag);
 
   if (press?.dragging && press.slot !== null) {

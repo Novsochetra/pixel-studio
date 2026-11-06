@@ -34,6 +34,7 @@ function memory() {
 test('a version too big for one stored document is split and joined back exactly', async () => {
   const backend = memory();
   const project = newProject({ name: 'Sochetra' });
+
   await saveVersion(backend, project, 'first');
   const [entry] = await listVersions(backend);
   assert.ok(entry.chunks > 1);
@@ -58,4 +59,11 @@ test('projects keep their documents apart, and the list follows renames', () => 
   assert.equal(upsertEntry(index, project, 'p-x-'), true);
   assert.equal(index.list[0].name, 'Dark knight');
   assert.equal(index.list[0].prefix, 'p-x-');
+});
+
+test('shortcuts name ⌘ on a Mac and Ctrl elsewhere', async () => {
+  const { keyNames } = await import('../../src/ui/platform-keys.js');
+
+  assert.equal(keyNames('Redo (⇧⌘Z or ⌘Y)', true), 'Redo (⇧⌘Z or ⌘Y)');
+  assert.equal(keyNames('Redo (⇧⌘Z or ⌘Y)', false), 'Redo (Ctrl+Shift+Z or Ctrl+Y)');
 });

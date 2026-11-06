@@ -11,6 +11,7 @@ import { bounds } from '../../model/sprite.js';
 import { drawableDirections } from '../../model/directions.js';
 import { referenceOf } from '../../model/reference.js';
 import { isSingleView, viewName } from '../../model/kinds.js';
+import { keyNames } from '../platform-keys.js';
 
 // a character asks for another view or the next frame; anything else for the next frame or another
 // of its kind in the same style
@@ -64,7 +65,7 @@ function copyButton(box) {
       () => toast('Prompt copied'),
       () => {
         box.select();
-        toast('Press ⌘C to copy');
+        toast(keyNames('Press ⌘C to copy'));
       },
     );
 
@@ -117,7 +118,6 @@ function draw(slot, state, ask, { close, redraw }) {
   );
 }
 
-// A prompt and a reference sheet to ask ChatGPT (or another image AI) for art that fits.
 export function openChatgptSheet(app) {
   const { state } = app.store;
   const sheet = openSheet('Ask ChatGPT for new art', null, { wide: true });

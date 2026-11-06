@@ -56,6 +56,7 @@ function viewRow(app, direction, playFrame) {
   const frames = currentAnimation(state).directions[direction].frames;
   const { sprites, box } = rowArt(state.project, frames);
   const current = direction === state.at.direction;
+  const single = isSingleView(state.project);
   const cells = node(
     'div.grid-cells',
     {},
@@ -71,8 +72,8 @@ function viewRow(app, direction, playFrame) {
     ),
     current ? addFrameTile(app, frames.length - 1) : null,
   );
+
   bindFrameDrag(cells, '.cell', (from, to) => moveFrameTo(app, from, to));
-  const single = isSingleView(state.project);
 
   return node(
     `div.grid-row${current ? '.current' : ''}`,
@@ -84,9 +85,9 @@ function viewRow(app, direction, playFrame) {
 
 function numbersRow(state, count, playFrame) {
   const numbers = Array.from({ length: count }, (_, index) => {
-    const on = `${index === state.at.frame ? '.on' : ''}${index === playFrame ? '.playing' : ''}`;
+    const classes = `${index === state.at.frame ? '.on' : ''}${index === playFrame ? '.playing' : ''}`;
 
-    return node(`span.grid-number${on}`, {}, String(index + 1));
+    return node(`span.grid-number${classes}`, {}, String(index + 1));
   });
 
   return node(

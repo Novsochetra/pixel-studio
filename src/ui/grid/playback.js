@@ -44,7 +44,6 @@ export function stopPlayback(app) {
   return false;
 }
 
-// isShown: false once the canvas is gone (another workspace); onFrame: repaint
 export function togglePlayback(app, { isShown, onFrame }) {
   if (stopPlayback(app)) {
     onFrame();

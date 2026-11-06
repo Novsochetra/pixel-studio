@@ -11,6 +11,7 @@ export function bbox(opaque, width) {
     if (on) {
       const x = i % width;
       const y = (i - x) / width;
+
       left = Math.min(left, x);
       right = Math.max(right, x);
       top = Math.min(top, y);

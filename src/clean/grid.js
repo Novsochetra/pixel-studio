@@ -12,6 +12,7 @@ export function exactCell(image, maxCell = 64, purity = 0.995) {
 
     for (const prof of profs) {
       const phase = new Float64Array(size);
+
       prof.forEach((value, i) => {
         phase[(i + 1) % size] += value;
       });
@@ -42,6 +43,7 @@ function climb(cands, score, start) {
 
     for (const multiple of [2, 3]) {
       const win = [];
+
       cands.forEach((candidate, j) => {
         if (Math.abs(candidate - multiple * cands[i]) <= 0.02 * multiple * cands[i]) {
           win.push(j);
@@ -71,6 +73,7 @@ export function detectCell(profs, lo = 2.0, hi = 40.0) {
   const cands = arange(lo, hi, 0.01);
   const score = totalScore(profs, peakList, cands);
   const i = climb(cands, score, argmax(score));
+
   // a 0.01 px error drifts ~2 px across 160 cells, enough to sample the wrong pixel
   const fine = arange(cands[i] - 0.03, cands[i] + 0.03, 0.0005);
 
@@ -156,6 +159,7 @@ export function findGrid(image, isBg, options, cutOut = false) {
     sizes = parseCell(options.cell);
   } else {
     const shared = detectCell(profs, 2.0, Math.max(40.0, Math.min(image.width, image.height) / 8));
+
     sizes = axisCells(image, isBg, profs, shared);
   }
 

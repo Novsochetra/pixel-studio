@@ -3,7 +3,7 @@ import { promptText } from './prompt-text.js';
 
 // typing the pose changes the prompt in place, so the field keeps its focus
 export function poseField(state, ask, box) {
-  const type = (event) => {
+  const onType = (event) => {
     ask.pose = event.target.value;
     box.value = promptText(state, ask.direction, ask.task, ask.pose);
   };
@@ -16,7 +16,7 @@ export function poseField(state, ask, box) {
       id: 'prompt-pose',
       value: ask.pose,
       placeholder: 'Right foot forward, left arm forward, knees bent',
-      oninput: type,
+      oninput: onType,
     }),
   );
 }

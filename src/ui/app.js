@@ -67,15 +67,17 @@ export function mountApp(app) {
     }
   });
 
-  Object.values(draw).forEach((fn) => fn());
+  Object.values(draw).forEach((drawPart) => drawPart());
+
   // the zoom that fills the window; a resize follows it unless another zoom was chosen
   app.fitCanvas = () => {
     app.fittedZoom = fitZoom(stage, currentLayer(app.store.state).sprite);
     app.store.set({ zoom: app.fittedZoom });
   };
+
   app.fitCanvas();
   bindKeyboard(app);
   bindDrop(stage, app);
-  showQuickStart(document.body);
+  showQuickStart(document.body, app.store.state.project);
   window.addEventListener('resize', () => followResize(app, draw.stage));
 }

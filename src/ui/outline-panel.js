@@ -35,6 +35,7 @@ function apply(app, operation, colour) {
   const { state } = app.store;
   const layers = state.outline.everywhere ? allArtLayers(state) : [currentLayer(state)];
   let count = 0;
+
   commit(app, operation.label, layers, () =>
     layers.forEach((other) => {
       count += operation.run(other.sprite, colour);
@@ -120,6 +121,7 @@ function everywhereToggle(app) {
 export function renderOutlinePanel(el, app) {
   const { state } = app.store;
   const detected = outlineColour(directionSprite(state, state.at.direction));
+
   state.outline ??= { colour: null, everywhere: false };
   const colour = state.outline.colour ?? detected;
 

@@ -28,6 +28,7 @@ function header(size) {
 
 function localHeader(name, data, crc) {
   const { bytes, view } = header(30 + name.length);
+
   view.setUint32(0, 0x04034b50, true);
   view.setUint16(4, 20, true);
   view.setUint32(14, crc, true);
@@ -41,6 +42,7 @@ function localHeader(name, data, crc) {
 
 function centralHeader(name, data, crc, offset) {
   const { bytes, view } = header(46 + name.length);
+
   view.setUint32(0, 0x02014b50, true);
   view.setUint16(4, 20, true);
   view.setUint16(6, 20, true);
@@ -65,6 +67,7 @@ export function zipFiles(files) {
     const name = encoder.encode(file.name);
     const crc = crc32(file.data);
     const local = localHeader(name, file.data, crc);
+
     central.push(centralHeader(name, file.data, crc, offset));
     parts.push(local, file.data);
     offset += local.length + file.data.length;

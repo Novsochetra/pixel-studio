@@ -42,6 +42,7 @@ function pressSession(app, view, event) {
 
 function showCursor(app, point) {
   const color = getPixel(currentLayer(app.store.state).sprite, ...point);
+
   app.store.set({
     cursor: { x: point[0], y: point[1], color: color ? toHex(color) : 'transparent' },
   });

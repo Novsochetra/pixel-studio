@@ -7,6 +7,7 @@ export function sheetCell(result, settings, row, frame) {
 
   for (let y = 0; y < frameHeight; y++) {
     const from = ((row * frameHeight + y) * result.sheet.width + frame * frameWidth) * 4;
+
     cell.pixels.set(result.sheet.pixels.subarray(from, from + frameWidth * 4), y * frameWidth * 4);
   }
 

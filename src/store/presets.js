@@ -19,6 +19,7 @@ export async function readPresets(backend) {
 // a list that could not be read is never written back, which would drop every preset in it
 async function changePresets(backend, change) {
   const list = await listIn(backend);
+
   await backend.write(PRESETS, { list: change(list) });
 }
 

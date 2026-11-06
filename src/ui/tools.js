@@ -36,8 +36,9 @@ function pick(app, [x, y]) {
 
 function pin(app, [x, y]) {
   const name = app.store.state.pinName;
-  restructure(app, `Pin ${name}`, (state) => {
-    setPin(frameAt(state.project, state.at), name, x, y);
+
+  restructure(app, `Pin ${name}`, (draft) => {
+    setPin(frameAt(draft.project, draft.at), name, x, y);
   });
   app.store.set({ showPins: true });
 
@@ -66,6 +67,7 @@ const ON_PRESS = {
 
 function hiddenLayer(app) {
   const layer = currentLayer(app.store.state);
+
   toast(`${layer.name} is hidden, so you would not see what you draw. Show it in Layers first.`);
 
   return null;
@@ -75,8 +77,8 @@ export function startTool(app, point, event) {
   const { tool } = app.store.state;
 
   if (tool === 'pin' && event.altKey) {
-    restructure(app, 'Remove pin', (state) =>
-      removePinNear(frameAt(state.project, state.at), point),
+    restructure(app, 'Remove pin', (draft) =>
+      removePinNear(frameAt(draft.project, draft.at), point),
     );
 
     return null;

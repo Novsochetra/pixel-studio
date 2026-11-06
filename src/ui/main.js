@@ -18,6 +18,7 @@ import { allLayers, newId } from '../model/project.js';
 async function startEditor(backend, index, { project, prefix, save, background = null }) {
   const store = createStore({ ...startingState(project), storage: backend.kind });
   const app = { store, backend, index };
+
   app.findLayer = (id) =>
     [...allLayers(store.state.project)].find(({ layer }) => layer.id === id)?.layer ?? null;
   install(app, project, { prefix, save });
@@ -45,22 +46,28 @@ const fresh = (project) => {
 };
 
 function startScreenHandlers(backend, index, closeScreen) {
-  const open = (opened) => {
+  // the keyboard starts on the tool in hand, not lost on the page behind the start screen
+  const open = async (opened) => {
     closeScreen();
+    await startEditor(backend, index, opened);
 
-    return startEditor(backend, index, opened);
+    if (document.activeElement === document.body) {
+      document.querySelector('#rail [aria-pressed="true"]')?.focus();
+    }
   };
 
   return {
     onCreate: (project) => open(fresh(project)),
     async onExample() {
       const sample = fillMissingSprites(await sampleProject());
+
       // the example is only written once it is edited
       open({ project: sample, prefix: prefixFor(sample.id), save: 'on-change' });
     },
     async onOpenFile(file) {
       try {
         const { project, background } = await readProjectBundle(await file.text());
+
         await open({ ...fresh(project), background });
       } catch (error) {
         toast(error.message);

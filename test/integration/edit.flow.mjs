@@ -129,6 +129,7 @@ check(
 for (let i = 0; i < 6; i++) {
   await page.keyboard.press('+');
 }
+
 const scrolled = () =>
   page.locator('.edit-scroll').evaluate((element) => element.scrollLeft + element.scrollTop);
 const before = await scrolled();

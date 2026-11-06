@@ -37,7 +37,6 @@ function mirrorRow(state, direction, source) {
   );
 }
 
-// the sides the game draws by flipping another, faded: what the sheet will hold
 export function mirrorRows(state) {
   return flippedSides(state.project, currentAnimation(state)).map(([side, source]) =>
     mirrorRow(state, side, source),

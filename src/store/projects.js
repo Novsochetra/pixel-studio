@@ -56,6 +56,7 @@ export function upsertEntry(index, project, prefix) {
 // an entry from this visit put into a list read later, in place of the same project's
 function mergeEntry(index, entry) {
   const at = index.list.findIndex((listed) => listed.id === entry.id);
+
   at < 0 ? index.list.push(entry) : (index.list[at] = entry);
 }
 

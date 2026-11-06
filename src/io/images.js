@@ -3,6 +3,7 @@ import { REFERENCE_CHECKER } from '../art/editor-colours.js';
 
 function makeCanvas(width, height) {
   const canvas = document.createElement('canvas');
+
   canvas.width = width;
   canvas.height = height;
 
@@ -18,6 +19,7 @@ export async function decodeImage(blob) {
   const { width, height } = bitmap;
   const canvas = makeCanvas(width, height);
   const context = canvas.getContext('2d', { willReadFrequently: true });
+
   context.drawImage(bitmap, 0, 0);
   const { data } = context.getImageData(0, 0, width, height);
   bitmap.close?.();
@@ -28,6 +30,7 @@ export async function decodeImage(blob) {
 export async function decodeSprite(blob) {
   const { width, height, data } = await decodeImage(blob);
   const sprite = createSprite(width, height);
+
   sprite.pixels.set(data);
 
   return sprite;
@@ -39,6 +42,7 @@ export function spriteCanvas(sprite, scale = 1, paintBackground = null) {
   const canvas = makeCanvas(sprite.width * scale, sprite.height * scale);
   const context = canvas.getContext('2d');
   const native = makeCanvas(sprite.width, sprite.height);
+
   native
     .getContext('2d')
     .putImageData(
@@ -73,6 +77,7 @@ export function spriteDataUrl(sprite) {
 // through an <img>, since the page may not fetch data: addresses
 export async function dataUrlSprite(url) {
   const image = new Image();
+
   image.src = url;
   await image.decode();
   const canvas = makeCanvas(image.naturalWidth, image.naturalHeight);

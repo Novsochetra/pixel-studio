@@ -18,6 +18,7 @@ export function drawMarks(context, project, direction, scale) {
   const panelWidth = project.canvas.width * scale;
   const { strokes, notes } = marksFor(project, direction);
   const colour = cssVar('--guide');
+
   context.save();
   context.strokeStyle = colour;
   context.lineWidth = Math.max(2, scale * 0.8);
@@ -39,6 +40,7 @@ export function drawMarks(context, project, direction, scale) {
   for (const note of notes) {
     const width = context.measureText(note.text).width + 10;
     const height = Math.max(16, scale * 4.4);
+
     // a note near the right edge opens to the left, so it stays on its own view
     const x = Math.max(0, Math.min(note.x * scale, panelWidth - width));
     const y = Math.max(height, note.y * scale);

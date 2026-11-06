@@ -15,7 +15,6 @@ function sheetHead(title, close) {
   );
 }
 
-// A modal sheet; Escape, × or a click on the backdrop runs onClose and gives focus back.
 export function openSheet(title, onClose, { wide = false } = {}) {
   const restoreFocus = rememberFocus();
   const body = node(`div.sheet${wide ? '.wide' : ''}`, {
@@ -59,9 +58,9 @@ export function openSheet(title, onClose, { wide = false } = {}) {
   return { body, close };
 }
 
-// a sprite on the app's own checkerboard, with the guide lines
 export function previewCanvas(sprite, guides = [], scale = 3) {
   const canvas = node('canvas');
+
   canvas.width = sprite.width * scale;
   canvas.height = sprite.height * scale;
   const context = canvas.getContext('2d');

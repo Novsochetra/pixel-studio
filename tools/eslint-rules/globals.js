@@ -4,6 +4,7 @@ const shared = [
   'console',
   'setTimeout',
   'queueMicrotask',
+  'ResizeObserver',
   'clearTimeout',
   'URL',
   'TextEncoder',

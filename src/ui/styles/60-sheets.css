@@ -173,6 +173,16 @@
   justify-content: flex-end;
 }
 
+/* Keep is a choice like the swatches: marked when it is the one picked, faint when one is */
+.target-picker .keep {
+  color: var(--label-muted);
+}
+
+.target-picker .keep[aria-pressed='true'] {
+  background: var(--tint-quiet);
+  color: var(--tint);
+}
+
 .target-picker .swatch {
   width: 20px;
   height: 20px;

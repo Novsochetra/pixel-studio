@@ -7,8 +7,43 @@ import { renderEmptyFrame } from './empty-frame.js';
 import { mountGridPanel } from './grid/grid-panel.js';
 import { stopPlayback } from './grid/playback.js';
 
+// The room above the frames changes as the grid grows (All views, a new animation) or the window
+// does: a canvas that was fitted stays fitted, so its feet never hide under the frames.
+function keepFitted(app, scroller, canvas) {
+  const observer = new ResizeObserver(() => {
+    if (!canvas.isConnected) {
+      observer.disconnect();
+    } else if (app.store.state.zoom === app.fittedZoom) {
+      app.fitCanvas?.();
+    }
+  });
+  observer.observe(scroller);
+}
+
 // changes that mean the person is working again, which stop a playing animation
 const STOPS_PLAYING = ['at', 'pixels', 'animations', 'frames', 'layers', 'tool', 'selection'];
+
+// What the frame grid shows. Drawing it again for anything else (a zoom, the pointer moving) would
+// take a field or button being used out from under the person; a stroke redraws it once, at its end.
+const GRID_KEYS = [
+  'mode',
+  'at',
+  'pixels',
+  'animations',
+  'frames',
+  'layers',
+  'project',
+  'gridAll',
+  'onion',
+  'showPins',
+  'pinName',
+];
+
+const showsInGrid = (patch) => {
+  const keys = Object.keys(patch);
+
+  return !patch.stroke && (!keys.length || keys.some((key) => GRID_KEYS.includes(key)));
+};
 
 // the zoom at which the canvas fits the part of the stage above the frames
 export function fitZoom(stage, sprite) {
@@ -40,9 +75,12 @@ export function mountEditStage(container, app) {
     isShown: () => canvas.isConnected,
     onPlayFrame: () => paint(canvas, app),
   });
+
   container.replaceChildren(node('div.edit-layout', {}, scroller, grid.el));
   bindPointer(canvas, app, scroller);
   bindWheelZoom(scroller, canvas, app);
+  keepFitted(app, scroller, canvas);
+  grid.render();
 
   return {
     render(patch = {}) {
@@ -54,7 +92,7 @@ export function mountEditStage(container, app) {
       renderSelectionBar(bar, app);
       renderEmptyFrame(empty, app);
 
-      if (!patch.stroke) {
+      if (showsInGrid(patch)) {
         grid.render();
       }
     },

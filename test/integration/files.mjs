@@ -19,6 +19,7 @@ export function readZip(path) {
     const name = data.toString('utf8', at + 46, at + 46 + nameLength);
     const start = local + 30 + data.readUInt16LE(local + 26) + data.readUInt16LE(local + 28);
     const body = data.subarray(start, start + size);
+
     entries[name] = method === 8 ? inflateRawSync(body) : body;
     at += 46 + nameLength + extra;
   }

@@ -116,6 +116,7 @@ async function newKind(page, kind) {
 
 export async function monkey({ page, check }) {
   const run = { page, clicks: 0 };
+
   await openExample(page);
 
   for (const kind of [null, 'Tiles', 'Effect', 'Character']) {

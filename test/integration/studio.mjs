@@ -74,12 +74,14 @@ export async function dropImage(page, path, name = 'picture.webp') {
   const transfer = await page.evaluateHandle(
     ([bytes, fileName]) => {
       const data = new DataTransfer();
+
       data.items.add(new File([new Uint8Array(bytes)], fileName, { type: 'image/webp' }));
 
       return data;
     },
     [[...readFileSync(path)], name],
   );
+
   await page.dispatchEvent('#stage', 'drop', { dataTransfer: transfer });
 }
 
@@ -127,6 +129,7 @@ export const imageFile = (path, name) => ({
 
 export async function chooseFiles(page, click, files) {
   const chooser = page.waitForEvent('filechooser', { timeout: 5000 });
+
   await click();
   await (await chooser).setFiles(files);
 }

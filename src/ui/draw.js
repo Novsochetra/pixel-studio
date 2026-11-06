@@ -11,6 +11,7 @@ function nativeCanvas(sprite) {
 
   if (!entry) {
     const canvas = document.createElement('canvas');
+
     canvas.width = sprite.width;
     canvas.height = sprite.height;
     entry = { canvas };
@@ -58,6 +59,7 @@ export function drawChecker(context, { width, height }, square) {
 // lines between the art pixels, one device pixel wide at any zoom
 export function drawGrid(context, { cols, rows }, { scale, ratio }) {
   const half = 0.5 / ratio;
+
   context.save();
   context.strokeStyle = cssVar('--separator');
   context.lineWidth = 1 / ratio;
@@ -82,6 +84,7 @@ export function drawGrid(context, { cols, rows }, { scale, ratio }) {
 export function drawGuide(context, guide, { width, scale, label = true }) {
   const edge = guide.rule === 'bottom' ? guide.row + 1 : guide.row;
   const lineY = Math.round(edge * scale) + 0.5;
+
   context.save();
   context.strokeStyle = cssVar('--guide');
   context.setLineDash([6, 4]);
@@ -103,6 +106,7 @@ export function drawGuide(context, guide, { width, scale, label = true }) {
 // the symmetry axis, between columns when the two halves are an even width apart
 export function drawMirrorLine(context, axisSum, { height, scale }) {
   const lineX = Math.round(((axisSum + 1) / 2) * scale) + 0.5;
+
   context.save();
   context.strokeStyle = cssVar('--mirror');
   context.setLineDash([3, 3]);
@@ -115,6 +119,7 @@ export function drawMirrorLine(context, axisSum, { height, scale }) {
 
 export function sizeCanvas(canvas, width, height) {
   const ratio = window.devicePixelRatio || 1;
+
   canvas.width = Math.round(width * ratio);
   canvas.height = Math.round(height * ratio);
   canvas.style.width = `${width}px`;

@@ -64,6 +64,7 @@ export function drawScene(canvas, state, { background, clock }) {
     : PLAIN_SIZE;
   const groundY = Math.round(height * groundOf(project, background));
   const { anchor, factor, spacing } = standing(state);
+
   canvas.width = width;
   canvas.height = height;
   const context = canvas.getContext('2d');
@@ -82,6 +83,7 @@ export function drawScene(canvas, state, { background, clock }) {
   if (view.runAcross) {
     const runner = animation.directions.east ? 'east' : Object.keys(animation.directions)[0];
     const x = clock.seconds === null ? 60 : ((clock.seconds * RUN_SPEED) % (width + 100)) - 50;
+
     stand({ source: runner, flip: false }, x);
   }
 

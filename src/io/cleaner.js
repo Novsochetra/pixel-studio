@@ -16,6 +16,7 @@ function startWorker() {
   worker.onmessage = (event) => {
     const { id, result, error } = event.data;
     const pending = waiting.get(id);
+
     waiting.delete(id);
 
     if (error) {

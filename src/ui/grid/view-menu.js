@@ -8,16 +8,16 @@ import { viewName } from '../../model/kinds.js';
 export function makeReference(app, direction) {
   const { project } = app.store.state;
   const before = project.referenceDirection;
+
   project.referenceDirection = direction;
   app.history.recordSetting('Reference view', 'referenceDirection', before, direction);
   changeStructure(app, 'project');
 }
 
-// a view's own actions: the reference every other view is matched to, or gone from this animation
 export function openViewMenu(app, anchor, direction) {
   const { state } = app.store;
   const name = viewName(state.project, direction);
-  const views = Object.keys(currentAnimation(state).directions).length;
+  const viewCount = Object.keys(currentAnimation(state).directions).length;
 
   openMenu(anchor, [
     [
@@ -35,7 +35,7 @@ export function openViewMenu(app, anchor, direction) {
         restructure(app, `Remove ${name}`, (draft) => {
           removeDirection(currentAnimation(draft), direction);
         }),
-      { danger: true, disabled: views < 2 },
+      { danger: true, disabled: viewCount < 2 },
     ],
   ]);
 }

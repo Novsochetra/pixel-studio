@@ -1,5 +1,6 @@
 import { node } from './dom.js';
 import { openSheet } from './sheet.js';
+import { keyNames } from './platform-keys.js';
 
 const GROUPS = [
   [
@@ -54,6 +55,7 @@ const GROUPS = [
 
 export function openShortcuts() {
   const sheet = openSheet('Keyboard shortcuts', null, { wide: true });
+
   sheet.body.append(
     node(
       'div.compare',
@@ -64,7 +66,7 @@ export function openShortcuts() {
           { style: { display: 'grid', gap: '6px', alignContent: 'start' } },
           node('h2.eyebrow', {}, title),
           rows.map(([keys, what]) =>
-            node('div.shortcut', {}, node('kbd', {}, keys), node('span', {}, what)),
+            node('div.shortcut', {}, node('kbd', {}, keyNames(keys)), node('span', {}, what)),
           ),
         ),
       ),

@@ -13,6 +13,7 @@ export function uniqueColors(colors, mask) {
   mask.forEach((on, i) => {
     if (on) {
       const key = colorAt(colors, i).join();
+
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
   });
@@ -119,10 +120,12 @@ export function snap(cells, palette, backgrounds) {
 
     if (edge[i] && backgrounds.length) {
       const fit = unmix(color, palette, backgrounds);
+
       index = fit.index;
       opaque[i] = fit.cover >= 0.5 ? 1 : 0;
     } else {
       const distances = palette.map((swatch) => distance(swatch, color));
+
       index = distances.indexOf(Math.min(...distances));
     }
 
@@ -166,6 +169,7 @@ export function loneEdgeColours(cells) {
     if (near.length && !near.includes(colorAt(colors, i).join())) {
       const count = (key) => near.filter((index) => index === key).length;
       const winner = near.reduce((best, key) => (count(key) > count(best) ? key : best));
+
       out.set(winner.split(',').map(Number), i * 3);
     }
   });

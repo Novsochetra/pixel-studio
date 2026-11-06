@@ -15,11 +15,26 @@ function coloursOfFrame(state, frameIndex) {
   return totals;
 }
 
-// every colour the art uses across its views, with how many pixels, most used first; a new empty
-// frame still offers the art's colours, those of the animation's first frame
+// the art's colours when the open frame has none: its animation's first frame, else the first
+// frame of any animation, so a new empty frame or animation still offers them to draw with
+function fallbackColours(state) {
+  const animations = [state.at.animation, ...state.project.animations.map(({ id }) => id)];
+
+  for (const animation of animations) {
+    const totals = coloursOfFrame({ ...state, at: { ...state.at, animation } }, 0);
+
+    if (totals.size) {
+      return totals;
+    }
+  }
+
+  return new Map();
+}
+
+// every colour the art uses across its views, with how many pixels, most used first
 export function characterCounts(state) {
   const here = coloursOfFrame(state, state.at.frame ?? 0);
-  const totals = here.size ? here : coloursOfFrame(state, 0);
+  const totals = here.size ? here : fallbackColours(state);
 
   return [...totals.entries()]
     .sort((first, second) => second[1] - first[1])

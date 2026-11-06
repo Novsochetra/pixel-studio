@@ -1,6 +1,7 @@
 import { node, replace } from './dom.js';
 import { commit, currentLayer } from './actions.js';
 import { clearSelected, liftPixels, transformSelected } from '../editor/selection.js';
+import { keyNames } from './platform-keys.js';
 
 const ACTIONS = [
   ['flip-x', 'Flip ↔', 'Flip the selection left to right'],
@@ -12,6 +13,7 @@ const ACTIONS = [
 function transform(app, kind, label) {
   const layer = currentLayer(app.store.state);
   let selection = app.store.state.selection;
+
   commit(app, label, [layer], () => {
     selection = transformSelected(layer.sprite, selection, kind);
   });
@@ -20,12 +22,14 @@ function transform(app, kind, label) {
 
 function copySelected(app) {
   const { state } = app.store;
+
   app.clipboard = liftPixels(currentLayer(state).sprite, state.selection);
 }
 
 function eraseSelected(app) {
   const { state } = app.store;
   const layer = currentLayer(state);
+
   commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection));
 }
 
@@ -46,7 +50,7 @@ export function renderSelectionBar(el, app) {
     ACTIONS.map(([kind, label, title]) =>
       button(title, () => transform(app, kind, title.split(' the')[0]), label),
     ),
-    button('Copy (⌘C); paste in any frame with ⌘V', () => copySelected(app), 'Copy'),
+    button(keyNames('Copy (⌘C); paste in any frame with ⌘V'), () => copySelected(app), 'Copy'),
     button('Erase the selected pixels (Delete)', () => eraseSelected(app), 'Delete'),
     button('Let go of the selection (Esc)', () => app.store.set({ selection: null }), 'Done'),
   );

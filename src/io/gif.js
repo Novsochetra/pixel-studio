@@ -9,6 +9,7 @@ function paletteOf(frames) {
     for (let i = 0; i < frame.pixels.length; i += 4) {
       if (frame.pixels[i + 3]) {
         const key = (frame.pixels[i] << 16) | (frame.pixels[i + 1] << 8) | frame.pixels[i + 2];
+
         counts.set(key, (counts.get(key) ?? 0) + 1);
       }
     }
@@ -51,6 +52,7 @@ function bitWriter() {
     bytes,
     write(code, size) {
       bits |= code << count;
+
       count += size;
 
       while (count >= 8) {
@@ -118,6 +120,7 @@ function pushAll(target, bytes) {
 function pushSubBlocks(target, bytes) {
   for (let i = 0; i < bytes.length; i += 255) {
     const chunk = bytes.slice(i, i + 255);
+
     target.push(chunk.length);
     pushAll(target, chunk);
   }
@@ -134,10 +137,12 @@ export function encodeGif(frames, delay) {
   const depth = Math.max(1, Math.ceil(Math.log2(colours.length)));
   const tableSize = 1 << depth;
   const bytes = [...'GIF89a'].map((char) => char.charCodeAt(0));
+
   bytes.push(...word(width), ...word(height), 0xf0 | (depth - 1), 0, 0);
 
   for (let i = 0; i < tableSize; i++) {
     const key = colours[i] ?? 0;
+
     bytes.push((key >> 16) & 255, (key >> 8) & 255, key & 255);
   }
 
@@ -159,6 +164,7 @@ export function encodeGif(frames, delay) {
 
     for (let pixel = 0; pixel < width * height; pixel++) {
       const i = pixel * 4;
+
       indices[pixel] = frame.pixels[i + 3]
         ? indexOf((frame.pixels[i] << 16) | (frame.pixels[i + 1] << 8) | frame.pixels[i + 2])
         : 0;

@@ -32,6 +32,7 @@ function cleansAlone(state, direction, frame) {
 
 function accept(job, place) {
   const { app, direction, frame } = job;
+
   keepVersion(app, `Before cleaning into ${place}`);
   replaceDirectionArt(app, { direction, frame }, job.result, `Clean into ${place}`);
   app.store.set({ at: { ...app.store.state.at, direction, frame }, mode: 'edit', selection: null });
@@ -73,6 +74,7 @@ export async function openImport(app, direction, file, frame = app.store.state.a
   const place = placeName(state, direction, frame);
   const sheet = openSheet(`Clean into ${place}`, null, { wide: true });
   const alone = cleansAlone(state, direction, frame);
+
   // a later frame of an animation is another pose: by default it keeps its own height
   const fields = optionFields({ matching: !alone, keepScale: frame > 0 });
   const job = {

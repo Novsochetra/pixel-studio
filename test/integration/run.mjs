@@ -15,6 +15,7 @@ for (const flow of flows) {
       encoding: 'utf8',
       timeout: 600000,
     });
+
     console.log(
       `${flow}: ${out
         .trim()

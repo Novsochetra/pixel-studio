@@ -21,6 +21,7 @@ const count = (number, word) => `${number} ${word}${number === 1 ? '' : 's'}`;
 function warn(warnings) {
   if (warnings.length) {
     const more = warnings.length > 3 ? ` (and ${warnings.length - 3} more)` : '';
+
     toast(`Saved, but check: ${warnings.slice(0, 3).join(' ')}${more}`);
   }
 }
@@ -101,7 +102,13 @@ function drawExport(slot, job) {
     ...choice.settings,
     includeMirrored: choice.includeMirrored,
   });
-  const download = async () => saveFile(`${result.name}.png`, await spritePng(result.sheet));
+  const download = async () => {
+    const filename = `${result.name}.png`;
+
+    if (await saveFile(filename, await spritePng(result.sheet))) {
+      result.warnings.length ? warn(result.warnings) : toast(`Saved ${filename}`);
+    }
+  };
   const pick = (id) =>
     change({ preset: id, settings: id === 'custom' ? choice.settings : presetSettings(state, id) });
   const edit = (patch) =>
@@ -138,6 +145,7 @@ export function openExportSheet(app) {
   const slot = node('div', { style: { display: 'grid', gap: '12px' } });
   const choice = startingChoice(state);
   const job = { state, animation, choice, close: sheet.close };
+
   job.change = (patch) => {
     Object.assign(choice, patch);
     state.project.exportSettings = {

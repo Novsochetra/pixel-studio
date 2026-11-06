@@ -11,6 +11,7 @@ export async function openStudio({
   initScript = null,
 } = {}) {
   const [url, images, shots] = process.argv.slice(2);
+
   mkdirSync(shots, { recursive: true });
   const browser = await chromium.launch();
   const options = device ? { ...devices[device] } : { viewport, deviceScaleFactor: 1 };

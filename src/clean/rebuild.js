@@ -9,6 +9,7 @@ function blockPixels(image, isBg, [ya, yb], [xa, xb]) {
   for (let y = ya; y < yb; y++) {
     for (let x = xa; x < xb; x++) {
       const at = y * width + x;
+
       pixels.push({ color: [rgb[at * 3], rgb[at * 3 + 1], rgb[at * 3 + 2]], bg: isBg[at] === 1 });
       bgCount += isBg[at];
     }
@@ -26,6 +27,7 @@ function cellColor(image, isBg, rows, cols) {
 
   for (const color of voters) {
     const key = (color[0] >> 3) * 1024 + (color[1] >> 3) * 32 + (color[2] >> 3);
+
     if (!groups.has(key)) {
       groups.set(key, []);
     }
@@ -63,6 +65,7 @@ export function rebuild(image, isBg, grid) {
     colSpans.forEach((cols, columnIndex) => {
       const { color, onBg } = cellColor(image, isBg, rows, cols);
       const at = rowIndex * out.width + columnIndex;
+
       out.colors.set(color, at * 3);
       out.bg[at] = onBg ? 1 : 0;
     });

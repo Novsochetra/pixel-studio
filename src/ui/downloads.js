@@ -27,6 +27,7 @@ async function saveView(app, scale, checker = false) {
   const sprite = directionSprite(state, state.at.direction);
   const size = sprite.width * scale;
   const blob = await spritePng(sprite, scale, checker ? checkerPainter(scale * 2) : null);
+
   await saveFile(
     `${names(state, state.at.direction)}-${size}${checker ? '-checker' : ''}.png`,
     blob,
@@ -44,6 +45,7 @@ async function saveAllViews(app) {
     for (const factor of scale > 1 ? [1, scale] : [1]) {
       const suffix = sprite.width * factor;
       const blob = await spritePng(sprite, factor);
+
       files.push({
         name: `${names(state, direction)}-${suffix}.png`,
         data: new Uint8Array(await blob.arrayBuffer()),
@@ -59,12 +61,14 @@ async function saveBoard(app) {
   const blob = await canvasToBlob(
     boardCanvas(state, state.project.canvas.scale, { overlay: null, mapping: null }),
   );
+
   await saveFile(`${slug(state.project.name)}-views-board.png`, blob);
 }
 
 export async function saveProject(app) {
   const { project } = app.store.state;
   const text = projectFileText(project, await backgroundUrl(app));
+
   await saveFile(`${slug(project.name)}.json`, new Blob([text], { type: 'application/json' }));
 }
 
@@ -72,6 +76,7 @@ export function openProjectFile(app, onOpened = () => {}) {
   chooseFile(async (file) => {
     try {
       const { project, background } = await readProjectBundle(await file.text());
+
       await app.addProject(project, background);
       onOpened();
       toast(

@@ -33,6 +33,7 @@ export function duplicateAnimation(project, animation, name = `${animation.name}
     ),
   };
   const at = project.animations.indexOf(animation);
+
   project.animations.splice(at + 1, 0, copy);
 
   return copy;
@@ -57,6 +58,7 @@ function fillFromPose(project, animation, from) {
 // or 'pose' to start every frame from the first frame of `like`.
 export function startAnimation(project, like, { name, frames = 1, fps = 8, start = 'empty' }) {
   const animation = addAnimation(project, name, Object.keys(like.directions));
+
   animation.fps = fps;
 
   for (let i = 1; i < frames; i++) {

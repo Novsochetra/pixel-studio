@@ -23,6 +23,7 @@ function normalizeParts(project) {
   if (!project.parts) {
     const old = project.kitParts ?? {};
     const names = project.game.teamKits ? ['Shirt', 'Shorts', 'Socks', 'Trim'] : [];
+
     project.parts = names.map((name) => ({
       id: name.toLowerCase(),
       name,

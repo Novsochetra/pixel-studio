@@ -11,9 +11,11 @@ async function seed(target, docs) {
     (entries) =>
       new Promise((resolve, reject) => {
         const request = indexedDB.open('pixel-clean-studio', 1);
+
         request.onerror = reject;
         request.onsuccess = () => {
           const tx = request.result.transaction('docs', 'readwrite');
+
           entries.forEach(([key, value]) => tx.objectStore('docs').put(value, key));
           tx.oncomplete = resolve;
         };
@@ -26,6 +28,7 @@ async function seed(target, docs) {
 const png = (target, width) =>
   target.evaluate((size) => {
     const canvas = document.createElement('canvas');
+
     canvas.width = size;
     canvas.height = size;
     const context2d = canvas.getContext('2d');

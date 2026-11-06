@@ -20,6 +20,7 @@ export function imageIntoFrame(app, direction, index) {
 export function startFromPrevious(app, direction, index) {
   const frames = currentAnimation(app.store.state).directions[direction].frames;
   const [previous, frame] = [frames[index - 1], frames[index]];
+
   commit(app, `Copy frame ${index} here`, frame.layers, () => {
     for (const layer of frame.layers) {
       const source = matchingLayer(previous, layer)?.sprite;

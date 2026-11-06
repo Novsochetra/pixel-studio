@@ -2,6 +2,7 @@ import { toast } from './dom.js';
 
 function linkDownload(filename, blob) {
   const link = document.createElement('a');
+
   link.href = URL.createObjectURL(blob);
   link.download = filename;
   link.click();

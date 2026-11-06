@@ -1,5 +1,6 @@
 import { node, icon } from './dom.js';
 import { redo, undo } from './actions.js';
+import { keyNames } from './platform-keys.js';
 
 const SAVE_TEXT = {
   pending: 'Edited',
@@ -88,7 +89,7 @@ export function undoRedo(app) {
     node(
       'button.btn.quiet',
       {
-        title: 'Undo (⌘Z)',
+        title: keyNames('Undo (⌘Z)'),
         'aria-label': 'Undo',
         disabled: !app.history.canUndo,
         onclick: () => undo(app),
@@ -98,7 +99,7 @@ export function undoRedo(app) {
     node(
       'button.btn.quiet',
       {
-        title: 'Redo (⇧⌘Z)',
+        title: keyNames('Redo (⇧⌘Z)'),
         'aria-label': 'Redo',
         disabled: !app.history.canRedo,
         onclick: () => redo(app),

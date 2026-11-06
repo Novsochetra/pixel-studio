@@ -86,3 +86,18 @@
 .save-status[data-state='error'] {
   color: var(--bad);
 }
+
+/* a quick pick: a size or a name, outlined so it reads as a button, marked when it is the one */
+.btn.chip {
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--separator);
+  border-radius: 999px;
+  background: transparent;
+}
+
+.btn.chip[aria-pressed='true'] {
+  border-color: var(--tint);
+  background: var(--tint-quiet);
+  color: var(--tint);
+}

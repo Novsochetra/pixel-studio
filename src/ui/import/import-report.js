@@ -19,6 +19,14 @@ function aloneLine(report, place) {
 function matchLine(report, refHeight, refName) {
   const { scaled } = report;
 
+  if (report.tooBig) {
+    return `Too tall to keep its own pixel size on this canvas: scaled to match the ${refName}'s ${refHeight}`;
+  }
+
+  if (report.kept && (!scaled || scaled.fy === 1)) {
+    return `Kept its own pixel size (${report.size[1]} px tall), with the ${refName}'s colours`;
+  }
+
   if (!scaled) {
     return `Drawn at the ${refName}'s scale: not resized`;
   }

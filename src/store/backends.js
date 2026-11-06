@@ -14,6 +14,10 @@ function withTimeout(promise, message) {
   ]);
 }
 
+// claude.ai hands documents back frozen, and opening a project changes what it reads in place
+// (the projects list, an older project brought up to date), so the page works on its own copy
+const ownCopy = (data) => structuredClone(data);
+
 async function accountBackend() {
   const claude = window.claude;
 
@@ -35,7 +39,9 @@ async function accountBackend() {
     async readAll() {
       const snapshot = await withTimeout(collection.get(), 'Your saved work could not be reached.');
 
-      return new Map(snapshot.docs.filter((doc) => doc.exists).map((doc) => [doc.id, doc.data()]));
+      return new Map(
+        snapshot.docs.filter((doc) => doc.exists).map((doc) => [doc.id, ownCopy(doc.data())]),
+      );
     },
     async read(key) {
       const doc = await withTimeout(
@@ -43,7 +49,7 @@ async function accountBackend() {
         'Your saved work could not be reached.',
       );
 
-      return doc.exists ? doc.data() : null;
+      return doc.exists ? ownCopy(doc.data()) : null;
     },
     write: (key, data) => collection.doc(key).set(data),
     remove: (key) => collection.doc(key).delete(),
@@ -60,6 +66,7 @@ function request(operation) {
 async function browserBackend() {
   try {
     const open = indexedDB.open('pixel-clean-studio', 1);
+
     open.onupgradeneeded = () => open.result.createObjectStore('docs');
     const database = await request(open);
     const store = (mode) => database.transaction('docs', mode).objectStore('docs');

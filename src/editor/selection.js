@@ -70,6 +70,7 @@ export function liftPixels(sprite, selection) {
     if (on) {
       const x = i % selection.width;
       const y = (i - x) / selection.width;
+
       lifted.push({ x, y, color: getPixel(sprite, x, y) });
     }
   });
@@ -106,6 +107,7 @@ export function stampPixels(sprite, pixels, dx, dy) {
 // moves the selected pixels by (dx, dy) on the sprite; returns the moved selection
 export function moveSelected(sprite, selection, dx, dy) {
   const lifted = liftPixels(sprite, selection);
+
   clearSelected(sprite, selection);
 
   return stampPixels(sprite, lifted, dx, dy);
@@ -118,6 +120,7 @@ function selectionBox(selection) {
     if (on) {
       const x = i % selection.width;
       const y = (i - x) / selection.width;
+
       box ??= { left: x, top: y, right: x, bottom: y };
       box.left = Math.min(box.left, x);
       box.right = Math.max(box.right, x);

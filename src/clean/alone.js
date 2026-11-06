@@ -33,6 +33,7 @@ function scaled(analyzed, own, { fx, fy }, fill) {
 
   for (let y = own.top; y < own.bottom; y++) {
     const from = (y * analyzed.width + left) * 4;
+
     rows.set(rgba.subarray(from, from + width * 4), (y - own.top) * width * 4);
   }
 

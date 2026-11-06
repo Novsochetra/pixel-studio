@@ -33,6 +33,7 @@ export function drawOnion(context, state, scale) {
 export function drawLayers(context, state, scale) {
   const frame = frameAt(state.project, state.at);
   const drag = state.frameDrag ?? { x: 0, y: 0 };
+
   context.save();
   context.translate(drag.x * scale, drag.y * scale);
 
@@ -110,6 +111,7 @@ function paintMarks(context, state, scale) {
   if (state.showPins) {
     const frames = currentFrames(state);
     const index = Math.min(state.at.frame, frames.length - 1);
+
     drawPins(context, frames[index], frames[index - 1] ?? null, scale);
   }
 
@@ -127,6 +129,7 @@ export function paint(canvas, app) {
   const { width, height } = state.project.canvas;
   const scale = state.zoom;
   const { context, ratio } = sizeCanvas(canvas, width * scale, height * scale);
+
   drawChecker(context, { width: width * scale, height: height * scale }, scale * 2);
   paintArt(context, state, scale);
   paintHelpers(context, state, { scale, ratio });

@@ -23,6 +23,7 @@ function relativeToMean(prof) {
 // changes between two background pixels are ignored, or a checkerboard would win
 export function edgeProfile(image, axis, ignore = null) {
   const { width, height, rgb } = image;
+
   // rows and columns to walk, the step to the neighbour, and which of x and y indexes the profile
   const [rows, cols, step, byX] =
     axis === 1 ? [height, width - 1, 1, true] : [height - 1, width, width, false];
@@ -92,6 +93,7 @@ export function coherence(prof, candidates, cachedPeaks = peaks(prof)) {
 
     for (const x of nonzero) {
       const angle = (2 * Math.PI * x) / candidate;
+
       re += Math.cos(angle) * peakList[x];
       im += Math.sin(angle) * peakList[x];
     }
@@ -107,6 +109,7 @@ export function findOffset(prof, size) {
 
   for (let x = 0; x < peakList.length; x++) {
     const angle = (2 * Math.PI * x) / size;
+
     re += Math.cos(angle) * peakList[x];
     im += Math.sin(angle) * peakList[x];
   }

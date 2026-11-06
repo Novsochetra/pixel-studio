@@ -32,6 +32,7 @@ export function scaleAxis(image, factor, axis) {
     Math.min(Math.trunc((i + 0.5) / factor), length - 1),
   );
   const out = { width: axis === 0 ? width : count, height: axis === 0 ? count : height };
+
   out.rgba = new Uint8Array(out.width * out.height * 4);
 
   pick.forEach((index, i) => {
@@ -45,6 +46,7 @@ export function scaleAxis(image, factor, axis) {
         differ(own, pixel(image, axis, index + 1, step));
       const value = thin ? pixel(image, axis, index + 1, step) : own;
       const [x, y] = axis === 0 ? [step, i] : [i, step];
+
       out.rgba.set(value, (y * out.width + x) * 4);
     }
   });

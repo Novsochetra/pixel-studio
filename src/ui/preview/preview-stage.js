@@ -9,6 +9,9 @@ import { kindOf, viewName } from '../../model/kinds.js';
 
 const ZOOMS = { scene: [1, 2, 3], tiled: [1, 2, 4], centred: [1] };
 
+// until a zoom is picked: a scene at its own size, tiles big enough to see each pixel
+const zoomOf = (state, mode) => state.game.zoom ?? (mode === 'tiled' ? 4 : 1);
+
 function animationPicker(app) {
   const { state } = app.store;
   const choose = (event) =>
@@ -38,7 +41,7 @@ function zoomButtons(app, mode, set) {
           node(
             'button',
             {
-              'aria-pressed': String(app.store.state.game.zoom === zoom),
+              'aria-pressed': String(zoomOf(app.store.state, mode) === zoom),
               onclick: () => set({ zoom }),
             },
             `${zoom}×`,
@@ -81,8 +84,9 @@ function paintPreview(canvas, app, { clock, time }) {
     mode === 'scene'
       ? drawScene(canvas, state, { background: clock.background, clock: { tick, seconds } })
       : flat(canvas, state.project, { frames: viewFrames(state), tick });
-  canvas.style.width = `${size.width * state.game.zoom}px`;
-  canvas.style.maxWidth = state.game.zoom === 1 ? '100%' : 'none';
+  const zoom = zoomOf(state, mode);
+  canvas.style.width = `${size.width * zoom}px`;
+  canvas.style.maxWidth = zoom === 1 ? '100%' : 'none';
 }
 
 // The art where it will be used: in a scene, laid as tiles, or at icon sizes. It plays on its own
@@ -91,6 +95,7 @@ export function mountPreview(container, app) {
   const canvas = node('canvas', { 'aria-label': 'The art where it will be used' });
   const bar = node('div.group.preview-bar');
   const note = node('p.hint.preview-note');
+
   container.replaceChildren(node('div.stage-inner.preview', {}, bar, canvas, note));
   const clock = { started: null, background: null };
 
@@ -117,6 +122,7 @@ export function mountPreview(container, app) {
       clock.started === null ? 'Play' : 'Pause',
     );
     const own = mode === 'scene' ? sceneControls(app, set) : null;
+
     replace(bar, animationPicker(app), play, zoomButtons(app, mode, set), own);
     note.textContent = noteText(state, mode);
     backgroundOf(app).then((image) => {

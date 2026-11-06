@@ -12,6 +12,7 @@ async function fitPicture(file, width, height) {
   const image = await decodeImage(file);
   const scale = Math.min(width / image.width, height / image.height);
   const source = document.createElement('canvas');
+
   source.width = image.width;
   source.height = image.height;
   source.getContext('2d').putImageData(new ImageData(image.data, image.width, image.height), 0, 0);
@@ -50,6 +51,7 @@ function addReference(app) {
         kind: 'reference',
         above: layerStack(animation)[0]?.key ?? null,
       });
+
       moveLayer(animation, key, -1);
       frameAt(draft.project, draft.at).layers.find((layer) => layer.key === key).sprite = picture;
 

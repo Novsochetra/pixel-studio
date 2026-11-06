@@ -2,6 +2,7 @@ import { bounds } from '../model/sprite.js';
 
 function nativeCanvas(sprite) {
   const native = document.createElement('canvas');
+
   native.width = sprite.width;
   native.height = sprite.height;
   const pixels = new ImageData(new Uint8ClampedArray(sprite.pixels), sprite.width, sprite.height);
@@ -10,8 +11,6 @@ function nativeCanvas(sprite) {
   return native;
 }
 
-// The sprite's art (or the part of it inside `frameBox`, so a row of frames shares one framing)
-// scaled to fit a size×size canvas, pixels kept sharp; flipped when asked.
 export function drawThumbnail(
   canvas,
   sprite,

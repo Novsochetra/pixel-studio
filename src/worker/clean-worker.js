@@ -12,6 +12,7 @@ self.onmessage = (event) => {
         ? cleanAlone(image, { width: reference.width, height: reference.height }, options)
         : cleanLike(image, analyzeReference(reference), options);
     const pixels = toRgba(cleaned);
+
     self.postMessage(
       {
         id,

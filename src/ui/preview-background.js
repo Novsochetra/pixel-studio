@@ -41,6 +41,7 @@ export async function backgroundOf(app) {
 
 export async function setBackground(app, file) {
   const url = await backgroundDataUrl(file);
+
   await app.backend.write(app.keys.background, { url });
   app.backgroundImage = await imageFrom(url);
   app.store.state.project.preview = { ...app.store.state.project.preview, background: true };

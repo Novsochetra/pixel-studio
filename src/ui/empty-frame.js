@@ -14,6 +14,7 @@ function isEmptyFrame(state) {
 // Over an empty frame: what to do with it, so a new frame never looks like a dead end.
 export function renderEmptyFrame(el, app) {
   const { state } = app.store;
+
   el.hidden = state.mode !== 'edit' || Boolean(app.playback) || !isEmptyFrame(state);
 
   if (el.hidden) {

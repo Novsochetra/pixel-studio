@@ -23,6 +23,7 @@ export function flatten({ width, height, data }) {
 
   for (let i = 0; i < width * height; i++) {
     const clear = data[i * 4 + 3] < 128;
+
     cutOut ||= clear;
     rgb.set(clear ? [255, 0, 255] : data.subarray(i * 4, i * 4 + 3), i * 3);
   }
@@ -39,6 +40,7 @@ function cleanColors(cells, grid, { backgrounds, palette, merge }) {
 
   if (palette || !grid.exact) {
     const own = ownPalette(out);
+
     out = loneEdgeColours(snap(out, palette ?? own, backgrounds));
   }
 
@@ -59,6 +61,7 @@ export function analyze(imageData, options = {}, palette = null) {
     ? transparentCells(rebuilt, settings.holeMin, settings.tolerance)
     : new Uint8Array(rebuilt.bg.length);
   const cells = { width: rebuilt.width, height: rebuilt.height, colors: rebuilt.colors };
+
   cells.opaque = clear.map((value) => (value ? 0 : 1));
   const cleaned = cleanColors(cells, grid, { backgrounds, palette, merge: settings.merge });
 

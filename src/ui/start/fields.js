@@ -30,21 +30,32 @@ function controls() {
   };
 }
 
+// square sizes as chips; the one the width and height make is marked
 function sizeButtons(width, height) {
+  const buttons = SIZES.map((size) =>
+    node('button.btn.chip', { type: 'button', onclick: () => setSize(size) }, String(size)),
+  );
+  const mark = () =>
+    buttons.forEach((button, i) => {
+      const on = width.value === String(SIZES[i]) && height.value === String(SIZES[i]);
+      button.setAttribute('aria-pressed', String(on));
+    });
   const setSize = (size) => {
     width.value = String(size);
     height.value = String(size);
+    mark();
   };
 
-  return SIZES.map((size) =>
-    node('button.btn.quiet', { type: 'button', onclick: () => setSize(size) }, String(size)),
-  );
+  width.addEventListener('input', mark);
+  height.addEventListener('input', mark);
+
+  return { buttons, mark };
 }
 
-// name, canvas size, big-copy scale and, for characters, which directions are drawn
 export function projectFields() {
   const { name, width, height, scale, directions } = controls();
   const directionsField = field('Directions', directions);
+  const sizes = sizeButtons(width, height);
   const el = node(
     'div.start-fields',
     {},
@@ -56,11 +67,7 @@ export function projectFields() {
       field('Height', height),
       field('Big copy scale', scale),
     ),
-    node(
-      'div.start-sizes',
-      { role: 'group', 'aria-label': 'Common sizes' },
-      sizeButtons(width, height),
-    ),
+    node('div.start-sizes', { role: 'group', 'aria-label': 'Common sizes' }, sizes.buttons),
     directionsField,
   );
 
@@ -70,6 +77,7 @@ export function projectFields() {
       name.placeholder = defaultName(preset);
       width.value = String(preset.canvas.width);
       height.value = String(preset.canvas.height);
+      sizes.mark();
       scale.value = String(preset.canvas.scale);
       directions.value = preset.directionSet;
       directionsField.hidden = preset.kind !== 'character';

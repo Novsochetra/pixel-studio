@@ -18,7 +18,6 @@ function moreWays(handlers) {
   );
 }
 
-// handlers: { onCreate(project), onExample(), onOpenFile(file), onDeletePreset(preset) }
 export function showStartScreen({ presets, failed, handlers }) {
   const chooser = newProjectChooser({
     presets,
@@ -42,6 +41,7 @@ export function showStartScreen({ presets, failed, handlers }) {
       moreWays(handlers),
     ),
   );
+
   document.body.append(screen);
 
   return { close: () => screen.remove() };

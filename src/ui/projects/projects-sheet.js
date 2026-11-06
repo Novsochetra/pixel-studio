@@ -50,6 +50,7 @@ export function openProjectsSheet(app) {
   const list = node('div.view-list');
   const redraw = () => {
     const others = app.index.list.filter((entry) => entry.id !== app.store.state.project.id);
+
     replace(
       list,
       currentRow(app, redraw),

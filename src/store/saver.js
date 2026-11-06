@@ -112,6 +112,7 @@ export class Saver {
   async flush(project) {
     const layers = [...allLayers(project)].map(({ layer }) => layer);
     const dirty = layers.filter((layer) => this.dirty.has(layer.id) && layer.sprite);
+
     this.dirty.clear();
     const current = new Set(layers.map((layer) => layer.id));
     const gone = [...this.stored].filter((id) => !current.has(id));

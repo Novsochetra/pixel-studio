@@ -16,6 +16,7 @@ import { DIRECTION_SETS } from '../../src/model/directions.js';
 test('each kind starts with its own canvas, views and first animation', () => {
   for (const [id, kind] of Object.entries(KINDS)) {
     const project = newProject({ kind: id });
+
     assert.equal(project.kind, id);
     assert.equal(project.canvas.width, kind.size);
     assert.equal(project.animations[0].name, kind.names[0]);
@@ -28,6 +29,7 @@ test('each kind starts with its own canvas, views and first animation', () => {
 test('a one-view kind names its view after itself, a character after the direction', () => {
   const tile = newProject({ kind: 'tile' });
   const hero = newProject({ kind: 'character' });
+
   assert.equal(isSingleView(tile), true);
   assert.equal(viewName(tile, 'south'), 'Tile');
   assert.equal(viewName(hero, 'east'), 'Side');
@@ -37,6 +39,7 @@ test('a one-view kind names its view after itself, a character after the directi
 
 test('a one-view kind cannot be given directions', () => {
   const effect = newProject({ kind: 'effect', directionSet: 'eight' });
+
   assert.equal(effect.directionSet, 'single');
   const hero = newProject({ kind: 'character', directionSet: 'single' });
   assert.equal(hero.directionSet, 'four');
@@ -45,6 +48,7 @@ test('a one-view kind cannot be given directions', () => {
 
 test('the Naga Eleven preset copies its game into the project, which then stands alone', () => {
   const project = newProject({ preset: NAGA_ELEVEN, name: 'Striker' });
+
   assert.equal(gameOf(project).spriteHeight, 58);
   assert.deepEqual(
     project.parts.map((part) => part.name),
@@ -58,6 +62,7 @@ test('the Naga Eleven preset copies its game into the project, which then stands
 
 test('a project saved as a preset starts new ones with its setup but none of its pixels', () => {
   const source = newProject({ preset: NAGA_ELEVEN, name: 'Keeper' });
+
   source.animations[0].name = 'Dive';
   const preset = presetFromProject(source);
   const made = newProject({ preset });

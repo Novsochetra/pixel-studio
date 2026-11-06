@@ -10,6 +10,7 @@ const { page, context, check, finish, shots, url } = await openStudio();
 const saved = async (click, name) => {
   const file = await download(page, click);
   const path = `${shots}/${name}`;
+
   await file?.saveAs(path);
 
   return { name: file?.suggestedFilename() ?? 'none', path };

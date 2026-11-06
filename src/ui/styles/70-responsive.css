@@ -71,10 +71,38 @@
     display: none;
   }
 
-  .quick-start {
-    top: auto;
-    left: 16px;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  /* one row that scrolls sideways, Download first, instead of four rows over the canvas */
+  .toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-right: 32px;
+    mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+  }
+
+  .toolbar > * {
+    flex: none;
+  }
+
+  .toolbar .spacer {
+    display: none;
+  }
+
+  .toolbar .wordmark {
+    order: -2;
+  }
+
+  .toolbar .btn.primary {
+    order: -1;
+  }
+
+  /* the fade says the tools go on past the edge */
+  .rail {
+    padding-right: 32px;
+    mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+  }
+
+  .stage-inner.preview {
+    width: 100%;
   }
 }
 
@@ -120,6 +148,26 @@
   }
 
   .layer-row .btn {
+    min-height: 36px;
+  }
+
+  .input,
+  select.input {
+    min-height: 40px;
+  }
+
+  .cell-more {
+    width: 28px;
+    height: 28px;
+  }
+
+  .grid-view-more,
+  .tab-more {
+    width: 36px;
+    height: 36px;
+  }
+
+  .grid-view {
     min-height: 36px;
   }
 }

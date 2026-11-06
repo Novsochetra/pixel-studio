@@ -127,6 +127,7 @@ test('"Fit the art" holds the art of every animation, not only the open one', ()
   const tall = addAnimation(project, 'Jump', Object.keys(project.animations[0].directions));
   const anchor = { x: 16, y: 25 };
   const direction = Object.keys(tall.directions)[0];
+
   setPixel(tall.directions[direction].frames[0].layers[0].sprite, 16, 2, RED);
   setPixel(project.animations[0].directions[direction].frames[0].layers[0].sprite, 16, 20, RED);
   const one = fittedFrame(project, project.animations[0], anchor);
@@ -187,6 +188,7 @@ test('a failed save is flagged and its changes stay waiting until a later save s
   };
   const project = newProject({ width: 8, height: 8 });
   const saver = new Saver(backend, () => {}, keysFor('p-x-'));
+
   saver.attach(project);
   saver.remember(project);
   saver.markStructure();
@@ -203,6 +205,7 @@ test('a failed save is flagged and its changes stay waiting until a later save s
 // projects from before kinds and presets lost their game, views and kit colours when opened
 test('a project saved by an earlier version opens as a Naga Eleven character with its kit parts', () => {
   const old = newProject();
+
   delete old.kind;
   delete old.game;
   delete old.directionSet;

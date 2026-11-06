@@ -1,5 +1,6 @@
 import { createSprite, getPixel, setPixel, CLEAR } from '../model/sprite.js';
 import { compositeFrame } from '../model/composite.js';
+import { hasArt } from '../model/frames.js';
 import { drawnDirections, flippedSides } from '../model/directions.js';
 
 // the drawn views in compass order, then the flipped ones when they are wanted
@@ -38,15 +39,15 @@ function placeFrame(sheet, art, cell, settings) {
         continue;
       }
 
-      const fx = x - artAnchor.x + anchorX;
-      const fy = y - artAnchor.y + anchorY;
+      const frameX = x - artAnchor.x + anchorX;
+      const frameY = y - artAnchor.y + anchorY;
       // mirrored about the anchor, so the feet stay where the manifest says
-      const cx = flip ? 2 * anchorX - fx : fx;
+      const placedX = flip ? 2 * anchorX - frameX : frameX;
 
-      if (cx < 0 || fy < 0 || cx >= frameWidth || fy >= frameHeight) {
+      if (placedX < 0 || frameY < 0 || placedX >= frameWidth || frameY >= frameHeight) {
         clipped++;
       } else {
-        setPixel(sheet, cell.x + cx, cell.y + fy, color);
+        setPixel(sheet, cell.x + placedX, cell.y + frameY, color);
       }
     }
   }
@@ -70,23 +71,37 @@ function manifestRows(project, rows, includeMirrored, animation) {
 }
 
 // one row of the sheet: every frame of the row's view, the last one repeated if it has fewer
+// a view or frame not drawn yet ships as blank cells, which a game shows as the sprite vanishing
+function emptyWarning(row, viewFrames) {
+  const empty = viewFrames.flatMap((frame, index) => (hasArt(frame) ? [] : [index + 1]));
+
+  if (row.flip || !empty.length) {
+    return [];
+  }
+
+  return empty.length === viewFrames.length
+    ? [`${row.direction} is empty: it ships as a blank row.`]
+    : [`${row.direction}: frame ${empty.join(', ')} ${empty.length > 1 ? 'are' : 'is'} empty.`];
+}
+
 function placeRow(sheet, row, place) {
   const { project, animation, settings, frames, rowIndex } = place;
   const { frameWidth, frameHeight } = settings;
-  const list = animation.directions[row.source].frames;
-  const warnings = [];
+  const viewFrames = animation.directions[row.source].frames;
+  const warnings = emptyWarning(row, viewFrames);
   let clipped = 0;
 
   for (let frameIndex = 0; frameIndex < frames; frameIndex++) {
-    const frame = list[Math.min(frameIndex, list.length - 1)];
+    const frame = viewFrames[Math.min(frameIndex, viewFrames.length - 1)];
     const art = compositeFrame(frame, project.canvas.width, project.canvas.height);
     const cell = { x: frameIndex * frameWidth, y: rowIndex * frameHeight, flip: row.flip };
+
     clipped += placeFrame(sheet, art, cell, settings);
   }
 
-  if (list.length < frames) {
+  if (viewFrames.length < frames) {
     warnings.push(
-      `${row.direction} has ${list.length} of ${frames} frames; its last frame repeats.`,
+      `${row.direction} has ${viewFrames.length} of ${frames} frames; its last frame repeats.`,
     );
   }
 
@@ -117,8 +132,6 @@ function slugOf(project, animation) {
   return before ? `${plain}-${before + 1}` : plain;
 }
 
-// The animation as one sheet: frames left to right, directions top to bottom, plus the entry
-// for the game's SPRITES manifest and anything that did not fit.
 export function buildSheet(project, animation, settings) {
   const rows = sheetRows(project, animation, settings.includeMirrored);
   const frames = Math.max(...rows.map((row) => animation.directions[row.source].frames.length));

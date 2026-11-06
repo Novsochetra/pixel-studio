@@ -30,6 +30,10 @@ check(
 );
 await page.getByRole('button', { name: 'Edit', exact: true }).click();
 await page.waitForTimeout(300);
+check(
+  (await page.locator('.grid-row.current .cell').count()) === 3,
+  'back in Edit, the frames show again',
+);
 const stage = await page.locator('.edit-scroll').boundingBox();
 check(stage.height > 150, 'the canvas keeps room above the frames');
 
@@ -43,6 +47,7 @@ const drag = async (from, to, hold) => {
   const start = await page.locator('.grid-row.current .cell').nth(from).boundingBox();
   const end = await page.locator('.grid-row.current .cell').nth(to).boundingBox();
   const y = start.y + start.height / 2;
+
   await touch('touchStart', start.x + start.width / 2, y);
   await page.waitForTimeout(hold);
 

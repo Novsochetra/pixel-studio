@@ -42,6 +42,7 @@ export function batchItems(state, files) {
       ? state.at.direction
       : guessDirection(file.name, animation, referenceOf(state.project));
     const at = state.at.frame + (seen[direction] ?? 0);
+
     seen[direction] = (seen[direction] ?? 0) + 1;
 
     return {
@@ -84,6 +85,7 @@ export function placeAll(app, items) {
 
     items.forEach((item, i) => {
       const frame = animation.directions[item.direction].frames[indexes[i]];
+
       frame.layers.find((layer) => layer.kind !== 'reference').sprite = item.sprite;
     });
 

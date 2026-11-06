@@ -31,6 +31,7 @@ function shifted(sprite, [dx, dy]) {
   for (let y = Math.max(0, -dy); y < Math.min(sprite.height, sprite.height - dy); y++) {
     const row = y * sprite.width;
     const target = ((y + dy) * sprite.width + start + dx) * 4;
+
     out.pixels.set(sprite.pixels.subarray((row + start) * 4, (row + end) * 4), target);
   }
 

@@ -32,6 +32,7 @@ export async function readProjectBundle(text) {
 
   for (const { layer } of allLayers(file.project)) {
     const png = file.pngs?.[layer.id];
+
     layer.sprite = png ? await dataUrlSprite(png) : null;
   }
 

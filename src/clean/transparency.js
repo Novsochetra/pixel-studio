@@ -7,6 +7,7 @@ function spriteColors(cells) {
   for (let i = 0; i < cells.bg.length; i++) {
     if (!cells.bg[i]) {
       const color = [cells.colors[i * 3], cells.colors[i * 3 + 1], cells.colors[i * 3 + 2]];
+
       seen.set(color.join(), color);
     }
   }

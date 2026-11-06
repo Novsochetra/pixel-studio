@@ -62,6 +62,7 @@ export function components(mask, width, height) {
   for (let i = 0; i < left.length; i++) {
     if (left[i]) {
       const region = fill(left, width, height, [i]);
+
       region.forEach((on, j) => {
         if (on) {
           left[j] = 0;
@@ -85,6 +86,7 @@ export function edgeCells(cells) {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const touches = STEPS.some(([dx, dy]) => !opaqueAt(cells, x + dx, y + dy));
+
       edge[y * width + x] = opaque[y * width + x] && touches ? 1 : 0;
     }
   }
@@ -100,6 +102,7 @@ export function despeckle(cells) {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const touches = STEPS.some(([dx, dy]) => opaqueAt(cells, x + dx, y + dy));
+
       out[y * width + x] = opaque[y * width + x] && touches ? 1 : 0;
     }
   }

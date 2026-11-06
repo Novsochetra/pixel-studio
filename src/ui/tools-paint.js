@@ -18,6 +18,7 @@ export function paintOptions(state, color = state.color) {
 export function stroke(app, point, color) {
   const layer = currentLayer(app.store.state);
   const line = new Stroke(layer.sprite, color, paintOptions(app.store.state, color));
+
   line.add(...point);
   app.store.touch('stroke');
 
@@ -43,6 +44,7 @@ export function stroke(app, point, color) {
 
 export function fill(app, [x, y]) {
   const layer = currentLayer(app.store.state);
+
   commit(app, 'Fill', [layer], () =>
     floodFill(layer.sprite, [x, y], app.store.state.color, paintOptions(app.store.state)),
   );
@@ -55,6 +57,7 @@ export function replace(app, [x, y]) {
   const layer = currentLayer(state);
   const from = getPixel(layer.sprite, x, y);
   let count = 0;
+
   commit(app, 'Replace colour', [layer], () => {
     count = replaceColor(layer.sprite, from, state.color);
   });
@@ -87,6 +90,7 @@ export function shade(app, point, darker) {
     last = [x, y];
     app.store.touch('stroke');
   };
+
   step(point);
 
   return {

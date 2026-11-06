@@ -16,6 +16,7 @@ function addNote(app, point) {
 function press(app, canvas, point, event) {
   const { state } = app.store;
   const mode = state.markupMode ?? 'edit';
+
   state.project.markup ??= { strokes: [], notes: [] };
 
   if (mode === 'edit') {

@@ -46,6 +46,7 @@ const carried = (preset) => ({
 
 function firstAnimation(project, preset, { animation: name, directions }) {
   const animation = newAnimation(name ?? preset.names?.[0] ?? 'Idle', project.canvas, directions);
+
   animation.fps = preset.fps ?? animation.fps;
 
   return animation;

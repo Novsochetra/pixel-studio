@@ -25,6 +25,7 @@ function layersFor(state, scope) {
 
 function apply(job, mapping, scope) {
   const layers = layersFor(job.app.store.state, scope);
+
   commit(job.app, 'Swap colours', layers, () =>
     layers.forEach((layer) => {
       layer.sprite = applyMapping(layer.sprite, mapping);
@@ -42,6 +43,7 @@ function apply(job, mapping, scope) {
 function mappingFor(job, palette) {
   const { project } = job.app.store.state;
   const colours = characterColors(job.app.store.state);
+
   project.mappings[job.paletteId] ??= suggestMapping(colours, palette.colors);
 
   return project.mappings[job.paletteId];
@@ -59,6 +61,7 @@ function mappingHeader(job, palette, changed) {
   const { app } = job;
   const suggest = () => {
     const colours = characterColors(app.store.state);
+
     app.store.state.project.mappings[job.paletteId] = suggestMapping(colours, palette.colors);
     changed();
   };
@@ -134,6 +137,7 @@ export function openSwapSheet(app) {
     paletteId: palettes.at(-1)?.id ?? null,
     previewOn: true,
   };
+
   job.draw = () => {
     const palette = app.store.state.project.palettes.find(
       (candidate) => candidate.id === job.paletteId,

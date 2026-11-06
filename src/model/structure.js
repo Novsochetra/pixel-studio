@@ -4,7 +4,6 @@ import { matchingLayer, newAnimation, newFrame, newId, newLayer } from './projec
 const framesOf = (animation) =>
   Object.values(animation.directions).flatMap((entry) => entry.frames);
 
-// the layer list every frame of an animation shares: [{ key, name, kind, visible, opacity }]
 export function layerStack(animation) {
   const first = framesOf(animation)[0];
 
@@ -47,6 +46,7 @@ export function addDirection(project, animation, direction, copyFrom = null) {
     1,
     ...Object.values(animation.directions).map((entry) => entry.frames.length),
   );
+
   animation.directions[direction] = {
     frames: source
       ? source.map((frame) => frameLike(animation, project.canvas, frame))
@@ -60,7 +60,6 @@ export function removeDirection(animation, direction) {
   }
 }
 
-// a new layer in every frame of the animation, placed above the layer keyed `above` (or on top)
 export function addLayer(project, animation, { name, kind = 'art', above = null }) {
   const key = newId('k');
 
@@ -132,6 +131,7 @@ export function uniqueName(project, name, except = null) {
 
 export function addAnimation(project, name, directions) {
   const animation = newAnimation(uniqueName(project, name), project.canvas, directions);
+
   project.animations.push(animation);
 
   return animation;
@@ -160,6 +160,7 @@ export function copyFrameToViews(project, animation, direction, index) {
 
     for (const layer of entry.frames[index].layers) {
       const copy = matchingLayer(source, layer)?.sprite;
+
       layer.sprite = copy
         ? cloneSprite(copy)
         : createSprite(project.canvas.width, project.canvas.height);

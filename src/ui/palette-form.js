@@ -52,6 +52,7 @@ export function paletteForm(onAdd) {
     onAdd({ id: newId('p'), name: name.value.trim() || fallbackName, colors });
   };
   const file = fileInput(add);
+
   return node(
     'div',
     { style: { display: 'grid', gap: '8px' } },

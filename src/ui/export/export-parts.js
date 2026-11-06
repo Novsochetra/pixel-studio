@@ -19,6 +19,7 @@ export function numberField(label, value, id, onChange) {
 
 function nativeOf(sheet) {
   const native = document.createElement('canvas');
+
   native.width = sheet.width;
   native.height = sheet.height;
   const pixels = new ImageData(new Uint8ClampedArray(sheet.pixels), sheet.width, sheet.height);
@@ -35,6 +36,7 @@ export function sheetPreview(result) {
     Math.min(4, Math.floor(860 / sheet.width), Math.floor(320 / sheet.height)),
   );
   const canvas = node('canvas', { style: { maxWidth: '100%', imageRendering: 'pixelated' } });
+
   canvas.width = sheet.width * scale;
   canvas.height = sheet.height * scale;
   const context = canvas.getContext('2d');
