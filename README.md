@@ -14,6 +14,11 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
   frame from play without deleting it, see the mirrored side, fold the frames away for room.
 - **Preview**: characters in a scene (the pitch for Naga Eleven), tiles laid as a floor, effects and
   icons at 1×, 2× and 4×.
+- **Cast**: every project in Projects (the name, top left) with its picture, sorted into folders
+  (one per game, or heroes, enemies, tiles). "New character like this" sets up the next character
+  of a game as the open one is: the same canvas, views, animations, frames, layers and guide lines,
+  with nothing drawn, in the same folder. "Line them up" stands every project, or a folder's,
+  side by side at one pixel size, to check heights agree, and downloads it as a PNG.
 - **Export**: sprite sheet + Aseprite-style JSON (Phaser, Godot, Unity), separate frames, GIFs, and
   the Naga Eleven game pack.
 
@@ -52,6 +57,7 @@ That runs ESLint and Prettier, the unit and regression tests, the build, and eve
 - `build/build.py`: joins the modules into one page and refuses import cycles, missing exports and
   calls to functions that were never imported
 - `test/unit/`, `test/integration/`, `test/regression/`: see `CLAUDE.md`
+- `tools/claude-hooks/`: shows Claude Code each comment an edit adds (`.claude/settings.json`)
 - `docs/`: plans and design notes
 
 ## The command-line cleaner
