@@ -1,16 +1,17 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { newProject } from '../src/model/new-project.js';
-import { referenceOf } from '../src/model/reference.js';
-import { addAnimation, removeDirection } from '../src/model/structure.js';
-import { pack, setPixel } from '../src/model/sprite.js';
-import { fittedFrame } from '../src/export/anchor.js';
-import { encodeGif } from '../src/io/gif.js';
-import { keysFor, prefixFor } from '../src/store/keys.js';
-import { projectStructure } from '../src/store/load.js';
-import { projectFileText, readProjectBundle } from '../src/store/project-file.js';
-import { readIndex } from '../src/store/projects.js';
-import { firstProject } from '../src/ui/boot-project.js';
+import { newProject } from '../../src/model/new-project.js';
+import { referenceOf } from '../../src/model/reference.js';
+import { addAnimation, removeDirection } from '../../src/model/structure.js';
+import { pack, setPixel } from '../../src/model/sprite.js';
+import { fittedFrame } from '../../src/export/anchor.js';
+import { encodeGif } from '../../src/io/gif.js';
+import { keysFor } from '../../src/store/keys.js';
+import { normalizeProject } from '../../src/model/normalize.js';
+import { projectStructure } from '../../src/store/load.js';
+import { projectFileText, readProjectBundle } from '../../src/store/project-file.js';
+import { readIndex } from '../../src/store/projects.js';
+import { firstProject } from '../../src/ui/boot-project.js';
 
 const RED = pack(255, 0, 0);
 
@@ -148,7 +149,7 @@ test('a big GIF frame encodes without overflowing the stack', () => {
 });
 
 test('a failed save is flagged and its changes stay waiting until a later save succeeds', async () => {
-  const { Saver } = await import('../src/store/saver.js');
+  const { Saver } = await import('../../src/store/saver.js');
   const docs = {};
   let offline = true;
   const backend = {
@@ -174,4 +175,28 @@ test('a failed save is flagged and its changes stay waiting until a later save s
   assert.equal(saver.failed, false);
   assert.ok(docs[keysFor('p-x-').project]);
   saver.detach();
+});
+
+test('a project saved by an earlier version opens as a Naga Eleven character with its kit parts', () => {
+  const old = newProject();
+  delete old.kind;
+  delete old.game;
+  delete old.directionSet;
+  delete old.parts;
+  old.kitParts = { shirt: [1, 2], shorts: [3], socks: [], trim: [4] };
+  const project = normalizeProject(old);
+  assert.equal(project.kind, 'character');
+  assert.equal(project.game.name, 'Naga Eleven');
+  assert.equal(project.game.teamKits, true);
+  assert.equal(project.directionSet, 'naga');
+  assert.deepEqual(
+    project.parts.map((part) => [part.id, part.colours]),
+    [
+      ['shirt', [1, 2]],
+      ['shorts', [3]],
+      ['socks', []],
+      ['trim', [4]],
+    ],
+  );
+  assert.equal(project.kitParts, undefined);
 });

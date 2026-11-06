@@ -1,15 +1,15 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { newProject } from '../src/model/new-project.js';
-import { addFrame } from '../src/model/frames.js';
-import { createSprite, getPixel, pack, setPixel, CLEAR } from '../src/model/sprite.js';
-import { buildSheet } from '../src/export/sheet.js';
-import { NAGA_ELEVEN } from '../src/model/presets.js';
+import { newProject } from '../../src/model/new-project.js';
+import { addFrame } from '../../src/model/frames.js';
+import { createSprite, getPixel, pack, setPixel, CLEAR } from '../../src/model/sprite.js';
+import { buildSheet } from '../../src/export/sheet.js';
+import { NAGA_ELEVEN } from '../../src/model/presets.js';
 
 const GAME_FRAME = NAGA_ELEVEN.game.frame;
-import { fittedFrame } from '../src/export/anchor.js';
-import { changedLayers, snapshotAnimations } from '../src/editor/history.js';
-import { Stroke } from '../src/editor/stroke.js';
+import { fittedFrame } from '../../src/export/anchor.js';
+import { changedLayers, snapshotAnimations } from '../../src/editor/history.js';
+import { Stroke } from '../../src/editor/stroke.js';
 
 const RED = pack(255, 0, 0);
 

@@ -1,10 +1,10 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { History, snapshotAnimations } from '../src/editor/history.js';
-import { allLayers } from '../src/model/project.js';
-import { newProject } from '../src/model/new-project.js';
-import { addFrame, removeFrame } from '../src/model/frames.js';
-import { cloneSprite, getPixel, pack, setPixel } from '../src/model/sprite.js';
+import { History, snapshotAnimations } from '../../src/editor/history.js';
+import { allLayers } from '../../src/model/project.js';
+import { newProject } from '../../src/model/new-project.js';
+import { addFrame, removeFrame } from '../../src/model/frames.js';
+import { cloneSprite, getPixel, pack, setPixel } from '../../src/model/sprite.js';
 
 const RED = pack(255, 0, 0);
 

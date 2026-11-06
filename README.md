@@ -1,50 +1,57 @@
 # Pixel Clean Studio
 
-Turns AI-made "fake" pixel art (ChatGPT images) into true pixel art, then lets you edit, animate and
-export it for a game. Everything runs in the browser; the build makes one self-contained HTML page.
+Turns AI-made "fake" pixel art into true pixel art, then lets you edit, animate and export it for
+any game. Everything runs in the browser; the build makes one self-contained HTML page.
 
-- **Clean**: finds the image's pixel grid, removes the background and fringe, and matches each view
-  to your reference view's size, palette and feet line.
+- **Start**: pick what you are making (a character, an object, tiles, an effect, an icon) or a game
+  preset such as Naga Eleven; save any project as a preset of your own.
+- **Clean**: finds the image's pixel grid, removes the background and fringe, and fits it as its
+  kind stands: a character matched to its reference view, a tile filling its canvas, an effect
+  centred. Later animation frames keep their own pixel size.
 - **Edit**: pencil, eraser, fill, colour swap, selection, outlines, guides, layers, pictures to trace.
-- **Animate**: animations with frames shared by every view (drag to reorder), onion skin, pins.
-- **Projects**: several characters, each with its own views, colours, history and versions.
+- **Animate**: each animation is a grid, views down and frames across, as the sheet will be: drag
+  frames to reorder them, play them on the canvas, see the mirrored side.
+- **Preview**: characters in a scene (the pitch for Naga Eleven), tiles laid as a floor, effects and
+  icons at 1×, 2× and 4×.
 - **Export**: sprite sheet + Aseprite-style JSON (Phaser, Godot, Unity), separate frames, GIFs, and
   the Naga Eleven game pack.
 
 ## Run it
 
-Needs Python 3 (for the build) and Node 20+ (for the tests).
+Needs Python 3 (for the build) and Node 20+ (for the checks).
 
 ```bash
-python3 build/build.py                         # writes dist/index.html
-python3 test/wrap.py                           # dist/wrapped.html: the page with <html> around it
-python3 -m http.server 8811 --directory dist   # open http://localhost:8811/wrapped.html
+npm run serve
 ```
 
-Or `npm run serve` for all three. Outside claude.ai the page saves to the browser (IndexedDB).
+Then open http://localhost:8811/wrapped.html. Outside claude.ai the page saves to the browser.
 
-## Test it
+## Check it
 
 ```bash
-npm test             # unit tests (node --test)
-npm install          # once: Playwright, for the browser flows
-npm run test:all     # build, unit tests, then every browser flow, monkey tests included
+npm install
 ```
 
-Browser flows save screenshots in `shots/`.
+```bash
+npm run check
+```
+
+That runs ESLint and Prettier, the unit and regression tests, the build, and every browser flow
+(`test/integration/`), which save screenshots in `shots/`. `npm test` runs only the fast tests.
 
 ## Layout
 
 - `src/clean/`: the cleaner, a pixel-exact port of `tools/pixel_clean.py`, run in a worker
-- `src/model/`: projects, animations, frames, layers, sprites
+- `src/model/`: projects, kinds, presets, animations, frames, layers, sprites
 - `src/editor/`, `src/palette/`, `src/export/`, `src/io/`, `src/store/`: tools, colours, exports,
   file formats, saving
-- `src/ui/`: the page; `src/ui/page.html` and `src/ui/styles.css` are its shell
+- `src/ui/`: the page, one folder per feature (`grid/`, `start/`, `preview/`, `import/`, …);
+  `src/ui/page.html` is its shell and `src/ui/styles/` its stylesheets, tokens first
+- `src/art/`: colours painted as pixel art
 - `build/build.py`: joins the modules into one page and refuses import cycles, missing exports and
   calls to functions that were never imported
-- `assets/`: the sample character and the pitch; `build/game-kits.json`: Naga Eleven's kits
-- `test/`: unit tests (`*.test.js`), browser flows (`*.mjs`), `test/images/` the ChatGPT images they
-  clean, `fixtures/` the pixels `pixel_clean.py` makes from them (`test/make_fixtures.py` remakes them)
+- `test/unit/`, `test/integration/`, `test/regression/`: see `CLAUDE.md`
+- `docs/`: plans and design notes
 
 ## The command-line cleaner
 

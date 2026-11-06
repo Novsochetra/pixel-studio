@@ -5,3 +5,6 @@ assets/
 build/game-kits.json
 build/samples.json
 src/ui/page.html
+test/images/
+docs/*.png
+tools/pixel_clean.py

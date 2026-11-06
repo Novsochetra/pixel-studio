@@ -12,7 +12,12 @@ function nativeCanvas(sprite) {
 
 // The sprite's art (or the part of it inside `frameBox`, so a row of frames shares one framing)
 // scaled to fit a size×size canvas, pixels kept sharp; flipped when asked.
-export function drawThumbnail(canvas, sprite, size = 104, { box: frameBox = null, flip = false } = {}) {
+export function drawThumbnail(
+  canvas,
+  sprite,
+  size = 104,
+  { box: frameBox = null, flip = false } = {},
+) {
   canvas.width = size;
   canvas.height = size;
   const context = canvas.getContext('2d');
@@ -34,5 +39,15 @@ export function drawThumbnail(canvas, sprite, size = 104, { box: frameBox = null
 
   const left = (size - wide * scale) / 2;
   const top = (size - tall * scale) / 2;
-  context.drawImage(nativeCanvas(sprite), box.left, box.top, wide, tall, left, top, wide * scale, tall * scale);
+  context.drawImage(
+    nativeCanvas(sprite),
+    box.left,
+    box.top,
+    wide,
+    tall,
+    left,
+    top,
+    wide * scale,
+    tall * scale,
+  );
 }

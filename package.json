@@ -5,10 +5,15 @@
   "scripts": {
     "build": "python3 build/build.py",
     "serve": "python3 build/build.py && python3 test/wrap.py && python3 -m http.server 8811 --directory dist",
-    "test": "node --test test/*.test.js",
-    "test:all": "bash test/run-all.sh"
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "node --test test/unit/*.test.js test/regression/*.test.js",
+    "test:flows": "bash test/run-all.sh",
+    "check": "bash test/run-all.sh"
   },
   "devDependencies": {
-    "playwright": "^1.48.0"
+    "eslint": "^10.1.0",
+    "playwright": "^1.48.0",
+    "prettier": "^3.8.1"
   }
 }

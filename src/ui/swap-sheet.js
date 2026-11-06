@@ -1,27 +1,21 @@
 import { node, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
-import { allArtLayers, commit, directionSprite, directionsInUse } from './actions.js';
-import { frameAt, newId } from '../model/project.js';
-import { colorCounts, toHex } from '../model/sprite.js';
-import { applyMapping, suggestMapping } from '../palette/palette.js';
-import { reducePalette } from '../palette/reduce.js';
+import { allArtLayers, commit } from './actions.js';
 import { characterColors } from './character-colours.js';
-import { paletteForm } from './palette-form.js';
-import { boardPreview } from './board-canvas.js';
+import { mappingRows } from './swap/swap-mapping.js';
+import {
+  addPalette,
+  paletteChooser,
+  previewFigure,
+  previewToggle,
+  reduceButton,
+  showPreview,
+} from './swap/swap-parts.js';
+import { frameAt } from '../model/project.js';
+import { applyMapping, suggestMapping } from '../palette/palette.js';
 
-function characterEntries(state) {
-  const totals = new Map();
-
-  for (const direction of directionsInUse(state)) {
-    const sprite = directionSprite(state, direction);
-
-    for (const { color, count } of sprite ? colorCounts(sprite) : []) {
-      totals.set(color, (totals.get(color) ?? 0) + count);
-    }
-  }
-
-  return [...totals.entries()].map(([color, count]) => ({ color, count }));
-}
+const NO_PALETTE =
+  "Add the palette you want to use: paste its hex codes or open a palette file. Or start from 8 of the character's own colours.";
 
 function layersFor(state, scope) {
   return scope === 'view'
@@ -29,226 +23,130 @@ function layersFor(state, scope) {
     : allArtLayers(state);
 }
 
-function setPreview(app, mapping, on) {
-  app.store.set({ swapPreview: on ? mapping : null });
-}
-
-// every view with the swap applied, inside the sheet, since the sheet covers the canvas
-function previewFigure(app, mapping) {
-  const canvas = boardPreview(app.store.state, 420, { overlay: null, mapping });
-
-  return node(
-    'figure',
-    { style: { margin: '0', display: 'grid', gap: '6px' } },
-    canvas,
-    node('figcaption.hint', {}, 'With the swap applied'),
+function apply(job, mapping, scope) {
+  const layers = layersFor(job.app.store.state, scope);
+  commit(job.app, 'Swap colours', layers, () =>
+    layers.forEach((layer) => {
+      layer.sprite = applyMapping(layer.sprite, mapping);
+    }),
   );
-}
-
-function targetPicker(palette, current, onPick) {
-  return node(
-    'div.target-picker',
-    { role: 'group' },
-    node(
-      'button.btn.quiet',
-      {
-        'aria-pressed': String(current === undefined),
-        onclick: () => onPick(undefined),
-        title: 'Keep this colour',
-      },
-      'Keep',
-    ),
-    palette.colors.map((color) =>
-      node('button.swatch', {
-        style: { background: toHex(color) },
-        'aria-pressed': String(current === color),
-        title: toHex(color),
-        'aria-label': `Change to ${toHex(color)}`,
-        onclick: () => onPick(color),
-      }),
-    ),
+  toast(
+    scope === 'view'
+      ? 'Colours swapped in this frame'
+      : 'Colours swapped across the whole character',
   );
+  job.close();
 }
 
-function mappingRows(state, palette, mapping, onChange) {
-  const counts = new Map(characterEntries(state).map((entry) => [entry.color, entry.count]));
+// the palette's mapping: each character colour and what it becomes, kept with the project
+function mappingFor(job, palette) {
+  const { project } = job.app.store.state;
+  const colours = characterColors(job.app.store.state);
+  project.mappings[job.paletteId] ??= suggestMapping(colours, palette.colors);
 
-  return characterColors(state).map((color) =>
-    node(
-      'div.map-row',
-      {},
-      node('span.swatch', { style: { background: toHex(color) }, 'aria-hidden': 'true' }),
-      node('span.mono', {}, toHex(color), node('span.hint', {}, ` · ${counts.get(color)} px`)),
-      node('span', { 'aria-hidden': 'true' }, '→'),
-      targetPicker(palette, mapping[color], (target) => onChange(color, target)),
-    ),
-  );
+  return project.mappings[job.paletteId];
 }
 
-function makeReducedPalette(app, size) {
-  const { state } = app.store;
-
-  if (!characterColors(state).length) {
-    toast('The character has no colours yet. Clean or draw a view first.');
-
-    return null;
+function setTarget(mapping, color, target) {
+  if (target === undefined) {
+    delete mapping[color];
+  } else {
+    mapping[color] = target;
   }
-
-  const palette = {
-    id: newId('p'),
-    name: `Character, ${size} colours`,
-    colors: reducePalette(characterEntries(state), size),
-  };
-  state.project.palettes.push(palette);
-  app.saver.markStructure();
-
-  return palette;
 }
 
+function mappingHeader(job, palette, changed) {
+  const { app } = job;
+  const suggest = () => {
+    const colours = characterColors(app.store.state);
+    app.store.state.project.mappings[job.paletteId] = suggestMapping(colours, palette.colors);
+    changed();
+  };
+
+  return node(
+    'div.compare',
+    {},
+    node('label.field', {}, node('span', {}, 'Change to this palette'), paletteChooser(job)),
+    node(
+      'div.field',
+      {},
+      node('span', {}, 'Each colour goes to the one you pick; Keep leaves it'),
+      node(
+        'div.group',
+        {},
+        node('button.btn', { onclick: suggest }, 'Suggest nearest'),
+        reduceButton(job),
+      ),
+    ),
+  );
+}
+
+function applyButtons(job, mapping) {
+  return node(
+    'div.sheet-actions',
+    {},
+    node('button.btn', { onclick: job.close }, 'Cancel'),
+    node('button.btn', { onclick: () => apply(job, mapping, 'view') }, 'Apply to this frame'),
+    node(
+      'button.btn.primary',
+      { onclick: () => apply(job, mapping, 'all') },
+      'Apply to the whole character',
+    ),
+  );
+}
+
+function drawMapping(job, palette) {
+  const { app } = job;
+  const mapping = mappingFor(job, palette);
+  const changed = () => {
+    app.saver.markStructure();
+    job.draw();
+  };
+  const onChange = (color, target) => {
+    setTarget(mapping, color, target);
+    changed();
+  };
+  const rows = mappingRows(app.store.state, palette, mapping, onChange);
+
+  replace(
+    job.slot,
+    mappingHeader(job, palette, changed),
+    node('div.compare', {}, node('div.map-table', {}, rows), previewFigure(app, mapping)),
+    previewToggle(job, mapping),
+    node('details', {}, node('summary', {}, 'Add another palette'), addPalette(job)),
+    applyButtons(job, mapping),
+  );
+  showPreview(job, mapping);
+}
+
+// Every character colour changed to one of a palette's, shown before it is applied to a frame or
+// to the whole character.
 export function openSwapSheet(app) {
-  const { state } = app.store;
   const sheet = openSheet('Swap colours', () => app.store.set({ swapPreview: null }));
   const slot = node('div', { style: { display: 'grid', gap: '12px' } });
-  let paletteId = state.project.palettes.at(-1)?.id ?? null;
-  let previewOn = true;
-
-  const draw = () => {
-    const palette = state.project.palettes.find((candidate) => candidate.id === paletteId);
-    const choose = node(
-      'select.input',
-      {
-        id: 'swap-palette',
-        'aria-label': 'Target palette',
-        onchange: (event) => {
-          paletteId = event.target.value;
-          draw();
-        },
-      },
-      state.project.palettes.map((candidate) =>
-        node(
-          'option',
-          { value: candidate.id, selected: candidate.id === paletteId },
-          `${candidate.name} (${candidate.colors.length})`,
-        ),
-      ),
-    );
-    const addForm = paletteForm((added) => {
-      state.project.palettes.push(added);
-      paletteId = added.id;
-      app.saver.markStructure();
-      draw();
-    });
-    const reduce8 = node(
-      'button.btn',
-      {
-        onclick: () => {
-          paletteId = makeReducedPalette(app, 8)?.id ?? paletteId;
-          draw();
-        },
-      },
-      'Make an 8-colour palette from the character',
+  const { palettes } = app.store.state.project;
+  const job = {
+    app,
+    slot,
+    close: sheet.close,
+    paletteId: palettes.at(-1)?.id ?? null,
+    previewOn: true,
+  };
+  job.draw = () => {
+    const palette = app.store.state.project.palettes.find(
+      (candidate) => candidate.id === job.paletteId,
     );
 
-    if (!palette) {
-      replace(
-        slot,
-        node(
-          'p.hint',
-          {},
-          "Add the palette you want to use: paste its hex codes or open a palette file. Or start from 8 of the character's own colours.",
-        ),
-        addForm,
-        reduce8,
-      );
-      app.store.set({ swapPreview: null });
+    if (palette) {
+      drawMapping(job, palette);
 
       return;
     }
 
-    state.project.mappings[paletteId] ??= suggestMapping(characterColors(state), palette.colors);
-    const mapping = state.project.mappings[paletteId];
-    const onChange = (color, target) => {
-      if (target === undefined) {
-        delete mapping[color];
-      } else {
-        mapping[color] = target;
-      }
-
-      app.saver.markStructure();
-      draw();
-    };
-    const suggest = () => {
-      state.project.mappings[paletteId] = suggestMapping(characterColors(state), palette.colors);
-      app.saver.markStructure();
-      draw();
-    };
-    const previewToggle = node(
-      'label.toggle-row',
-      { for: 'swap-preview' },
-      node('span', {}, 'Also preview on the canvas behind'),
-      node('input.switch', {
-        type: 'checkbox',
-        role: 'switch',
-        id: 'swap-preview',
-        checked: previewOn,
-        onchange: (event) => {
-          previewOn = event.target.checked;
-          setPreview(app, mapping, previewOn);
-        },
-      }),
-    );
-    const apply = (scope) => {
-      const layers = layersFor(state, scope);
-      commit(app, 'Swap colours', layers, () =>
-        layers.forEach((layer) => {
-          layer.sprite = applyMapping(layer.sprite, mapping);
-        }),
-      );
-      toast(
-        scope === 'view'
-          ? 'Colours swapped in this frame'
-          : 'Colours swapped across the whole character',
-      );
-      sheet.close();
-    };
-
-    replace(
-      slot,
-      node(
-        'div.compare',
-        {},
-        node('label.field', {}, node('span', {}, 'Change to this palette'), choose),
-        node(
-          'div.field',
-          {},
-          node('span', {}, 'Each colour goes to the one you pick; Keep leaves it'),
-          node(
-            'div.group',
-            {},
-            node('button.btn', { onclick: suggest }, 'Suggest nearest'),
-            reduce8,
-          ),
-        ),
-      ),
-      node(
-        'div.compare',
-        {},
-        node('div.map-table', {}, mappingRows(state, palette, mapping, onChange)),
-        previewFigure(app, mapping),
-      ),
-      previewToggle,
-      node('details', {}, node('summary', {}, 'Add another palette'), addForm),
-      node(
-        'div.sheet-actions',
-        {},
-        node('button.btn', { onclick: sheet.close }, 'Cancel'),
-        node('button.btn', { onclick: () => apply('view') }, 'Apply to this frame'),
-        node('button.btn.primary', { onclick: () => apply('all') }, 'Apply to the whole character'),
-      ),
-    );
-    setPreview(app, mapping, previewOn);
+    replace(slot, node('p.hint', {}, NO_PALETTE), addPalette(job), reduceButton(job));
+    app.store.set({ swapPreview: null });
   };
 
   sheet.body.append(slot);
-  draw();
+  job.draw();
 }

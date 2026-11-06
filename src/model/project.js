@@ -47,9 +47,7 @@ export function newFrame(width, height, layers = [newLayer(width, height)]) {
 export function newAnimation(name, canvas, directions) {
   const key = newId('k');
   const frame = () =>
-    newFrame(canvas.width, canvas.height, [
-      newLayer(canvas.width, canvas.height, { key }),
-    ]);
+    newFrame(canvas.width, canvas.height, [newLayer(canvas.width, canvas.height, { key })]);
 
   return {
     id: newId('a'),

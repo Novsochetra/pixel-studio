@@ -1,5 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
+import { keysFor, prefixFor } from '../../src/store/keys.js';
+import { upsertEntry } from '../../src/store/projects.js';
 
 // versions.js reaches PNG encoding through project-file.js; give it a stand-in for the browser
 globalThis.document = {
@@ -15,8 +17,8 @@ globalThis.ImageData = class {
 };
 
 const { saveVersion, listVersions, versionText, deleteVersion } =
-  await import('../src/store/versions.js');
-const { newProject } = await import('../src/model/new-project.js');
+  await import('../../src/store/versions.js');
+const { newProject } = await import('../../src/model/new-project.js');
 
 function memory() {
   const docs = new Map();
@@ -42,4 +44,18 @@ test('a version too big for one stored document is split and joined back exactly
   await deleteVersion(backend, entry.id);
   assert.equal((await listVersions(backend)).length, 0);
   assert.equal([...backend.docs.keys()].filter((key) => key.startsWith('version-')).length, 0);
+});
+
+// from the projects list
+test('projects keep their documents apart, and the list follows renames', () => {
+  assert.equal(keysFor('').project, 'project');
+  assert.equal(keysFor(prefixFor('abc')).layer('l1'), 'p-abc-layer-l1');
+  const index = { list: [], current: null };
+  const project = newProject({ name: 'Knight', profile: 'generic' });
+  assert.equal(upsertEntry(index, project, 'p-x-'), true);
+  assert.equal(upsertEntry(index, project, 'p-x-'), false);
+  project.name = 'Dark knight';
+  assert.equal(upsertEntry(index, project, 'p-x-'), true);
+  assert.equal(index.list[0].name, 'Dark knight');
+  assert.equal(index.list[0].prefix, 'p-x-');
 });

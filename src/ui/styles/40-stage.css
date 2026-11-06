@@ -73,3 +73,33 @@
   margin: 0;
   text-align: center;
 }
+
+.stage-inner.board {
+  gap: 16px;
+  align-content: center;
+}
+
+.board-controls,
+.board-guides {
+  /* like the preview's bar: wrap within the stage instead of widening it */
+  contain: inline-size;
+  width: min(100%, 900px);
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.board-guides {
+  gap: 6px;
+}
+
+.board-row {
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.board-canvas {
+  max-width: 100%;
+  touch-action: none;
+}

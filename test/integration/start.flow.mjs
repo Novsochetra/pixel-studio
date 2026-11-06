@@ -112,4 +112,9 @@ check(
 );
 check(!(await status(page)).includes('empty'), 'with its art');
 
+await page.emulateMedia({ colorScheme: 'dark' });
+const dark = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+check(dark === 'rgb(0, 0, 0)', 'the page follows a dark appearance');
+await page.screenshot({ path: `${shots}/dark.png` });
+
 await finish();

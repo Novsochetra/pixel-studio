@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { analyzeReference, cleanLike } from '../src/clean/like.js';
-import { toRgba } from '../src/clean/scale.js';
+import { analyzeReference, cleanLike } from '../../src/clean/like.js';
+import { toRgba } from '../../src/clean/scale.js';
 
-const fixtures = new URL('../fixtures/', import.meta.url);
+const fixtures = new URL('../../fixtures/', import.meta.url);
 
 function load(name) {
   const { width, height } = JSON.parse(readFileSync(new URL(`${name}.json`, fixtures)));

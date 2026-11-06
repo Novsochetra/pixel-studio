@@ -1,0 +1,54 @@
+// the globals each place may use, named here as the globals package is not installed
+const shared = [
+  'globalThis',
+  'console',
+  'setTimeout',
+  'clearTimeout',
+  'URL',
+  'TextEncoder',
+  'TextDecoder',
+  'structuredClone',
+  'Promise',
+  'atob',
+  'btoa',
+  'performance',
+];
+
+export const browser = [
+  'window',
+  'document',
+  'navigator',
+  'location',
+  'localStorage',
+  'indexedDB',
+  'requestAnimationFrame',
+  'cancelAnimationFrame',
+  'Image',
+  'ImageData',
+  'Blob',
+  'File',
+  'FileReader',
+  'Worker',
+  'self',
+  'createImageBitmap',
+  'OffscreenCanvas',
+  'getComputedStyle',
+  'matchMedia',
+  'DataTransfer',
+  'HTMLCanvasElement',
+  'CSS',
+  'fetch',
+  'addEventListener',
+  'removeEventListener',
+  'postMessage',
+  'innerWidth',
+  'innerHeight',
+  'devicePixelRatio',
+  'alert',
+  'confirm',
+  'Node',
+];
+
+export const node = ['process', 'Buffer'];
+export const globalsOf = (names) =>
+  Object.fromEntries([...shared, ...names].map((name) => [name, 'readonly']));

@@ -105,6 +105,20 @@ check(
 );
 await page.keyboard.press('Escape');
 
+await page.locator('button.wordmark').click();
+await page.locator('.start-section').evaluate((details) => {
+  details.open = true;
+});
+await createProject(page, { kind: 'Character', name: 'Compass', width: 32, directions: 'eight' });
+await menu(/Sprite sheet/);
+check(
+  (await page.locator('.sheet p.hint').first().textContent()).includes('× 8 rows'),
+  'a character drawn in all eight directions has a row for each',
+);
+const eight = readZip((await saved(button('Animated GIFs'), 'eight.zip')).path);
+check(Object.values(eight).length === 8 && Object.values(eight).every(isGif), 'and a GIF for each');
+await page.keyboard.press('Escape');
+
 const fresh = await context.browser().newContext({ viewport: { width: 1280, height: 860 } });
 const second = await fresh.newPage();
 await second.goto(url);
