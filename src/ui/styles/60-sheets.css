@@ -188,9 +188,10 @@
   height: 20px;
 }
 
+/* above the windows, as a project's ⋯ in Projects opens one from inside its window */
 .menu {
   position: absolute;
-  z-index: 15;
+  z-index: 25;
   background: var(--chrome-raised);
   border: 1px solid var(--separator);
   border-radius: var(--radius);

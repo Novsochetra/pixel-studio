@@ -1,22 +1,4 @@
-/* The projects list with a picture of each project, and the line-up of them all. */
-.project-row {
-  justify-content: flex-start;
-}
-
-.project-text {
-  flex: 1;
-  min-width: 180px;
-}
-
-.project-picture {
-  flex: none;
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  border-radius: var(--radius-sm);
-  background: var(--well);
-  image-rendering: pixelated;
-}
+/* The line-up of a game's projects; the projects browser is in 88-projects.css. */
 
 .line-up {
   display: flex;
@@ -67,51 +49,4 @@
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
-
-.folder-group {
-  display: grid;
-  gap: 2px;
-  margin-top: 10px;
-}
-
-.folder-head {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--separator);
-}
-
-.folder-head svg {
-  width: 18px;
-  height: 18px;
-  color: var(--label-muted);
-}
-
-.folder-name {
-  margin: 0;
-  font-size: 14px;
-}
-
-.folder-head .group {
-  margin-left: auto;
-}
-
-.folder-name-field {
-  max-width: 220px;
-}
-
-.folder-group .project-row {
-  padding-left: 12px;
-}
-
-.folder-picker {
-  width: auto;
-  max-width: 160px;
-}
-
-.open-now {
-  padding: 0 8px;
 }

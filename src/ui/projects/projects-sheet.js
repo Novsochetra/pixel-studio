@@ -1,114 +1,120 @@
-import { icon, node, replace, toast } from '../dom.js';
+import { node, replace } from '../dom.js';
 import { openSheet } from '../sheet.js';
-import { addProject } from '../session.js';
-import { openProjectFile } from '../downloads.js';
-import { newProjectChooser } from '../start/chooser.js';
-import { sampleProject } from '../sample.js';
+import { readSetting, keepSetting } from '../remembered.js';
 import { currentRow } from './current-row.js';
-import { listRow } from './list-row.js';
-import { folderGroup } from './folder-group.js';
-import { changeList } from './folder-picker.js';
+import { browseBar } from './browse-bar.js';
+import { folderList } from './folder-list.js';
+import { projectGrid } from './project-grid.js';
+import { startSection, whereNewGoes } from './start-section.js';
+import { changeList } from './change-list.js';
 import { castPictures } from './cast-pictures.js';
 import { openLineUp } from './line-up-sheet.js';
-import { addFolder, byFolder } from '../../store/folders.js';
-import { deletePreset, readPresets } from '../../store/presets.js';
+import { EVERY_PROJECT, knownPlace } from '../../store/browse.js';
+import { addFolder, folderOf } from '../../store/folders.js';
 
-const UNREADABLE =
-  'Your projects list could not be read just now, so only this one shows. Nothing was removed: reload the page to see the others.';
-const ALONE =
-  'Your other projects show here, each with its own views, animations, colours and history. For the next character of your game, "New character like this" sets one up as this one is, with nothing drawn.';
+const SORT_KEY = 'pixel-clean-projects-sort';
 
-function listHint(app, others) {
-  if (app.index.unreadable) {
-    return node('p.hint', {}, UNREADABLE);
-  }
+// the place open last in this visit, so a game's folder stays open while its projects are switched
+let lastPlace = null;
 
-  return others.length ? null : node('p.hint', {}, ALONE);
+function startingView(index) {
+  const place = lastPlace ?? folderOf(index, index.current) ?? EVERY_PROJECT;
+
+  return { place: knownPlace(index, place), sort: readSetting(SORT_KEY, 'recent'), query: '' };
 }
 
-async function startSection(app, sheet) {
-  const opened = (project) =>
-    addProject(app, project).then(sheet.close, (error) => toast(error.message));
-  const chooser = newProjectChooser({
-    presets: await readPresets(app.backend),
-    onCreate: opened,
-    onDeletePreset: (preset) =>
-      deletePreset(app.backend, preset.id).catch((error) =>
-        toast(`The preset could not be forgotten: ${error.message}`),
-      ),
-  });
+function drawing(job, { current, browser, body }) {
+  const show = () => {
+    job.view.place = knownPlace(job.app.index, job.view.place);
+    lastPlace = job.view.place;
+    replace(browser, folderList(job), projectGrid(job));
 
-  return node(
-    'details.start-section',
-    { open: app.index.list.length < 2 },
-    node('summary', {}, 'New project'),
-    chooser,
-    node(
-      'button.btn.quiet',
-      { onclick: async () => opened(await sampleProject()) },
-      'Try the example character',
-    ),
-  );
+    const where = body.querySelector('.start-where');
+
+    if (where) {
+      where.textContent = whereNewGoes(job);
+    }
+
+    if (job.renaming) {
+      job.renaming = null;
+      browser.querySelector('.place-rename')?.click();
+    }
+  };
+
+  return {
+    show,
+    redraw: () => {
+      replace(current, currentRow(job));
+      show();
+    },
+  };
 }
 
-function listBody(job) {
-  const { index, store } = job.app;
+function browsing(job, body) {
+  const field = () => body.querySelector('.projects-search');
 
-  if (!index.folders?.length) {
-    const others = index.list.filter((entry) => entry.id !== store.state.project.id);
-
-    return [others.map((entry) => listRow(job, entry)), listHint(job.app, others)];
-  }
-
-  const groups = byFolder(index).filter((group) => group.folder || group.entries.length);
-
-  return [groups.map((group) => folderGroup(job, group)), listHint(job.app, index.list)];
+  return {
+    goTo: (place) => {
+      Object.assign(job.view, { place, query: '' });
+      field().value = '';
+      job.show();
+    },
+    search: (query) => {
+      job.view.query = query;
+      job.show();
+    },
+    clearSearch: () => job.goTo(job.view.place),
+    sortBy: (sort) => {
+      job.view.sort = sort;
+      keepSetting(SORT_KEY, sort);
+      job.show();
+    },
+    renameFolder: (id) => {
+      job.renaming = id;
+      job.goTo(id);
+    },
+    newFolder: () => job.renameFolder(changeList(job, (index) => addFolder(index)).id),
+  };
 }
 
-function newFolder(job, list) {
-  const folder = changeList(job, (index) => addFolder(index));
+function newProjectOpener(body) {
+  return () => {
+    const section = body.querySelector('.start-section');
 
-  list.querySelector(`[data-folder="${folder.id}"] .folder-rename`)?.click();
-}
-
-function bottomButtons(job, list) {
-  return node(
-    'div.group',
-    { style: { gap: '6px', flexWrap: 'wrap' } },
-    node(
-      'button.btn.quiet',
-      {
-        title: 'Every project side by side at one pixel size, to check their sizes agree',
-        onclick: () => job.lineUp(job.app.index.list),
-      },
-      'Line them up…',
-    ),
-    node('button.btn.quiet', { onclick: () => newFolder(job, list) }, icon('folder'), 'New folder'),
-    node(
-      'button.btn.quiet',
-      { onclick: () => openProjectFile(job.app, job.close) },
-      'Open a project file…',
-    ),
-  );
+    if (section) {
+      section.open = true;
+      section.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      section.querySelector('[role="radio"][tabindex="0"]')?.focus({ preventScroll: true });
+    }
+  };
 }
 
 export function openProjectsSheet(app) {
-  const sheet = openSheet('Projects');
-  const list = node('div.view-list');
-  const pictures = castPictures(app);
+  const sheet = openSheet('Projects', null, { wide: true });
+  const parts = { current: node('div.projects-current'), browser: node('div.projects-browser') };
   const job = {
     app,
-    pictures,
     close: sheet.close,
-    redraw: () => replace(list, currentRow(job), listBody(job)),
+    pictures: castPictures(app),
+    view: startingView(app.index),
+  };
+
+  Object.assign(job, drawing(job, { ...parts, body: sheet.body }), browsing(job, sheet.body), {
+    startNew: newProjectOpener(sheet.body),
     // one sheet at a time: two open sheets would both close on one Escape
     lineUp: (entries) => {
       sheet.close();
-      openLineUp(pictures.cast(entries));
+      openLineUp(job.pictures.cast(entries));
     },
-  };
-
-  sheet.body.append(list, bottomButtons(job, list));
+  });
+  sheet.body.classList.add('projects-sheet');
+  sheet.body.append(parts.current, browseBar(job), parts.browser);
   job.redraw();
-  startSection(app, sheet).then((section) => sheet.body.append(section));
+  startSection(job).then((section) => sheet.body.append(section));
+
+  // with many projects, finding one by name is the quickest way in; a phone's keyboard would
+  // cover the list, so the search takes focus only with a pointer
+  if (matchMedia('(pointer: fine)').matches) {
+    queueMicrotask(() => sheet.body.querySelector('.projects-search')?.focus());
+  }
 }

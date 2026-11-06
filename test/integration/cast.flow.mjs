@@ -8,15 +8,17 @@ import { isPng } from './files.mjs';
 const { page, check, finish, shots } = await openStudio();
 const openProjects = async () => {
   await page.locator('button.wordmark').click();
-  await page.waitForSelector('.project-row');
+  await page.waitForSelector('.project-card');
   await page.waitForTimeout(600);
 };
 const pictures = () =>
-  page.locator('.project-row').evaluateAll((rows) =>
-    rows.map((row) => ({
-      name: row.querySelector('input')?.value ?? row.querySelector('.view-name').textContent,
-      picture: row.querySelector('img.project-picture') !== null,
-    })),
+  page.locator('.project-card').evaluateAll((cards) =>
+    cards
+      .map((card) => ({
+        name: card.querySelector('.card-name').textContent,
+        picture: card.querySelector('img.project-picture') !== null,
+      }))
+      .sort((first, second) => first.name.localeCompare(second.name)),
   );
 const tabs = () => page.locator('.grid-tabs [role="tab"]').allTextContents();
 const views = async () => {
@@ -29,7 +31,11 @@ await openExample(page);
 const heroViews = await views();
 const heroTabs = await tabs();
 await openProjects();
-check((await pictures())[0].picture, "the open project's row shows its picture");
+check(
+  (await page.locator('.current-project img.project-picture').count()) === 1 &&
+    (await pictures())[0].picture,
+  'the open project shows its picture, above and on its card',
+);
 await page.getByRole('button', { name: 'New character like this' }).click();
 await page.waitForTimeout(800);
 check(
@@ -73,10 +79,11 @@ check(
 );
 await page.screenshot({ path: `${shots}/cast-projects.png` });
 
-await page.getByRole('button', { name: 'Line them up…' }).click();
+await page.locator('.place-head').getByRole('button', { name: 'Line up' }).click();
 await page.waitForSelector('.line-up-member');
 check(
-  JSON.stringify(await page.locator('.line-up-name').allTextContents()) === '["Sochetra","Rival"]',
+  JSON.stringify((await page.locator('.line-up-name').allTextContents()).sort()) ===
+    '["Rival","Sochetra"]',
   'the line-up stands every drawn project side by side',
 );
 const bottoms = await page

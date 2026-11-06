@@ -92,7 +92,7 @@ check(
 );
 
 await openProjects();
-check((await page.locator('.version-row').count()) === 4, 'every project made is listed');
+check((await page.locator('.project-card').count()) === 4, 'every project made is listed');
 await page.getByRole('button', { name: 'Save as a preset' }).click();
 await page.keyboard.press('Escape');
 await openProjects();

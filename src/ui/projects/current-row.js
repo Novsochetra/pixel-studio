@@ -4,13 +4,12 @@ import { addProject } from '../session.js';
 import { saveProject } from '../downloads.js';
 import { backgroundUrl } from '../preview-background.js';
 import { projectPicture } from './project-picture.js';
-import { folderPicker } from './folder-picker.js';
 import { describeProject, defaultName } from '../../model/presets.js';
 import { presetFromProject } from '../../model/preset-from-project.js';
 import { blankCopy } from '../../model/cast.js';
 import { projectFileText, readProjectFile } from '../../store/project-file.js';
 import { savePreset } from '../../store/presets.js';
-import { portraitUrl } from '../../store/portraits.js';
+import { folderOf } from '../../store/folders.js';
 
 const LIKE_THIS =
   'Same canvas, views, animations and frames, with nothing drawn: the next one for your game';
@@ -92,22 +91,26 @@ function renameField({ app, redraw }) {
   });
 }
 
-export function currentRow(job) {
-  const { project } = job.app.store.state;
-  const entry = job.app.index.list.find((listed) => listed.id === project.id);
+function aboutOpen({ app }) {
+  const { project } = app.store.state;
+  const folderId = folderOf(app.index, project.id);
+  const folder = app.index.folders.find((each) => each.id === folderId);
   const size = `${project.canvas.width}×${project.canvas.height}`;
 
+  return [`Open now · ${describeProject(project)} · ${size}`, folder ? ` · in ${folder.name}` : ''];
+}
+
+export function currentRow(job) {
   return node(
-    'div.version-row.project-row',
+    'div.current-project',
     {},
-    projectPicture(portraitUrl(project)),
+    projectPicture(job.pictures.ofOpen()),
     node(
       'div.field.project-text',
       {},
-      node('span', {}, `Open now · ${describeProject(project)} · ${size}`),
+      node('span', {}, aboutOpen(job)),
       renameField(job),
+      currentActions(job),
     ),
-    entry ? folderPicker(job, entry) : null,
-    currentActions(job),
   );
 }

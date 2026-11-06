@@ -15,11 +15,13 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
   frame from play without deleting it, see the mirrored side, fold the frames away for room.
 - **Preview**: characters in a scene (the pitch for Naga Eleven), tiles laid as a floor, effects and
   icons at 1×, 2× and 4×.
-- **Cast**: every project in Projects (the name, top left) with its picture, sorted into folders
-  (one per game, or heroes, enemies, tiles). "New character like this" sets up the next character
+- **Cast**: Projects (the name, top left) shows every project as a card with its picture, its
+  folders (one per game, or heroes, enemies, tiles) down the side. Drag a card onto a folder or use
+  its ⋯ menu to move it; search finds any project or folder by name; sort by latest or A–Z. A new
+  project goes in the folder that is open. "New character like this" sets up the next character
   of a game as the open one is: the same canvas, views, animations, frames, layers and guide lines,
-  with nothing drawn, in the same folder. "Line them up" stands every project, or a folder's,
-  side by side at one pixel size, to check heights agree, and downloads it as a PNG.
+  with nothing drawn, in the same folder. "Line up" stands every project shown side by side at one
+  pixel size, to check heights agree, and downloads it as a PNG.
 - **Export**: sprite sheet + Aseprite-style JSON (Phaser, Godot, Unity), separate frames, GIFs, and
   the Naga Eleven game pack.
 

@@ -2,15 +2,26 @@ import { toast } from '../dom.js';
 import { openProject } from '../session.js';
 import { portraitUrl, readPortrait } from '../../store/portraits.js';
 
-// the open project's picture is made from the screen, so it is never behind its last save
+// The open project's picture is made from the screen, so it is never behind its last save. It is
+// made once for each project opened while the window is up, as a search draws the list per key.
 export function castPictures(app) {
   const read = new Map();
+  let made = { project: null, url: null };
   const of = (entry) => {
     if (!read.has(entry.id)) {
       read.set(entry.id, readPortrait(app.backend, entry.prefix));
     }
 
     return read.get(entry.id);
+  };
+  const ofOpen = () => {
+    const { project } = app.store.state;
+
+    if (made.project !== project) {
+      made = { project, url: portraitUrl(project) };
+    }
+
+    return made.url;
   };
   const open = (entry) => () =>
     openProject(app, entry).then(
@@ -22,10 +33,10 @@ export function castPictures(app) {
 
     return entries.map((entry) =>
       entry.id === project.id
-        ? { name: project.name, url: Promise.resolve(portraitUrl(project)), open: null }
+        ? { name: project.name, url: Promise.resolve(ofOpen()), open: null }
         : { name: entry.name, url: of(entry), open: open(entry) },
     );
   };
 
-  return { of, cast };
+  return { of, ofOpen, cast };
 }
