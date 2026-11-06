@@ -45,8 +45,9 @@ async function saveBeforeLeaving(app) {
 function saveIndex(app, project) {
   const changed = upsertEntry(app.index, project, app.keys.prefix);
 
-  if (changed || app.index.current !== project.id || app.index.unreadable) {
+  if (changed || app.index.current !== project.id || app.index.unreadable || app.index.unwritten) {
     app.index.current = project.id;
+    app.index.unwritten = false;
 
     return saveProjectList(app.backend, app.index);
   }
@@ -109,6 +110,14 @@ function viewKept(state, project) {
   return { ...kept, at: settleAt({ project, at: state.at }) };
 }
 
+// The open project is always in the list, even before its first save writes the list; marked so
+// that save writes it, as nothing about the entry looks changed by then.
+function listOpenProject(index, project, prefix) {
+  const listed = upsertEntry(index, project, prefix);
+  index.unwritten ||= listed || index.current !== project.id;
+  index.current = project.id;
+}
+
 // Makes `project` the open one: its own undo history and its own saver. { prefix, save, keepView }:
 // save as startSaving takes it; keepView keeps the zoom, tools and place being edited.
 export function install(app, project, { prefix, save = 'nothing', keepView = false }) {
@@ -120,9 +129,7 @@ export function install(app, project, { prefix, save = 'nothing', keepView = fal
   app.keys = keysFor(prefix);
   app.history = new History(app.findLayer);
   startSaving(app, project, save, stored);
-  // the open project is always in the list, even before its first save writes the list
-  upsertEntry(app.index, project, prefix);
-  app.index.current = project.id;
+  listOpenProject(app.index, project, prefix);
   const saveStatus = save === 'all' || evened.has(project) ? 'pending' : 'saved';
   app.store.set({ ...startingState(project), ...view, saveStatus });
 }

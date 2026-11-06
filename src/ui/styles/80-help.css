@@ -84,3 +84,11 @@ kbd {
   outline-offset: 4px;
   border-radius: 2px;
 }
+
+/* while the first-visit card shows, the empty-frame card waits at the bottom, out from under it */
+@media (min-width: 701px) {
+  body:has(.quick-start) .empty-frame {
+    top: auto;
+    bottom: 12px;
+  }
+}
