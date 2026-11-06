@@ -4,6 +4,7 @@ import { PART_COLOURS } from '../../art/editor-colours.js';
 import { bounds } from '../../model/sprite.js';
 import { linePoints } from '../../editor/paint.js';
 import { paintOwners, pivotsOf } from '../../model/body/cut-plan.js';
+import { drawLasso, lassoDrag } from './cut-lasso.js';
 
 // The art with each part painted over in its colour, and the pivots each part turns about. The
 // brush gives pixels to the part picked; a pivot is dragged where the part should turn.
@@ -76,15 +77,15 @@ export function drawCut(canvas, job) {
   drawSprite(context, job.source, view.scale);
   drawOwners(context, job, view);
   drawPivots(context, job, view);
+  drawLasso(context, job);
 }
 
-function pointOf(canvas, view, event) {
+// the art pixel under the pointer, or with `exact`, the point itself in art pixels
+function pointOf(canvas, view, event, exact = false) {
   const box = canvas.getBoundingClientRect();
+  const along = (offset) => (exact ? offset / view.scale : Math.floor(offset / view.scale));
 
-  return [
-    Math.floor((event.clientX - box.left) / view.scale) + view.left,
-    Math.floor((event.clientY - box.top) / view.scale) + view.top,
-  ];
+  return [along(event.clientX - box.left) + view.left, along(event.clientY - box.top) + view.top];
 }
 
 // the part whose pivot is under the pointer, near enough to grab
@@ -104,26 +105,33 @@ function brushAlong(job, from, to) {
   }
 }
 
-function pressOn(job, canvas, event) {
-  const start = pointOf(canvas, job.view, event);
-  const pivot = pivotUnder(job, start);
-
-  if (pivot >= 0) {
-    job.selected = pivot;
-
-    return (point) => {
-      job.plan.parts[pivot].pivot = { x: point[0], y: point[1] };
-    };
-  }
-
+function brushDrag(job, start) {
   let last = start;
 
   brushAlong(job, start, start);
 
-  return (point) => {
-    brushAlong(job, last, point);
-    last = point;
+  return {
+    move(point) {
+      brushAlong(job, last, point);
+      last = point;
+    },
   };
+}
+
+// a press drags a pivot when it is on one; otherwise it paints, or draws a lasso
+function pressOn(job, canvas, event) {
+  const at = (exact) => pointOf(canvas, job.view, event, exact);
+  const pivot = pivotUnder(job, at(false));
+
+  if (pivot >= 0) {
+    job.selected = pivot;
+
+    return {
+      move: ([x, y]) => (job.plan.parts[pivot].pivot = { x, y }),
+    };
+  }
+
+  return job.tool === 'lasso' ? lassoDrag(job, at(true)) : brushDrag(job, at(false));
 }
 
 export function cutCanvas(job, onChange) {
@@ -138,13 +146,15 @@ export function cutCanvas(job, onChange) {
   });
   canvas.addEventListener('pointermove', (event) => {
     if (drag) {
-      drag(pointOf(canvas, job.view, event));
+      drag.move(pointOf(canvas, job.view, event, Boolean(job.lasso)));
       drawCut(canvas, job);
     }
   });
   const letGo = () => {
     if (drag) {
+      drag.end?.();
       drag = null;
+      drawCut(canvas, job);
       onChange();
     }
   };

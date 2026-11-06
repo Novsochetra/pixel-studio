@@ -28,7 +28,7 @@ function newJob(app) {
   const { state } = app.store;
   const { direction, frame } = state.at;
   const rig = rigOf(currentAnimation(state), direction);
-  const place = { app, direction, frame, brush: 2, erase: false };
+  const place = { app, direction, frame, tool: 'brush', brush: 2, erase: false };
 
   if (rig) {
     const plan = planFromRig(rig, state.project.canvas);
@@ -77,20 +77,28 @@ function brushControls(job, change) {
   const choice = (label, pressed, onclick) =>
     node('button', { 'aria-pressed': String(pressed), onclick: () => change(onclick) }, label);
 
+  const sizes = [1, 2, 4].map((size) =>
+    choice(`${size} px`, job.brush === size, () => (job.brush = size)),
+  );
+
   return node(
     'div.cut-brush',
     {},
     node(
       'div.segmented',
-      { role: 'group', 'aria-label': 'Brush' },
-      choice('Paint', !job.erase, () => (job.erase = false)),
-      choice('Unpaint', job.erase, () => (job.erase = true)),
+      { role: 'group', 'aria-label': 'Tool' },
+      choice('Brush', job.tool === 'brush', () => (job.tool = 'brush')),
+      choice('Lasso', job.tool === 'lasso', () => (job.tool = 'lasso')),
     ),
     node(
       'div.segmented',
-      { role: 'group', 'aria-label': 'Brush size' },
-      [1, 2, 4].map((size) => choice(`${size} px`, job.brush === size, () => (job.brush = size))),
+      { role: 'group', 'aria-label': 'Give or take' },
+      choice('Paint', !job.erase, () => (job.erase = false)),
+      choice('Unpaint', job.erase, () => (job.erase = true)),
     ),
+    job.tool === 'brush'
+      ? node('div.segmented', { role: 'group', 'aria-label': 'Brush size' }, sizes)
+      : null,
   );
 }
 
@@ -99,7 +107,7 @@ function hint(job) {
     ? 'Pixels left unpainted are taken off the body.'
     : `Pixels left unpainted stay on ${job.layer.name}.`;
 
-  return `Paint each part with the brush: L and R are as the picture shows them. The dots are where parts turn: drag one to move it. ${unpainted}`;
+  return `Paint each part with the brush, or draw a loop round it with the lasso: L and R are as the picture shows them. The dots are where parts turn: drag one to move it. ${unpainted}`;
 }
 
 function actions(job, change) {

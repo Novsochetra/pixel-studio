@@ -59,6 +59,31 @@ check(
   (await head.locator('.cut-size').textContent()) !== headSize,
   'the brush unpaints pixels from a part',
 );
+await page.getByRole('button', { name: 'Paint', exact: true }).click();
+await page.getByRole('button', { name: 'Lasso' }).click();
+await page.getByRole('button', { name: 'Paint Torso' }).click();
+const torso = page.locator('.cut-part', { has: page.getByRole('button', { name: 'Paint Torso' }) });
+const torsoSize = await torso.locator('.cut-size').textContent();
+const [left, top] = [cutCanvas.x + cutCanvas.width * 0.25, cutCanvas.y + cutCanvas.height * 0.08];
+const [right, bottom] = [
+  cutCanvas.x + cutCanvas.width * 0.75,
+  cutCanvas.y + cutCanvas.height * 0.3,
+];
+await page.mouse.move(left, top);
+await page.mouse.down();
+for (const [x, y] of [
+  [right, top],
+  [right, bottom],
+  [left, bottom],
+]) {
+  await page.mouse.move(x, y, { steps: 4 });
+}
+await page.mouse.up();
+await page.waitForTimeout(150);
+check(
+  parseInt(await torso.locator('.cut-size').textContent(), 10) > parseInt(torsoSize, 10) + 100,
+  'a lasso round the head gives what it holds to the part picked',
+);
 await page.getByRole('button', { name: 'Guess again' }).click();
 check((await head.locator('.cut-size').textContent()) === headSize, 'Guess again starts over');
 await page.locator('.sheet').getByRole('button', { name: 'Cut into 13 parts' }).click();
