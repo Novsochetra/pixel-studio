@@ -17,6 +17,14 @@ await page.locator('.cell-add').click();
 await page.locator('.cell-add').click();
 await page.waitForTimeout(300);
 
+await page.locator('.grid-row.current .cell').nth(1).click();
+await page.getByRole('button', { name: 'Show frame 1 faded' }).click();
+check(
+  (await page.getByRole('button', { name: 'Onion skin' }).getAttribute('aria-pressed')) === 'true',
+  'an empty frame offers the frame before, faded behind it, to draw the next pose over',
+);
+await page.getByRole('button', { name: 'Onion skin' }).click();
+
 await page.locator('.grid-row.current .cell.selected').focus();
 await page.keyboard.press('Home');
 check((await focused()) === 'Front, frame 1', 'Home goes to the first frame, with focus on it');

@@ -39,21 +39,46 @@ await page.keyboard.press('Meta+Shift+z');
 check((await pixels()) !== plain, '⇧⌘Z redoes it');
 await page.keyboard.press('Meta+z');
 
+const layerNames = () => page.locator('.layer-row .layer-name').allTextContents();
 check(
-  (await page.locator('.section[data-name="layers"]').getAttribute('data-collapsed')) === 'true',
-  'Layers starts folded away',
+  (await page.locator('.layer-row .layer-thumb').count()) === 1,
+  'the layers panel is open, the art layer shown with its thumbnail',
 );
-await openPanel(page, 'Layers');
-await page.getByRole('button', { name: 'Add layer' }).click();
-check((await page.locator('.layer-row').count()) === 2, 'a layer is added to every frame');
+await page.getByRole('button', { name: 'New layer', exact: true }).click();
+check(
+  (await page.evaluate(() => document.activeElement.getAttribute('aria-label'))) === 'Layer name',
+  'a new layer waits for its name, as in an image editor',
+);
+await page.keyboard.type('Hair');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(200);
+check(JSON.stringify(await layerNames()) === '["Hair","Art"]', 'named Hair, on top of the art');
+await page.getByRole('button', { name: 'Duplicate layer' }).click();
+check(
+  JSON.stringify(await layerNames()) === '["Hair copy","Hair","Art"]',
+  'Duplicate puts a copy just above',
+);
+await page.getByRole('button', { name: /^Merge down/ }).click();
+check(JSON.stringify(await layerNames()) === '["Hair","Art"]', 'Merge down makes the two one');
+const rows = page.locator('.layer-row');
+const [hairRow, artRow] = [await rows.nth(0).boundingBox(), await rows.nth(1).boundingBox()];
+await page.mouse.move(hairRow.x + hairRow.width / 2, hairRow.y + hairRow.height / 2);
+await page.mouse.down();
+await page.mouse.move(artRow.x + artRow.width / 2, artRow.y + artRow.height - 2, { steps: 8 });
+await page.mouse.up();
+await page.waitForTimeout(200);
+check(JSON.stringify(await layerNames()) === '["Art","Hair"]', 'a drag puts Hair under the art');
 await page.getByRole('button', { name: 'Hide Art' }).click();
 check(
   (await page.locator('.layer-row', { hasText: 'Hidden' }).count()) === 1,
   'a hidden layer says so',
 );
 await page.getByRole('button', { name: 'Show Art' }).click();
-await page.getByRole('button', { name: 'Delete Layer 2' }).click();
-check((await page.locator('.layer-row').count()) === 1, 'and can be deleted');
+await page.locator('.layer-row', { hasText: 'Hair' }).click();
+await page.getByRole('button', { name: 'Delete Hair' }).click();
+check(JSON.stringify(await layerNames()) === '["Art"]', 'and a layer can be deleted');
+await page.getByRole('button', { name: 'Delete Art' }).click();
+check((await rows.count()) === 1, 'but never the last layer of art');
 
 await page.keyboard.press('s');
 await page.mouse.move(...at(50, 60));

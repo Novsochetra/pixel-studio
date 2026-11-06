@@ -101,3 +101,8 @@
   background: var(--tint-quiet);
   color: var(--tint);
 }
+
+/* a way into more, worded as a link so it does not compete with the section's own button */
+.btn.link {
+  color: var(--tint);
+}

@@ -76,6 +76,10 @@ const PATHS = {
   pin: 'M12 21s-6-5.6-6-11a6 6 0 0112 0c0 5.4-6 11-6 11zM12 8a2 2 0 100 4 2 2 0 000-4z',
   moveframe:
     'M12 3v18M3 12h18M12 3L9 6M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3',
+  duplicate: 'M9 9h11v11H9zM5 15V4h11',
+  'merge-down': 'M6 4h12M12 4v12M8 12l4 4 4-4M5 20h14',
+  picture: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 8.5h.01',
+  trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6',
   more: 'M5 12h.01M12 12h.01M19 12h.01',
   close: 'M6 6l12 12M18 6L6 18',
   swap: 'M7 7h11l-3-3M17 17H6l3 3',

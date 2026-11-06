@@ -1,8 +1,9 @@
-import { node, icon, toast } from './dom.js';
-import { currentAnimation, restructure } from './actions.js';
-import { layerStack, moveLayer, removeLayer, updateLayer } from '../model/structure.js';
-
-const quiet = (event) => event.stopPropagation();
+import { node, icon } from './dom.js';
+import { currentAnimation, goTo, restructure } from './actions.js';
+import { renameInPlace } from './rename-field.js';
+import { updateLayer } from '../model/structure.js';
+import { frameAt, matchingLayer } from '../model/project.js';
+import { drawThumbnail } from './thumbnail.js';
 
 function changeLayer(app, entry, label, patch) {
   restructure(app, label, (draft) => {
@@ -12,89 +13,71 @@ function changeLayer(app, entry, label, patch) {
 
 function eyeButton(app, entry) {
   const shown = entry.visible;
+  const toggle = (event) => {
+    event.stopPropagation();
+    changeLayer(app, entry, shown ? 'Hide layer' : 'Show layer', { visible: !shown });
+  };
 
   return node(
     `button.btn.quiet.eye${shown ? '' : '.off'}`,
     {
       'aria-pressed': String(shown),
       'aria-label': `${shown ? 'Hide' : 'Show'} ${entry.name}`,
-      title: shown
-        ? 'Shown. Click to hide (hidden layers stay out of downloads)'
-        : 'Hidden. Click to show',
-      onclick: (event) => {
-        quiet(event);
-        changeLayer(app, entry, shown ? 'Hide layer' : 'Show layer', { visible: !shown });
-      },
+      title: shown ? 'Shown. Click to hide (a hidden layer stays out of downloads)' : 'Hidden',
+      onclick: toggle,
     },
     icon(shown ? 'eye' : 'eye-off'),
   );
 }
 
-function stepButton(app, entry, step) {
-  const way = step > 0 ? 'up' : 'down';
-  const move = (event) => {
-    quiet(event);
-    restructure(app, 'Move layer', (draft) => {
-      moveLayer(currentAnimation(draft), entry.key, step);
-    });
-  };
+// what is on the layer in the frame being edited, small, so a layer is known by its art
+function thumbnail(state, entry) {
+  const canvas = node('canvas.layer-thumb', { 'aria-hidden': 'true' });
+  const layer = matchingLayer(frameAt(state.project, state.at), entry);
 
-  return node(
-    'button.btn.quiet',
-    { title: `Move ${way}`, 'aria-label': `Move ${entry.name} ${way}`, onclick: move },
-    step > 0 ? '↑' : '↓',
-  );
+  if (layer?.sprite) {
+    drawThumbnail(canvas, layer.sprite, 28);
+  }
+
+  return canvas;
 }
 
-// the last art layer stays: a frame with nothing to draw on is no frame
-function deleteButton(app, entry) {
-  const remove = (event) => {
-    quiet(event);
-    const animation = currentAnimation(app.store.state);
-    const arts = layerStack(animation).filter((layer) => layer.kind !== 'reference');
-
-    if (entry.kind !== 'reference' && arts.length <= 1) {
-      toast('Keep at least one art layer.');
-
-      return;
-    }
-
-    restructure(app, `Delete ${entry.name}`, (draft) => {
-      removeLayer(currentAnimation(draft), entry.key);
-    });
-  };
-
-  return node(
-    'button.btn.quiet',
-    { title: 'Delete layer', 'aria-label': `Delete ${entry.name}`, onclick: remove },
-    '×',
-  );
+export function startRename(app, entry, label) {
+  renameInPlace(label, {
+    value: entry.name,
+    label: 'Layer name',
+    className: 'layer-rename',
+    onDone: (name) =>
+      name ? changeLayer(app, entry, 'Rename layer', { name }) : app.store.touch('layers'),
+  });
 }
 
-// one layer of the stack: shown or hidden, its name, its place, and a way to delete it
+// one layer, as an image editor lists it: shown or not, its art, its name; a click draws on it,
+// a double-click on the name renames it
 export function layerRow(app, entry, active) {
-  const { state } = app.store;
-  const rename = (event) =>
-    changeLayer(app, entry, 'Rename layer', { name: event.target.value.trim() || entry.name });
+  const select = () => goTo(app, { layer: entry.key });
+  const label = node(
+    'span.layer-name',
+    { title: 'Double-click to rename', ondblclick: () => startRename(app, entry, label) },
+    entry.name,
+  );
 
   return node(
     'div.layer-row',
     {
+      role: 'option',
+      tabindex: active ? '0' : '-1',
+      'aria-selected': String(active),
       'aria-current': String(active),
       'data-hidden': String(!entry.visible),
-      onclick: () => app.store.set({ at: { ...state.at, layer: entry.key }, selection: null }),
+      'data-key': entry.key,
+      onclick: select,
+      onkeydown: (event) => event.key === 'F2' && startRename(app, entry, label),
     },
     eyeButton(app, entry),
-    node('input.input', {
-      value: entry.name,
-      'aria-label': 'Layer name',
-      onclick: quiet,
-      onchange: rename,
-    }),
-    entry.kind === 'reference' ? node('span.badge', {}, 'Trace') : null,
+    thumbnail(app.store.state, entry),
+    label,
+    entry.kind === 'reference' ? node('span.badge', { title: 'Never downloaded' }, 'Trace') : null,
     entry.visible ? null : node('span.badge', {}, 'Hidden'),
-    stepButton(app, entry, 1),
-    stepButton(app, entry, -1),
-    deleteButton(app, entry),
   );
 }

@@ -1,125 +1,164 @@
-import { node, replace, toast } from './dom.js';
-import { commit, currentAnimation, currentLayer, restructure } from './actions.js';
-import { addLayer, layerStack, moveLayer, updateLayer } from '../model/structure.js';
-import { layerRow } from './layer-row.js';
-import { frameAt } from '../model/project.js';
-import { decodeImage } from '../io/images.js';
-import { createSprite } from '../model/sprite.js';
-import { chooseFile } from './choose-file.js';
+import { icon, node, replace, toast } from './dom.js';
+import { commit, currentAnimation, currentLayer, goTo, restructure } from './actions.js';
+import { addLayer, layerStack, removeLayer } from '../model/structure.js';
+import { duplicateLayer, layerBelow, mergeDown, placeLayer } from '../model/layer-ops.js';
+import { layerRow, startRename } from './layer-row.js';
+import { addPicture, pictureStrength } from './trace-picture.js';
+import { bindFrameDrag } from './frame-drag.js';
 
-// a picture fitted inside the canvas, smoothly scaled, to trace over
-async function fitPicture(file, width, height) {
-  const image = await decodeImage(file);
-  const scale = Math.min(width / image.width, height / image.height);
-  const source = document.createElement('canvas');
+const ONE_LAYER_HINT =
+  'Like sheets of glass stacked in every frame: add one for hair or a sword to draw it without touching the rest.';
 
-  source.width = image.width;
-  source.height = image.height;
-  source.getContext('2d').putImageData(new ImageData(image.data, image.width, image.height), 0, 0);
-  const target = document.createElement('canvas');
-  target.width = width;
-  target.height = height;
-  const context = target.getContext('2d', { willReadFrequently: true });
-  const fittedWidth = Math.round(image.width * scale);
-  const hgt = Math.round(image.height * scale);
-  context.drawImage(source, Math.round((width - fittedWidth) / 2), height - hgt, fittedWidth, hgt);
-  const sprite = createSprite(width, height);
-  sprite.pixels.set(context.getImageData(0, 0, width, height).data);
+// the new layer's name is ready to type, as an image editor has it
+function newLayer(app, active) {
+  const name = `Layer ${layerStack(currentAnimation(app.store.state)).length + 1}`;
+  let key = null;
+  restructure(app, 'New layer', (draft) => {
+    key = addLayer(draft.project, currentAnimation(draft), { name, above: active.key });
 
-  return sprite;
+    return { layer: key };
+  });
+  const label = document.querySelector(`.layer-row[data-key="${key}"] .layer-name`);
+
+  if (label) {
+    startRename(app, { key, name }, label);
+  }
 }
 
-function addReference(app) {
-  chooseFile(async (file) => {
-    const { state } = app.store;
-    const picture = await fitPicture(
-      file,
-      state.project.canvas.width,
-      state.project.canvas.height,
-    ).catch(() => null);
-
-    if (!picture) {
-      toast('That file is not a picture the browser can open.');
-
-      return;
+function deleteLayer(app, active) {
+  restructure(app, `Delete ${active.name}`, (draft) => {
+    if (!removeLayer(currentAnimation(draft), active.key)) {
+      toast('Keep at least one layer of art.');
     }
-
-    restructure(app, 'Add picture to trace', (draft) => {
-      const animation = currentAnimation(draft);
-      const key = addLayer(draft.project, animation, {
-        name: `Trace: ${file.name}`,
-        kind: 'reference',
-        above: layerStack(animation)[0]?.key ?? null,
-      });
-
-      moveLayer(animation, key, -1);
-      frameAt(draft.project, draft.at).layers.find((layer) => layer.key === key).sprite = picture;
-
-      return { layer: key };
-    });
-    toast(
-      'Picture added under your art, faded. Move it with the select tool; it never goes into downloads.',
-    );
   });
 }
 
-function referenceStrength(app, layer) {
+// an icon button; its name shows on hover and is read out
+function tool(iconName, name, onclick, { disabled = false, title = name } = {}) {
   return node(
-    'label.field',
-    { for: 'trace-opacity' },
-    node('span', {}, 'How strong the picture shows'),
-    node('input', {
-      type: 'range',
-      id: 'trace-opacity',
-      min: '0.1',
-      max: '1',
-      step: '0.05',
-      value: String(layer.opacity),
-      onchange: (event) =>
-        restructure(app, 'Picture strength', (draft) => {
-          updateLayer(currentAnimation(draft), layer.key, { opacity: Number(event.target.value) });
-        }),
-    }),
+    'button.btn.quiet.icon-only',
+    { onclick, title, 'aria-label': name, disabled },
+    icon(iconName),
   );
 }
 
-function layerButtons(app, active) {
+function layerActions(app, active) {
+  return {
+    duplicate: () =>
+      restructure(app, 'Duplicate layer', (draft) => ({
+        layer: duplicateLayer(currentAnimation(draft), active.key),
+      })),
+    merge: () =>
+      restructure(app, 'Merge down', (draft) => ({
+        layer: mergeDown(currentAnimation(draft), active.key),
+      })),
+    clear: () => commit(app, 'Clear layer', [active], () => active.sprite.pixels.fill(0)),
+  };
+}
+
+// grouped as an image editor's: add, then change, then (apart, at the end) take away
+function layerBar(app, active) {
   const animation = currentAnimation(app.store.state);
-  const add = () =>
-    restructure(app, 'Add layer', (draft) => ({
-      layer: addLayer(draft.project, currentAnimation(draft), {
-        name: `Layer ${layerStack(animation).length + 1}`,
-        above: active.key,
-      }),
-    }));
-  const clear = () => commit(app, 'Clear layer', [active], () => active.sprite.pixels.fill(0));
+  const { duplicate, merge, clear } = layerActions(app, active);
 
   return node(
-    'div.group',
-    { style: { gap: '6px', flexWrap: 'wrap' } },
-    node('button.btn', { onclick: add }, 'Add layer'),
-    node('button.btn', { onclick: () => addReference(app) }, 'Add picture to trace…'),
+    'div.layer-bar',
+    { role: 'toolbar', 'aria-label': 'Layer actions' },
     node(
-      'button.btn.quiet',
-      { onclick: clear, title: 'Erase everything on this layer in this frame' },
-      'Clear',
+      'div.layer-tools',
+      {},
+      node(
+        'button.btn.quiet',
+        { onclick: () => newLayer(app, active), title: 'New layer above this one' },
+        icon('plus'),
+        'New layer',
+      ),
+      tool('picture', 'Add a picture to trace', () => addPicture(app), {
+        title: 'Add a picture to trace: shown faded under your art, never in a download',
+      }),
+    ),
+    node(
+      'div.layer-tools',
+      {},
+      tool('duplicate', 'Duplicate layer', duplicate),
+      tool(
+        'merge-down',
+        'Merge down into the layer below',
+        merge,
+        !layerBelow(animation, active.key),
+      ),
+    ),
+    node(
+      'div.layer-tools.end',
+      {},
+      tool('eraser', `Clear ${active.name} in this frame`, clear, {
+        disabled: active.kind === 'reference',
+      }),
+      tool('trash', `Delete ${active.name}`, () => deleteLayer(app, active)),
     ),
   );
 }
 
+// ↑ and ↓ pick the layer above or below, as in an image editor's list
+function onListKey(app, event, stack) {
+  const step = { ArrowUp: 1, ArrowDown: -1 }[event.key];
+  const at = stack.findIndex((entry) => entry.key === currentLayer(app.store.state).key);
+  const next = stack[at + (step ?? 0)];
+
+  if (step && next) {
+    event.preventDefault();
+    goTo(app, { layer: next.key });
+  }
+}
+
+// top first, as image editors list them; a drag puts a layer anywhere in the stack
+function layerList(app, stack, active) {
+  const list = node(
+    'div.view-list',
+    {
+      role: 'listbox',
+      'aria-label': 'Layers, top first',
+      onkeydown: (event) => onListKey(app, event, stack),
+    },
+    [...stack].reverse().map((entry) => layerRow(app, entry, entry.key === active.key)),
+  );
+  const top = stack.length - 1;
+
+  bindFrameDrag(
+    list,
+    '.layer-row',
+    (from, to) =>
+      restructure(app, 'Move layer', (draft) => {
+        placeLayer(currentAnimation(draft), stack[top - from].key, top - to);
+      }),
+    { axis: 'y' },
+  );
+
+  return list;
+}
+
 export function renderLayersPanel(el, app) {
   const { state } = app.store;
-  const animation = currentAnimation(state);
+
+  // a layer name being typed is never drawn over
+  if (el.querySelector('.layer-rename')) {
+    return;
+  }
+
+  const stack = layerStack(currentAnimation(state));
   const active = currentLayer(state);
-  const rows = [...layerStack(animation)]
-    .reverse()
-    .map((entry) => layerRow(app, entry, entry.key === active.key));
+  const hadFocus = Boolean(document.activeElement?.closest?.('.layer-row'));
 
   replace(
     el,
-    node('h2', { tabindex: '0' }, 'Layers', node('span.hint', {}, 'top first')),
-    node('div.view-list', {}, rows),
-    active.kind === 'reference' ? referenceStrength(app, active) : null,
-    layerButtons(app, active),
+    node('h2', { tabindex: '0' }, 'Layers'),
+    stack.length < 2 ? node('p.hint', {}, ONE_LAYER_HINT) : null,
+    layerList(app, stack, active),
+    active.kind === 'reference' ? pictureStrength(app, active) : null,
+    layerBar(app, active),
   );
+
+  if (hadFocus) {
+    el.querySelector('.layer-row[aria-selected="true"]')?.focus();
+  }
 }

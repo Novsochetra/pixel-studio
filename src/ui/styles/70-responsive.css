@@ -161,6 +161,10 @@
     height: 28px;
   }
 
+  .btn.icon-only {
+    width: 40px;
+  }
+
   .grid-view-more,
   .tab-more {
     width: 36px;

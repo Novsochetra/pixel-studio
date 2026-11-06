@@ -11,7 +11,6 @@ import {
   openExample,
   selectFrame,
   selectView,
-  openPanel,
 } from './studio.mjs';
 
 const { page, check, finish, images, shots } = await openStudio();
@@ -76,11 +75,17 @@ check(
   'the image fills frame 2, frame 1 keeps its art',
 );
 
-await openPanel(page, 'Layers');
-await chooseFiles(page, () => page.getByRole('button', { name: 'Add picture to trace…' }).click(), [
-  imageFile(back, 'trace.webp'),
-]);
+await chooseFiles(
+  page,
+  () => page.getByRole('button', { name: /^Add a picture to trace/ }).click(),
+  [imageFile(back, 'trace.webp')],
+);
 await page.waitForTimeout(600);
+await page.locator('.layer-row', { hasText: 'Trace' }).click();
+check(
+  (await page.getByLabel('How strongly the picture shows').count()) === 1,
+  'a picture to trace joins the layers, marked, with how strongly it shows',
+);
 await page.locator('.cell-add').click();
 await page.waitForTimeout(200);
 await dropImage(page, side, 'side.webp');

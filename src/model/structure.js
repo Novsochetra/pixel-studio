@@ -1,7 +1,7 @@
 import { cloneSprite, createSprite } from './sprite.js';
 import { matchingLayer, newAnimation, newFrame, newId, newLayer } from './project.js';
 
-const framesOf = (animation) =>
+export const framesOf = (animation) =>
   Object.values(animation.directions).flatMap((entry) => entry.frames);
 
 export function layerStack(animation) {

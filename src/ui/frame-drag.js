@@ -4,12 +4,18 @@ const MOUSE_SLOP = 5;
 const TOUCH_SLOP = 8;
 const HOLD_MS = 300;
 
+// along a row of frames, or down a list (layers): which coordinate and which side of a box count
+const AXES = {
+  x: { at: (event) => event.clientX, start: 'left', size: 'width', scroll: 'scrollLeft' },
+  y: { at: (event) => event.clientY, start: 'top', size: 'height', scroll: 'scrollTop' },
+};
+
 // the gap the pointer is over: 0 is before the first frame, n after the last
-function slotAt(frames, x) {
+function slotAt(frames, position, axis) {
   return frames.filter((frame) => {
     const box = frame.getBoundingClientRect();
 
-    return box.left + box.width / 2 < x;
+    return box[axis.start] + box[axis.size] / 2 < position;
   }).length;
 }
 
@@ -23,14 +29,15 @@ function markSlot(frames, from, slot) {
   });
 }
 
-function scrollNear(row, x) {
+function scrollNear(row, position, axis) {
   const scroller = row.closest('.grid-scroll') ?? row;
   const box = scroller.getBoundingClientRect();
+  const end = box[axis.start] + box[axis.size];
 
-  if (x < box.left + 24) {
-    scroller.scrollLeft -= 8;
-  } else if (x > box.right - 24) {
-    scroller.scrollLeft += 8;
+  if (position < box[axis.start] + 24) {
+    scroller[axis.scroll] -= 8;
+  } else if (position > end - 24) {
+    scroller[axis.scroll] += 8;
   }
 }
 
@@ -59,7 +66,7 @@ function endDrag(drag) {
 function onDown(drag, event) {
   const frame = event.target.closest(drag.selector);
 
-  if (!frame || event.button > 0 || event.target.closest('.cell-more')) {
+  if (!frame || event.button > 0 || event.target.closest('.cell-more, input')) {
     return;
   }
 
@@ -87,9 +94,10 @@ function onMove(drag, event) {
   }
 
   if (press.dragging) {
-    press.slot = slotAt(drag.frames(), event.clientX);
+    const position = drag.axis.at(event);
+    press.slot = slotAt(drag.frames(), position, drag.axis);
     markSlot(drag.frames(), press.from, press.slot);
-    scrollNear(drag.row, event.clientX);
+    scrollNear(drag.row, position, drag.axis);
 
     return;
   }
@@ -116,10 +124,11 @@ function onUp(drag) {
 }
 
 // onMove(from, to): `to` is where the frame should end up, as moveFrame takes it
-export function bindFrameDrag(row, selector, onMoveFrame) {
+export function bindFrameDrag(row, selector, onMoveFrame, { axis = 'x' } = {}) {
   const drag = {
     row,
     selector,
+    axis: AXES[axis],
     onMove: onMoveFrame,
     press: null,
     frames: () => [...row.querySelectorAll(selector)],

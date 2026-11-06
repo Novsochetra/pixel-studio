@@ -7,7 +7,7 @@ import { renderOutlinePanel } from './outline-panel.js';
 
 const FOLDED = 'pixel-clean-folded';
 // what is used on every visit stays open; the rest waits one click away
-const FOLDED_AT_FIRST = ['layers', 'outline', 'guides'];
+const FOLDED_AT_FIRST = ['outline', 'guides'];
 
 function folding(folded) {
   return (title) => {

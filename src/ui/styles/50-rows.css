@@ -48,7 +48,7 @@
 
 .layer-row {
   display: grid;
-  grid-template-columns: auto 1fr repeat(5, auto);
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 4px;
   padding: 4px 6px;
@@ -62,7 +62,8 @@
   border-color: color-mix(in srgb, var(--tint), transparent 50%);
 }
 
-.layer-row[data-hidden='true'] .input {
+.layer-row[data-hidden='true'] .layer-name,
+.layer-row[data-hidden='true'] .layer-thumb {
   opacity: 0.5;
 }
 
@@ -147,4 +148,85 @@
   border-radius: 4px;
   background: var(--fill-quiet);
   color: var(--label-secondary);
+}
+
+.layer-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: var(--well);
+  image-rendering: pixelated;
+}
+
+.layer-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+
+.layer-rename {
+  min-width: 0;
+  height: 26px;
+}
+
+.layer-row.dragging {
+  opacity: 0.4;
+}
+
+.layer-row.drop-before,
+.layer-row.drop-after {
+  position: relative;
+}
+
+/* where a dragged layer will land: a line between two rows */
+.layer-row.drop-before::before,
+.layer-row.drop-after::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--tint);
+}
+
+.layer-row.drop-before::before {
+  top: -4px;
+}
+
+.layer-row.drop-after::after {
+  bottom: -4px;
+}
+
+.layer-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--separator);
+}
+
+/* each group of layer actions sits together; the ones that take away keep to the far end */
+.layer-tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 4px;
+  border-right: 1px solid var(--separator);
+}
+
+.layer-tools .btn:not(.icon-only) {
+  padding: 0 8px 0 6px;
+}
+
+.layer-tools.end {
+  margin-left: auto;
+  padding-right: 0;
+  border-right: 0;
+}
+
+.btn.icon-only {
+  width: 28px;
+  padding: 0;
 }

@@ -11,6 +11,27 @@ function isEmptyFrame(state) {
   return Boolean(frame) && !hasArt(frame) && !hiddenArt(state, state.at.direction).length;
 }
 
+// the next pose from the one before: a copy to change, or that pose faded behind to draw over
+function fromPrevious(app, { direction, index }) {
+  return [
+    node(
+      'button.btn',
+      { onclick: () => startFromPrevious(app, direction, index) },
+      `Start from frame ${index}`,
+    ),
+    app.store.state.onion
+      ? null
+      : node(
+          'button.btn.quiet',
+          {
+            title: 'Onion skin: the frames before and after show faded behind this one',
+            onclick: () => app.store.set({ onion: true }),
+          },
+          `Show frame ${index} faded`,
+        ),
+  ];
+}
+
 // Over an empty frame: what to do with it, so a new frame never looks like a dead end.
 export function renderEmptyFrame(el, app) {
   const { state } = app.store;
@@ -41,12 +62,6 @@ export function renderEmptyFrame(el, app) {
       icon('upload'),
       'Image into this frame…',
     ),
-    previous
-      ? node(
-          'button.btn',
-          { onclick: () => startFromPrevious(app, direction, index) },
-          `Start from frame ${index}`,
-        )
-      : null,
+    previous ? fromPrevious(app, { direction, index }) : null,
   );
 }
