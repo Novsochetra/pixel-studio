@@ -1,5 +1,5 @@
 import { changedLayers } from '../editor/history.js';
-import { settleAt } from './actions.js';
+import { goToSettled, settleAt } from './actions.js';
 import { toast } from './dom.js';
 
 function afterHistory(app, step) {
@@ -15,7 +15,7 @@ function afterHistory(app, step) {
     ]);
     app.saver.markNewLayers(app.store.state.project);
     app.saver.markStructure();
-    app.store.set({ at: settleAt(app.store.state), selection: null });
+    goToSettled(app, settleAt(app.store.state));
     app.store.touch('animations');
 
     return;

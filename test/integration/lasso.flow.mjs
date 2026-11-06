@@ -1,7 +1,7 @@
 // The lasso: a loop drawn round a part selects it; a drag inside lifts it off the art and moves
 // it; cut, paste and undo work as for any selection; a click away lets go.
 import { openStudio } from './harness.mjs';
-import { openExample } from './studio.mjs';
+import { frameAction, frameLabels, openExample, selectView } from './studio.mjs';
 
 const { page, check, finish, shots } = await openStudio();
 const canvas = page.locator('.canvas-holder canvas');
@@ -107,6 +107,25 @@ await page.keyboard.press('Meta+z');
 await page.waitForTimeout(150);
 
 await page.keyboard.press('l');
+await stroke(roundTheFist);
+await frameAction(page, 'Duplicate frame');
+check(
+  (await bar.isVisible()) && (await frameLabels(page)).length === 2,
+  'a duplicated frame keeps the selection',
+);
+const copied = await picture();
+await stroke([
+  [58, 88],
+  [58, 80],
+]);
+check((await picture()) !== copied, 'so the part is moved in the new frame at once');
+await page.keyboard.press(',');
+await page.waitForTimeout(150);
+check(await bar.isVisible(), 'stepping to another frame keeps it too');
+await selectView(page, 'Side');
+check(await bar.isHidden(), 'another view is another drawing: the selection goes');
+await selectView(page, 'Front');
+
 await stroke(roundTheFist);
 await page.mouse.click(...(await over([10, 10])));
 await page.waitForTimeout(150);

@@ -4,6 +4,7 @@ import { compositeFrame } from '../model/composite.js';
 import { changedLayers, snapshotAnimations } from '../editor/history.js';
 import { referenceOf } from '../model/reference.js';
 import { refusesPaint } from './body/body-lock.js';
+import { keptSelection } from '../editor/selection-kept.js';
 import { bodyOf, isBody } from '../model/body/body-kind.js';
 import { clearPosedBody } from '../model/body/body.js';
 
@@ -134,8 +135,20 @@ export function restructure(app, label, mutate) {
   app.saver.markLayers(changedLayers(before, state.project.animations));
   app.saver.markNewLayers(state.project);
   app.saver.markStructure();
-  app.store.set({ at: settleAt({ ...state, at: { ...state.at, ...at } }), selection: null });
+  goToSettled(app, settleAt({ ...state, at: { ...state.at, ...at } }));
   app.store.touch('animations');
+}
+
+// to a place that exists after a change, the selection kept if it is still the same drawing
+export function goToSettled(app, at) {
+  const { state } = app.store;
+  const selection = keptSelection(state.selection, {
+    from: state.at,
+    to: at,
+    canvas: state.project.canvas,
+  });
+
+  app.store.set({ at, selection });
 }
 
 export function flipCurrent(app) {
@@ -162,10 +175,9 @@ export function replaceDirectionArt(app, { direction, frame }, sprite, label) {
   });
 }
 
-// to another animation, view or frame ({ animation, direction, frame, layer }), letting go of
-// the selection, which belongs to the frame it was made in
+// to another animation, view, frame or layer ({ animation, direction, frame, layer })
 export function goTo(app, place) {
-  app.store.set({ at: { ...app.store.state.at, ...place }, selection: null });
+  goToSettled(app, { ...app.store.state.at, ...place });
 }
 
 export const selectDirection = (app, direction) => goTo(app, { direction });
