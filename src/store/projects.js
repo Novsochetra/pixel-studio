@@ -25,7 +25,7 @@ export function writeIndex(backend, index) {
   return backend.write(INDEX, { list: index.list, current: index.current });
 }
 
-export function entryFor(project, prefix) {
+function entryFor(project, prefix) {
   return {
     id: project.id,
     name: project.name,
@@ -54,9 +54,28 @@ export function upsertEntry(index, project, prefix) {
 }
 
 // an entry from this visit put into a list read later, in place of the same project's
-export function mergeEntry(index, entry) {
+function mergeEntry(index, entry) {
   const at = index.list.findIndex((listed) => listed.id === entry.id);
   at < 0 ? index.list.push(entry) : (index.list[at] = entry);
+}
+
+// The list is only written when it was read: one written from an empty guess would drop every
+// project this visit did not see. While it cannot be read, each save tries again, and the work of
+// this visit joins the real list once it can.
+export async function saveProjectList(backend, index) {
+  if (index.unreadable) {
+    const read = await readIndex(backend);
+
+    if (read.unreadable) {
+      return;
+    }
+
+    index.list.forEach((entry) => mergeEntry(read, entry));
+    delete index.unreadable;
+    index.list = read.list;
+  }
+
+  await writeIndex(backend, index);
 }
 
 // every document of one project: its layers, structure, background and versions

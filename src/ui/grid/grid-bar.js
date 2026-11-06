@@ -7,6 +7,7 @@ import { setGridAll } from './all-views.js';
 import { togglePlayback } from './playback.js';
 import { PIN_NAMES } from '../../model/pins.js';
 import { isSingleView, kindOf } from '../../model/kinds.js';
+import { wholeNumber } from '../../model/numbers.js';
 
 function toggle(app, { key, iconName, label, title }) {
   const on = Boolean(app.store.state[key]);
@@ -48,10 +49,11 @@ function fpsField(app) {
   const setFps = (event) => {
     const playback = app.playback;
     restructure(app, 'Frame rate', (draft) => {
-      currentAnimation(draft).fps = Math.max(
-        1,
-        Math.min(30, Math.round(Number(event.target.value)) || 8),
-      );
+      currentAnimation(draft).fps = wholeNumber(event.target.value, {
+        min: 1,
+        max: 30,
+        fallback: 8,
+      });
     });
 
     if (playback && !app.playback) {

@@ -1,47 +1,23 @@
 import { node } from '../dom.js';
 import { openSheet } from '../sheet.js';
 import { currentAnimation, restructure } from '../actions.js';
-import { startAnimation } from '../../model/animations.js';
+import { nameSuggestions, posesToStartFrom, startAnimation } from '../../model/animations.js';
 import { kindOf } from '../../model/kinds.js';
-import { gameOf } from '../../model/presets.js';
-import { compositeFrame } from '../../model/composite.js';
-import { bounds } from '../../model/sprite.js';
+import { wholeNumber } from '../../model/numbers.js';
+import { numberInput } from '../number-input.js';
 
-function suggestions(project) {
-  const used = new Set(project.animations.map((animation) => animation.name));
-  const names = [...(gameOf(project).names ?? []), ...kindOf(project).names];
+function numberField(options) {
+  const input = numberInput(options);
 
-  return [...new Set(names)].filter((name) => !used.has(name));
+  return { input, el: node('label.field', {}, node('span', {}, options.label), input) };
 }
 
-function numberField(id, label, value, max) {
-  const input = node('input.input.mono', {
-    id,
-    type: 'number',
-    min: '1',
-    max: String(max),
-    value: String(value),
-  });
-
-  return { input, el: node('label.field', {}, node('span', {}, label), input) };
-}
-
-const drawn = (project, animation) =>
-  Object.values(animation.directions).some(({ frames }) =>
-    bounds(compositeFrame(frames[0], project.canvas.width, project.canvas.height)),
-  );
-
-// empty frames, or every frame starting as the first frame of an animation that has one drawn:
-// the standing pose, or the one open
 function startChoice(project, open) {
-  const poses = [open, ...project.animations.filter((animation) => animation !== open)].filter(
-    (animation) => drawn(project, animation),
-  );
   const select = node(
     'select.input',
     { id: 'new-animation-start' },
     node('option', { value: '' }, 'Empty frames'),
-    poses.map((animation) =>
+    posesToStartFrom(project, open).map((animation) =>
       node('option', { value: animation.id }, `Every frame as ${animation.name}'s first frame`),
     ),
   );
@@ -53,7 +29,7 @@ function startChoice(project, open) {
 }
 
 function nameField(project, item) {
-  const names = suggestions(project);
+  const names = nameSuggestions(project);
   const input = node('input.input', {
     id: 'new-animation-name',
     'aria-label': 'Name',
@@ -76,16 +52,13 @@ function nameField(project, item) {
   };
 }
 
-const within = (input, max, fallback) =>
-  Math.max(1, Math.min(max, Math.round(Number(input.value)) || fallback));
-
 // the animation the sheet's fields describe, made and opened
 function createAnimation(app, { name, frames, fps, start, item }, close) {
   const pose = start.select.value;
   const options = {
     name: name.input.value.trim() || name.input.placeholder,
-    frames: within(frames.input, 48, 1),
-    fps: within(fps.input, 30, 8),
+    frames: wholeNumber(frames.input.value, { min: 1, max: 48 }),
+    fps: wholeNumber(fps.input.value, { min: 1, max: 30, fallback: 8 }),
     start: pose ? 'pose' : 'empty',
   };
   restructure(app, `New ${item}: ${options.name}`, (draft) => {
@@ -106,8 +79,18 @@ export function openNewAnimationSheet(app) {
   const item = kindOf(state.project).itemName;
   const sheet = openSheet(`New ${item}`);
   const name = nameField(state.project, item);
-  const frames = numberField('new-animation-frames', 'Frames', item === 'animation' ? 4 : 1, 48);
-  const fps = numberField('new-animation-fps', 'Frames per second', like.fps, 30);
+  const frames = numberField({
+    id: 'new-animation-frames',
+    label: 'Frames',
+    max: 48,
+    value: item === 'animation' ? 4 : 1,
+  });
+  const fps = numberField({
+    id: 'new-animation-fps',
+    label: 'Frames per second',
+    max: 30,
+    value: like.fps,
+  });
   const start = startChoice(state.project, like);
   const create = () => createAnimation(app, { name, frames, fps, start, item }, sheet.close);
 

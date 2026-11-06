@@ -1,11 +1,11 @@
 import { changeStructure, currentAnimation, restructure } from '../actions.js';
 import { openMenu } from '../menu.js';
 import { addDirection, removeDirection } from '../../model/structure.js';
-import { drawableDirections } from '../../model/directions.js';
+import { missingDirections } from '../../model/directions.js';
 import { referenceOf } from '../../model/reference.js';
 import { viewName } from '../../model/kinds.js';
 
-function makeReference(app, direction) {
+export function makeReference(app, direction) {
   const { project } = app.store.state;
   const before = project.referenceDirection;
   project.referenceDirection = direction;
@@ -40,18 +40,12 @@ export function openViewMenu(app, anchor, direction) {
   ]);
 }
 
-export function missingViews(state) {
-  const drawn = Object.keys(currentAnimation(state).directions);
-
-  return drawableDirections(state.project).filter((direction) => !drawn.includes(direction));
-}
-
 export function openAddViewMenu(app, anchor) {
   const { state } = app.store;
 
   openMenu(
     anchor,
-    missingViews(state).map((direction) => [
+    missingDirections(state.project, currentAnimation(state)).map((direction) => [
       viewName(state.project, direction),
       () =>
         restructure(app, `Add ${viewName(state.project, direction)}`, (draft) => {

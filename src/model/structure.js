@@ -1,5 +1,5 @@
 import { cloneSprite, createSprite } from './sprite.js';
-import { newAnimation, newFrame, newId, newLayer } from './project.js';
+import { matchingLayer, newAnimation, newFrame, newId, newLayer } from './project.js';
 
 const framesOf = (animation) =>
   Object.values(animation.directions).flatMap((entry) => entry.frames);
@@ -137,10 +137,16 @@ export function addAnimation(project, name, directions) {
   return animation;
 }
 
+// Takes the animation out, unless it is the last, and returns the one to open in its place: the
+// one before it, as closing a tab opens the tab beside it.
 export function removeAnimation(project, id) {
-  if (project.animations.length > 1) {
-    project.animations = project.animations.filter((animation) => animation.id !== id);
+  const at = project.animations.findIndex((animation) => animation.id === id);
+
+  if (project.animations.length > 1 && at >= 0) {
+    project.animations.splice(at, 1);
   }
+
+  return project.animations[Math.max(0, at - 1)];
 }
 
 // the current frame of one view becomes the same frame of every other view: a start for them
@@ -153,7 +159,7 @@ export function copyFrameToViews(project, animation, direction, index) {
     }
 
     for (const layer of entry.frames[index].layers) {
-      const copy = source.layers.find((candidate) => candidate.key === layer.key)?.sprite;
+      const copy = matchingLayer(source, layer)?.sprite;
       layer.sprite = copy
         ? cloneSprite(copy)
         : createSprite(project.canvas.width, project.canvas.height);

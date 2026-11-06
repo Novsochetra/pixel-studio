@@ -1,23 +1,12 @@
 import { node } from './dom.js';
 import { openShortcuts } from './shortcuts.js';
+import { keepSetting, readSetting } from './remembered.js';
 
 const SEEN = 'pixel-clean-quick-start';
 
-function seen() {
-  try {
-    return localStorage.getItem(SEEN) === '1';
-  } catch {
-    return false;
-  }
-}
+const seen = () => Boolean(readSetting(SEEN, false));
 
-function remember() {
-  try {
-    localStorage.setItem(SEEN, '1');
-  } catch {
-    // private windows keep nothing; the card simply shows again next time
-  }
-}
+const remember = () => keepSetting(SEEN, true);
 
 const STEPS = [
   [

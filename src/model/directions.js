@@ -59,3 +59,20 @@ export function drawableDirections(project) {
 export function mirrorsOf(project) {
   return directionSetOf(project).mirrors;
 }
+
+// the views an animation draws, in compass order: the order of a sheet's rows
+export function drawnDirections(animation) {
+  return ALL_DIRECTIONS.filter((direction) => animation.directions[direction]);
+}
+
+// the views the project can draw that the animation does not have yet
+export function missingDirections(project, animation) {
+  return drawableDirections(project).filter((direction) => !animation.directions[direction]);
+}
+
+// the sides the game draws by flipping a view the animation has, as [side, view] pairs
+export function flippedSides(project, animation) {
+  return Object.entries(mirrorsOf(project)).filter(
+    ([side, source]) => animation.directions[source] && !animation.directions[side],
+  );
+}

@@ -5,7 +5,11 @@ const { chromium, devices } = createRequire(`${process.cwd()}/`)('playwright');
 
 // The page on a fresh browser profile, with its errors collected and a list of checks that fail
 // the flow. args: [url, images, shots].
-export async function openStudio({ device = null, viewport = { width: 1440, height: 960 } } = {}) {
+export async function openStudio({
+  device = null,
+  viewport = { width: 1440, height: 960 },
+  initScript = null,
+} = {}) {
   const [url, images, shots] = process.argv.slice(2);
   mkdirSync(shots, { recursive: true });
   const browser = await chromium.launch();
@@ -21,6 +25,11 @@ export async function openStudio({ device = null, viewport = { width: 1440, heig
     (message) => message.type() === 'error' && errors.push(`console: ${message.text()}`),
   );
   await page.addInitScript(() => localStorage.setItem('pixel-clean-quick-start', '1'));
+
+  if (initScript) {
+    await page.addInitScript(initScript);
+  }
+
   await page.goto(url);
   await page.waitForTimeout(800);
 

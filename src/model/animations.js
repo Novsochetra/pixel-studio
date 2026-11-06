@@ -1,7 +1,9 @@
 import { cloneSprite } from './sprite.js';
 import { newId } from './project.js';
 import { compositeFrame } from './composite.js';
-import { addFrame } from './frames.js';
+import { addFrame, hasArt } from './frames.js';
+import { kindOf } from './kinds.js';
+import { gameOf } from './presets.js';
 import { addAnimation, uniqueName } from './structure.js';
 
 // a deep copy whose animation, frames and layers have ids of their own, so both are saved
@@ -66,4 +68,21 @@ export function startAnimation(project, like, { name, frames = 1, fps = 8, start
   }
 
   return animation;
+}
+
+// names a new animation is offered: the game's, then the kind's, less those already taken
+export function nameSuggestions(project) {
+  const used = new Set(project.animations.map((animation) => animation.name));
+  const names = [...(gameOf(project).names ?? []), ...kindOf(project).names];
+
+  return [...new Set(names)].filter((name) => !used.has(name));
+}
+
+// the animations a new one can start from: those with a first frame drawn, the open one first
+export function posesToStartFrom(project, open) {
+  const others = project.animations.filter((animation) => animation !== open);
+
+  return [open, ...others].filter((animation) =>
+    Object.values(animation.directions).some(({ frames }) => hasArt(frames[0])),
+  );
 }

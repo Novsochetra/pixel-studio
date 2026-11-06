@@ -165,13 +165,15 @@ export function replaceDirectionArt(app, { direction, frame }, sprite, label) {
   });
 }
 
-export function selectDirection(app, direction) {
-  app.store.set({ at: { ...app.store.state.at, direction }, selection: null });
+// to another animation, view or frame ({ animation, direction, frame, layer }), letting go of
+// the selection, which belongs to the frame it was made in
+export function goTo(app, place) {
+  app.store.set({ at: { ...app.store.state.at, ...place }, selection: null });
 }
 
-export function selectFrame(app, frame) {
-  app.store.set({ at: { ...app.store.state.at, frame }, selection: null });
-}
+export const selectDirection = (app, direction) => goTo(app, { direction });
+
+export const selectFrame = (app, frame) => goTo(app, { frame });
 
 export function changeStructure(app, what = 'structure') {
   app.saver.markStructure();

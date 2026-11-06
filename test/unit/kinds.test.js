@@ -73,3 +73,39 @@ test('list entries from before kinds are still described', () => {
   assert.equal(describeEntry({ profile: 'naga-eleven' }), 'Character for Naga Eleven');
   assert.equal(describeEntry({ about: 'Tiles' }), 'Tiles');
 });
+
+test('a new project starts with the line its kind stands on, or a preset its own guides', async () => {
+  const character = newProject({ kind: 'character', width: 64, height: 50 });
+  const object = newProject({ kind: 'object', width: 32, height: 40 });
+  const preset = { ...character, guides: [{ id: 'g', name: 'Eyes', row: 9, rule: 'fixed' }] };
+
+  assert.deepEqual(
+    character.guides.map((guide) => [guide.name, guide.row]),
+    [['Feet', 40]],
+  );
+  assert.deepEqual(
+    object.guides.map((guide) => [guide.name, guide.row]),
+    [['Ground', 36]],
+  );
+  assert.deepEqual(newProject({ kind: 'tile' }).guides, []);
+  assert.deepEqual(newProject({ preset }).guides, preset.guides);
+});
+
+test('every kind is offered to start from, then the presets, the saved ones marked', async () => {
+  const { startChoices } = await import('../../src/model/start-choices.js');
+  const saved = { id: 'mine', label: 'Mine', kind: 'icon', game: { name: 'Quest' } };
+  const { kinds, presets } = startChoices([saved]);
+
+  assert.deepEqual(
+    kinds.map((choice) => choice.label),
+    ['Character', 'Object', 'Tiles', 'Effect', 'Icon'],
+  );
+  assert.equal(kinds.at(-1).icon, 'star');
+  assert.deepEqual(
+    presets.map((choice) => [choice.label, choice.about, choice.saved]),
+    [
+      ['Naga Eleven', 'Character for Naga Eleven', false],
+      ['Mine', 'Icon for Quest', true],
+    ],
+  );
+});

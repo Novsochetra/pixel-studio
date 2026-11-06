@@ -84,3 +84,44 @@ test('every direction set starts with directions it can draw', () => {
     );
   }
 });
+
+test('the box around several boxes leaves out the empty ones', async () => {
+  const { unionBounds } = await import('../../src/model/sprite.js');
+
+  assert.deepEqual(
+    unionBounds([
+      { left: 2, top: 5, right: 4, bottom: 9 },
+      null,
+      { left: 1, top: 6, right: 3, bottom: 7 },
+    ]),
+    { left: 1, top: 5, right: 4, bottom: 9 },
+  );
+  assert.equal(unionBounds([null]), null);
+});
+
+test('an animation draws its views in compass order, lacks the rest, and flips the missing sides', async () => {
+  const { drawnDirections, flippedSides, missingDirections } =
+    await import('../../src/model/directions.js');
+  const project = newProject({ kind: 'character', directionSet: 'four' });
+  const animation = project.animations[0];
+
+  assert.deepEqual(drawnDirections(animation), ['south', 'east', 'north']);
+  assert.deepEqual(missingDirections(project, animation), []);
+  assert.deepEqual(flippedSides(project, animation), [['west', 'east']]);
+  delete animation.directions.east;
+  assert.deepEqual(missingDirections(project, animation), ['east']);
+  assert.deepEqual(flippedSides(project, animation), []);
+});
+
+test('removing an animation opens the one before it, and never removes the last', async () => {
+  const { addAnimation, removeAnimation } = await import('../../src/model/structure.js');
+  const project = newProject();
+  const [idle] = project.animations;
+  const walk = addAnimation(project, 'Walk', ['south']);
+  const run = addAnimation(project, 'Run', ['south']);
+
+  assert.equal(removeAnimation(project, walk.id), idle);
+  assert.equal(removeAnimation(project, idle.id), run);
+  assert.equal(removeAnimation(project, run.id), run);
+  assert.deepEqual(project.animations, [run]);
+});

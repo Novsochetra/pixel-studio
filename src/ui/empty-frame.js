@@ -1,6 +1,7 @@
 import { node, icon, replace } from './dom.js';
 import { currentAnimation, hiddenArt } from './actions.js';
-import { hasArt, imageIntoFrame, startFromPrevious } from './frame-actions.js';
+import { imageIntoFrame, startFromPrevious } from './frame-actions.js';
+import { hasArt } from '../model/frames.js';
 import { frameAt } from '../model/project.js';
 import { viewName } from '../model/kinds.js';
 

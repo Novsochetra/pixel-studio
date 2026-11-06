@@ -46,18 +46,6 @@ export function argmax(values) {
   return best;
 }
 
-export function argmin(values) {
-  let best = 0;
-
-  for (let i = 1; i < values.length; i++) {
-    if (values[i] < values[best]) {
-      best = i;
-    }
-  }
-
-  return best;
-}
-
 export function median(values) {
   const sorted = Float64Array.from(values).sort();
   const mid = sorted.length >> 1;

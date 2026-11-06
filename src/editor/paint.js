@@ -1,4 +1,4 @@
-import { CLEAR, getPixel, setPixel } from '../model/sprite.js';
+import { getPixel, setPixel } from '../model/sprite.js';
 
 // every point on the line between two pixels (Bresenham)
 export function linePoints(x0, y0, x1, y1) {
@@ -114,5 +114,3 @@ export function replaceColor(sprite, from, to) {
 
   return count;
 }
-
-export const ERASE = CLEAR;

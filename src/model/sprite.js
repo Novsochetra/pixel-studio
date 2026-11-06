@@ -110,6 +110,22 @@ export function bounds(sprite) {
   return box;
 }
 
+// the box around all of `boxes`; boxes of empty sprites (null) are left out
+export function unionBounds(boxes) {
+  const found = boxes.filter(Boolean);
+
+  if (!found.length) {
+    return null;
+  }
+
+  return {
+    left: Math.min(...found.map((box) => box.left)),
+    top: Math.min(...found.map((box) => box.top)),
+    right: Math.max(...found.map((box) => box.right)),
+    bottom: Math.max(...found.map((box) => box.bottom)),
+  };
+}
+
 export function mapPixels(sprite, transform) {
   const out = createSprite(sprite.width, sprite.height);
 

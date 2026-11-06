@@ -8,7 +8,7 @@ import { select, wand } from './tools-select.js';
 import { moveFrameDrag } from './frame-move.js';
 import { kindOf } from '../model/kinds.js';
 
-export const TOOLS = [
+const TOOLS = [
   { id: 'pencil', label: 'Pencil', key: 'b' },
   { id: 'eraser', label: 'Eraser', key: 'e' },
   { id: 'picker', label: 'Colour picker', key: 'i' },
@@ -53,15 +53,15 @@ const PAINTING = new Set(['pencil', 'eraser', 'fill', 'replace', 'shade']);
 
 // the tools a press starts; each returns the drag that follows, or null
 const ON_PRESS = {
-  select: (app, point) => select(app, point),
+  select,
   wand: (app, point, event) => wand(app, point, event.shiftKey),
-  pin: (app, point) => pin(app, point),
-  moveframe: (app, point) => moveFrameDrag(app, point),
+  pin,
+  moveframe: moveFrameDrag,
   shade: (app, point, event) => shade(app, point, event.shiftKey),
   pencil: (app, point) => stroke(app, point, app.store.state.color),
   eraser: (app, point) => stroke(app, point, CLEAR),
-  fill: (app, point) => fill(app, point),
-  replace: (app, point) => replace(app, point),
+  fill,
+  replace,
 };
 
 function hiddenLayer(app) {

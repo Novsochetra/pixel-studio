@@ -1,10 +1,10 @@
 import { currentAnimation, currentFrames } from '../actions.js';
+import { frameAtTime } from '../../model/frames.js';
 
 // Play runs the animation on the canvas itself: app.playback.frame is the frame on show, and
 // onFrame repaints whatever shows it. Any edit, or a click on a frame, stops it.
 
-// Each play has its own loop, which ends once that play is stopped or another takes its place.
-// A frame's time can come just before the play's start, which must not step back to frame -1.
+// each play has its own loop, which ends once that play is stopped or another takes its place
 function tick(app, playback, time) {
   if (app.playback !== playback) {
     return;
@@ -17,10 +17,10 @@ function tick(app, playback, time) {
   }
 
   const { state } = app.store;
-  const count = currentFrames(state).length;
-  const elapsed = Math.max(0, time - playback.start);
-  const step = Math.floor((elapsed / 1000) * currentAnimation(state).fps);
-  const frame = (playback.from + step) % count;
+  const frame = frameAtTime(
+    { from: playback.from, fps: currentAnimation(state).fps, count: currentFrames(state).length },
+    time - playback.start,
+  );
 
   if (frame !== playback.frame) {
     playback.frame = frame;

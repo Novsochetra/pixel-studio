@@ -1,11 +1,12 @@
 import { createStore } from './store.js';
 import { mountApp } from './app.js';
-import { node, toast } from './dom.js';
+import { toast } from './dom.js';
 import { startingState } from './starting-state.js';
 import { addProject, fillMissingSprites, install } from './session.js';
 import { firstProject } from './boot-project.js';
 import { sampleProject } from './sample.js';
 import { showStartScreen } from './start/start-screen.js';
+import { showOpening } from './opening-screen.js';
 import { openBackend } from '../store/backends.js';
 import { readIndex } from '../store/projects.js';
 import { deletePreset, readPresets } from '../store/presets.js';
@@ -70,9 +71,7 @@ function startScreenHandlers(backend, index, closeScreen) {
   };
 }
 
-async function boot() {
-  const stage = document.getElementById('stage');
-  stage.append(node('div.stage-inner', {}, node('p.hint', {}, 'Opening your work…')));
+async function openWork() {
   const backend = await openBackend();
   const index = await readIndex(backend);
   const opened = await firstProject(backend, index);
@@ -83,11 +82,21 @@ async function boot() {
     return;
   }
 
-  stage.replaceChildren();
   const presets = await readPresets(backend);
   let screen = null;
   const handlers = startScreenHandlers(backend, index, () => screen.close());
   screen = showStartScreen({ presets, failed: opened.failed, handlers });
+}
+
+async function boot() {
+  const opening = showOpening();
+
+  try {
+    await openWork();
+    opening.close();
+  } catch (error) {
+    opening.fail(error);
+  }
 }
 
 boot();

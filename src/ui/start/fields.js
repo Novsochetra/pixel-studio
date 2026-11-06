@@ -1,32 +1,25 @@
 import { node } from '../dom.js';
 import { DIRECTION_SETS } from '../../model/directions.js';
 import { defaultName } from '../../model/presets.js';
+import { wholeNumber } from '../../model/numbers.js';
+import { numberInput } from '../number-input.js';
 
 const SIZES = [16, 24, 32, 48, 64, 96, 128, 160];
-
-function numberInput(id, label, max) {
-  return node('input.input.mono', {
-    id,
-    type: 'number',
-    min: '1',
-    max: String(max),
-    'aria-label': label,
-  });
-}
 
 function field(label, control) {
   return node('label.field', {}, node('span', {}, label), control);
 }
 
-const clamp = (input, min, max) =>
-  Math.max(min, Math.min(max, Math.round(Number(input.value)) || min));
-
 function controls() {
   return {
     name: node('input.input', { id: 'project-name', 'aria-label': 'Name' }),
-    width: numberInput('project-width', 'Canvas width', 512),
-    height: numberInput('project-height', 'Canvas height', 512),
-    scale: numberInput('project-scale', 'Pixels per art pixel in the big copy', 32),
+    width: numberInput({ id: 'project-width', label: 'Canvas width', max: 512 }),
+    height: numberInput({ id: 'project-height', label: 'Canvas height', max: 512 }),
+    scale: numberInput({
+      id: 'project-scale',
+      label: 'Pixels per art pixel in the big copy',
+      max: 32,
+    }),
     directions: node(
       'select.input',
       { id: 'project-directions', 'aria-label': 'Directions' },
@@ -83,9 +76,9 @@ export function projectFields() {
     },
     read: () => ({
       name: name.value.trim() || name.placeholder,
-      width: clamp(width, 8, 512),
-      height: clamp(height, 8, 512),
-      scale: clamp(scale, 1, 32),
+      width: wholeNumber(width.value, { min: 8, max: 512 }),
+      height: wholeNumber(height.value, { min: 8, max: 512 }),
+      scale: wholeNumber(scale.value, { min: 1, max: 32 }),
       directionSet: directions.value,
     }),
   };

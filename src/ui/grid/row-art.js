@@ -2,32 +2,17 @@ import { node } from '../dom.js';
 import { currentAnimation } from '../actions.js';
 import { mirrorCell } from './cells.js';
 import { compositeFrame } from '../../model/composite.js';
-import { bounds } from '../../model/sprite.js';
-import { mirrorsOf } from '../../model/directions.js';
+import { bounds, unionBounds } from '../../model/sprite.js';
+import { flippedSides } from '../../model/directions.js';
 import { viewName } from '../../model/kinds.js';
 
 // one framing for a whole row, so the thumbnails show the art moving, not jumping to fit
-function unionBox(sprites) {
-  const boxes = sprites.map(bounds).filter(Boolean);
-
-  if (!boxes.length) {
-    return null;
-  }
-
-  return {
-    left: Math.min(...boxes.map((box) => box.left)),
-    top: Math.min(...boxes.map((box) => box.top)),
-    right: Math.max(...boxes.map((box) => box.right)),
-    bottom: Math.max(...boxes.map((box) => box.bottom)),
-  };
-}
-
 export function rowArt(project, frames) {
   const sprites = frames.map((frame) =>
     compositeFrame(frame, project.canvas.width, project.canvas.height),
   );
 
-  return { sprites, box: unionBox(sprites) };
+  return { sprites, box: unionBounds(sprites.map(bounds)) };
 }
 
 function mirrorRow(state, direction, source) {
@@ -52,16 +37,9 @@ function mirrorRow(state, direction, source) {
   );
 }
 
-// the sides the game mirrors from a view this animation draws, and which view each comes from
-function mirroredSides(state) {
-  const directions = currentAnimation(state).directions;
-
-  return Object.entries(mirrorsOf(state.project)).filter(
-    ([side, source]) => directions[source] && !directions[side],
-  );
-}
-
 // the sides the game draws by flipping another, faded: what the sheet will hold
 export function mirrorRows(state) {
-  return mirroredSides(state).map(([side, source]) => mirrorRow(state, side, source));
+  return flippedSides(state.project, currentAnimation(state)).map(([side, source]) =>
+    mirrorRow(state, side, source),
+  );
 }

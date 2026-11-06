@@ -1,4 +1,5 @@
 import { node } from './dom.js';
+import { keepSetting, readSetting } from './remembered.js';
 import { renderColourPanel, renderDrawingPanel } from './colour-panel.js';
 import { renderGuidesPanel } from './guides-panel.js';
 import { renderLayersPanel } from './layers-panel.js';
@@ -8,34 +9,19 @@ const FOLDED = 'pixel-clean-folded';
 // what is used on every visit stays open; the rest waits one click away
 const FOLDED_AT_FIRST = ['layers', 'outline', 'guides'];
 
-function readFolded() {
-  try {
-    const saved = localStorage.getItem(FOLDED);
-
-    return saved === null ? FOLDED_AT_FIRST : JSON.parse(saved);
-  } catch {
-    return FOLDED_AT_FIRST;
-  }
-}
-
 function folding(folded) {
   return (title) => {
     const section = title.parentElement;
     const now = section.dataset.collapsed !== 'true';
     section.dataset.collapsed = String(now);
     now ? folded.add(section.dataset.name) : folded.delete(section.dataset.name);
-
-    try {
-      localStorage.setItem(FOLDED, JSON.stringify([...folded]));
-    } catch {
-      // nothing to remember it in: it stays folded for this visit
-    }
+    keepSetting(FOLDED, [...folded]);
   };
 }
 
 // a click, or Enter or Space, on a section's title folds it away; which are folded is remembered
 function bindCollapsing(inspector, sections) {
-  const folded = new Set(readFolded());
+  const folded = new Set(readSetting(FOLDED, FOLDED_AT_FIRST));
   const toggle = folding(folded);
 
   for (const [name, section] of Object.entries(sections)) {

@@ -1,12 +1,11 @@
 import { currentAnimation } from '../actions.js';
 import { openMenu } from '../menu.js';
-import { frameCount } from '../../model/frames.js';
+import { frameCount, hasArt } from '../../model/frames.js';
 import { viewName } from '../../model/kinds.js';
 import {
   copyToOtherViews,
   deleteFrame,
   duplicateFrame,
-  hasArt,
   imageIntoFrame,
   moveFrameTo,
   startFromPrevious,

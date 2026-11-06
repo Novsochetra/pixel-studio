@@ -3,16 +3,25 @@ import { test } from 'node:test';
 import { History } from '../../src/editor/history.js';
 import { newProject } from '../../src/model/new-project.js';
 import { normalizeProject } from '../../src/model/normalize.js';
+import { isSingleView, kindOf } from '../../src/model/kinds.js';
 import { install } from '../../src/ui/session.js';
 
 // choosing the reference view was not undoable, so the undo after it undid the step before
-test('choosing the reference view is its own undo step', () => {
+test('choosing the reference view is its own undo step', async () => {
+  const { makeReference } = await import('../../src/ui/grid/view-menu.js');
   const project = newProject();
   const history = new History(() => null);
-  history.recordSetting('Reference view', 'referenceDirection', 'south', 'east');
-  project.referenceDirection = 'east';
+  const app = {
+    history,
+    store: { state: { project }, touch() {} },
+    saver: { markStructure() {} },
+  };
+  const before = project.referenceDirection;
+
+  makeReference(app, 'east');
+  assert.equal(project.referenceDirection, 'east');
   history.undo(project);
-  assert.equal(project.referenceDirection, 'south');
+  assert.equal(project.referenceDirection, before);
   history.redo(project);
   assert.equal(project.referenceDirection, 'east');
 });
@@ -52,16 +61,26 @@ test('a version restored keeps how the editor was showing things', () => {
 });
 
 // with ⌘ or Ctrl held, only the ⌘ keys were looked up, so ⌘⌫ and ⌘Esc did nothing to a selection
-test('⌘ Esc lets go of a selection, as Esc does', async () => {
+test('⌘⌫ erases a selection and ⌘ Esc lets go of it, as ⌫ and Esc do', async () => {
   const { handleSelectionKey } = await import('../../src/ui/selection-keys.js');
-  const state = { selection: { width: 1, height: 1, cells: [1] }, tool: 'select' };
-  const app = { store: { state, set: (patch) => Object.assign(state, patch) } };
-  let prevented = false;
-  const event = { shiftKey: false, preventDefault: () => (prevented = true) };
+  const { rectSelection } = await import('../../src/editor/selection.js');
+  const { getPixel, pack, setPixel, CLEAR } = await import('../../src/model/sprite.js');
+  const project = newProject({ width: 4, height: 4 });
+  const at = { animation: project.animations[0].id, direction: 'south', frame: 0, layer: null };
+  const sprite = project.animations[0].directions.south.frames[0].layers[0].sprite;
+  const state = { project, at, selection: rectSelection(sprite, [0, 0], [1, 1]), tool: 'select' };
+  const app = {
+    store: { state, set: (patch) => Object.assign(state, patch), touch() {} },
+    history: new History(() => null),
+    saver: { markLayers() {} },
+  };
+  const event = { shiftKey: false, preventDefault() {} };
+  setPixel(sprite, 1, 1, pack(255, 0, 0));
 
+  assert.equal(handleSelectionKey(app, event, 'backspace', true), true);
+  assert.equal(getPixel(sprite, 1, 1), CLEAR);
   assert.equal(handleSelectionKey(app, event, 'escape', true), true);
   assert.equal(state.selection, null);
-  assert.equal(prevented, true);
 });
 
 // art the size of a tile canvas, drawn inside a margin, kept the margin and lost its far edges
@@ -175,11 +194,13 @@ test('a project of a kind this version does not know opens as a character, with 
   normalizeProject(project);
 
   assert.equal(project.directionSet, 'eight');
+  assert.equal(kindOf(project).label, 'Character');
+  assert.equal(isSingleView(project), false);
 });
 
 // work begun while the projects list could not be read was never added to it
 test('a project made while the list could not be read joins it once it can be', async () => {
-  const { writeList } = await import('../../src/ui/project-list.js');
+  const { saveProjectList } = await import('../../src/store/projects.js');
   let stored = { list: [{ id: 'old', name: 'Old' }], current: 'old' };
   const backend = {
     async read() {
@@ -191,7 +212,7 @@ test('a project made while the list could not be read joins it once it can be', 
   };
   const index = { list: [{ id: 'new', name: 'New' }], current: 'new', unreadable: true };
 
-  await writeList({ backend, index });
+  await saveProjectList(backend, index);
   assert.deepEqual(
     stored.list.map((entry) => entry.id),
     ['old', 'new'],

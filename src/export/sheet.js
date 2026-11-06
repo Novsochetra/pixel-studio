@@ -1,23 +1,18 @@
 import { createSprite, getPixel, setPixel, CLEAR } from '../model/sprite.js';
 import { compositeFrame } from '../model/composite.js';
+import { drawnDirections, flippedSides } from '../model/directions.js';
 
-import { ALL_DIRECTIONS, mirrorsOf } from '../model/directions.js';
-
-// the mirrors this animation can use: a direction the set mirrors, from one it has drawn
-function usableMirrors(project, animation) {
-  return Object.entries(mirrorsOf(project)).filter(
-    ([direction, source]) => animation.directions[source] && !animation.directions[direction],
-  );
-}
-
-// rows in compass order (Naga Eleven's order), then the mirrored ones when they are wanted
+// the drawn views in compass order, then the flipped ones when they are wanted
 function sheetRows(project, animation, includeMirrored) {
-  const drawn = ALL_DIRECTIONS.filter((direction) => animation.directions[direction]);
-  const rows = drawn.map((direction) => ({ direction, source: direction, flip: false }));
+  const rows = drawnDirections(animation).map((direction) => ({
+    direction,
+    source: direction,
+    flip: false,
+  }));
 
   if (includeMirrored) {
     rows.push(
-      ...usableMirrors(project, animation).map(([direction, source]) => ({
+      ...flippedSides(project, animation).map(([direction, source]) => ({
         direction,
         source,
         flip: true,
@@ -64,7 +59,7 @@ function manifestRows(project, rows, includeMirrored, animation) {
 
   if (!includeMirrored) {
     entries.push(
-      ...usableMirrors(project, animation).map(([direction, source]) => [
+      ...flippedSides(project, animation).map(([direction, source]) => [
         direction,
         { mirrorOf: source },
       ]),

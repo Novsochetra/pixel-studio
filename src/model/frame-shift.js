@@ -1,21 +1,11 @@
-import { bounds, createSprite } from './sprite.js';
+import { bounds, createSprite, unionBounds } from './sprite.js';
 
 function artBox(frame) {
-  const boxes = frame.layers
-    .filter((layer) => layer.kind !== 'reference' && layer.sprite)
-    .map((layer) => bounds(layer.sprite))
-    .filter(Boolean);
-
-  if (!boxes.length) {
-    return null;
-  }
-
-  return {
-    left: Math.min(...boxes.map((box) => box.left)),
-    top: Math.min(...boxes.map((box) => box.top)),
-    right: Math.max(...boxes.map((box) => box.right)),
-    bottom: Math.max(...boxes.map((box) => box.bottom)),
-  };
+  return unionBounds(
+    frame.layers
+      .filter((layer) => layer.kind !== 'reference' && layer.sprite)
+      .map((layer) => bounds(layer.sprite)),
+  );
 }
 
 // Art never falls off the canvas, so a move stops at the edge. A picture to trace may go off, as

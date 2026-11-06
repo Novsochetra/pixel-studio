@@ -11,12 +11,11 @@ import { shiftCurrentFrame } from './frame-move.js';
 
 const ARROWS = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] };
 
-function nudge(app, [dx, dy], big) {
+function nudge(app, [dx, dy]) {
   const layer = currentLayer(app.store.state);
-  const step = big ? 10 : 1;
   let selection = app.store.state.selection;
   commit(app, 'Move', [layer], () => {
-    selection = moveSelected(layer.sprite, selection, dx * step, dy * step);
+    selection = moveSelected(layer.sprite, selection, dx, dy);
   });
   app.store.set({ selection });
 }
@@ -81,12 +80,8 @@ function arrowKey([dx, dy]) {
     when: (state) => state.selection || state.tool === 'moveframe',
     run(app, event) {
       const step = event.shiftKey ? 10 : 1;
-
-      if (app.store.state.selection) {
-        nudge(app, [dx, dy], event.shiftKey);
-      } else {
-        shiftCurrentFrame(app, [dx * step, dy * step]);
-      }
+      const move = app.store.state.selection ? nudge : shiftCurrentFrame;
+      move(app, [dx * step, dy * step]);
     },
   };
 }

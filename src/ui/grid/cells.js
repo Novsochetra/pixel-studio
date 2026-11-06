@@ -1,4 +1,5 @@
 import { icon, node } from '../dom.js';
+import { goTo } from '../actions.js';
 import { drawThumbnail } from '../thumbnail.js';
 import { openCellMenu } from './cell-menu.js';
 import { moveFrameTo } from '../frame-actions.js';
@@ -7,8 +8,7 @@ import { viewName } from '../../model/kinds.js';
 
 const THUMB = 52;
 
-const select = (app, direction, index) =>
-  app.store.set({ at: { ...app.store.state.at, direction, frame: index }, selection: null });
+const selectCell = (app, direction, index) => goTo(app, { direction, frame: index });
 
 const ACROSS = { ArrowLeft: -1, ArrowRight: 1 };
 const DOWN = { ArrowUp: -1, ArrowDown: 1 };
@@ -47,14 +47,14 @@ function onCellKey(app, event, place) {
     const to = neighbour(event, place);
 
     if (to) {
-      select(app, to.direction, to.index);
+      selectCell(app, to.direction, to.index);
     }
   } else if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault();
     event.stopPropagation();
     selected
       ? openCellMenu(app, event.currentTarget, direction, index)
-      : select(app, direction, index);
+      : selectCell(app, direction, index);
   }
 }
 
@@ -96,7 +96,7 @@ export function cell(app, place) {
       onclick: (event) =>
         place.selected
           ? openCellMenu(app, event.currentTarget, place.direction, place.index)
-          : select(app, place.direction, place.index),
+          : selectCell(app, place.direction, place.index),
       onkeydown: (event) => onCellKey(app, event, place),
     },
     thumb,

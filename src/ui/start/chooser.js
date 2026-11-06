@@ -1,6 +1,6 @@
 import { icon, node, replace } from '../dom.js';
 import { newProject } from '../../model/new-project.js';
-import { startChoices, startingGuides } from './choices.js';
+import { startChoices } from '../../model/start-choices.js';
 import { projectFields } from './fields.js';
 
 function forgetButton(choice, onDelete) {
@@ -95,10 +95,7 @@ export function newProjectChooser({ presets, onCreate, onDeletePreset }) {
     },
   };
   const create = () => {
-    const options = fields.read();
-    const project = newProject({ ...options, preset: picked.preset });
-    project.guides = startingGuides(picked.preset, options.height);
-    onCreate(project);
+    onCreate(newProject({ ...fields.read(), preset: picked.preset }));
   };
 
   handlers.onPick(picked);

@@ -120,3 +120,42 @@ test('frames added to even out a loaded project are saved, so they never come ba
   assert.equal(app.saver.structureDirty, true);
   app.saver.detach();
 });
+
+test('a frame has art when a layer other than a picture to trace has a pixel', async () => {
+  const { hasArt } = await import('../../src/model/frames.js');
+  const project = newProject({ width: 8, height: 8 });
+  const frame = project.animations[0].directions.south.frames[0];
+
+  assert.equal(hasArt(frame), false);
+  frame.layers[0].kind = 'reference';
+  setPixel(frame.layers[0].sprite, 1, 1, RED);
+  assert.equal(hasArt(frame), false);
+  frame.layers[0].kind = 'art';
+  assert.equal(hasArt(frame), true);
+});
+
+test('a new animation is offered untaken names and the drawn poses, the open one first', async () => {
+  const { nameSuggestions, posesToStartFrom, startAnimation } =
+    await import('../../src/model/animations.js');
+  const project = newProject({ kind: 'character', width: 8, height: 8 });
+  const [idle] = project.animations;
+  const walk = startAnimation(project, idle, { name: 'Walk' });
+  const run = startAnimation(project, idle, { name: 'Run' });
+  setPixel(idle.directions.south.frames[0].layers[0].sprite, 1, 1, RED);
+  setPixel(run.directions.south.frames[0].layers[0].sprite, 1, 1, RED);
+
+  assert.deepEqual(nameSuggestions(project), ['Jump', 'Attack', 'Hurt']);
+  assert.deepEqual(posesToStartFrom(project, run), [run, idle]);
+  assert.ok(!posesToStartFrom(project, walk).includes(walk));
+});
+
+test('play shows the frame its time has reached, going round, never one before its start', async () => {
+  const { frameAtTime } = await import('../../src/model/frames.js');
+  const play = { from: 1, fps: 8, count: 4 };
+
+  assert.equal(frameAtTime(play, 0), 1);
+  assert.equal(frameAtTime(play, 124), 1);
+  assert.equal(frameAtTime(play, 125), 2);
+  assert.equal(frameAtTime(play, 500), 1);
+  assert.equal(frameAtTime(play, -5), 1);
+});

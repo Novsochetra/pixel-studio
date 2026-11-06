@@ -1,11 +1,11 @@
 import { icon, node } from '../dom.js';
-import { currentAnimation } from '../actions.js';
+import { currentAnimation, selectDirection } from '../actions.js';
 import { bindFrameDrag } from '../frame-drag.js';
 import { moveFrameTo, newFrameAfter } from '../frame-actions.js';
 import { cell } from './cells.js';
 import { mirrorRows, rowArt } from './row-art.js';
-import { missingViews, openAddViewMenu, openViewMenu } from './view-menu.js';
-import { ALL_DIRECTIONS } from '../../model/directions.js';
+import { openAddViewMenu, openViewMenu } from './view-menu.js';
+import { drawnDirections, missingDirections } from '../../model/directions.js';
 import { referenceOf } from '../../model/reference.js';
 import { isSingleView, viewName } from '../../model/kinds.js';
 
@@ -13,12 +13,15 @@ function label(app, direction) {
   const { state } = app.store;
   const name = viewName(state.project, direction);
   const star = referenceOf(state.project) === direction;
-  const pick = () => app.store.set({ at: { ...state.at, direction }, selection: null });
 
   return node(
     'div.grid-label',
     { role: 'rowheader' },
-    node('button.grid-view', { onclick: pick, title: `Edit ${name}` }, name),
+    node(
+      'button.grid-view',
+      { onclick: () => selectDirection(app, direction), title: `Edit ${name}` },
+      name,
+    ),
     star ? node('span.grid-star', { title: 'Every other view is matched to this one' }, '★') : null,
     node(
       'button.btn.quiet.grid-view-more',
@@ -96,9 +99,11 @@ function numbersRow(state, count, playFrame) {
 
 export function gridBody(app, { all, playFrame }) {
   const { state } = app.store;
-  const drawn = ALL_DIRECTIONS.filter((direction) => currentAnimation(state).directions[direction]);
-  const rows = all ? drawn : [state.at.direction];
-  const canAdd = all && !isSingleView(state.project) && missingViews(state).length > 0;
+  const rows = all ? drawnDirections(currentAnimation(state)) : [state.at.direction];
+  const canAdd =
+    all &&
+    !isSingleView(state.project) &&
+    missingDirections(state.project, currentAnimation(state)).length > 0;
   const gridName = all
     ? 'Frames of every view'
     : `Frames of ${viewName(state.project, state.at.direction)}`;

@@ -96,3 +96,8 @@ function* framesLayers(animation, direction, frames) {
     }
   }
 }
+
+// the layer of `frame` that is the same layer as `layer` in another frame or view
+export function matchingLayer(frame, layer) {
+  return frame.layers.find((other) => other.key === layer.key);
+}

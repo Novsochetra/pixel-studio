@@ -4,8 +4,7 @@ import { History } from '../editor/history.js';
 import { Saver } from '../store/saver.js';
 import { loadProject } from '../store/load.js';
 import { keysFor, prefixFor } from '../store/keys.js';
-import { deleteProjectData, upsertEntry } from '../store/projects.js';
-import { writeList } from './project-list.js';
+import { deleteProjectData, saveProjectList, upsertEntry } from '../store/projects.js';
 import { allLayers, newId } from '../model/project.js';
 import { normalizeProject } from '../model/normalize.js';
 import { createSprite } from '../model/sprite.js';
@@ -49,7 +48,7 @@ function saveIndex(app, project) {
   if (changed || app.index.current !== project.id || app.index.unreadable) {
     app.index.current = project.id;
 
-    return writeList(app);
+    return saveProjectList(app.backend, app.index);
   }
 
   return null;
@@ -139,7 +138,7 @@ export async function openProject(app, entry) {
   project.id ??= entry.id;
 
   install(app, fillMissingSprites(project), { prefix: entry.prefix });
-  await writeList(app);
+  await saveProjectList(app.backend, app.index);
 }
 
 // a project made here, or read from a file, joins the list under a fresh id and is saved whole
@@ -157,7 +156,7 @@ export async function addProject(app, project, background = null) {
   }
 
   await app.saver.flushNow();
-  await writeList(app);
+  await saveProjectList(app.backend, app.index);
 }
 
 export async function deleteProject(app, id) {
@@ -176,7 +175,7 @@ export async function deleteProject(app, id) {
 
   await deleteProjectData(app.backend, entry.prefix);
   app.index.list = app.index.list.filter((listed) => listed.id !== id);
-  await writeList(app);
+  await saveProjectList(app.backend, app.index);
 }
 
 // an earlier version of the open project takes its place, under the same id and documents

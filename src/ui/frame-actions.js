@@ -4,18 +4,13 @@ import { openImport } from './import-sheet.js';
 import { addFrame, moveFrame, removeFrame } from '../model/frames.js';
 import { copyFrameToViews } from '../model/structure.js';
 import { cloneSprite } from '../model/sprite.js';
+import { matchingLayer } from '../model/project.js';
 
 // What can be done to one frame, from its menu, its empty-frame card or the keyboard. Adding,
 // moving and deleting change every view; the rest change this view only.
 
 const frameChange = (app, label, change) =>
   restructure(app, label, (draft) => ({ frame: change(currentAnimation(draft)) }));
-
-export const hasArt = (frame) =>
-  frame.layers.some(
-    (layer) =>
-      layer.kind !== 'reference' && layer.sprite?.pixels.some((value, i) => i % 4 === 3 && value),
-  );
 
 export function imageIntoFrame(app, direction, index) {
   chooseFile((file) => openImport(app, direction, file, index));
@@ -27,7 +22,7 @@ export function startFromPrevious(app, direction, index) {
   const [previous, frame] = [frames[index - 1], frames[index]];
   commit(app, `Copy frame ${index} here`, frame.layers, () => {
     for (const layer of frame.layers) {
-      const source = previous.layers.find((other) => other.key === layer.key)?.sprite;
+      const source = matchingLayer(previous, layer)?.sprite;
 
       if (source) {
         layer.sprite = cloneSprite(source);

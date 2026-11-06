@@ -1,5 +1,5 @@
 import { icon, node } from '../dom.js';
-import { currentAnimation, restructure } from '../actions.js';
+import { currentAnimation, goTo, restructure } from '../actions.js';
 import { openMenu } from '../menu.js';
 import { removeAnimation } from '../../model/structure.js';
 import { rename } from './tab-rename.js';
@@ -7,8 +7,7 @@ import { duplicateAnimation } from '../../model/animations.js';
 import { kindOf } from '../../model/kinds.js';
 import { openNewAnimationSheet } from './new-animation-sheet.js';
 
-const select = (app, id) =>
-  app.store.set({ at: { ...app.store.state.at, animation: id, layer: null }, selection: null });
+const openAnimation = (app, id) => goTo(app, { animation: id, layer: null });
 
 function tabMenu(app, anchor, tabButton, animation) {
   const { project } = app.store.state;
@@ -27,14 +26,11 @@ function tabMenu(app, anchor, tabButton, animation) {
     [
       `Delete ${animation.name}`,
       () =>
-        restructure(app, `Delete ${animation.name}`, (draft) => {
-          const at = draft.project.animations.indexOf(animation);
-          removeAnimation(draft.project, animation.id);
-          // the tab beside the deleted one opens, as closing a tab does
-          const next = draft.project.animations[Math.max(0, at - 1)];
-
-          return { animation: next.id, frame: 0, layer: null };
-        }),
+        restructure(app, `Delete ${animation.name}`, (draft) => ({
+          animation: removeAnimation(draft.project, animation.id).id,
+          frame: 0,
+          layer: null,
+        })),
       { danger: true, disabled: project.animations.length < 2, title: `Keep at least one ${item}` },
     ],
   ]);
@@ -52,7 +48,7 @@ function onTabKey(app, event, animation) {
   if (animations[to]) {
     event.preventDefault();
     event.stopPropagation();
-    select(app, animations[to].id);
+    openAnimation(app, animations[to].id);
   } else if (event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey)) {
     event.preventDefault();
     tabMenu(app, event.currentTarget, event.currentTarget, animation);
@@ -67,7 +63,7 @@ function tab(app, animation, active) {
       tabindex: active ? '0' : '-1',
       'aria-selected': String(active),
       title: active ? 'Double-click to rename; right-click for more' : animation.name,
-      onclick: () => !active && select(app, animation.id),
+      onclick: () => !active && openAnimation(app, animation.id),
       ondblclick: () => rename(app, button, animation),
       oncontextmenu: (event) => {
         event.preventDefault();
