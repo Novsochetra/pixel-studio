@@ -8,7 +8,7 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
 - **Clean**: finds the image's pixel grid, removes the background and fringe, and fits it as its
   kind stands: a character matched to its reference view, a tile filling its canvas, an effect
   centred. Later animation frames keep their own pixel size.
-- **Edit**: pencil and eraser from 1 to 8 px, round or square; fill, colour swap, selection,
+- **Edit**: pencil and eraser from 1 to 8 px, round or square; fill, colour swap, selection (a box, a colour, or pixel by pixel),
   outlines, guides, layers, pictures to trace.
 - **Animate**: each animation is a grid, views down and frames across, as the sheet will be: drag
   frames to reorder them, play them on the canvas (every view side by side with All views), hide a
