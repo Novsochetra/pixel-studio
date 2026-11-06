@@ -44,3 +44,43 @@ test('the ramp maker matches the game: Cambodia home shirt', () => {
   assert.deepEqual(Object.keys(ramps), ['cape']);
   assert.equal(ramps.cape.length, 4);
 });
+
+test('every starter palette has eight colours, dark to light, as a project palette', async () => {
+  const { STARTER_PALETTES } = await import('../../src/art/starter-palettes.js');
+  const { paletteFromHexCodes } = await import('../../src/palette/palette.js');
+  const { unpack } = await import('../../src/model/sprite.js');
+  const lightness = (color) =>
+    unpack(color)
+      .slice(0, 3)
+      .reduce((sum, channel) => sum + channel, 0);
+
+  for (const starter of STARTER_PALETTES) {
+    const palette = paletteFromHexCodes(starter.name, starter.colors);
+    const light = palette.colors.map(lightness);
+
+    assert.equal(palette.colors.length, 8, starter.name);
+    assert.ok(palette.id && palette.name === starter.name);
+    assert.deepEqual(
+      light,
+      [...light].sort((first, second) => first - second),
+      starter.name,
+    );
+  }
+});
+
+test('a first guess at the parts: one per family of shades, named by its hue', async () => {
+  const { partsFromColours } = await import('../../src/palette/colour-parts.js');
+  const colours = ['#850d19', '#df2321', '#283ca0', '#3c5ad8', '#fcb94c', '#121214', '#e0e0e0'];
+  const parts = partsFromColours(colours.map(fromHex));
+
+  assert.deepEqual(
+    parts.map((part) => [part.name, part.colours.length]),
+    [
+      ['Reds', 2],
+      ['Blues', 2],
+      ['Oranges', 1],
+      ['Greys', 2],
+    ],
+  );
+  assert.equal(new Set(parts.flatMap((part) => part.colours)).size, colours.length);
+});

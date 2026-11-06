@@ -152,4 +152,31 @@ await page.getByRole('button', { name: 'Use for Effect' }).click();
 const [top, bottom] = await rows();
 check(Math.abs(top - (47 - bottom)) <= 1, 'an effect is centred on its canvas');
 
+await page.locator('button.wordmark').click();
+await page.locator('.start-section').evaluate((details) => {
+  details.open = true;
+});
+await createProject(page, { kind: 'Object', name: 'Chest' });
+await dropImage(page, back, 'chest.webp');
+await cleanReport(page);
+await page.getByRole('button', { name: 'Use for Object' }).click();
+await page.getByRole('button', { name: 'Outfits…' }).click();
+check(
+  await page.getByRole('button', { name: 'Wear it (whole character)' }).isDisabled(),
+  'a new project has no parts yet, so nothing can be worn',
+);
+await page.getByRole('button', { name: "Make parts from the art's colours" }).click();
+check(
+  (await page.locator('.part-row').count()) > 1,
+  'one click makes a part of each colour family',
+);
+await page.keyboard.press('Escape');
+await page.getByRole('button', { name: 'Swap colours…' }).click();
+await page.getByRole('button', { name: 'Ice', exact: true }).click();
+check(
+  (await page.locator('#swap-palette option:checked').textContent()) === 'Ice (8)',
+  'a starter palette is one click away in Swap colours',
+);
+await page.keyboard.press('Escape');
+
 await finish();

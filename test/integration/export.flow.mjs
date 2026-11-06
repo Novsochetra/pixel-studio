@@ -45,6 +45,10 @@ const sheetPng = await saved(
   'idle.png',
 );
 check(isPng(readFileSync(sheetPng.path)), 'the sheet downloads as a PNG');
+check(
+  (await page.locator('.toast').textContent()).startsWith('Saved'),
+  'and the page says it is saved',
+);
 const json = readZip((await saved(button('Sheets + JSON'), 'sheets.zip')).path);
 const meta = JSON.parse(json['idle.json']);
 check(

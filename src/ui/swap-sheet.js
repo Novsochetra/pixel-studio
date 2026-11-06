@@ -10,12 +10,13 @@ import {
   previewToggle,
   reduceButton,
   showPreview,
+  starterPalettes,
 } from './swap/swap-parts.js';
 import { frameAt } from '../model/project.js';
 import { applyMapping, suggestMapping } from '../palette/palette.js';
 
 const NO_PALETTE =
-  "Add the palette you want to use: paste its hex codes or open a palette file. Or start from 8 of the art's own colours.";
+  "Add the palette you want to use: paste its hex codes or open a palette file, pick a starter below, or make one from 8 of the art's own colours.";
 
 function layersFor(state, scope) {
   return scope === 'view'
@@ -116,7 +117,13 @@ function drawMapping(job, palette) {
     mappingHeader(job, palette, changed),
     node('div.compare', {}, node('div.map-table', {}, rows), previewFigure(app, mapping)),
     previewToggle(job, mapping),
-    node('details', {}, node('summary', {}, 'Add another palette'), addPalette(job)),
+    node(
+      'details',
+      {},
+      node('summary', {}, 'Add another palette'),
+      addPalette(job),
+      starterPalettes(job),
+    ),
     applyButtons(job, mapping),
   );
   showPreview(job, mapping);
@@ -149,7 +156,13 @@ export function openSwapSheet(app) {
       return;
     }
 
-    replace(slot, node('p.hint', {}, NO_PALETTE), addPalette(job), reduceButton(job));
+    replace(
+      slot,
+      node('p.hint', {}, NO_PALETTE),
+      addPalette(job),
+      starterPalettes(job),
+      reduceButton(job),
+    );
     app.store.set({ swapPreview: null });
   };
 

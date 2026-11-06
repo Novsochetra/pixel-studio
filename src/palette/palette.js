@@ -1,4 +1,5 @@
 import { CLEAR, fromHex, getPixel, pack, setPixel, unpack } from '../model/sprite.js';
+import { newId } from '../model/project.js';
 
 // Colours from text: a list of hex codes (Lospec .hex, a pasted list) or a GIMP .gpl palette.
 export function parsePaletteText(text) {
@@ -100,4 +101,9 @@ export function applyMapping(sprite, mapping) {
   }
 
   return out;
+}
+
+// a palette from its hex codes, with an id of its own, ready to add to a project
+export function paletteFromHexCodes(name, hexCodes) {
+  return { id: newId('p'), name, colors: hexCodes.map(fromHex) };
 }

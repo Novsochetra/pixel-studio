@@ -2,6 +2,8 @@ import { node } from '../dom.js';
 import { boardPreview } from '../board-canvas.js';
 import { paletteForm } from '../palette-form.js';
 import { makeReducedPalette } from './swap-mapping.js';
+import { paletteFromHexCodes } from '../../palette/palette.js';
+import { STARTER_PALETTES } from '../../art/starter-palettes.js';
 
 // The pieces of the swap sheet; job: { app, paletteId, previewOn, draw, close }.
 
@@ -45,6 +47,30 @@ export function addPalette(job) {
     job.app.saver.markStructure();
     job.draw();
   });
+}
+
+// a ready-made palette to start from, added to the project as a copy the person can change
+export function starterPalettes(job) {
+  const add = (starter) => {
+    const palette = paletteFromHexCodes(starter.name, starter.colors);
+    job.app.store.state.project.palettes.push(palette);
+    job.paletteId = palette.id;
+    job.app.saver.markStructure();
+    job.draw();
+  };
+
+  return node(
+    'div.field',
+    {},
+    node('span', {}, 'Or start from one of these'),
+    node(
+      'div.start-sizes',
+      { role: 'group', 'aria-label': 'Starter palettes' },
+      STARTER_PALETTES.map((starter) =>
+        node('button.btn.chip', { type: 'button', onclick: () => add(starter) }, starter.name),
+      ),
+    ),
+  );
 }
 
 export function reduceButton(job) {

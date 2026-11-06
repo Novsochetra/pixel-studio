@@ -7,6 +7,7 @@ function linkDownload(filename, blob) {
   link.download = filename;
   link.click();
   setTimeout(() => URL.revokeObjectURL(link.href), 4000);
+  toast(`Saved ${filename}`);
 
   return true;
 }
@@ -43,6 +44,7 @@ export async function saveFile(filename, blob) {
 
   try {
     await downloads.save({ filename, data: blob });
+    toast(`Saved ${filename}`);
 
     return true;
   } catch (error) {

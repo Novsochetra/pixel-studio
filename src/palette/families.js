@@ -10,7 +10,7 @@ function hueSector({ red, green, blue }, high, span) {
   return high === green ? (blue - red) / span + 2 : (red - green) / span + 4;
 }
 
-function hsl(color) {
+export function hsl(color) {
   const [red, green, blue] = unpack(color)
     .slice(0, 3)
     .map((value) => value / 255);

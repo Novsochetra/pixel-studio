@@ -106,7 +106,7 @@ function drawExport(slot, job) {
     const filename = `${result.name}.png`;
 
     if (await saveFile(filename, await spritePng(result.sheet))) {
-      result.warnings.length ? warn(result.warnings) : toast(`Saved ${filename}`);
+      warn(result.warnings);
     }
   };
   const pick = (id) =>

@@ -7,6 +7,7 @@ import { keepVersion } from './versions-sheet.js';
 import { downloadOutfit, keepAsSwap } from './outfit-files.js';
 import { choiceControls, chosenName, chosenRamps } from './outfits/outfit-choice.js';
 import { outfitNames } from './outfits/outfit-names.js';
+import { outfitFirstStep } from './outfits/outfit-first-step.js';
 import { kitMapping } from '../palette/kits.js';
 import { applyMapping } from '../palette/palette.js';
 import { gameOf } from '../model/presets.js';
@@ -29,7 +30,7 @@ function wear(job, mapping, name) {
 function actions(job, mapping, name) {
   const { app } = job;
   const nothing = !Object.keys(mapping).length;
-  const why = nothing ? 'Tick which colours make up each part first, below' : undefined;
+  const why = nothing ? 'Say which colours make up each part, and pick new ones, first' : undefined;
   const download = () =>
     downloadOutfit(app.store.state, mapping, name).catch((error) => toast(error.message));
 
@@ -92,9 +93,7 @@ function drawOutfits(job) {
       { style: { overflowX: 'auto' } },
       boardPreview(state, 860, { overlay: null, mapping, onScreen: true }),
     ),
-    Object.keys(mapping).length
-      ? null
-      : node('p.hint', {}, 'Nothing changes yet: tick which colours make up each part below.'),
+    outfitFirstStep(job, mapping),
     partsSection(job),
     actions(job, mapping, name),
   );
