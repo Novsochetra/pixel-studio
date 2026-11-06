@@ -1,4 +1,4 @@
-// h('button.btn.primary', { onclick }, 'Save') builds an element; children may be strings,
+// node('button.btn.primary', { onclick }, 'Save') builds an element; children may be strings,
 // nodes, arrays or null.
 export function node(selector, props = {}, ...children) {
   const [tag, ...classes] = selector.split('.');
@@ -9,19 +9,7 @@ export function node(selector, props = {}, ...children) {
   }
 
   for (const [key, value] of Object.entries(props ?? {})) {
-    if (value === undefined || value === null || value === false) {
-      continue;
-    }
-
-    if (key.startsWith('on')) {
-      el.addEventListener(key.slice(2), value);
-    } else if (key === 'style' && typeof value === 'object') {
-      Object.assign(el.style, value);
-    } else if (key in el && !key.includes('-') && key !== 'list') {
-      el[key] = value;
-    } else {
-      el.setAttribute(key, value === true ? '' : value);
-    }
+    setProp(el, key, value);
   }
 
   append(el, children);
@@ -29,9 +17,27 @@ export function node(selector, props = {}, ...children) {
   return el;
 }
 
+const isUnset = (value) => value === undefined || value === null || value === false;
+
+function setProp(el, key, value) {
+  if (isUnset(value)) {
+    return;
+  }
+
+  if (key.startsWith('on')) {
+    el.addEventListener(key.slice(2), value);
+  } else if (key === 'style' && typeof value === 'object') {
+    Object.assign(el.style, value);
+  } else if (key in el && !key.includes('-') && key !== 'list') {
+    el[key] = value;
+  } else {
+    el.setAttribute(key, value === true ? '' : value);
+  }
+}
+
 function append(el, children) {
   for (const child of children.flat(Infinity)) {
-    if (child === null || child === undefined || child === false) {
+    if (isUnset(child)) {
       continue;
     }
 
@@ -59,6 +65,17 @@ const PATHS = {
   grid: 'M4 4h16v16H4zM4 9.3h16M4 14.6h16M9.3 4v16M14.6 4v16',
   download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
   upload: 'M12 20V9M7 14l5-5 5 5M5 4h14',
+  character: 'M12 3a3 3 0 100 6 3 3 0 000-6zM8 21v-6l-2-3 3-2h6l3 2-2 3v6M10 21v-4M14 21v-4',
+  object: 'M4 9l8-5 8 5v9l-8 4-8-4V9zM4 9l8 4 8-4M12 13v9',
+  tile: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  effect: 'M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3',
+  star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3z',
+  play: 'M7 4l13 8-13 8V4z',
+  pause: 'M7 4h3v16H7zM14 4h3v16h-3z',
+  onion: 'M9 6a6 6 0 100 12 6 6 0 000-12zM15 6a6 6 0 110 12',
+  pin: 'M12 21s-6-5.6-6-11a6 6 0 0112 0c0 5.4-6 11-6 11zM12 8a2 2 0 100 4 2 2 0 000-4z',
+  more: 'M5 12h.01M12 12h.01M19 12h.01',
+  close: 'M6 6l12 12M18 6L6 18',
   swap: 'M7 7h11l-3-3M17 17H6l3 3',
   wand: 'M4 20L15 9M14 4v3M19 9h-3M17.5 5.5l-2 2M9 4l.5 1.5M20 14l-1.5-.5',
   shade: 'M12 3a9 9 0 100 18V3zM12 3a9 9 0 010 18',

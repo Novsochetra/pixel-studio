@@ -34,7 +34,8 @@ const plain = ({ width, height, data, pixels }) => ({
   data: new Uint8Array(data ?? pixels),
 });
 
-// image: decoded ChatGPT picture; reference: the front sprite. Resolves { width, height, pixels, report }.
+// image: a decoded AI picture; reference: the reference pose. Resolves { width, height, pixels,
+// report }.
 export function cleanImage(image, reference, options = {}) {
   return new Promise((resolve, reject) => {
     nextId += 1;

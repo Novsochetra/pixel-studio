@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { newProject } from '../src/model/project.js';
+import { newProject } from '../src/model/new-project.js';
 import { addLayer, layerStack, moveLayer, removeLayer } from '../src/model/structure.js';
 import { addFrame } from '../src/model/frames.js';
 import { compositeFrame } from '../src/model/composite.js';
@@ -17,7 +17,7 @@ test('layers stay in step across every frame of an animation', () => {
   const project = newProject();
   const animation = project.animations[0];
   addFrame(project, animation, 0);
-  const key = addLayer(project, animation, 'Shading');
+  const key = addLayer(project, animation, { name: 'Shading' });
   for (const entry of Object.values(animation.directions)) {
     for (const frame of entry.frames) {
       assert.deepEqual(
@@ -39,7 +39,7 @@ test('layers stay in step across every frame of an animation', () => {
 test('the composite stacks visible art layers and leaves out pictures to trace', () => {
   const project = newProject();
   const animation = project.animations[0];
-  const traceKey = addLayer(project, animation, 'Trace', 'reference');
+  const traceKey = addLayer(project, animation, { name: 'Trace', kind: 'reference' });
   const frame = animation.directions.south.frames[0];
   setPixel(frame.layers[0].sprite, 1, 1, RED);
   setPixel(frame.layers.find((layer) => layer.key === traceKey).sprite, 2, 2, BLUE);

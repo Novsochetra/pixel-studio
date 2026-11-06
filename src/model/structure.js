@@ -26,14 +26,12 @@ export function frameLike(animation, canvas, source = null) {
     const copy = source?.layers.find((layer) => layer.key === entry.key)?.sprite;
 
     return {
-      ...newLayer(
-        canvas.width,
-        canvas.height,
-        entry.name,
-        copy ? cloneSprite(copy) : createSprite(canvas.width, canvas.height),
-        entry.key,
-        entry.kind,
-      ),
+      ...newLayer(canvas.width, canvas.height, {
+        name: entry.name,
+        sprite: copy ? cloneSprite(copy) : createSprite(canvas.width, canvas.height),
+        key: entry.key,
+        kind: entry.kind,
+      }),
       visible: entry.visible,
       opacity: entry.opacity,
     };
@@ -62,9 +60,10 @@ export function removeDirection(animation, direction) {
   }
 }
 
-// a new layer in every frame of the animation, placed above `aboveKey` (or on top)
-export function addLayer(project, animation, name, kind = 'art', aboveKey = null) {
+// a new layer in every frame of the animation, placed above the layer keyed `above` (or on top)
+export function addLayer(project, animation, { name, kind = 'art', above = null }) {
   const key = newId('k');
+  const aboveKey = above;
 
   for (const frame of framesOf(animation)) {
     const at = aboveKey
@@ -73,7 +72,7 @@ export function addLayer(project, animation, name, kind = 'art', aboveKey = null
     frame.layers.splice(
       at,
       0,
-      newLayer(project.canvas.width, project.canvas.height, name, undefined, key, kind),
+      newLayer(project.canvas.width, project.canvas.height, { name, key, kind }),
     );
   }
 

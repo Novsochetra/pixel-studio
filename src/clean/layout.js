@@ -43,13 +43,18 @@ export function bodyColumn(opaque, width) {
 
 // the sprite on the reference canvas: feet on the reference's bottom row, legs on its column
 export function placeLike(sprite, ref) {
-  const { width, height } = ref;
   const spriteBox = bbox(sprite.opaque, sprite.width);
   const refBox = bbox(ref.opaque, ref.width);
   const dx = roundHalfEven(
     bodyColumn(ref.opaque, ref.width) - bodyColumn(sprite.opaque, sprite.width),
   );
-  const dy = refBox.bottom - spriteBox.bottom;
+
+  return shiftInto(sprite, ref, dx, refBox.bottom - spriteBox.bottom);
+}
+
+// the sprite moved by (dx, dy) onto a canvas the size of `canvas`; what falls outside is cut
+export function shiftInto(sprite, canvas, dx, dy) {
+  const { width, height } = canvas;
   const colors = new Uint8Array(width * height * 3);
   const opaque = new Uint8Array(width * height);
 

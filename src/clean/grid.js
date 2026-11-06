@@ -101,13 +101,13 @@ function axisCandidates(prof, size) {
 // away would double the outline.
 function axisCells(image, isBg, profs, size) {
   const sizes = [size, size];
-  const base = gridError(image, isBg, profs, size, size);
+  const base = gridError(image, isBg, profs, [size, size]);
 
   for (const axis of [0, 1]) {
     const tried = axisCandidates(profs[axis], size).map((cand) => {
       const trial = axis === 0 ? [cand, size] : [size, cand];
 
-      return [gridError(image, isBg, profs, ...trial), cand];
+      return [gridError(image, isBg, profs, trial), cand];
     });
     const lowest = Math.min(...tried.map(([err]) => err));
 

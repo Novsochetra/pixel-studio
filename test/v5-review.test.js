@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { newProject } from '../src/model/project.js';
+import { newProject } from '../src/model/new-project.js';
 import { referenceOf } from '../src/model/reference.js';
 import { addAnimation, removeDirection } from '../src/model/structure.js';
 import { pack, setPixel } from '../src/model/sprite.js';
@@ -47,7 +47,7 @@ test('an index that fails once is read again; one that keeps failing is marked u
   assert.equal((await readIndex(memory())).unreadable, undefined);
 });
 
-test('boot tries every listed project before the sample, and the sample never takes their documents', async () => {
+test('boot tries every listed project before showing the start screen', async () => {
   const second = newProject({ name: 'Second' });
   const backend = memory(
     { [keysFor('p-b-').project]: stored(second) },
@@ -68,18 +68,18 @@ test('boot tries every listed project before the sample, and the sample never ta
     memory({}, (key) => key.startsWith('p-')),
     index,
   );
-  assert.equal(none.failed, true);
-  assert.equal(none.prefix, prefixFor(none.project.id));
-  assert.notEqual(none.prefix, '');
+  assert.equal(none.project, null, 'nothing readable: the start screen shows');
+  assert.equal(none.failed, true, 'and it says the saved work could not be read');
 });
 
-test('the sample takes the plain documents only when nothing at all is saved', async () => {
+test('with nothing saved the start screen shows; work from before projects still opens', async () => {
   const fresh = await firstProject(memory(), { list: [], current: null });
-  assert.equal(fresh.prefix, '');
+  assert.equal(fresh.project, null);
   assert.equal(fresh.failed, false);
 
   const unreadable = await firstProject(memory(), { list: [], current: null, unreadable: true });
-  assert.notEqual(unreadable.prefix, '');
+  assert.equal(unreadable.project, null);
+  assert.equal(unreadable.failed, true);
 
   const legacy = newProject({ name: 'Before projects' });
   delete legacy.id;

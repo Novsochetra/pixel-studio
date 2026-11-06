@@ -126,7 +126,9 @@ def main():
         f"globalThis.SAMPLE = {json.dumps(sample)};\n"
         f"globalThis.GAME_KITS = {(ROOT / 'build' / 'game-kits.json').read_text()};\n" + app
     )
-    page = page.replace("/*STYLE*/", (SRC / "ui" / "styles.css").read_text())
+    # the stylesheets in name order: tokens first, then each part of the page
+    styles = "\n".join(path.read_text() for path in sorted((SRC / "ui" / "styles").glob("*.css")))
+    page = page.replace("/*STYLE*/", styles)
     page = page.replace("/*SCRIPT*/", script.replace("</script", "<\\/script"))
     out = ROOT / "dist" / "index.html"
     out.parent.mkdir(exist_ok=True)

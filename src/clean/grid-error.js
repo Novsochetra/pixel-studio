@@ -21,7 +21,8 @@ function innerShade(rgb, width, [ya, yb], [xa, xb]) {
   return channels.map(median);
 }
 
-function cellError(image, isBg, rows, cols, inner) {
+// source: { image, isBg }
+function cellError({ image, isBg }, rows, cols, inner) {
   const { width, rgb } = image;
   const [ya, yb] = rows;
   const [xa, xb] = cols;
@@ -49,21 +50,22 @@ function cellError(image, isBg, rows, cols, inner) {
   return [total, count];
 }
 
-// how far the image is from its rebuild on this grid: mean colour error per sprite pixel
-export function gridError(image, isBg, profs, sx, sy) {
+// how far the image is from its rebuild on a grid of cells sx by sy: mean colour error per sprite
+// pixel
+export function gridError(image, isBg, profs, [sx, sy]) {
   const { width, height } = image;
   const xs = gridLines(profs[0], sx, width);
   const ys = gridLines(profs[1], sy, height);
-  const colOuter = spans(xs, sx, width, 0, 1);
-  const colInner = spans(xs, sx, width, 0.25, 0.75);
-  const rowOuter = spans(ys, sy, height, 0, 1);
-  const rowInner = spans(ys, sy, height, 0.25, 0.75);
+  const colOuter = spans(xs, sx, width, [0, 1]);
+  const colInner = spans(xs, sx, width, [0.25, 0.75]);
+  const rowOuter = spans(ys, sy, height, [0, 1]);
+  const rowInner = spans(ys, sy, height, [0.25, 0.75]);
   let total = 0;
   let count = 0;
 
   rowOuter.forEach((rows, rowIndex) => {
     colOuter.forEach((cols, columnIndex) => {
-      const [cellTotal, cellCount] = cellError(image, isBg, rows, cols, [
+      const [cellTotal, cellCount] = cellError({ image, isBg }, rows, cols, [
         rowInner[rowIndex],
         colInner[columnIndex],
       ]);

@@ -1,0 +1,72 @@
+.quick-start {
+  position: fixed;
+  top: calc(64px + env(safe-area-inset-top, 0px));
+  right: calc(316px + env(safe-area-inset-right, 0px));
+  width: min(340px, calc(100% - 32px));
+  box-sizing: border-box;
+  background: var(--chrome-raised);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+  z-index: 5;
+}
+
+.quick-start h3,
+.eyebrow {
+  margin: 0;
+  font: 700 11px/1.2 var(--font-pixel);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--label-muted);
+}
+
+.quick-start ol {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.shortcut {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 10px;
+  align-items: baseline;
+}
+
+kbd {
+  font: 12px var(--font-mono);
+  background: var(--well);
+  border: 1px solid var(--separator);
+  border-radius: 5px;
+  padding: 1px 6px;
+  justify-self: start;
+}
+
+.section[data-collapsed='true'] > :not(h2) {
+  display: none;
+}
+
+.section > h2 {
+  cursor: pointer;
+  user-select: none;
+  justify-content: flex-start;
+  gap: 2px;
+}
+
+.section > h2 > * {
+  margin-left: auto;
+}
+
+.section > h2::before {
+  content: '▾';
+  margin-right: 6px;
+  font-family: var(--font-ui);
+}
+
+.section[data-collapsed='true'] > h2::before {
+  content: '▸';
+}

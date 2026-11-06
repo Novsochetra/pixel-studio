@@ -1,182 +1,85 @@
 import { node, replace, toast } from './dom.js';
 import { openSheet, previewCanvas } from './sheet.js';
-import { currentAnimation, referenceSprite, restructure } from './actions.js';
+import { currentAnimation, referenceSprite } from './actions.js';
+import { keepVersion } from './versions-sheet.js';
+import { batchItems, placeAll } from './batch/batch-items.js';
+import { batchRow } from './batch/batch-row.js';
 import { cleanImage } from '../io/cleaner.js';
 import { decodeImage } from '../io/images.js';
-import { directionLabel } from '../model/project.js';
-import { addFrame, frameCount } from '../model/frames.js';
-import { keepVersion } from './versions-sheet.js';
 import { referenceOf } from '../model/reference.js';
+import { placementOf, viewName } from '../model/kinds.js';
 
-// most specific first: "south-west" must not be read as "south"
-const NAME_HINTS = [
-  ['north-west', /north.?west|back.?side.?left|left.?back.?side/i],
-  ['south-west', /south.?west|front.?side.?left|left.?front.?side/i],
-  ['west', /\bwest\b|side.?left|left.?side|\bleft\b/i],
-  ['north-east', /back.?side|north.?east|three.?quarter.?back/i],
-  ['south-east', /front.?side|south.?east|three.?quarter/i],
-  ['north', /back|north|rear/i],
-  ['east', /side|east|profile/i],
-  ['south', /front|south/i],
-];
+// characters are matched to the reference, later frames keeping their own pixel size; anything
+// else is cleaned on its own and placed as its kind stands
+function cleanOptions(project, item) {
+  if (project.kind !== 'character') {
+    return { alone: true, ...placementOf(project) };
+  }
 
-// the direction a file's name points at (side.webp, sochetra-back-2.png), else the first other view
-function guessDirection(name, animation, reference) {
-  const hit = NAME_HINTS.find(([, pattern]) => pattern.test(name));
-  const drawn = Object.keys(animation.directions);
-
-  return hit && drawn.includes(hit[0])
-    ? hit[0]
-    : (drawn.find((direction) => direction !== reference) ?? drawn[0]);
+  return { keepScale: item.placement !== '0' };
 }
 
-function rowView(item, animation) {
-  const direction = node(
-    'select.input',
-    {
-      'aria-label': `View for ${item.file.name}`,
-      onchange: (event) => {
-        item.direction = event.target.value;
-      },
-    },
-    Object.keys(animation.directions).map((other) =>
-      node('option', { value: other, selected: item.direction === other }, directionLabel(other)),
-    ),
-  );
-  const placement = node(
-    'select.input',
-    {
-      'aria-label': `Where ${item.file.name} goes`,
-      onchange: (event) => {
-        item.placement = event.target.value;
-      },
-    },
-    Array.from({ length: frameCount(animation) }, (_, i) =>
-      node(
-        'option',
-        { value: String(i), selected: item.placement === String(i) },
-        `Frame ${i + 1}`,
-      ),
-    ),
-    node('option', { value: 'new', selected: item.placement === 'new' }, 'A new frame at the end'),
-  );
+function statusText(report) {
+  const scaled = report.scaled ? `, scaled ${report.scaled.fy.toFixed(2)}×` : '';
 
-  return node(
-    'div.batch-row',
-    {},
-    node('img', { src: item.url, alt: item.file.name }),
-    node(
-      'div',
-      { style: { display: 'grid', gap: '6px', minWidth: '0' } },
-      node('div.view-name', {}, item.file.name),
-      node('div.group', { style: { gap: '6px', flexWrap: 'wrap' } }, direction, placement),
-      item.status,
-    ),
-    item.result ?? node('div'),
-  );
+  return `${report.size[0]}×${report.size[1]} px${scaled}`;
 }
 
-// The frame each image goes into. Images for new frames fill them in order, per view: three side
-// and three back images make three new frames, each with a side and a back.
-function frameIndexes(items, count) {
-  const fresh = {};
-
-  return items.map((item) => {
-    if (item.placement !== 'new') {
-      return Number(item.placement);
-    }
-
-    fresh[item.direction] = (fresh[item.direction] ?? 0) + 1;
-
-    return count + fresh[item.direction] - 1;
-  });
+async function cleanOne(state, item, ref) {
+  try {
+    const result = await cleanImage(
+      await decodeImage(item.file),
+      { width: ref.width, height: ref.height, data: ref.pixels },
+      cleanOptions(state.project, item),
+    );
+    item.sprite = {
+      width: result.width,
+      height: result.height,
+      pixels: new Uint8ClampedArray(result.pixels),
+    };
+    item.result = previewCanvas(item.sprite, state.project.guides, 1);
+    item.status = node('span.hint', {}, statusText(result.report));
+  } catch (error) {
+    item.status = node(
+      'span.hint',
+      { style: { color: 'var(--bad)' } },
+      `Could not clean: ${error.message}`,
+    );
+  }
 }
 
-// every cleaned image into its view and frame, as one step that undo takes back
-function place(app, items) {
-  restructure(app, `Clean ${items.length} images`, (state) => {
-    const animation = currentAnimation(state);
-    const indexes = frameIndexes(items, frameCount(animation));
+function hintText(state) {
+  const fill = `each view's images fill frames from frame ${state.at.frame + 1} on, in the order of their names.`;
 
-    while (frameCount(animation) <= Math.max(...indexes)) {
-      addFrame(state.project, animation, frameCount(animation) - 1);
-    }
+  if (state.project.kind !== 'character') {
+    return `The images fill frames from frame ${state.at.frame + 1} on, in the order of their names.`;
+  }
 
-    items.forEach((item, i) => {
-      const frame = animation.directions[item.direction].frames[indexes[i]];
-      frame.layers.find((layer) => layer.kind !== 'reference').sprite = item.sprite;
-    });
+  const reference = viewName(state.project, referenceOf(state.project)).toLowerCase();
 
-    return { frame: indexes[0] };
-  });
+  return `Each image is matched to the ${reference} view. Names with side, back or front pick their view; ${fill}`;
 }
 
+// Several AI images at once, each cleaned into its own view and frame, placed together in one step.
 export function openBatchSheet(app, files) {
   const { state } = app.store;
   const animation = currentAnimation(state);
   const sheet = openSheet(`Clean ${files.length} images`);
   const list = node('div.view-list');
-  const seen = {};
-  // run-2 before run-10, so numbered images become frames in their order
-  const ordered = [...files].sort((first, second) =>
-    first.name.localeCompare(second.name, undefined, { numeric: true }),
-  );
-  const items = ordered.map((file) => {
-    const direction = guessDirection(file.name, animation, referenceOf(state.project));
-    // each view's images fill frames from the one being edited on, then new ones
-    const at = state.at.frame + (seen[direction] ?? 0);
-    const placement = at < frameCount(animation) ? String(at) : 'new';
-    seen[direction] = (seen[direction] ?? 0) + 1;
-
-    return {
-      file,
-      url: URL.createObjectURL(file),
-      direction,
-      placement,
-      status: node('span.hint', {}, 'Waiting'),
-      result: null,
-      sprite: null,
-    };
-  });
+  const items = batchItems(state, files);
   const accept = node('button.btn.primary', { disabled: true }, 'Use them all');
   const draw = () =>
     replace(
       list,
-      items.map((item) => rowView(item, animation)),
+      items.map((item) => batchRow(item, state.project, animation)),
     );
-
   const run = async () => {
     const ref = referenceSprite(state);
 
     for (const item of items) {
       item.status = node('span.hint', {}, 'Cleaning…');
       draw();
-
-      try {
-        const result = await cleanImage(
-          await decodeImage(item.file),
-          { width: ref.width, height: ref.height, data: ref.pixels },
-          {},
-        );
-        item.sprite = {
-          width: result.width,
-          height: result.height,
-          pixels: new Uint8ClampedArray(result.pixels),
-        };
-        item.result = previewCanvas(item.sprite, state.project.guides, 1);
-        item.status = node(
-          'span.hint',
-          {},
-          `${result.report.size[0]}×${result.report.size[1]} px, feet on row ${result.report.feetRow}${result.report.scaled ? `, scaled ${result.report.scaled.fy.toFixed(2)}×` : ''}`,
-        );
-      } catch (error) {
-        item.status = node(
-          'span.hint',
-          { style: { color: 'var(--bad)' } },
-          `Could not clean: ${error.message}`,
-        );
-      }
-
+      await cleanOne(state, item, ref);
       draw();
     }
 
@@ -185,7 +88,7 @@ export function openBatchSheet(app, files) {
 
   accept.addEventListener('click', () => {
     keepVersion(app, `Before cleaning ${files.length} images`);
-    place(
+    placeAll(
       app,
       items.filter((item) => item.sprite),
     );
@@ -193,11 +96,7 @@ export function openBatchSheet(app, files) {
     sheet.close();
   });
   sheet.body.append(
-    node(
-      'p.hint',
-      {},
-      `Each image is matched to the ${directionLabel(referenceOf(state.project)).toLowerCase()} view. Names with side, back or front pick their view; each view's images fill frames from frame ${state.at.frame + 1} on, in the order of their names.`,
-    ),
+    node('p.hint', {}, hintText(state)),
     list,
     node('div.sheet-actions', {}, node('button.btn', { onclick: sheet.close }, 'Cancel'), accept),
   );

@@ -57,8 +57,8 @@ export function mergeSimilar(colors, opaque, tolerance) {
 
 // colours that fill the inside of the sprite: a blend left by the background only shows on the
 // outline, so it is not one of them
-export function ownPalette(colors, opaque, width, height, minCount = 3) {
-  const edge = edgeCells(opaque, width, height);
+export function ownPalette({ colors, opaque, width, height }, minCount = 3) {
+  const edge = edgeCells({ opaque, width, height });
   const inner = opaque.map((on, i) => (on && !edge[i] ? 1 : 0));
   const unique = uniqueColors(colors, inner);
   const common = unique.filter((entry) => entry.count >= minCount);
@@ -107,7 +107,7 @@ export function snap(cells, palette, backgrounds) {
   const { width, height, colors } = cells;
   const out = Uint8Array.from(colors);
   const opaque = Uint8Array.from(cells.opaque);
-  const edge = edgeCells(cells.opaque, width, height);
+  const edge = edgeCells({ opaque: cells.opaque, width, height });
 
   cells.opaque.forEach((on, i) => {
     if (!on) {
@@ -153,7 +153,7 @@ function neighbourColors(cells, x, y) {
 export function loneEdgeColours(cells) {
   const { width, height, colors } = cells;
   const out = Uint8Array.from(colors);
-  const edge = edgeCells(cells.opaque, width, height);
+  const edge = edgeCells({ opaque: cells.opaque, width, height });
 
   edge.forEach((on, i) => {
     if (!on) {

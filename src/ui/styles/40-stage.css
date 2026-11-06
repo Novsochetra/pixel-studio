@@ -1,0 +1,72 @@
+.stage {
+  grid-area: stage;
+  position: relative;
+  overflow: auto;
+  background: var(--stage);
+  min-width: 0;
+}
+
+.stage-inner {
+  min-height: 100%;
+  min-width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  box-sizing: border-box;
+  width: max-content;
+}
+
+.stage canvas {
+  display: block;
+  image-rendering: pixelated;
+  touch-action: none;
+}
+
+.stage.dropping::after {
+  content: 'Drop a ChatGPT image to clean it into this view';
+  position: absolute;
+  inset: 12px;
+  display: grid;
+  place-items: center;
+  border: 2px dashed var(--tint);
+  border-radius: var(--radius-lg);
+  background: var(--tint-quiet);
+  font: 700 12px var(--font-pixel);
+  pointer-events: none;
+}
+
+.stage-inner.edit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.selection-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--radius);
+  background: var(--chrome);
+  border: 1px solid var(--separator);
+  box-shadow: var(--shadow);
+}
+
+.stage-inner.preview {
+  gap: 14px;
+  align-content: center;
+}
+
+.preview-bar {
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.preview-note {
+  max-width: 680px;
+  margin: 0;
+  text-align: center;
+}

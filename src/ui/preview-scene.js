@@ -1,6 +1,6 @@
 import { compositeFrame } from '../model/composite.js';
 import { flipHorizontal } from '../model/sprite.js';
-import { mirrorsOf } from '../model/profiles.js';
+import { mirrorsOf } from '../model/directions.js';
 
 export const PLAIN_SIZE = { width: 768, height: 432 };
 
@@ -19,12 +19,13 @@ const nativeOf = (sprite) => {
   return canvas;
 };
 
-// the whole frame drawn so the character's feet (the anchor) stand on (feetX, groundY)
-export function drawStanding(context, sprite, feetX, groundY, anchor, factor) {
+// the whole frame drawn so the character's feet (the anchor) stand on (x, groundY), scaled by
+// factor
+export function drawStanding(context, sprite, { x, groundY, anchor, factor }) {
   context.imageSmoothingEnabled = false;
   context.drawImage(
     nativeOf(sprite),
-    Math.round(feetX - anchor.x * factor),
+    Math.round(x - anchor.x * factor),
     Math.round(groundY - anchor.y * factor),
     Math.round(sprite.width * factor),
     Math.round(sprite.height * factor),
@@ -59,7 +60,7 @@ export function frameSprite(project, animation, member, tick) {
 }
 
 // a quiet floor and ground line, for projects with no background of their own
-export function drawPlainGround(context, width, height, groundY, colours) {
+export function drawPlainGround(context, { width, height, groundY }, colours) {
   context.fillStyle = colours.sky;
   context.fillRect(0, 0, width, height);
   context.fillStyle = colours.ground;

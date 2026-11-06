@@ -16,7 +16,7 @@ globalThis.ImageData = class {
 
 const { saveVersion, listVersions, versionText, deleteVersion } =
   await import('../src/store/versions.js');
-const { newProject } = await import('../src/model/project.js');
+const { newProject } = await import('../src/model/new-project.js');
 
 function memory() {
   const docs = new Map();
@@ -31,7 +31,7 @@ function memory() {
 
 test('a version too big for one stored document is split and joined back exactly', async () => {
   const backend = memory();
-  const project = newProject();
+  const project = newProject({ name: 'Sochetra' });
   await saveVersion(backend, project, 'first');
   const [entry] = await listVersions(backend);
   assert.ok(entry.chunks > 1);

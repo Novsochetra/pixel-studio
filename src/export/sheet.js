@@ -1,9 +1,8 @@
 import { createSprite, getPixel, setPixel, CLEAR } from '../model/sprite.js';
 import { compositeFrame } from '../model/composite.js';
 
-import { ALL_DIRECTIONS, mirrorsOf } from '../model/profiles.js';
+import { ALL_DIRECTIONS, mirrorsOf } from '../model/directions.js';
 
-export const GAME_FRAME = { frameWidth: 64, frameHeight: 62, anchorX: 32, anchorY: 61 };
 
 // the mirrors this animation can use: a direction the set mirrors, from one it has drawn
 function usableMirrors(project, animation) {

@@ -30,15 +30,16 @@ export function flatten({ width, height, data }) {
   return { image: { width, height, rgb }, cutOut };
 }
 
-function cleanColors(cells, grid, backgrounds, palette, options) {
+// colours: { backgrounds, palette, merge }
+function cleanColors(cells, grid, { backgrounds, palette, merge }) {
   let out = cells;
 
-  if (options.merge > 0 && !grid.exact) {
-    out = { ...out, colors: mergeSimilar(out.colors, out.opaque, options.merge) };
+  if (merge > 0 && !grid.exact) {
+    out = { ...out, colors: mergeSimilar(out.colors, out.opaque, merge) };
   }
 
   if (palette || !grid.exact) {
-    const own = ownPalette(out.colors, out.opaque, out.width, out.height);
+    const own = ownPalette(out);
     out = loneEdgeColours(snap(out, palette ?? own, backgrounds));
   }
 
@@ -60,11 +61,11 @@ export function analyze(imageData, options = {}, palette = null) {
     : new Uint8Array(rebuilt.bg.length);
   const cells = { width: rebuilt.width, height: rebuilt.height, colors: rebuilt.colors };
   cells.opaque = clear.map((value) => (value ? 0 : 1));
-  const cleaned = cleanColors(cells, grid, backgrounds, palette, settings);
+  const cleaned = cleanColors(cells, grid, { backgrounds, palette, merge: settings.merge });
 
   return {
     ...cleaned,
-    opaque: despeckle(cleaned.opaque, cleaned.width, cleaned.height),
+    opaque: despeckle(cleaned),
     backgroundColors: rebuilt.colors,
     cell: [grid.sx, grid.sy],
     exact: grid.exact,

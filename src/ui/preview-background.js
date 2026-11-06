@@ -1,5 +1,5 @@
 import { changeStructure } from './actions.js';
-import { profileOf } from '../model/profiles.js';
+import { gameOf } from '../model/presets.js';
 import { backgroundDataUrl, imageFrom } from '../io/background.js';
 
 let pitch = null;
@@ -30,7 +30,7 @@ export async function backgroundOf(app) {
     }
   }
 
-  if (profileOf(project).preview === 'pitch' && globalThis.SAMPLE?.pitch) {
+  if (gameOf(project).background === 'pitch' && globalThis.SAMPLE?.pitch) {
     pitch ??= await imageFrom(globalThis.SAMPLE.pitch).catch(() => null);
 
     return pitch;

@@ -1,0 +1,55 @@
+.app {
+  display: grid;
+  grid-template: 'bar bar bar' auto 'rail stage inspector' 1fr 'status status status' auto / auto 1fr 300px;
+  height: 100%;
+  padding-left: max(0px, env(safe-area-inset-left, 0px));
+  padding-right: max(0px, env(safe-area-inset-right, 0px));
+}
+
+.toolbar {
+  grid-area: bar;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-block: 8px;
+  padding-inline: max(16px, env(safe-area-inset-left, 0px))
+    max(16px, env(safe-area-inset-right, 0px));
+  background: var(--chrome);
+  border-bottom: 1px solid var(--separator);
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.wordmark {
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  font: 700 13px/1 var(--font-pixel);
+  letter-spacing: 0.04em;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.wordmark:hover {
+  background: var(--fill-quiet);
+}
+
+.wordmark small {
+  display: block;
+  font: 400 10px/1.4 var(--font-ui);
+  letter-spacing: 0;
+  color: var(--label-muted);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}

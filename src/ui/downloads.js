@@ -1,4 +1,5 @@
-import { node, toast } from './dom.js';
+import { toast } from './dom.js';
+import { openMenu } from './menu.js';
 import { directionSprite, directionsInUse } from './actions.js';
 import { canvasToBlob, checkerPainter, spritePng } from '../io/images.js';
 import { zipFiles } from '../io/zip.js';
@@ -7,9 +8,9 @@ import { saveFile } from './save-file.js';
 import { boardCanvas } from './board-canvas.js';
 import { projectFileText, readProjectBundle } from '../store/project-file.js';
 import { backgroundUrl } from './preview-background.js';
-import { chooseFile } from './views-panel.js';
+import { chooseFile } from './choose-file.js';
 import { openExportSheet } from './export-sheet.js';
-import { openChatgptSheet } from './chatgpt-sheet.js';
+import { openChatgptSheet } from './prompt/prompt-sheet.js';
 
 const slug = (text) =>
   text
@@ -91,7 +92,7 @@ function menuItems(app) {
 
   return [
     ['Sprite sheet for the game…', async () => openExportSheet(app)],
-    ['Reference and prompt for ChatGPT…', async () => openChatgptSheet(app)],
+    ['Prompt and reference for an AI image…', async () => openChatgptSheet(app)],
     null,
     [`${label} · ${width}×${height} for editing`, () => saveView(app, 1)],
     ...(scale > 1 ? [[`${label} · ${big}, transparent`, () => saveView(app, scale)]] : []),
@@ -105,57 +106,9 @@ function menuItems(app) {
   ];
 }
 
-// called straight from the click, so a file picker it opens still counts as the viewer's doing
-function run(action) {
-  const fail = (error) => toast(`Could not make the file: ${error.message}`);
-
-  try {
-    Promise.resolve(action()).catch(fail);
-  } catch (error) {
-    fail(error);
-  }
-}
-
 export function openDownloadMenu(app, anchor) {
-  document.querySelector('.menu')?.remove();
-  const box = anchor.getBoundingClientRect();
-  const menu = node('div.menu', {
-    role: 'menu',
-    style: {
-      top: `${box.bottom + 6}px`,
-      right: `${Math.max(16, window.innerWidth - box.right)}px`,
-      position: 'fixed',
-    },
+  openMenu(anchor, menuItems(app), {
+    align: 'right',
+    onError: (error) => toast(`Could not make the file: ${error.message}`),
   });
-  const close = () => {
-    menu.remove();
-    document.removeEventListener('pointerdown', outside, true);
-  };
-  const outside = (event) => {
-    if (!menu.contains(event.target) && event.target !== anchor) {
-      close();
-    }
-  };
-
-  for (const item of menuItems(app)) {
-    menu.append(
-      item
-        ? node(
-            'button',
-            {
-              role: 'menuitem',
-              onclick: () => {
-                close();
-                run(item[1]);
-              },
-            },
-            item[0],
-          )
-        : node('hr'),
-    );
-  }
-
-  document.body.append(menu);
-  document.addEventListener('pointerdown', outside, true);
-  menu.querySelector('button')?.focus();
 }

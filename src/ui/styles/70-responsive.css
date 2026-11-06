@@ -1,0 +1,61 @@
+@media (max-width: 860px) {
+  .app {
+    grid-template:
+      'bar' auto 'rail' auto 'stage' minmax(360px, 70vh)
+      'inspector' auto 'status' auto / 1fr;
+    height: auto;
+    min-height: 100%;
+  }
+
+  .stage-inner {
+    padding: 16px;
+  }
+
+  body {
+    overflow: auto;
+  }
+
+  .rail {
+    overflow: visible;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: 0;
+    border-bottom: 1px solid var(--separator);
+    padding-inline: max(16px, env(safe-area-inset-left, 0px))
+      max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  .rail hr {
+    border-top: 0;
+    border-left: 1px solid var(--separator);
+    margin: 2px 4px;
+  }
+
+  .inspector {
+    border-left: 0;
+    overflow: visible;
+  }
+
+  .section {
+    padding-inline: max(16px, env(safe-area-inset-left, 0px))
+      max(16px, env(safe-area-inset-right, 0px));
+  }
+}
+
+@media (max-width: 860px) {
+  .quick-start {
+    top: auto;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+body.panning .stage canvas {
+  cursor: grab;
+}

@@ -4,7 +4,7 @@ import { addLayer, layerStack, moveLayer, removeLayer, updateLayer } from '../mo
 import { frameAt } from '../model/project.js';
 import { decodeImage } from '../io/images.js';
 import { createSprite } from '../model/sprite.js';
-import { chooseFile } from './views-panel.js';
+import { chooseFile } from './choose-file.js';
 
 // a picture fitted inside the canvas, smoothly scaled, to trace over
 async function fitPicture(file, width, height) {
@@ -44,13 +44,11 @@ function addReference(app) {
 
     restructure(app, 'Add picture to trace', (draft) => {
       const animation = currentAnimation(draft);
-      const key = addLayer(
-        draft.project,
-        animation,
-        `Trace: ${file.name}`,
-        'reference',
-        layerStack(animation)[0]?.key ?? null,
-      );
+      const key = addLayer(draft.project, animation, {
+        name: `Trace: ${file.name}`,
+        kind: 'reference',
+        above: layerStack(animation)[0]?.key ?? null,
+      });
       moveLayer(animation, key, -1);
       frameAt(draft.project, draft.at).layers.find((layer) => layer.key === key).sprite = picture;
 
@@ -201,13 +199,10 @@ export function renderLayersPanel(el, app) {
         {
           onclick: () =>
             restructure(app, 'Add layer', (draft) => ({
-              layer: addLayer(
-                draft.project,
-                currentAnimation(draft),
-                `Layer ${layerStack(animation).length + 1}`,
-                'art',
-                active.key,
-              ),
+              layer: addLayer(draft.project, currentAnimation(draft), {
+                name: `Layer ${layerStack(animation).length + 1}`,
+                above: active.key,
+              }),
             })),
         },
         'Add layer',

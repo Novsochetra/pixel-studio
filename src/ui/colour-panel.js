@@ -4,7 +4,8 @@ import { characterColors } from './character-colours.js';
 import { CLEAR, bounds, fromHex, toHex } from '../model/sprite.js';
 import { openSwapSheet } from './swap-sheet.js';
 import { openOutfitsSheet } from './outfits-sheet.js';
-import { profileOf } from '../model/profiles.js';
+import { gameOf } from '../model/presets.js';
+import { kindOf } from '../model/kinds.js';
 
 function swatch(color, pressed, onclick, title) {
   return node(`button.swatch${color === CLEAR ? '.clear' : ''}`, {
@@ -155,11 +156,14 @@ export function renderColourPanel(el, app) {
         icon('swap'),
         'Swap colours…',
       ),
-      node(
-        'button.btn',
-        { style: { flex: '1' }, onclick: () => openOutfitsSheet(app) },
-        profileOf(state.project).teamKits ? 'Team kits…' : 'Outfits…',
-      ),
+      // outfits recolour a character's or an object's parts; tiles, effects and icons have none
+      kindOf(state.project).place === 'feet'
+        ? node(
+            'button.btn',
+            { style: { flex: '1' }, onclick: () => openOutfitsSheet(app) },
+            gameOf(state.project).teamKits ? 'Team kits…' : 'Outfits…',
+          )
+        : null,
     ),
     node('h2', {}, 'Drawing'),
     toggle(

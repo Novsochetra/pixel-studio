@@ -1,0 +1,92 @@
+/* Layout: a Mac pro-app frame. Toolbar on top, tool rail left, canvas centre, inspector right,
+   status bar below; the arcade's Apple greys and blue, dark first, Silkscreen for labels. */
+:root {
+  --bg: #000000;
+  --chrome: #1c1c1e;
+  --chrome-raised: #2c2c2e;
+  --well: #242426;
+  --stage: #2a2a2d;
+  --checker-a: #3a3a3e;
+  --checker-b: #333336;
+  --separator: rgb(84 84 88 / 60%);
+  --label: #ffffff;
+  --label-secondary: rgb(235 235 245 / 72%);
+  --label-muted: #8e8e93;
+  --tint: #0a84ff;
+  --on-tint: #ffffff;
+  --tint-quiet: rgb(10 132 255 / 22%);
+  --fill-quiet: rgb(118 118 128 / 24%);
+  --ok: #30d158;
+  --warn: #ff9f0a;
+  --bad: #ff453a;
+  --guide: #ff375f;
+  --mirror: #64d2ff;
+  --scrim: rgb(0 0 0 / 55%);
+  --ink: #000000;
+  --lift: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow: 0 24px 60px rgb(0 0 0 / 45%);
+  --font-ui: -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
+  --font-pixel: 'Silkscreen', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --bg: #f2f2f7;
+    --chrome: #f6f6f8;
+    --chrome-raised: #ffffff;
+    --well: #e9e9ee;
+    --stage: #d6d6db;
+    --checker-a: #c9c9cf;
+    --checker-b: #bdbdc4;
+    --separator: rgb(60 60 67 / 22%);
+    --label: #000000;
+    --label-secondary: rgb(60 60 67 / 85%);
+    --label-muted: #6d6d72;
+    --tint: #007aff;
+    --tint-quiet: rgb(0 122 255 / 14%);
+    --fill-quiet: rgb(118 118 128 / 14%);
+    --ok: #248a3d;
+    --warn: #c93400;
+    --bad: #d70015;
+    --guide: #d30f45;
+    --mirror: #0071a4;
+    --scrim: rgb(0 0 0 / 30%);
+    --ink: #000000;
+    --lift: 0 1px 2px rgb(0 0 0 / 14%);
+    --shadow: 0 24px 60px rgb(0 0 0 / 18%);
+    color-scheme: light;
+  }
+}
+
+:root[data-theme='light'] {
+  --bg: #f2f2f7;
+  --chrome: #f6f6f8;
+  --chrome-raised: #ffffff;
+  --well: #e9e9ee;
+  --stage: #d6d6db;
+  --checker-a: #c9c9cf;
+  --checker-b: #bdbdc4;
+  --separator: rgb(60 60 67 / 22%);
+  --label: #000000;
+  --label-secondary: rgb(60 60 67 / 85%);
+  --label-muted: #6d6d72;
+  --tint: #007aff;
+  --tint-quiet: rgb(0 122 255 / 14%);
+  --fill-quiet: rgb(118 118 128 / 14%);
+  --ok: #248a3d;
+  --warn: #c93400;
+  --bad: #d70015;
+  --guide: #d30f45;
+  --mirror: #0071a4;
+  --scrim: rgb(0 0 0 / 30%);
+  --ink: #000000;
+  --lift: 0 1px 2px rgb(0 0 0 / 14%);
+  --shadow: 0 24px 60px rgb(0 0 0 / 18%);
+  color-scheme: light;
+}

@@ -66,7 +66,7 @@ export function snapLines(starts, prof, size) {
 }
 
 // pixel ranges [a, b) covering the part lo..hi of each cell
-export function spans(lines, size, length, lo, hi) {
+export function spans(lines, size, length, [lo, hi]) {
   return lines.map((start, index) => {
     const end = index + 1 < lines.length ? lines[index + 1] : start + size;
     const first = Math.max(roundHalfEven(start + (end - start) * lo), 0);

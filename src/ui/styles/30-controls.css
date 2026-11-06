@@ -1,0 +1,83 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--fill-quiet);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: color-mix(in srgb, var(--fill-quiet), var(--label) 8%);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn.primary {
+  background: var(--tint);
+  color: var(--on-tint);
+}
+
+.btn.quiet {
+  background: transparent;
+}
+
+.btn.quiet:hover {
+  background: var(--fill-quiet);
+}
+
+.btn.on {
+  background: var(--tint-quiet);
+  color: var(--tint);
+}
+
+.btn svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--fill-quiet);
+}
+
+.segmented button {
+  border: 0;
+  background: transparent;
+  padding: 3px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--chrome-raised);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+}
+
+.zoom-label {
+  min-width: 46px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--label-secondary);
+}
+
+.save-status {
+  font-size: 12px;
+  color: var(--label-muted);
+  white-space: nowrap;
+}
+
+.save-status[data-state='error'] {
+  color: var(--bad);
+}

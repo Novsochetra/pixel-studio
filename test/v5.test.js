@@ -4,8 +4,9 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { newProject, normalizeProject } from '../src/model/project.js';
-import { drawableDirections } from '../src/model/profiles.js';
+import { newProject } from '../src/model/new-project.js';
+import { normalizeProject } from '../src/model/normalize.js';
+import { drawableDirections } from '../src/model/directions.js';
 import { addFrame } from '../src/model/frames.js';
 import { pack, setPixel } from '../src/model/sprite.js';
 import { buildSheet } from '../src/export/sheet.js';
@@ -55,14 +56,17 @@ test('every direction set starts with directions it can draw', () => {
   }
 });
 
-test('a project saved by an earlier version opens as Naga Eleven with its kit parts', () => {
+test('a project saved by an earlier version opens as a Naga Eleven character with its kit parts', () => {
   const old = newProject();
-  delete old.profile;
+  delete old.kind;
+  delete old.game;
   delete old.directionSet;
   delete old.parts;
   old.kitParts = { shirt: [1, 2], shorts: [3], socks: [], trim: [4] };
   const project = normalizeProject(old);
-  assert.equal(project.profile, 'naga-eleven');
+  assert.equal(project.kind, 'character');
+  assert.equal(project.game.name, 'Naga Eleven');
+  assert.equal(project.game.teamKits, true);
   assert.equal(project.directionSet, 'naga');
   assert.deepEqual(
     project.parts.map((part) => [part.id, part.colours]),
@@ -90,15 +94,15 @@ test('the Aseprite JSON names every frame and tags each direction', () => {
     includeMirrored: false,
   };
   const result = buildSheet(project, animation, settings);
-  const json = asepriteJson(result, settings, animation, 'pose.png');
+  const json = asepriteJson(result, settings, animation, 'idle.png');
   assert.equal(Object.keys(json.frames).length, 6);
-  assert.deepEqual(json.frames['pose east 1'].frame, { x: 20, y: 30, w: 20, h: 30 });
+  assert.deepEqual(json.frames['idle east 1'].frame, { x: 20, y: 30, w: 20, h: 30 });
   assert.deepEqual(
     json.meta.frameTags.map((tag) => [tag.name, tag.from, tag.to]),
     [
-      ['pose south', 0, 1],
-      ['pose east', 2, 3],
-      ['pose north', 4, 5],
+      ['idle south', 0, 1],
+      ['idle east', 2, 3],
+      ['idle north', 4, 5],
     ],
   );
   assert.deepEqual(json.meta.size, { w: 40, h: 90 });

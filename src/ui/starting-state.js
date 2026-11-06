@@ -1,6 +1,8 @@
 import { settleAt } from './actions.js';
+import { readGridAll } from './grid/all-views.js';
 import { bounds, fromHex } from '../model/sprite.js';
 import { referenceOf } from '../model/reference.js';
+import { FIRST_PENCIL_COLOUR } from '../art/editor-colours.js';
 
 // the editor's state when a project opens
 export function startingState(project) {
@@ -17,7 +19,7 @@ export function startingState(project) {
     }),
     mode: 'edit',
     tool: 'pencil',
-    color: fromHex('#df2321'),
+    color: fromHex(FIRST_PENCIL_COLOUR),
     paintOver: null,
     paletteLock: false,
     cleanLines: true,
@@ -30,6 +32,7 @@ export function startingState(project) {
     swapPreview: null,
     cursor: null,
     onion: false,
+    gridAll: readGridAll(),
     viewFilter: 'colour',
     showPins: false,
     pinName: 'Head',

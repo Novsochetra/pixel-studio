@@ -1,6 +1,5 @@
-// What a project is drawn for. Directions are the eight compass names Naga Eleven uses
-// (south faces the camera); a direction set says which ones are drawn and which are left for the
-// game to mirror.
+// Directions are the eight compass names (south faces the camera); a direction set says which are
+// drawn and which are left for the game to mirror.
 
 export const ALL_DIRECTIONS = [
   'south',
@@ -39,35 +38,17 @@ export const DIRECTION_SETS = {
     drawn: ALL_DIRECTIONS,
     mirrors: {},
   },
-};
-
-export const PROFILES = {
-  'naga-eleven': {
-    label: 'Naga Eleven',
-    directionSet: 'naga',
-    startWith: ['south', 'east', 'north'],
-    teamKits: true,
-    preview: 'pitch',
-    gamePack: true,
-    parts: ['Shirt', 'Shorts', 'Socks', 'Trim'],
-  },
-  generic: {
-    label: 'Any game',
-    directionSet: 'four',
-    startWith: null,
-    teamKits: false,
-    preview: 'plain',
-    gamePack: false,
-    parts: [],
+  // objects, tiles, effects and icons are seen from one side only
+  single: {
+    label: 'One view',
+    drawn: ['south'],
+    mirrors: {},
+    hidden: true,
   },
 };
-
-export function profileOf(project) {
-  return PROFILES[project.profile] ?? PROFILES.generic;
-}
 
 export function directionSetOf(project) {
-  return DIRECTION_SETS[project.directionSet] ?? DIRECTION_SETS[profileOf(project).directionSet];
+  return DIRECTION_SETS[project.directionSet] ?? DIRECTION_SETS.four;
 }
 
 // the directions a project may draw, in compass order

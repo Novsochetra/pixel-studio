@@ -68,7 +68,7 @@ export function openVersionsSheet(app) {
   const sheet = openSheet('History');
   const list = node('div.view-list');
   const name = node('input.input', {
-    placeholder: 'Name this version, e.g. "New back from ChatGPT"',
+    placeholder: 'Name this version, e.g. "New back view from the AI"',
     id: 'version-name',
     'aria-label': 'Version name',
   });

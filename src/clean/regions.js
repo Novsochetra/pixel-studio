@@ -5,35 +5,39 @@ const STEPS = [
   [1, 0],
 ];
 
+const inside = ({ width, height }, x, y) => x >= 0 && y >= 0 && x < width && y < height;
+
+// adds the unreached neighbours of `at` that are in the mask to the queue
+function spread(flood, at) {
+  const { mask, width, reached, queue } = flood;
+  const x = at % width;
+  const y = (at - x) / width;
+
+  for (const [dx, dy] of STEPS) {
+    const next = (y + dy) * width + x + dx;
+
+    if (inside(flood, x + dx, y + dy) && mask[next] && !reached[next]) {
+      reached[next] = 1;
+      queue.push(next);
+    }
+  }
+}
+
 function fill(mask, width, height, seeds) {
-  const reached = new Uint8Array(mask.length);
-  const queue = [];
+  const flood = { mask, width, height, reached: new Uint8Array(mask.length), queue: [] };
 
   for (const seed of seeds) {
-    if (mask[seed] && !reached[seed]) {
-      reached[seed] = 1;
-      queue.push(seed);
+    if (mask[seed] && !flood.reached[seed]) {
+      flood.reached[seed] = 1;
+      flood.queue.push(seed);
     }
   }
 
-  while (queue.length) {
-    const at = queue.pop();
-    const x = at % width;
-    const y = (at - x) / width;
-
-    for (const [dx, dy] of STEPS) {
-      const nx = x + dx;
-      const ny = y + dy;
-      const next = ny * width + nx;
-
-      if (nx >= 0 && ny >= 0 && nx < width && ny < height && mask[next] && !reached[next]) {
-        reached[next] = 1;
-        queue.push(next);
-      }
-    }
+  while (flood.queue.length) {
+    spread(flood, flood.queue.pop());
   }
 
-  return reached;
+  return flood.reached;
 }
 
 // the part of `mask` connected (4-way) to the image border
@@ -58,13 +62,11 @@ export function components(mask, width, height) {
   for (let i = 0; i < left.length; i++) {
     if (left[i]) {
       const region = fill(left, width, height, [i]);
-
-      for (let j = 0; j < region.length; j++) {
-        if (region[j]) {
+      region.forEach((on, j) => {
+        if (on) {
           left[j] = 0;
         }
-      }
-
+      });
       regions.push(region);
     }
   }
@@ -72,17 +74,17 @@ export function components(mask, width, height) {
   return regions;
 }
 
-function opaqueAt(opaque, width, height, x, y) {
-  return x >= 0 && y >= 0 && x < width && y < height && opaque[y * width + x] === 1;
-}
+const opaqueAt = (cells, x, y) => inside(cells, x, y) && cells.opaque[y * cells.width + x] === 1;
 
-// opaque cells touching (4-way) a transparent cell or the canvas edge
-export function edgeCells(opaque, width, height) {
+// opaque cells touching (4-way) a transparent cell or the canvas edge; cells: { opaque, width,
+// height }
+export function edgeCells(cells) {
+  const { opaque, width, height } = cells;
   const edge = new Uint8Array(opaque.length);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const touches = STEPS.some(([dx, dy]) => !opaqueAt(opaque, width, height, x + dx, y + dy));
+      const touches = STEPS.some(([dx, dy]) => !opaqueAt(cells, x + dx, y + dy));
       edge[y * width + x] = opaque[y * width + x] && touches ? 1 : 0;
     }
   }
@@ -90,12 +92,14 @@ export function edgeCells(opaque, width, height) {
   return edge;
 }
 
-export function despeckle(opaque, width, height) {
+// opaque cells without an opaque neighbour are dropped
+export function despeckle(cells) {
+  const { opaque, width, height } = cells;
   const out = new Uint8Array(opaque.length);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const touches = STEPS.some(([dx, dy]) => opaqueAt(opaque, width, height, x + dx, y + dy));
+      const touches = STEPS.some(([dx, dy]) => opaqueAt(cells, x + dx, y + dy));
       out[y * width + x] = opaque[y * width + x] && touches ? 1 : 0;
     }
   }

@@ -1,8 +1,6 @@
 import { fillMissingSprites } from './session.js';
-import { sampleProject } from './sample.js';
 import { loadProject } from '../store/load.js';
-import { keysFor, prefixFor } from '../store/keys.js';
-import { newId } from '../model/project.js';
+import { keysFor } from '../store/keys.js';
 
 // the open one first, then the rest of the list, then work saved before projects existed (its
 // documents have no prefix)
@@ -14,9 +12,9 @@ function candidates(index) {
   return [...current, ...rest, ...legacy];
 }
 
-// The project the page opens with. The sample only takes the plain document names when nothing at
-// all is saved; whenever saved work could not be read, it gets documents of its own, so editing
-// it can never write over that work.
+// The project the page opens with: the one open last time, else any other listed, else work saved
+// before projects existed. None when nothing is saved (or nothing could be read): the start
+// screen shows instead, and every project made there gets documents of its own.
 export async function firstProject(backend, index) {
   let failed = index.unreadable === true;
 
@@ -38,12 +36,5 @@ export async function firstProject(backend, index) {
     }
   }
 
-  const sample = fillMissingSprites(await sampleProject());
-  const safe = failed || index.list.length > 0;
-
-  if (safe) {
-    sample.id = newId('p');
-  }
-
-  return { project: sample, prefix: safe ? prefixFor(sample.id) : '', save: 'on-change', failed };
+  return { project: null, failed };
 }

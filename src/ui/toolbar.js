@@ -1,99 +1,25 @@
 import { node, icon, replace } from './dom.js';
-import { redo, undo } from './actions.js';
 import { openDownloadMenu } from './downloads.js';
 import { openVersionsSheet } from './versions-sheet.js';
 import { openShortcuts } from './shortcuts.js';
-import { openProjectsSheet } from './projects-sheet.js';
-import { profileOf } from '../model/profiles.js';
+import { openProjectsSheet } from './projects/projects-sheet.js';
+import { saveText, undoRedo, viewFilter, zoomControls } from './toolbar-parts.js';
+import { gameOf } from '../model/presets.js';
+import { isSingleView } from '../model/kinds.js';
 
-// the preview is a football pitch for Naga Eleven projects, a plain scene for any other game
-const modesFor = (project) => [
-  ['edit', 'Edit'],
-  ['board', 'Views board'],
-  ['game', profileOf(project).preview === 'pitch' ? 'On the pitch' : 'Preview'],
-];
+// the board compares views, so only kinds with several have one; the preview is the pitch for a
+// game played on one
+const modesFor = (project) =>
+  [
+    ['edit', 'Edit'],
+    isSingleView(project) ? null : ['board', 'Views board'],
+    ['game', gameOf(project).background === 'pitch' ? 'On the pitch' : 'Preview'],
+  ].filter(Boolean);
 
-const SAVE_TEXT = {
-  pending: 'Edited',
-  saving: 'Saving…',
-  saved: 'Saved',
-  error: 'Not saved',
-};
-
-function saveText(state) {
-  const where =
-    { account: 'to your account', browser: 'in this browser', none: '' }[state.storage] ?? '';
-
-  if (state.storage === 'none') {
-    return 'Not saved: download a project file to keep your work';
-  }
-
-  return state.saveStatus === 'saved' ? `Saved ${where}` : (SAVE_TEXT[state.saveStatus] ?? '');
-}
-
-function zoomControls(app) {
-  const { state } = app.store;
-  const setZoom = (zoom) => app.store.set({ zoom: Math.max(1, Math.min(24, zoom)) });
-
-  return node(
-    'div.group',
-    {},
-    node(
-      'button.btn.quiet',
-      { title: 'Zoom out (−)', 'aria-label': 'Zoom out', onclick: () => setZoom(state.zoom - 1) },
-      icon('minus'),
-    ),
-    node('span.zoom-label', {}, `${state.zoom * 100}%`),
-    node(
-      'button.btn.quiet',
-      { title: 'Zoom in (+)', 'aria-label': 'Zoom in', onclick: () => setZoom(state.zoom + 1) },
-      icon('plus'),
-    ),
-    node(
-      `button.btn.quiet${state.showGrid ? '.on' : ''}`,
-      {
-        title: 'Pixel grid',
-        'aria-label': 'Pixel grid',
-        'aria-pressed': String(state.showGrid),
-        onclick: () => app.store.set({ showGrid: !state.showGrid }),
-      },
-      icon('grid'),
-    ),
-  );
-}
-
-function viewFilter(app) {
+function workspaces(app) {
   const { state } = app.store;
 
   return node(
-    'div.segmented',
-    { role: 'group', 'aria-label': 'Show the art as' },
-    [
-      ['colour', 'Colour'],
-      ['silhouette', 'Silhouette'],
-      ['grey', 'Grey'],
-    ].map(([id, label]) =>
-      node(
-        'button',
-        {
-          'aria-pressed': String(state.viewFilter === id),
-          title:
-            id === 'silhouette'
-              ? 'One flat shape: does the pose read?'
-              : id === 'grey'
-                ? 'Light and dark only: is there enough contrast?'
-                : 'The art as it is',
-          onclick: () => app.store.set({ viewFilter: id }),
-        },
-        label,
-      ),
-    ),
-  );
-}
-
-export function renderToolbar(el, app) {
-  const { state } = app.store;
-  const modes = node(
     'div.segmented',
     { role: 'group', 'aria-label': 'Workspace' },
     modesFor(state.project).map(([id, label]) =>
@@ -104,44 +30,19 @@ export function renderToolbar(el, app) {
       ),
     ),
   );
+}
 
-  replace(
-    el,
-    node(
-      'button.wordmark',
-      { title: 'Projects: switch, start a new one, rename', onclick: () => openProjectsSheet(app) },
-      'PIXEL CLEAN',
-      node('small', {}, `${state.project.name} ▾`),
-    ),
-    node(
-      'div.group',
-      {},
-      node(
-        'button.btn.quiet',
-        {
-          title: 'Undo (⌘Z)',
-          'aria-label': 'Undo',
-          disabled: !app.history.canUndo,
-          onclick: () => undo(app),
-        },
-        icon('undo'),
-      ),
-      node(
-        'button.btn.quiet',
-        {
-          title: 'Redo (⇧⌘Z)',
-          'aria-label': 'Redo',
-          disabled: !app.history.canRedo,
-          onclick: () => redo(app),
-        },
-        icon('redo'),
-      ),
-    ),
-    modes,
-    state.mode === 'edit' ? zoomControls(app) : null,
-    state.mode !== 'game' ? viewFilter(app) : null,
-    node('div.spacer'),
-    node('span.save-status', { 'data-state': state.saveStatus }, saveText(state)),
+function projectButton(app) {
+  return node(
+    'button.wordmark',
+    { title: 'Projects: switch, start a new one, rename', onclick: () => openProjectsSheet(app) },
+    'PIXEL CLEAN',
+    node('small', {}, `${app.store.state.project.name} ▾`),
+  );
+}
+
+function endButtons(app) {
+  return [
     node(
       'button.btn.quiet',
       { title: 'Saved versions', onclick: () => openVersionsSheet(app) },
@@ -153,7 +54,7 @@ export function renderToolbar(el, app) {
       {
         title: 'Keyboard shortcuts (?)',
         'aria-label': 'Keyboard shortcuts',
-        onclick: () => openShortcuts(),
+        onclick: openShortcuts,
       },
       '?',
     ),
@@ -163,5 +64,21 @@ export function renderToolbar(el, app) {
       icon('download'),
       'Download',
     ),
+  ];
+}
+
+export function renderToolbar(el, app) {
+  const { state } = app.store;
+
+  replace(
+    el,
+    projectButton(app),
+    undoRedo(app),
+    workspaces(app),
+    state.mode === 'edit' ? zoomControls(app) : null,
+    state.mode !== 'game' ? viewFilter(app) : null,
+    node('div.spacer'),
+    node('span.save-status', { 'data-state': state.saveStatus }, saveText(state)),
+    endButtons(app),
   );
 }

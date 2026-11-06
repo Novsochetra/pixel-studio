@@ -1,39 +1,44 @@
 import { pymod } from './numeric.js';
 
-// colour change between neighbouring columns (axis 1) or rows (axis 0), summed across the image;
-// changes between two background pixels are ignored, or a checkerboard would win
-export function edgeProfile(image, axis, ignore = null) {
-  const { width, height, rgb } = image;
-  const length = axis === 1 ? width - 1 : height - 1;
-  const prof = new Float64Array(length);
-  const step = axis === 1 ? 1 : width;
+const change = (rgb, at, next) =>
+  Math.abs(rgb[next * 3] - rgb[at * 3]) +
+  Math.abs(rgb[next * 3 + 1] - rgb[at * 3 + 1]) +
+  Math.abs(rgb[next * 3 + 2] - rgb[at * 3 + 2]);
 
-  for (let y = 0; y < (axis === 1 ? height : height - 1); y++) {
-    for (let x = 0; x < (axis === 1 ? width - 1 : width); x++) {
-      const at = y * width + x;
-      const next = at + step;
+const bothIgnored = (ignore, at, next) => Boolean(ignore && ignore[at] && ignore[next]);
 
-      if (ignore && ignore[at] && ignore[next]) {
-        continue;
-      }
-
-      const change =
-        Math.abs(rgb[next * 3] - rgb[at * 3]) +
-        Math.abs(rgb[next * 3 + 1] - rgb[at * 3 + 1]) +
-        Math.abs(rgb[next * 3 + 2] - rgb[at * 3 + 2]);
-      prof[axis === 1 ? x : y] += change;
-    }
-  }
-
+function relativeToMean(prof) {
   let total = 0;
 
   for (const value of prof) {
     total += value;
   }
 
-  const mean = total / length + 1e-9;
+  const mean = total / prof.length + 1e-9;
 
   return prof.map((value) => value / mean);
+}
+
+// colour change between neighbouring columns (axis 1) or rows (axis 0), summed across the image;
+// changes between two background pixels are ignored, or a checkerboard would win
+export function edgeProfile(image, axis, ignore = null) {
+  const { width, height, rgb } = image;
+  // rows and columns to walk, the step to the neighbour, and which of x and y indexes the profile
+  const [rows, cols, step, byX] =
+    axis === 1 ? [height, width - 1, 1, true] : [height - 1, width, width, false];
+  const prof = new Float64Array(byX ? width - 1 : height - 1);
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const at = y * width + x;
+
+      if (!bothIgnored(ignore, at, at + step)) {
+        prof[byX ? x : y] += change(rgb, at, at + step);
+      }
+    }
+  }
+
+  return relativeToMean(prof);
 }
 
 // negative 2nd derivative: keeps sharp edges, drops slow trends like the silhouette

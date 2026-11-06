@@ -1,5 +1,5 @@
-// Drag a frame along the strip to put it somewhere else. A mouse or pen drags once it moves a
-// little; a finger holds still for a moment first, so a quick swipe still scrolls the strip.
+// Drag a frame along a row to put it somewhere else. A mouse or pen drags once it moves a little;
+// a finger holds still for a moment first, so a quick swipe still scrolls the row.
 const MOUSE_SLOP = 5;
 const TOUCH_SLOP = 8;
 const HOLD_MS = 300;
@@ -14,117 +14,133 @@ function slotAt(frames, x) {
 }
 
 function markSlot(frames, from, slot) {
+  const last = frames.length - 1;
+
   frames.forEach((frame, i) => {
     frame.classList.toggle('dragging', i === from);
     frame.classList.toggle('drop-before', i === slot && slot !== from && slot !== from + 1);
-    frame.classList.toggle(
-      'drop-after',
-      i === frames.length - 1 && slot === frames.length && from !== frames.length - 1,
-    );
+    frame.classList.toggle('drop-after', i === last && slot === frames.length && from !== last);
   });
 }
 
-function scrollNear(strip, x) {
-  const box = strip.getBoundingClientRect();
+function scrollNear(row, x) {
+  const scroller = row.closest('.grid-scroll') ?? row;
+  const box = scroller.getBoundingClientRect();
 
   if (x < box.left + 24) {
-    strip.scrollLeft -= 8;
+    scroller.scrollLeft -= 8;
   } else if (x > box.right - 24) {
-    strip.scrollLeft += 8;
+    scroller.scrollLeft += 8;
+  }
+}
+
+function startDrag(drag) {
+  const { row, press } = drag;
+  press.dragging = true;
+  row.classList.add('sorting');
+
+  try {
+    row.setPointerCapture(press.pointerId);
+  } catch {
+    // a pointer that already lifted cannot be captured; the drag still ends on pointerup
+  }
+
+  markSlot(drag.frames(), press.from, press.from);
+}
+
+function endDrag(drag) {
+  clearTimeout(drag.press?.timer);
+  drag.frames().forEach((frame) => frame.classList.remove('dragging', 'drop-before', 'drop-after'));
+  drag.row.classList.remove('sorting');
+  drag.press = null;
+}
+
+function onDown(drag, event) {
+  const frame = event.target.closest(drag.selector);
+
+  if (!frame || event.button > 0 || event.target.closest('.cell-more')) {
+    return;
+  }
+
+  const touch = event.pointerType === 'touch';
+  drag.press = {
+    from: drag.frames().indexOf(frame),
+    x: event.clientX,
+    y: event.clientY,
+    pointerId: event.pointerId,
+    touch,
+    dragging: false,
+    slot: null,
+  };
+
+  if (touch) {
+    drag.press.timer = setTimeout(() => drag.press && startDrag(drag), HOLD_MS);
+  }
+}
+
+function onMove(drag, event) {
+  const { press } = drag;
+
+  if (!press || event.pointerId !== press.pointerId) {
+    return;
+  }
+
+  if (press.dragging) {
+    press.slot = slotAt(drag.frames(), event.clientX);
+    markSlot(drag.frames(), press.from, press.slot);
+    scrollNear(drag.row, event.clientX);
+
+    return;
+  }
+
+  const moved = Math.hypot(event.clientX - press.x, event.clientY - press.y);
+
+  if (press.touch && moved > TOUCH_SLOP) {
+    endDrag(drag);
+  } else if (!press.touch && moved > MOUSE_SLOP) {
+    startDrag(drag);
+  }
+}
+
+function onUp(drag) {
+  const press = drag.press;
+  endDrag(drag);
+
+  if (press?.dragging && press.slot !== null) {
+    drag.row.dataset.justSorted = '1';
+    setTimeout(() => delete drag.row.dataset.justSorted, 50);
+    drag.onMove(press.from, press.slot > press.from ? press.slot - 1 : press.slot);
   }
 }
 
 // onMove(from, to): `to` is where the frame should end up, as moveFrame takes it
-export function bindFrameDrag(strip, onMove) {
-  let press = null;
-  const framesOf = () => [...strip.querySelectorAll('.frame')];
-  const end = () => {
-    clearTimeout(press?.timer);
-    framesOf().forEach((frame) => frame.classList.remove('dragging', 'drop-before', 'drop-after'));
-    strip.classList.remove('sorting');
-    press = null;
-  };
-  const start = () => {
-    press.dragging = true;
-    strip.classList.add('sorting');
-    try {
-      strip.setPointerCapture(press.pointerId);
-    } catch {
-      // a pointer that already lifted cannot be captured; the drag still ends on pointerup
-    }
-    markSlot(framesOf(), press.from, press.from);
+export function bindFrameDrag(row, selector, onMoveFrame) {
+  const drag = {
+    row,
+    selector,
+    onMove: onMoveFrame,
+    press: null,
+    frames: () => [...row.querySelectorAll(selector)],
   };
 
-  strip.addEventListener('pointerdown', (event) => {
-    const frame = event.target.closest('.frame');
-
-    if (!frame || event.button > 0) {
-      return;
-    }
-
-    press = {
-      from: framesOf().indexOf(frame),
-      x: event.clientX,
-      y: event.clientY,
-      pointerId: event.pointerId,
-      touch: event.pointerType === 'touch',
-      dragging: false,
-      slot: null,
-    };
-
-    if (press.touch) {
-      press.timer = setTimeout(() => press && start(), HOLD_MS);
-    }
-  });
-  strip.addEventListener('pointermove', (event) => {
-    if (!press || event.pointerId !== press.pointerId) {
-      return;
-    }
-
-    const moved = Math.hypot(event.clientX - press.x, event.clientY - press.y);
-
-    if (!press.dragging) {
-      if (press.touch && moved > TOUCH_SLOP) {
-        end();
-      } else if (!press.touch && moved > MOUSE_SLOP) {
-        start();
-      }
-
-      return;
-    }
-
-    press.slot = slotAt(framesOf(), event.clientX);
-    markSlot(framesOf(), press.from, press.slot);
-    scrollNear(strip, event.clientX);
-  });
-  strip.addEventListener('pointerup', () => {
-    if (press?.dragging && press.slot !== null) {
-      const { from, slot } = press;
-      strip.dataset.justSorted = '1';
-      setTimeout(() => delete strip.dataset.justSorted, 50);
-      end();
-      onMove(from, slot > from ? slot - 1 : slot);
-
-      return;
-    }
-
-    end();
-  });
-  strip.addEventListener('pointercancel', end);
+  row.addEventListener('pointerdown', (event) => onDown(drag, event));
+  row.addEventListener('pointermove', (event) => onMove(drag, event));
+  row.addEventListener('pointerup', () => onUp(drag));
+  row.addEventListener('pointercancel', () => endDrag(drag));
   // the click that ends a drag is not a click on a frame
-  strip.addEventListener(
+  row.addEventListener(
     'click',
     (event) => {
-      if (strip.dataset.justSorted) {
-        delete strip.dataset.justSorted;
+      if (row.dataset.justSorted) {
+        delete row.dataset.justSorted;
         event.stopPropagation();
         event.preventDefault();
       }
     },
     true,
   );
-  // once a finger is dragging a frame, it must not scroll the page or the strip
-  strip.addEventListener('touchmove', (event) => press?.dragging && event.preventDefault(), {
+  // once a finger is dragging a frame, it must not scroll the page or the row
+  row.addEventListener('touchmove', (event) => drag.press?.dragging && event.preventDefault(), {
     passive: false,
   });
 }

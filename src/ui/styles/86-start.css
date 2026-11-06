@@ -1,0 +1,132 @@
+/* What are you making? The first screen when nothing is saved, and New project. */
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  padding: 32px 16px;
+  overflow: auto;
+  background: var(--bg);
+}
+
+.start-panel {
+  display: grid;
+  gap: 14px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.wordmark-big {
+  margin: 0;
+  font: 700 28px var(--font-pixel);
+  letter-spacing: 0.04em;
+}
+
+.start-warning {
+  color: var(--bad);
+}
+
+.start-chooser,
+.start-fields {
+  display: grid;
+  gap: 12px;
+}
+
+.start-heading {
+  margin: 4px 0 0;
+  font-size: 15px;
+}
+
+h4.start-heading {
+  color: var(--label-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.start-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.start-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1.5px solid var(--separator);
+  border-radius: var(--radius);
+  background: var(--chrome);
+  color: var(--tint);
+  cursor: pointer;
+}
+
+.start-card svg {
+  flex: none;
+  width: 26px;
+  height: 26px;
+}
+
+.start-card strong {
+  display: block;
+  color: var(--label);
+}
+
+.start-card span {
+  color: var(--label-secondary);
+  font-size: 12px;
+}
+
+.start-card[aria-checked='true'] {
+  border-color: var(--tint);
+  background: var(--tint-quiet);
+}
+
+.start-card:focus-visible {
+  outline: 2px solid var(--tint);
+  outline-offset: 2px;
+}
+
+.start-forget {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+}
+
+.start-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.start-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.start-fields [hidden] {
+  display: none;
+}
+
+.start-more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--separator);
+}
+
+.start-section {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.start-section summary {
+  font-weight: 600;
+  cursor: pointer;
+}

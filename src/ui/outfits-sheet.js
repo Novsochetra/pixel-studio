@@ -6,7 +6,7 @@ import { partsEditor } from './parts-editor.js';
 import { kitMapping, outfitRamps } from '../palette/kits.js';
 import { applyMapping } from '../palette/palette.js';
 import { newId } from '../model/project.js';
-import { profileOf } from '../model/profiles.js';
+import { gameOf } from '../model/presets.js';
 import { keepVersion } from './versions-sheet.js';
 import { downloadOutfit, keepAsSwap } from './outfit-files.js';
 
@@ -42,7 +42,7 @@ function chosenName(project, choice) {
 }
 
 function sourcePicker(project, choice, onChange) {
-  const teams = profileOf(project).teamKits ? Object.keys(globalThis.GAME_KITS?.kits ?? {}) : [];
+  const teams = gameOf(project).teamKits ? Object.keys(globalThis.GAME_KITS?.kits ?? {}) : [];
   const value =
     choice.source === 'team'
       ? `team:${choice.team}`
@@ -196,7 +196,7 @@ function outfitNames(app, redraw) {
 
 export function openOutfitsSheet(app) {
   const { state } = app.store;
-  const teams = profileOf(state.project).teamKits;
+  const teams = gameOf(state.project).teamKits;
   const sheet = openSheet(teams ? 'Team kits and outfits' : 'Outfits');
   const slot = node('div', { style: { display: 'grid', gap: '14px' } });
   let partsOpen = !state.project.parts.some((part) => part.colours.length);

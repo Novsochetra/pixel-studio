@@ -36,7 +36,7 @@ export function showQuickStart(stage) {
         'li',
         {},
         node('b', {}, 'Clean: '),
-        'drop a ChatGPT image on the canvas. Each view is fitted to the first one: same pixel size, feet, colours. Projects (top left) holds your other characters.',
+        'drop an AI image on the canvas, or into a frame below it. Every view and frame is fitted to the first: same pixel size, place, colours. Projects (top left) holds the rest of your art.',
       ),
       node(
         'li',

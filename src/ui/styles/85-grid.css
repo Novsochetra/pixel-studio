@@ -1,0 +1,330 @@
+/* The edit workspace: the canvas scrolls and zooms on its own above the frame grid, which stays
+   docked at the bottom. */
+.stage:has(.edit-layout) {
+  overflow: hidden;
+}
+
+.edit-layout {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  height: 100%;
+}
+
+.edit-scroll {
+  position: relative;
+  min-height: 0;
+  overflow: auto;
+}
+
+.grid-tab,
+.grid-view,
+.cell-more,
+.cell-add {
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* the three dots of a "more" button, thick enough to read at this size */
+.tab-more svg,
+.grid-view-more svg,
+.cell-more svg {
+  stroke-width: 3.4;
+}
+
+.grid-panel {
+  display: grid;
+  gap: 8px;
+  max-height: 45vh;
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--separator);
+  background: var(--chrome);
+  min-width: 0;
+}
+
+.grid-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.grid-tabs {
+  display: flex;
+  gap: 2px;
+  max-width: 100%;
+  padding: 2px;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: var(--well);
+}
+
+.grid-tab {
+  padding: 4px 12px;
+  border-radius: 6px;
+  color: var(--label-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.grid-tab-group {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  background: var(--chrome-raised);
+  box-shadow: var(--lift);
+}
+
+.grid-tab-group .grid-tab {
+  color: var(--label);
+  padding-right: 4px;
+}
+
+.tab-more,
+.grid-tab-add,
+.icon-toggle,
+.grid-view-more {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+}
+
+.tab-more {
+  width: 24px;
+  height: 24px;
+}
+
+.tab-rename {
+  width: 130px;
+  height: 28px;
+}
+
+.grid-fps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--label-secondary);
+}
+
+.grid-fps .input {
+  width: 52px;
+}
+
+.grid-play {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  padding: 0;
+}
+
+.grid-scroll {
+  min-height: 0;
+  overflow: auto;
+}
+
+.grid-table {
+  display: grid;
+  gap: 6px;
+  width: max-content;
+}
+
+.grid-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grid-label {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  width: 128px;
+  background: var(--chrome);
+  font-size: 12px;
+}
+
+.grid-view {
+  color: var(--label);
+  font-weight: 500;
+  text-align: left;
+}
+
+.grid-row.current .grid-view {
+  color: var(--tint);
+}
+
+.grid-label small {
+  color: var(--label-muted);
+}
+
+.grid-star {
+  color: var(--warn);
+  font-size: 11px;
+}
+
+.grid-view-more {
+  width: 24px;
+  height: 24px;
+  opacity: 0.7;
+}
+
+.grid-cells {
+  display: flex;
+  gap: 6px;
+}
+
+.grid-number {
+  width: 64px;
+  color: var(--label-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.grid-number.on {
+  color: var(--tint);
+  font-weight: 600;
+}
+
+.grid-number.playing {
+  color: var(--ok);
+}
+
+.cell,
+.cell-add {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.cell {
+  background: var(--well);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: pan-x;
+}
+
+.cell canvas {
+  width: 52px;
+  height: 52px;
+  image-rendering: pixelated;
+}
+
+.cell.empty,
+.cell-add {
+  border: 1.5px dashed var(--separator);
+  background: transparent;
+}
+
+.cell-add {
+  color: var(--label-muted);
+}
+
+.cell-add:hover {
+  border-color: var(--tint);
+  color: var(--tint);
+}
+
+.cell.selected {
+  border: 1.5px solid var(--tint);
+  background: var(--chrome-raised);
+}
+
+.cell.playing {
+  box-shadow: 0 0 0 2px var(--ok);
+}
+
+.cell:focus-visible {
+  outline: 2px solid var(--tint);
+  outline-offset: 2px;
+}
+
+.cell.mirror {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.cell-more {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 5px;
+  background: var(--tint);
+  color: var(--on-tint);
+}
+
+.cell-more svg {
+  width: 14px;
+  height: 14px;
+}
+
+.grid-cells.sorting .cell {
+  cursor: grabbing;
+}
+
+.cell.dragging {
+  opacity: 0.4;
+}
+
+.cell.drop-before::before,
+.cell.drop-after::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--tint);
+}
+
+.cell.drop-before::before {
+  left: -5px;
+}
+
+.cell.drop-after::after {
+  right: -5px;
+}
+
+.grid-add-view {
+  justify-self: start;
+}
+
+.menu button.danger {
+  color: var(--bad);
+}
+
+.menu button:disabled {
+  opacity: 0.45;
+}
+
+@media (max-width: 700px) {
+  .grid-panel {
+    max-height: 50vh;
+    padding: 8px;
+  }
+
+  .grid-label {
+    width: 88px;
+  }
+}

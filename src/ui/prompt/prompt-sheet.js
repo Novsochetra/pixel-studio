@@ -1,0 +1,144 @@
+import { node, replace, toast } from '../dom.js';
+import { openSheet } from '../sheet.js';
+import { currentAnimation, referenceSprite } from '../actions.js';
+import { boardCanvas, boardPreview } from '../board-canvas.js';
+import { saveFile } from '../save-file.js';
+import { hasMarks } from '../markup.js';
+import { promptText } from './prompt-text.js';
+import { canvasToBlob } from '../../io/images.js';
+import { bounds } from '../../model/sprite.js';
+import { drawableDirections } from '../../model/directions.js';
+import { referenceOf } from '../../model/reference.js';
+import { isSingleView, viewName } from '../../model/kinds.js';
+
+// a character asks for another view or the next frame; anything else for the next frame or another
+// of its kind in the same style
+const asksFor = (project) =>
+  isSingleView(project)
+    ? [
+        ['frame', 'The next frame'],
+        ['more', 'Another in this style'],
+      ]
+    : [
+        ['view', 'A new view'],
+        ['frame', 'An animation frame'],
+      ];
+
+function choices(state, ask, redraw) {
+  const segmented = node(
+    'div.segmented',
+    { role: 'group', 'aria-label': 'Ask for' },
+    asksFor(state.project).map(([id, label]) =>
+      node(
+        'button',
+        { 'aria-pressed': String(ask.task === id), onclick: () => redraw({ task: id }) },
+        label,
+      ),
+    ),
+  );
+  const views = isSingleView(state.project)
+    ? null
+    : node(
+        'select.input',
+        {
+          id: 'ask-direction',
+          'aria-label': 'Which view to ask for',
+          onchange: (event) => redraw({ direction: event.target.value }),
+        },
+        drawableDirections(state.project).map((id) =>
+          node(
+            'option',
+            { value: id, selected: id === ask.direction },
+            viewName(state.project, id),
+          ),
+        ),
+      );
+
+  return node('div.group', { style: { gap: '8px', flexWrap: 'wrap' } }, views, segmented);
+}
+
+function copyButton(text, box) {
+  const copy = () =>
+    navigator.clipboard.writeText(text).then(
+      () => toast('Prompt copied'),
+      () => {
+        box.select();
+        toast('Press ⌘C to copy');
+      },
+    );
+
+  return node('button.btn', { onclick: copy }, 'Copy the prompt');
+}
+
+function draw(slot, state, ask, { close, redraw }) {
+  const scale = state.project.canvas.scale;
+  const board = boardCanvas(state, scale, { overlay: null, mapping: null });
+  const text = promptText(state, ask.direction, ask.task);
+  const box = node(
+    'textarea.input.mono',
+    { rows: 9, id: 'prompt-text', 'aria-label': 'Prompt', readonly: true },
+    text,
+  );
+  const marks = hasMarks(state.project) ? ', with your marks' : '';
+  const download = async () => saveFile('reference-sheet.png', await canvasToBlob(board));
+
+  replace(
+    slot,
+    choices(state, ask, redraw),
+    node(
+      'div',
+      { style: { overflowX: 'auto' } },
+      boardPreview(state, 860, { overlay: null, mapping: null }),
+    ),
+    node(
+      'p.hint',
+      {},
+      `Attach the reference sheet (${board.width}×${board.height}, ${scale}× pixels${marks}) and paste the prompt. Then drop the AI's answer on the canvas to clean it.`,
+    ),
+    box,
+    node(
+      'div.sheet-actions',
+      {},
+      node('button.btn', { onclick: close }, 'Close'),
+      copyButton(text, box),
+      node('button.btn.primary', { onclick: download }, 'Download the reference sheet'),
+    ),
+  );
+}
+
+// A prompt and a reference sheet to ask ChatGPT (or another image AI) for art that fits.
+export function openChatgptSheet(app) {
+  const { state } = app.store;
+  const sheet = openSheet('Ask ChatGPT for new art');
+  const reference = viewName(state.project, referenceOf(state.project)).toLowerCase();
+
+  // the prompt is made of the reference view's numbers, so that view has to be drawn first
+  if (!bounds(referenceSprite(state))) {
+    sheet.body.append(
+      node(
+        'p.hint',
+        {},
+        `The ${reference} view, which everything is matched to, is empty. Clean or draw it first: new art is asked for at its size, with its colours.`,
+      ),
+      node('div.sheet-actions', {}, node('button.btn.primary', { onclick: sheet.close }, 'OK')),
+    );
+
+    return;
+  }
+
+  const slot = node('div', { style: { display: 'grid', gap: '12px' } });
+  const others = Object.keys(currentAnimation(state).directions).filter(
+    (other) => other !== referenceOf(state.project),
+  );
+  const ask = {
+    direction: others[0] ?? state.at.direction,
+    task: isSingleView(state.project) ? 'frame' : 'view',
+  };
+  const redraw = (patch) => {
+    Object.assign(ask, patch);
+    draw(slot, state, ask, { close: sheet.close, redraw });
+  };
+
+  sheet.body.append(slot);
+  redraw({});
+}

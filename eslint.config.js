@@ -167,6 +167,11 @@ export default [
     languageOptions: { globals: globalsOf(browser) },
     rules: { 'local/no-raw-hex': 'error' },
   },
+  // colours painted on the canvas are pixel-art data and live only in the art palettes
+  {
+    files: ['src/art/**/*.js'],
+    rules: { 'local/no-raw-hex': 'off' },
+  },
   {
     files: ['test/**/*.{js,mjs}'],
     languageOptions: { globals: globalsOf([...node, ...browser]) },

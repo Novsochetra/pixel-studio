@@ -1,7 +1,8 @@
 import { roundHalfEven } from './numeric.js';
 import { bbox } from './layout.js';
 
-function pixel(rgba, width, height, axis, line, across) {
+// the pixel at `line` along the axis and `across` it; past either end of the line, clear
+function pixel({ rgba, width, height }, axis, line, across) {
   const [x, y] = axis === 0 ? [across, line] : [line, across];
 
   if (line < 0 || line >= (axis === 0 ? height : width)) {
@@ -22,7 +23,8 @@ const differ = (first, second) =>
 // Nearest-neighbour stretch along one axis that keeps 1-pixel lines 1 pixel: where a source pixel
 // is drawn twice and it is a line (unlike both neighbours), the second copy takes the next pixel's
 // colour instead, so outlines and trims don't double.
-export function scaleAxis({ width, height, rgba }, factor, axis) {
+export function scaleAxis(image, factor, axis) {
+  const { width, height } = image;
   const length = axis === 0 ? height : width;
   const across = axis === 0 ? width : height;
   const count = roundHalfEven(length * factor);
@@ -36,12 +38,12 @@ export function scaleAxis({ width, height, rgba }, factor, axis) {
     const doubled = i > 0 && pick[i - 1] === index && index + 1 < length;
 
     for (let step = 0; step < across; step++) {
-      const own = pixel(rgba, width, height, axis, index, step);
+      const own = pixel(image, axis, index, step);
       const thin =
         doubled &&
-        differ(own, pixel(rgba, width, height, axis, index - 1, step)) &&
-        differ(own, pixel(rgba, width, height, axis, index + 1, step));
-      const value = thin ? pixel(rgba, width, height, axis, index + 1, step) : own;
+        differ(own, pixel(image, axis, index - 1, step)) &&
+        differ(own, pixel(image, axis, index + 1, step));
+      const value = thin ? pixel(image, axis, index + 1, step) : own;
       const [x, y] = axis === 0 ? [step, i] : [i, step];
       out.rgba.set(value, (y * out.width + x) * 4);
     }
@@ -63,7 +65,7 @@ export function toRgba({ width, height, colors, opaque }) {
   return rgba;
 }
 
-function fromRgba({ width, height, rgba }) {
+export function fromRgba({ width, height, rgba }) {
   const colors = new Uint8Array(width * height * 3);
   const opaque = new Uint8Array(width * height);
 
@@ -100,4 +102,24 @@ export function matchHeight(sprite, ref, height = null) {
   const scaled = scaleAxis(scaleAxis(cropped, fy, 0), fx, 1);
 
   return { ...sprite, ...fromRgba(scaled), scaled: { fx, fy, drawnHeight: own.bottom - own.top } };
+}
+
+// the picture as drawn, only made square where the image's pixels were not (sx by sy)
+export function keepPixelSize(sprite) {
+  const own = bbox(sprite.opaque, sprite.width);
+  const [sx, sy] = sprite.cell;
+  const fx = sx / sy;
+
+  if (Math.abs(fx - 1) <= 0.01) {
+    return { ...sprite, scaled: null };
+  }
+
+  const rows = toRgba(sprite).subarray(own.top * sprite.width * 4, own.bottom * sprite.width * 4);
+  const cropped = { width: sprite.width, height: own.bottom - own.top, rgba: rows };
+
+  return {
+    ...sprite,
+    ...fromRgba(scaleAxis(cropped, fx, 1)),
+    scaled: { fx, fy: 1, drawnHeight: own.bottom - own.top },
+  };
 }

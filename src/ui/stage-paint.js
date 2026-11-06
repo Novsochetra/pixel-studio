@@ -76,7 +76,7 @@ export function drawSelection(context, selection, scale) {
   }
 
   context.lineWidth = 2;
-  context.strokeStyle = '#000000';
+  context.strokeStyle = cssVar('--ink');
   context.stroke();
   context.setLineDash([4, 4]);
   context.strokeStyle = cssVar('--tint');
@@ -84,12 +84,25 @@ export function drawSelection(context, selection, scale) {
   context.restore();
 }
 
-export function paint(canvas, app) {
+// while the animation plays, the canvas shows the frame playing, without the editing marks
+function shownState(app) {
   const { state } = app.store;
-  const { width, height } = state.project.canvas;
-  const scale = state.zoom;
-  const { context, ratio } = sizeCanvas(canvas, width * scale, height * scale);
-  drawChecker(context, 0, 0, width * scale, height * scale, scale * 2);
+
+  if (!app.playback) {
+    return state;
+  }
+
+  return {
+    ...state,
+    at: { ...state.at, frame: app.playback.frame },
+    onion: false,
+    selection: null,
+    highlight: null,
+    showPins: false,
+  };
+}
+
+function paintArt(context, state, scale) {
   const ghost =
     state.overlay.direction && state.overlay.direction !== state.at.direction
       ? directionSprite(state, state.overlay.direction)
@@ -104,6 +117,10 @@ export function paint(canvas, app) {
   }
 
   drawLayers(context, state, scale);
+}
+
+function paintHelpers(context, state, { scale, ratio }) {
+  const { width, height } = state.project.canvas;
 
   if (state.showGrid && scale >= 6) {
     drawGrid(context, 0, 0, width, height, scale, ratio);
@@ -116,7 +133,9 @@ export function paint(canvas, app) {
   if (state.symmetry.on) {
     drawMirrorLine(context, state.symmetry.axisSum, 0, 0, height * scale, scale);
   }
+}
 
+function paintMarks(context, state, scale) {
   if (state.showPins) {
     const frames = currentFrames(state);
     const index = Math.min(state.at.frame, frames.length - 1);
@@ -130,6 +149,17 @@ export function paint(canvas, app) {
   if (state.highlight?.length) {
     drawHighlight(context, state.highlight, scale);
   }
+}
+
+export function paint(canvas, app) {
+  const state = shownState(app);
+  const { width, height } = state.project.canvas;
+  const scale = state.zoom;
+  const { context, ratio } = sizeCanvas(canvas, width * scale, height * scale);
+  drawChecker(context, 0, 0, width * scale, height * scale, scale * 2);
+  paintArt(context, state, scale);
+  paintHelpers(context, state, { scale, ratio });
+  paintMarks(context, state, scale);
 }
 
 // pixels an outline tool would change, ringed so they show on any colour

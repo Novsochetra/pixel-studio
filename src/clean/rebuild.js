@@ -53,8 +53,8 @@ export function rebuild(image, isBg, grid) {
 
   // sample the inner 50% of each cell, away from blended borders (the whole cell if clean)
   const [lo, hi] = grid.exact ? [0, 1] : [0.25, 0.75];
-  const colSpans = spans(xs, grid.sx, width, lo, hi);
-  const rowSpans = spans(ys, grid.sy, height, lo, hi);
+  const colSpans = spans(xs, grid.sx, width, [lo, hi]);
+  const rowSpans = spans(ys, grid.sy, height, [lo, hi]);
   const out = { width: colSpans.length, height: rowSpans.length };
   out.colors = new Uint8Array(out.width * out.height * 3);
   out.bg = new Uint8Array(out.width * out.height);

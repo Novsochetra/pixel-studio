@@ -1,3 +1,4 @@
+import { describeProject } from '../model/presets.js';
 import { allLayers } from '../model/project.js';
 import { keysFor } from './keys.js';
 import { deleteAllVersions } from './versions.js';
@@ -28,7 +29,7 @@ export function entryFor(project, prefix) {
   return {
     id: project.id,
     name: project.name,
-    profile: project.profile,
+    about: describeProject(project),
     prefix,
     updatedAt: Date.now(),
   };
@@ -46,7 +47,7 @@ export function upsertEntry(index, project, prefix) {
   }
 
   const old = index.list[at];
-  const changed = old.name !== entry.name || old.profile !== entry.profile;
+  const changed = old.name !== entry.name || old.about !== entry.about;
   index.list[at] = changed || Date.now() - old.updatedAt > 60000 ? entry : old;
 
   return changed || index.list[at] !== old;

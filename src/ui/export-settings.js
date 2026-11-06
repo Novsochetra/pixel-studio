@@ -1,18 +1,27 @@
 import { referenceSprite } from './actions.js';
-import { GAME_FRAME } from '../export/sheet.js';
 import { artAnchor, fittedFrame } from '../export/anchor.js';
 import { bounds } from '../model/sprite.js';
-import { profileOf } from '../model/profiles.js';
+import { gameOf } from '../model/presets.js';
+import { placementOf } from '../model/kinds.js';
 
-// The reference pose decides where the feet stand in every frame. With no reference drawn yet,
-// the feet go where a fresh one would: centred, a fifth of the way up.
+// The point of the art that sits on the frame's anchor. For a character or an object, the
+// reference pose's feet (or, with nothing drawn yet, where fresh feet would stand); an effect or an
+// icon, the middle of the canvas; a tile, its corner.
 export function referenceAnchor(state) {
-  const ref = referenceSprite(state);
   const { width, height } = state.project.canvas;
+  const { place, ground } = placementOf(state.project);
 
-  return ref && bounds(ref)
+  if (place !== 'feet') {
+    return place === 'fill'
+      ? { x: 0, y: 0 }
+      : { x: Math.floor(width / 2), y: Math.floor(height / 2) };
+  }
+
+  const ref = referenceSprite(state);
+
+  return bounds(ref)
     ? artAnchor(ref)
-    : { x: Math.floor(width / 2), y: Math.round(height * 0.8) };
+    : { x: Math.floor(width / 2), y: Math.round(height * ground) };
 }
 
 export function characterHeight(state) {
@@ -33,19 +42,30 @@ export function sane(settings) {
   };
 }
 
+// "Fit the art" (for a tile, the tile itself), the game's own frame when it has one, or custom
 export function presetsFor(project) {
+  const frame = gameOf(project).frame;
+
   return [
-    ['fit', 'Fit the art'],
-    ...(profileOf(project).gamePack ? [['game', 'Naga Eleven today (64×62)']] : []),
+    ['fit', placementOf(project).place === 'fill' ? 'The tile' : 'Fit the art'],
+    ...(frame ? [['game', frame.label]] : []),
     ['custom', 'Custom'],
   ];
 }
 
 export function presetSettings(state, preset) {
   const anchor = referenceAnchor(state);
+  const { frame } = gameOf(state.project);
+  const { width, height } = state.project.canvas;
 
-  if (preset === 'game' && profileOf(state.project).gamePack) {
-    return { ...GAME_FRAME, artAnchor: anchor };
+  if (preset === 'game' && frame) {
+    const { frameWidth, frameHeight, anchorX, anchorY } = frame;
+
+    return { frameWidth, frameHeight, anchorX, anchorY, artAnchor: anchor };
+  }
+
+  if (placementOf(state.project).place === 'fill') {
+    return { frameWidth: width, frameHeight: height, anchorX: 0, anchorY: 0, artAnchor: anchor };
   }
 
   return { ...fittedFrame(state.project, state.project.animations, anchor), artAnchor: anchor };

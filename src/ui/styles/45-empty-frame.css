@@ -1,0 +1,36 @@
+.empty-frame {
+  contain: inline-size;
+  width: min(100%, 620px);
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--chrome);
+  border: 1px solid var(--separator);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+}
+
+.empty-frame[hidden] {
+  display: none;
+}
+
+/* on a wide screen the card floats over the stage, so the canvas and frames never move for it */
+@media (min-width: 700px) {
+  .stage-inner.edit {
+    position: relative;
+  }
+
+  .empty-frame {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(calc(100% - 24px), 620px);
+    z-index: 2;
+  }
+}

@@ -4,7 +4,8 @@ import { Saver } from '../store/saver.js';
 import { loadProject } from '../store/load.js';
 import { keysFor, prefixFor } from '../store/keys.js';
 import { deleteProjectData, upsertEntry, writeIndex } from '../store/projects.js';
-import { allLayers, newId, normalizeProject } from '../model/project.js';
+import { allLayers, newId } from '../model/project.js';
+import { normalizeProject } from '../model/normalize.js';
 import { createSprite } from '../model/sprite.js';
 import { evenFrames } from '../model/frames.js';
 

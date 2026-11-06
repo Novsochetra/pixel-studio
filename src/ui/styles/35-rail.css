@@ -1,0 +1,27 @@
+.rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 8px;
+  background: var(--chrome);
+  border-right: 1px solid var(--separator);
+  overflow-y: auto;
+}
+
+.rail .btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.rail .btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.rail hr {
+  border: 0;
+  border-top: 1px solid var(--separator);
+  margin: 4px 2px;
+}

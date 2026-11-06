@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { newProject } from '../src/model/project.js';
+import { newProject } from '../src/model/new-project.js';
 import { getPixel, pack, setPixel } from '../src/model/sprite.js';
 import { addFrame, evenFrames, frameCount, moveFrame, removeFrame } from '../src/model/frames.js';
 import { addDirection, removeDirection } from '../src/model/structure.js';

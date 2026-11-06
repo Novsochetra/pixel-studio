@@ -57,14 +57,12 @@ export function moveFrame(animation, from, to) {
 
 function copyOfFrame(frame, canvas) {
   const layers = frame.layers.map((layer) => ({
-    ...newLayer(
-      canvas.width,
-      canvas.height,
-      layer.name,
-      layer.sprite ? cloneSprite(layer.sprite) : undefined,
-      layer.key,
-      layer.kind,
-    ),
+    ...newLayer(canvas.width, canvas.height, {
+      name: layer.name,
+      sprite: layer.sprite ? cloneSprite(layer.sprite) : undefined,
+      key: layer.key,
+      kind: layer.kind,
+    }),
     visible: layer.visible,
     opacity: layer.opacity,
   }));
