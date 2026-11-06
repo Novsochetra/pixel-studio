@@ -21,7 +21,10 @@ function pick(app, [x, y]) {
   const color = getPixel(currentLayer(app.store.state).sprite, x, y);
 
   if (color !== CLEAR) {
-    app.store.set({ color, tool: app.store.state.tool === 'picker' ? 'pencil' : app.store.state.tool });
+    app.store.set({
+      color,
+      tool: app.store.state.tool === 'picker' ? 'pencil' : app.store.state.tool,
+    });
   }
 
   return null;
@@ -43,7 +46,9 @@ export function startTool(app, point, event) {
   const { tool, color } = app.store.state;
 
   if (tool === 'pin' && event.altKey) {
-    restructure(app, 'Remove pin', (state) => removePinNear(frameAt(state.project, state.at), point));
+    restructure(app, 'Remove pin', (state) =>
+      removePinNear(frameAt(state.project, state.at), point),
+    );
 
     return null;
   }
@@ -53,7 +58,9 @@ export function startTool(app, point, event) {
   }
 
   if (PAINTING.has(tool) && !currentLayer(app.store.state).visible) {
-    toast(`${currentLayer(app.store.state).name} is hidden, so you would not see what you draw. Show it in Layers first.`);
+    toast(
+      `${currentLayer(app.store.state).name} is hidden, so you would not see what you draw. Show it in Layers first.`,
+    );
 
     return null;
   }

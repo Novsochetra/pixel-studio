@@ -39,7 +39,9 @@ function cellError(image, isBg, rows, cols, inner) {
 
       shade ??= innerShade(rgb, width, inner[0], inner[1]);
       total +=
-        Math.abs(rgb[at * 3] - shade[0]) + Math.abs(rgb[at * 3 + 1] - shade[1]) + Math.abs(rgb[at * 3 + 2] - shade[2]);
+        Math.abs(rgb[at * 3] - shade[0]) +
+        Math.abs(rgb[at * 3 + 1] - shade[1]) +
+        Math.abs(rgb[at * 3 + 2] - shade[2]);
       count++;
     }
   }
@@ -59,9 +61,12 @@ export function gridError(image, isBg, profs, sx, sy) {
   let total = 0;
   let count = 0;
 
-  rowOuter.forEach((rows, r) => {
-    colOuter.forEach((cols, c) => {
-      const [cellTotal, cellCount] = cellError(image, isBg, rows, cols, [rowInner[r], colInner[c]]);
+  rowOuter.forEach((rows, rowIndex) => {
+    colOuter.forEach((cols, columnIndex) => {
+      const [cellTotal, cellCount] = cellError(image, isBg, rows, cols, [
+        rowInner[rowIndex],
+        colInner[columnIndex],
+      ]);
       total += cellTotal;
       count += cellCount;
     });

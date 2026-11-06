@@ -15,11 +15,16 @@ export async function saveVersion(backend, project, name, keys = keysFor('')) {
   const id = newId('v');
   const chunks = Math.ceil(text.length / CHUNK);
 
-  for (let n = 0; n < chunks; n++) {
-    await backend.write(keys.versionChunk(id, n), { text: text.slice(n * CHUNK, (n + 1) * CHUNK) });
+  for (let chunk = 0; chunk < chunks; chunk++) {
+    await backend.write(keys.versionChunk(id, chunk), {
+      text: text.slice(chunk * CHUNK, (chunk + 1) * CHUNK),
+    });
   }
 
-  const list = [{ id, name, savedAt: Date.now(), chunks, size: text.length }, ...(await listVersions(backend, keys))];
+  const list = [
+    { id, name, savedAt: Date.now(), chunks, size: text.length },
+    ...(await listVersions(backend, keys)),
+  ];
 
   for (const old of list.slice(KEEP)) {
     await deleteVersionChunks(backend, old, keys);
@@ -31,18 +36,18 @@ export async function saveVersion(backend, project, name, keys = keysFor('')) {
 }
 
 async function deleteVersionChunks(backend, entry, keys) {
-  for (let n = 0; n < entry.chunks; n++) {
-    await backend.remove(keys.versionChunk(entry.id, n));
+  for (let chunk = 0; chunk < entry.chunks; chunk++) {
+    await backend.remove(keys.versionChunk(entry.id, chunk));
   }
 }
 
 export async function deleteVersion(backend, id, keys = keysFor('')) {
   const list = await listVersions(backend, keys);
-  const entry = list.find((v) => v.id === id);
+  const entry = list.find((version) => version.id === id);
 
   if (entry) {
     await deleteVersionChunks(backend, entry, keys);
-    await backend.write(keys.versions, { list: list.filter((v) => v.id !== id) });
+    await backend.write(keys.versions, { list: list.filter((version) => version.id !== id) });
   }
 }
 
@@ -57,8 +62,8 @@ export async function deleteAllVersions(backend, keys) {
 export async function versionText(backend, entry, keys = keysFor('')) {
   let text = '';
 
-  for (let n = 0; n < entry.chunks; n++) {
-    text += (await backend.read(keys.versionChunk(entry.id, n)))?.text ?? '';
+  for (let chunk = 0; chunk < entry.chunks; chunk++) {
+    text += (await backend.read(keys.versionChunk(entry.id, chunk)))?.text ?? '';
   }
 
   return text;

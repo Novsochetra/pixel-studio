@@ -9,7 +9,9 @@ function startWorker() {
     return worker;
   }
 
-  const url = URL.createObjectURL(new Blob([globalThis.CLEAN_WORKER_SOURCE], { type: 'text/javascript' }));
+  const url = URL.createObjectURL(
+    new Blob([globalThis.CLEAN_WORKER_SOURCE], { type: 'text/javascript' }),
+  );
   worker = new Worker(url);
   worker.onmessage = (event) => {
     const { id, result, error } = event.data;
@@ -26,13 +28,22 @@ function startWorker() {
   return worker;
 }
 
-const plain = ({ width, height, data, pixels }) => ({ width, height, data: new Uint8Array(data ?? pixels) });
+const plain = ({ width, height, data, pixels }) => ({
+  width,
+  height,
+  data: new Uint8Array(data ?? pixels),
+});
 
 // image: decoded ChatGPT picture; reference: the front sprite. Resolves { width, height, pixels, report }.
 export function cleanImage(image, reference, options = {}) {
   return new Promise((resolve, reject) => {
     nextId += 1;
     waiting.set(nextId, { resolve, reject });
-    startWorker().postMessage({ id: nextId, image: plain(image), reference: plain(reference), options });
+    startWorker().postMessage({
+      id: nextId,
+      image: plain(image),
+      reference: plain(reference),
+      options,
+    });
   });
 }

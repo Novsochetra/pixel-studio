@@ -2,7 +2,16 @@
 // (south faces the camera); a direction set says which ones are drawn and which are left for the
 // game to mirror.
 
-export const ALL_DIRECTIONS = ['south', 'south-east', 'east', 'north-east', 'north', 'north-west', 'west', 'south-west'];
+export const ALL_DIRECTIONS = [
+  'south',
+  'south-east',
+  'east',
+  'north-east',
+  'north',
+  'north-west',
+  'west',
+  'south-west',
+];
 
 export const DIRECTION_SETS = {
   side: {

@@ -21,19 +21,39 @@ test('a kit recolours each part shade for shade, darkest to darkest', () => {
   const mapping = kitMapping(parts, kit);
   assert.equal(mapping[fromHex('#850d19')], fromHex(kit.shirt[0]));
   assert.equal(mapping[fromHex('#df2321')], fromHex(kit.shirt[3]));
-  assert.equal(mapping[fromHex('#283ca0')], fromHex(kit.shorts[2]), 'a one-colour part takes the base shade');
-  assert.deepEqual(sharedColours([{ id: 'shirt', colours: [1, 2] }, { id: 'socks', colours: [2] }]), [2]);
+  assert.equal(
+    mapping[fromHex('#283ca0')],
+    fromHex(kit.shorts[2]),
+    'a one-colour part takes the base shade',
+  );
+  assert.deepEqual(
+    sharedColours([
+      { id: 'shirt', colours: [1, 2] },
+      { id: 'socks', colours: [2] },
+    ]),
+    [2],
+  );
 });
 
 test('the ramp maker matches the game: Cambodia home shirt', () => {
   assert.deepEqual(rampOf('#d0262e'), GAME.kits.cambodia.home.shirt);
-  const ramps = outfitRamps([{ id: 'cape', colours: [] }, { id: 'boots', colours: [] }], { cape: '#d0262e' });
+  const ramps = outfitRamps(
+    [
+      { id: 'cape', colours: [] },
+      { id: 'boots', colours: [] },
+    ],
+    { cape: '#d0262e' },
+  );
   assert.deepEqual(Object.keys(ramps), ['cape']);
   assert.equal(ramps.cape.length, 4);
 });
 
 function square(sprite, x0, y0, size, color) {
-  for (let y = y0; y < y0 + size; y++) for (let x = x0; x < x0 + size; x++) setPixel(sprite, x, y, color);
+  for (let y = y0; y < y0 + size; y++) {
+    for (let x = x0; x < x0 + size; x++) {
+      setPixel(sprite, x, y, color);
+    }
+  }
 }
 
 test('outline tools: add, thin a doubled one, close a gap', () => {

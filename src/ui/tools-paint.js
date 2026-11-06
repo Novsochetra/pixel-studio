@@ -8,7 +8,11 @@ import { toast } from './dom.js';
 
 // clean lines tidies drawn lines; for the eraser it would put erased corners back
 export function paintOptions(state, color = state.color) {
-  return { symmetry: state.symmetry, paintOver: state.paintOver, cleanLines: state.cleanLines && color !== CLEAR };
+  return {
+    symmetry: state.symmetry,
+    paintOver: state.paintOver,
+    cleanLines: state.cleanLines && color !== CLEAR,
+  };
 }
 
 export function stroke(app, point, color) {
@@ -27,7 +31,9 @@ export function stroke(app, point, color) {
       app.store.touch('stroke');
     },
     end() {
-      if (app.history.record(color === CLEAR ? 'Erase' : 'Pencil', [{ layer, before: line.before }])) {
+      if (
+        app.history.record(color === CLEAR ? 'Erase' : 'Pencil', [{ layer, before: line.before }])
+      ) {
         app.saver.markLayers([layer.id]);
         app.store.touch('pixels');
       }
@@ -37,7 +43,9 @@ export function stroke(app, point, color) {
 
 export function fill(app, [x, y]) {
   const layer = currentLayer(app.store.state);
-  commit(app, 'Fill', [layer], () => floodFill(layer.sprite, x, y, app.store.state.color, paintOptions(app.store.state)));
+  commit(app, 'Fill', [layer], () =>
+    floodFill(layer.sprite, x, y, app.store.state.color, paintOptions(app.store.state)),
+  );
 
   return null;
 }

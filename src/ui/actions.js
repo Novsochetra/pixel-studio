@@ -5,7 +5,10 @@ import { changedLayers, snapshotAnimations } from '../editor/history.js';
 import { referenceOf } from '../model/reference.js';
 
 export function currentAnimation(state) {
-  return state.project.animations.find((a) => a.id === state.at.animation) ?? state.project.animations[0];
+  return (
+    state.project.animations.find((animation) => animation.id === state.at.animation) ??
+    state.project.animations[0]
+  );
 }
 
 export function currentLayer(state) {
@@ -20,7 +23,9 @@ export function directionsInUse(state) {
 export function directionSprite(state, direction, frameIndex = state.at.frame ?? 0, options = {}) {
   const frame = frameAt(state.project, { ...state.at, direction, frame: frameIndex });
 
-  return frame ? compositeFrame(frame, state.project.canvas.width, state.project.canvas.height, options) : null;
+  return frame
+    ? compositeFrame(frame, state.project.canvas.width, state.project.canvas.height, options)
+    : null;
 }
 
 // the art of a view counting hidden layers: what cleaning matches and the colours come from
@@ -32,7 +37,12 @@ export function artSprite(state, direction, frameIndex = state.at.frame ?? 0) {
 export function hiddenArt(state, direction) {
   const frame = frameAt(state.project, { ...state.at, direction });
 
-  return (frame?.layers ?? []).filter((layer) => layer.kind !== 'reference' && !layer.visible && layer.sprite?.pixels.some((v, i) => i % 4 === 3 && v));
+  return (frame?.layers ?? []).filter(
+    (layer) =>
+      layer.kind !== 'reference' &&
+      !layer.visible &&
+      layer.sprite?.pixels.some((value, i) => i % 4 === 3 && value),
+  );
 }
 
 export function currentFrames(state) {
@@ -41,15 +51,22 @@ export function currentFrames(state) {
 
 // every art layer of the whole character, every animation and frame
 export function allArtLayers(state) {
-  return [...allLayers(state.project)].map(({ layer }) => layer).filter((layer) => layer.kind !== 'reference');
+  return [...allLayers(state.project)]
+    .map(({ layer }) => layer)
+    .filter((layer) => layer.kind !== 'reference');
 }
 
 // the pose every view is matched to: the reference view's first frame of the first animation
 export function referenceSprite(state) {
   const direction = referenceOf(state.project);
-  const frame = state.project.animations.find((a) => a.directions[direction])?.directions[direction].frames[0];
+  const frame = state.project.animations.find((animation) => animation.directions[direction])
+    ?.directions[direction].frames[0];
 
-  return frame ? compositeFrame(frame, state.project.canvas.width, state.project.canvas.height, { includeHidden: true }) : null;
+  return frame
+    ? compositeFrame(frame, state.project.canvas.width, state.project.canvas.height, {
+        includeHidden: true,
+      })
+    : null;
 }
 
 // Change some layers as one undoable step, then save and redraw.
@@ -71,7 +88,9 @@ export function settleAt(state) {
   const direction = directions.includes(state.at.direction) ? state.at.direction : directions[0];
   const frames = animation.directions[direction].frames;
   const frame = Math.max(0, Math.min(state.at.frame ?? 0, frames.length - 1));
-  const layer = frames[frame].layers.some((l) => l.key === state.at.layer) ? state.at.layer : null;
+  const layer = frames[frame].layers.some((other) => other.key === state.at.layer)
+    ? state.at.layer
+    : null;
 
   return { animation: animation.id, direction, frame, layer };
 }
@@ -83,7 +102,10 @@ function afterHistory(app, step) {
 
   if (step.kind === 'structure') {
     // either side may hold layers the other lacks, so compare both ways
-    app.saver.markLayers([...changedLayers(step.before, step.after), ...changedLayers(step.after, step.before)]);
+    app.saver.markLayers([
+      ...changedLayers(step.before, step.after),
+      ...changedLayers(step.after, step.before),
+    ]);
     app.saver.markNewLayers(app.store.state.project);
     app.saver.markStructure();
     app.store.set({ at: settleAt(app.store.state), selection: null });
@@ -126,10 +148,17 @@ export function flipCurrent(app) {
 
 // a cleaned image into one frame of a view: onto the layer being edited, unless that is a picture
 // to trace, which never reaches a download
-export function replaceDirectionArt(app, direction, sprite, label, frame = app.store.state.at.frame) {
+export function replaceDirectionArt(
+  app,
+  direction,
+  sprite,
+  label,
+  frame = app.store.state.at.frame,
+) {
   const at = { ...app.store.state.at, direction, frame };
   const chosen = layerAt(app.store.state.project, at);
-  const layer = chosen.kind === 'reference' ? layerAt(app.store.state.project, { ...at, layer: null }) : chosen;
+  const layer =
+    chosen.kind === 'reference' ? layerAt(app.store.state.project, { ...at, layer: null }) : chosen;
   commit(app, label, [layer], () => {
     layer.sprite = cloneSprite(sprite);
   });

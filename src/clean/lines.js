@@ -4,24 +4,26 @@ import { peaks } from './profile.js';
 export function cellStarts(offset, size, length) {
   const start = pymod(offset + size / 2, size) - size / 2;
 
-  return Array.from(arange(start, length, size)).filter((v) => v + size / 2 >= 0 && v + size / 2 < length);
+  return Array.from(arange(start, length, size)).filter(
+    (value) => value + size / 2 >= 0 && value + size / 2 < length,
+  );
 }
 
-function strongEdge(p) {
-  const positive = p.filter((value) => value > 0);
+function strongEdge(peakList) {
+  const positive = peakList.filter((value) => value > 0);
 
   return positive.length ? 0.15 * percentile(positive, 95) : Infinity;
 }
 
-function edgeShift(p, start, size, strong) {
+function edgeShift(peakList, start, size, strong) {
   const lo = Math.max(Math.ceil(start - 0.5 - 0.45 * size), 0);
-  const hi = Math.min(Math.trunc(start - 0.5 + 0.45 * size) + 1, p.length);
+  const hi = Math.min(Math.trunc(start - 0.5 + 0.45 * size) + 1, peakList.length);
 
   if (hi <= lo) {
     return NaN;
   }
 
-  const window = p.subarray(lo, hi);
+  const window = peakList.subarray(lo, hi);
   const best = argmax(window);
 
   return window[best] >= strong ? lo + best + 0.5 - start : NaN;
@@ -31,15 +33,15 @@ function edgeShift(p, start, size, strong) {
 // cells of uneven width (8 and 9 px for 8.4), so an even grid drifts up to half a cell off and
 // samples the neighbouring pixel: outlines double and the sprite grows a row.
 export function snapLines(starts, prof, size) {
-  const p = peaks(prof);
-  const strong = strongEdge(p);
-  const shifts = starts.map((start) => edgeShift(p, start, size, strong));
+  const peakList = peaks(prof);
+  const strong = strongEdge(peakList);
+  const shifts = starts.map((start) => edgeShift(peakList, start, size, strong));
   const knownIndex = [];
   const knownValue = [];
 
-  shifts.forEach((shift, k) => {
+  shifts.forEach((shift, index) => {
     if (!Number.isNaN(shift)) {
-      knownIndex.push(k);
+      knownIndex.push(index);
       knownValue.push(shift);
     }
   });
@@ -49,11 +51,15 @@ export function snapLines(starts, prof, size) {
   }
 
   // lines with no edge (flat colour) follow the drift of the lines around them
-  const filled = interp(starts.map((_, k) => k), knownIndex, knownValue);
-  const lines = starts.map((start, k) => start + filled[k]);
+  const filled = interp(
+    starts.map((_, index) => index),
+    knownIndex,
+    knownValue,
+  );
+  const lines = starts.map((start, index) => start + filled[index]);
 
-  for (let k = 1; k < lines.length; k++) {
-    lines[k] = Math.max(lines[k], lines[k - 1] + 0.5 * size);
+  for (let index = 1; index < lines.length; index++) {
+    lines[index] = Math.max(lines[index], lines[index - 1] + 0.5 * size);
   }
 
   return lines;
@@ -61,11 +67,11 @@ export function snapLines(starts, prof, size) {
 
 // pixel ranges [a, b) covering the part lo..hi of each cell
 export function spans(lines, size, length, lo, hi) {
-  return lines.map((start, k) => {
-    const end = k + 1 < lines.length ? lines[k + 1] : start + size;
-    const a = Math.max(roundHalfEven(start + (end - start) * lo), 0);
-    const b = Math.min(Math.max(roundHalfEven(start + (end - start) * hi), a + 1), length);
+  return lines.map((start, index) => {
+    const end = index + 1 < lines.length ? lines[index + 1] : start + size;
+    const first = Math.max(roundHalfEven(start + (end - start) * lo), 0);
+    const second = Math.min(Math.max(roundHalfEven(start + (end - start) * hi), first + 1), length);
 
-    return [a, b];
+    return [first, second];
   });
 }

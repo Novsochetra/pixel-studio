@@ -6,7 +6,7 @@ export function keysFor(prefix = '') {
     project: `${prefix}project`,
     layer: (id) => `${prefix}layer-${id}`,
     versions: `${prefix}versions`,
-    versionChunk: (id, n) => `${prefix}version-${id}-${n}`,
+    versionChunk: (id, chunk) => `${prefix}version-${id}-${chunk}`,
     background: `${prefix}background`,
   };
 }

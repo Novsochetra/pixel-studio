@@ -40,7 +40,12 @@ export function mirrored(x, y, symmetry) {
 
   const mirror = symmetry.axisSum - x;
 
-  return mirror === x ? [[x, y]] : [[x, y], [mirror, y]];
+  return mirror === x
+    ? [[x, y]]
+    : [
+        [x, y],
+        [mirror, y],
+      ];
 }
 
 // May this pixel be painted? With "paint only over" set, only pixels of that colour can change.
@@ -78,7 +83,13 @@ export function floodFill(sprite, x, y, color, options = {}) {
     while (stack.length) {
       const [px, py] = stack.pop();
 
-      if (getPixel(sprite, px, py) !== target || px < 0 || py < 0 || px >= sprite.width || py >= sprite.height) {
+      if (
+        getPixel(sprite, px, py) !== target ||
+        px < 0 ||
+        py < 0 ||
+        px >= sprite.width ||
+        py >= sprite.height
+      ) {
         continue;
       }
 

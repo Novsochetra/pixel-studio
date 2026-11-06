@@ -34,7 +34,10 @@ const stored = (project) => ({ json: JSON.stringify(projectStructure(project)) }
 
 test('an index that fails once is read again; one that keeps failing is marked unreadable', async () => {
   let calls = 0;
-  const flaky = memory({ projects: { list: [{ id: 'a', prefix: 'p-a-' }], current: 'a' } }, () => calls++ === 0);
+  const flaky = memory(
+    { projects: { list: [{ id: 'a', prefix: 'p-a-' }], current: 'a' } },
+    () => calls++ === 0,
+  );
   assert.equal((await readIndex(flaky)).list.length, 1);
 
   const down = await readIndex(memory({}, () => true));
@@ -46,13 +49,25 @@ test('an index that fails once is read again; one that keeps failing is marked u
 
 test('boot tries every listed project before the sample, and the sample never takes their documents', async () => {
   const second = newProject({ name: 'Second' });
-  const backend = memory({ [keysFor('p-b-').project]: stored(second) }, (key) => key === keysFor('p-a-').project);
-  const index = { list: [{ id: 'a', prefix: 'p-a-' }, { id: 'b', prefix: 'p-b-' }], current: 'a' };
+  const backend = memory(
+    { [keysFor('p-b-').project]: stored(second) },
+    (key) => key === keysFor('p-a-').project,
+  );
+  const index = {
+    list: [
+      { id: 'a', prefix: 'p-a-' },
+      { id: 'b', prefix: 'p-b-' },
+    ],
+    current: 'a',
+  };
   const opened = await firstProject(backend, index);
   assert.equal(opened.project.name, 'Second');
   assert.equal(opened.prefix, 'p-b-');
 
-  const none = await firstProject(memory({}, (key) => key.startsWith('p-')), index);
+  const none = await firstProject(
+    memory({}, (key) => key.startsWith('p-')),
+    index,
+  );
   assert.equal(none.failed, true);
   assert.equal(none.prefix, prefixFor(none.project.id));
   assert.notEqual(none.prefix, '');
@@ -68,7 +83,10 @@ test('the sample takes the plain documents only when nothing at all is saved', a
 
   const legacy = newProject({ name: 'Before projects' });
   delete legacy.id;
-  const old = await firstProject(memory({ [keysFor('').project]: stored(legacy) }), { list: [], current: null });
+  const old = await firstProject(memory({ [keysFor('').project]: stored(legacy) }), {
+    list: [],
+    current: null,
+  });
   assert.equal(old.project.name, 'Before projects');
   assert.equal(old.project.id, 'first-project');
   assert.equal(old.prefix, '');

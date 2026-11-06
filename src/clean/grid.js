@@ -15,7 +15,7 @@ export function exactCell(image, maxCell = 64, purity = 0.995) {
       prof.forEach((value, i) => {
         phase[(i + 1) % size] += value;
       });
-      const total = phase.reduce((a, b) => a + b, 0);
+      const total = phase.reduce((first, second) => first + second, 0);
 
       if (Math.max(...phase) < purity * total) {
         break;
@@ -40,10 +40,10 @@ function climb(cands, score, start) {
   while (moved) {
     moved = false;
 
-    for (const k of [2, 3]) {
+    for (const multiple of [2, 3]) {
       const win = [];
-      cands.forEach((c, j) => {
-        if (Math.abs(c - k * cands[i]) <= 0.02 * k * cands[i]) {
+      cands.forEach((candidate, j) => {
+        if (Math.abs(candidate - multiple * cands[i]) <= 0.02 * multiple * cands[i]) {
           win.push(j);
         }
       });
@@ -61,7 +61,7 @@ function climb(cands, score, start) {
 }
 
 function totalScore(profs, peakList, cands) {
-  const scores = profs.map((prof, k) => coherence(prof, cands, peakList[k]));
+  const scores = profs.map((prof, index) => coherence(prof, cands, peakList[index]));
 
   return cands.map((_, i) => scores[0][i] + scores[1][i]);
 }
@@ -138,7 +138,13 @@ export function findGrid(image, isBg, options, cutOut = false) {
   }
 
   if (exact) {
-    return { sx: exact.size, sy: exact.size, ox: exact.offsets[0], oy: exact.offsets[1], exact: true };
+    return {
+      sx: exact.size,
+      sy: exact.size,
+      ox: exact.offsets[0],
+      oy: exact.offsets[1],
+      exact: true,
+    };
   }
 
   const profs = [edgeProfile(image, 1, isBg), edgeProfile(image, 0, isBg)];
@@ -155,5 +161,12 @@ export function findGrid(image, isBg, options, cutOut = false) {
 
   const [sx, sy] = sizes;
 
-  return { sx, sy, ox: findOffset(profs[0], sx), oy: findOffset(profs[1], sy), exact: false, profs };
+  return {
+    sx,
+    sy,
+    ox: findOffset(profs[0], sx),
+    oy: findOffset(profs[1], sy),
+    exact: false,
+    profs,
+  };
 }

@@ -1,4 +1,12 @@
-import { cssVar, drawChecker, drawGrid, drawGuide, drawMirrorLine, drawSprite, sizeCanvas } from './draw.js';
+import {
+  cssVar,
+  drawChecker,
+  drawGrid,
+  drawGuide,
+  drawMirrorLine,
+  drawSprite,
+  sizeCanvas,
+} from './draw.js';
 import { currentFrames, directionSprite } from './actions.js';
 import { drawPins } from './pins-draw.js';
 import { frameAt } from '../model/project.js';
@@ -30,7 +38,10 @@ export function drawLayers(context, state, scale) {
       continue;
     }
 
-    const mapped = state.swapPreview && layer.kind !== 'reference' ? applyMapping(layer.sprite, state.swapPreview) : layer.sprite;
+    const mapped =
+      state.swapPreview && layer.kind !== 'reference'
+        ? applyMapping(layer.sprite, state.swapPreview)
+        : layer.sprite;
     const sprite = layer.kind === 'reference' ? mapped : VIEW_FILTERS[state.viewFilter](mapped);
     drawSprite(context, sprite, 0, 0, scale, layer.kind === 'reference' ? layer.opacity : 1);
   }
@@ -49,10 +60,18 @@ export function drawSelection(context, selection, scale) {
         continue;
       }
 
-      if (!on(x, y - 1)) context.rect(x * scale, y * scale, scale, 0);
-      if (!on(x, y + 1)) context.rect(x * scale, (y + 1) * scale, scale, 0);
-      if (!on(x - 1, y)) context.rect(x * scale, y * scale, 0, scale);
-      if (!on(x + 1, y)) context.rect((x + 1) * scale, y * scale, 0, scale);
+      if (!on(x, y - 1)) {
+        context.rect(x * scale, y * scale, scale, 0);
+      }
+      if (!on(x, y + 1)) {
+        context.rect(x * scale, (y + 1) * scale, scale, 0);
+      }
+      if (!on(x - 1, y)) {
+        context.rect(x * scale, y * scale, 0, scale);
+      }
+      if (!on(x + 1, y)) {
+        context.rect((x + 1) * scale, y * scale, 0, scale);
+      }
     }
   }
 
@@ -71,7 +90,10 @@ export function paint(canvas, app) {
   const scale = state.zoom;
   const { context, ratio } = sizeCanvas(canvas, width * scale, height * scale);
   drawChecker(context, 0, 0, width * scale, height * scale, scale * 2);
-  const ghost = state.overlay.direction && state.overlay.direction !== state.at.direction ? directionSprite(state, state.overlay.direction) : null;
+  const ghost =
+    state.overlay.direction && state.overlay.direction !== state.at.direction
+      ? directionSprite(state, state.overlay.direction)
+      : null;
 
   if (ghost) {
     drawSprite(context, ghost, 0, 0, scale, state.overlay.opacity);

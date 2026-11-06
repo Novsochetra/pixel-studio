@@ -1,8 +1,8 @@
 import { unpack } from '../model/sprite.js';
 
 function widestChannel(box) {
-  const ranges = [0, 1, 2].map((c) => {
-    const values = box.map((entry) => unpack(entry.color)[c]);
+  const ranges = [0, 1, 2].map((channel) => {
+    const values = box.map((entry) => unpack(entry.color)[channel]);
 
     return Math.max(...values) - Math.min(...values);
   });
@@ -12,7 +12,9 @@ function widestChannel(box) {
 
 function split(box) {
   const channel = widestChannel(box);
-  const sorted = [...box].sort((a, b) => unpack(a.color)[channel] - unpack(b.color)[channel]);
+  const sorted = [...box].sort(
+    (first, second) => unpack(first.color)[channel] - unpack(second.color)[channel],
+  );
   const half = sorted.reduce((total, entry) => total + entry.count, 0) / 2;
   let running = 0;
   let cut = 1;
@@ -49,9 +51,16 @@ export function reducePalette(entries, size) {
       break;
     }
 
-    const biggest = splittable.reduce((a, b) => (a.reduce((t, e) => t + e.count, 0) >= b.reduce((t, e) => t + e.count, 0) ? a : b));
+    const biggest = splittable.reduce((first, second) =>
+      first.reduce((total, entry) => total + entry.count, 0) >=
+      second.reduce((total, entry) => total + entry.count, 0)
+        ? first
+        : second,
+    );
     boxes = boxes.filter((box) => box !== biggest).concat(split(biggest));
   }
 
-  return boxes.map((box) => box.reduce((a, b) => (a.count >= b.count ? a : b)).color);
+  return boxes.map(
+    (box) => box.reduce((first, second) => (first.count >= second.count ? first : second)).color,
+  );
 }

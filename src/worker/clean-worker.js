@@ -7,11 +7,18 @@ self.onmessage = (event) => {
 
   try {
     const empty = !reference.data.some((value, i) => i % 4 === 3 && value > 0);
-    const cleaned = empty || options.alone
-      ? cleanAlone(image, { width: reference.width, height: reference.height }, options)
-      : cleanLike(image, analyzeReference(reference), options);
+    const cleaned =
+      empty || options.alone
+        ? cleanAlone(image, { width: reference.width, height: reference.height }, options)
+        : cleanLike(image, analyzeReference(reference), options);
     const pixels = toRgba(cleaned);
-    self.postMessage({ id, result: { width: cleaned.width, height: cleaned.height, pixels, report: cleaned.report } }, [pixels.buffer]);
+    self.postMessage(
+      {
+        id,
+        result: { width: cleaned.width, height: cleaned.height, pixels, report: cleaned.report },
+      },
+      [pixels.buffer],
+    );
   } catch (error) {
     self.postMessage({ id, error: error.message || String(error) });
   }

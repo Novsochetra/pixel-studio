@@ -1,4 +1,4 @@
-import { h, icon, replace } from './dom.js';
+import { node, icon, replace } from './dom.js';
 import { directionSprite, directionsInUse, hiddenArt, selectDirection } from './actions.js';
 import { directionLabel } from '../model/project.js';
 import { bounds, colorCounts } from '../model/sprite.js';
@@ -22,15 +22,31 @@ export function drawThumbnail(canvas, sprite, size = 104, frameBox = null) {
   const native = document.createElement('canvas');
   native.width = sprite.width;
   native.height = sprite.height;
-  native.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(sprite.pixels), sprite.width, sprite.height), 0, 0);
+  native
+    .getContext('2d')
+    .putImageData(
+      new ImageData(new Uint8ClampedArray(sprite.pixels), sprite.width, sprite.height),
+      0,
+      0,
+    );
   context.imageSmoothingEnabled = false;
-  const w = (box.right - box.left) * scale;
+  const width = (box.right - box.left) * scale;
   const hgt = (box.bottom - box.top) * scale;
-  context.drawImage(native, box.left, box.top, box.right - box.left, box.bottom - box.top, (size - w) / 2, (size - hgt) / 2, w, hgt);
+  context.drawImage(
+    native,
+    box.left,
+    box.top,
+    box.right - box.left,
+    box.bottom - box.top,
+    (size - width) / 2,
+    (size - hgt) / 2,
+    width,
+    hgt,
+  );
 }
 
 function chooseFiles(onFiles) {
-  const input = h('input', { type: 'file', accept: 'image/*', multiple: true, hidden: true });
+  const input = node('input', { type: 'file', accept: 'image/*', multiple: true, hidden: true });
   input.addEventListener('change', () => {
     if (input.files.length) {
       onFiles([...input.files]);
@@ -43,7 +59,7 @@ function chooseFiles(onFiles) {
 }
 
 function chooseFile(onFile, accept = 'image/*') {
-  const input = h('input', { type: 'file', accept, hidden: true });
+  const input = node('input', { type: 'file', accept, hidden: true });
   input.addEventListener('change', () => {
     if (input.files[0]) {
       onFile(input.files[0]);
@@ -58,16 +74,18 @@ function chooseFile(onFile, accept = 'image/*') {
 function viewRow(app, direction) {
   const { state } = app.store;
   const sprite = directionSprite(state, direction);
-  const thumb = h('canvas', { 'aria-hidden': 'true' });
+  const thumb = node('canvas', { 'aria-hidden': 'true' });
   drawThumbnail(thumb, sprite);
   const box = sprite && bounds(sprite);
   const hidden = hiddenArt(state, direction);
   const meta = box
     ? `${box.right - box.left}×${box.bottom - box.top} px · ${colorCounts(sprite).length} colours${hidden.length ? ' · some art hidden' : ''}`
-    : hidden.length ? `Art on hidden layer${hidden.length > 1 ? 's' : ''}: ${hidden.map((l) => l.name).join(', ')}` : 'Empty: drop or upload an image';
+    : hidden.length
+      ? `Art on hidden layer${hidden.length > 1 ? 's' : ''}: ${hidden.map((layer) => layer.name).join(', ')}`
+      : 'Empty: drop or upload an image';
   const isReference = direction === referenceOf(state.project);
 
-  return h(
+  return node(
     'div.view-row',
     {
       role: 'button',
@@ -80,8 +98,19 @@ function viewRow(app, direction) {
       onkeydown: (event) => event.key === 'Enter' && event.currentTarget.click(),
     },
     thumb,
-    h('div', {}, h('div.view-name', {}, directionLabel(direction), ' ', isReference ? h('span.badge', {}, 'Reference') : null), h('div.view-meta', {}, meta)),
-    h(
+    node(
+      'div',
+      {},
+      node(
+        'div.view-name',
+        {},
+        directionLabel(direction),
+        ' ',
+        isReference ? node('span.badge', {}, 'Reference') : null,
+      ),
+      node('div.view-meta', {}, meta),
+    ),
+    node(
       'button.btn.quiet',
       {
         title: `Clean a ChatGPT image into frame ${state.at.frame + 1} of the ${directionLabel(direction).toLowerCase()} view`,
@@ -99,12 +128,28 @@ function viewRow(app, direction) {
 export function renderViewsPanel(el, app) {
   replace(
     el,
-    h('h2', {}, 'Views'),
-    h('div.view-list', {}, directionsInUse(app.store.state).map((direction) => viewRow(app, direction))),
-    h('div.group', { style: { gap: '6px', flexWrap: 'wrap' } },
-      h('button.btn', { onclick: () => openChatgptSheet(app) }, 'Ask ChatGPT for a view…'),
-      h('button.btn', { onclick: () => chooseFiles((files) => openBatchSheet(app, files)) }, icon('upload'), 'Clean several…')),
-    h('p.hint', {}, `Drop a ChatGPT image on the canvas to clean it into the view you are editing, or drop several at once. ${directionLabel(referenceOf(app.store.state.project))} is the reference every view is matched to.`),
+    node('h2', {}, 'Views'),
+    node(
+      'div.view-list',
+      {},
+      directionsInUse(app.store.state).map((direction) => viewRow(app, direction)),
+    ),
+    node(
+      'div.group',
+      { style: { gap: '6px', flexWrap: 'wrap' } },
+      node('button.btn', { onclick: () => openChatgptSheet(app) }, 'Ask ChatGPT for a view…'),
+      node(
+        'button.btn',
+        { onclick: () => chooseFiles((files) => openBatchSheet(app, files)) },
+        icon('upload'),
+        'Clean several…',
+      ),
+    ),
+    node(
+      'p.hint',
+      {},
+      `Drop a ChatGPT image on the canvas to clean it into the view you are editing, or drop several at once. ${directionLabel(referenceOf(app.store.state.project))} is the reference every view is matched to.`,
+    ),
   );
 }
 

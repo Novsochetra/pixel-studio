@@ -27,8 +27,23 @@ export function directionLabel(id) {
 
 // A layer is one frame's cel of a named layer; `key` ties the cels of one layer together across
 // frames. A 'reference' layer holds a picture to trace over: shown faded, never exported.
-export function newLayer(width, height, name = 'Art', sprite = createSprite(width, height), key = newId('k'), kind = 'art') {
-  return { id: newId('l'), key, name, kind, visible: true, opacity: kind === 'reference' ? 0.45 : 1, sprite };
+export function newLayer(
+  width,
+  height,
+  name = 'Art',
+  sprite = createSprite(width, height),
+  key = newId('k'),
+  kind = 'art',
+) {
+  return {
+    id: newId('l'),
+    key,
+    name,
+    kind,
+    visible: true,
+    opacity: kind === 'reference' ? 0.45 : 1,
+    sprite,
+  };
 }
 
 export function newFrame(width, height, layers = [newLayer(width, height)]) {
@@ -37,9 +52,17 @@ export function newFrame(width, height, layers = [newLayer(width, height)]) {
 
 export function newAnimation(name, canvas, directions) {
   const key = newId('k');
-  const frame = () => newFrame(canvas.width, canvas.height, [newLayer(canvas.width, canvas.height, 'Art', undefined, key)]);
+  const frame = () =>
+    newFrame(canvas.width, canvas.height, [
+      newLayer(canvas.width, canvas.height, 'Art', undefined, key),
+    ]);
 
-  return { id: newId('a'), name, fps: 8, directions: Object.fromEntries(directions.map((id) => [id, { frames: [frame()] }])) };
+  return {
+    id: newId('a'),
+    name,
+    fps: 8,
+    directions: Object.fromEntries(directions.map((id) => [id, { frames: [frame()] }])),
+  };
 }
 
 function normalizeLayers(project) {
@@ -64,7 +87,11 @@ function normalizeParts(project) {
   if (!project.parts) {
     const old = project.kitParts ?? {};
     const names = profileOf(project).parts;
-    project.parts = names.map((name) => ({ id: name.toLowerCase(), name, colours: old[name.toLowerCase()] ?? [] }));
+    project.parts = names.map((name) => ({
+      id: name.toLowerCase(),
+      name,
+      colours: old[name.toLowerCase()] ?? [],
+    }));
   }
 
   delete project.kitParts;
@@ -91,16 +118,33 @@ export function normalizeProject(project) {
 // options: { name, profile, directionSet, width, height, scale, startWith }
 export function newProject(options = {}) {
   const profile = PROFILES[options.profile] ? options.profile : 'naga-eleven';
-  const canvas = { width: options.width ?? 160, height: options.height ?? 160, scale: options.scale ?? 5 };
-  const project = { version: 2, id: newId('p'), name: options.name ?? 'Sochetra', profile, directionSet: options.directionSet ?? PROFILES[profile].directionSet, canvas };
+  const canvas = {
+    width: options.width ?? 160,
+    height: options.height ?? 160,
+    scale: options.scale ?? 5,
+  };
+  const project = {
+    version: 2,
+    id: newId('p'),
+    name: options.name ?? 'Sochetra',
+    profile,
+    directionSet: options.directionSet ?? PROFILES[profile].directionSet,
+    canvas,
+  };
   const drawable = drawableDirections(project);
   const start = options.startWith ?? PROFILES[profile].startWith ?? drawable;
-  const directions = start.filter((d) => drawable.includes(d));
+  const directions = start.filter((direction) => drawable.includes(direction));
 
   return normalizeProject({
     ...project,
     referenceDirection: directions[0] ?? drawable[0],
-    animations: [newAnimation(options.animation ?? 'Pose', canvas, directions.length ? directions : [drawable[0]])],
+    animations: [
+      newAnimation(
+        options.animation ?? 'Pose',
+        canvas,
+        directions.length ? directions : [drawable[0]],
+      ),
+    ],
     palettes: [],
     mappings: {},
     guides: [],
@@ -108,7 +152,8 @@ export function newProject(options = {}) {
 }
 
 export function frameAt(project, at) {
-  const animation = project.animations.find((a) => a.id === at.animation) ?? project.animations[0];
+  const animation =
+    project.animations.find((candidate) => candidate.id === at.animation) ?? project.animations[0];
   const frames = animation.directions[at.direction]?.frames ?? [];
 
   return frames[Math.min(at.frame ?? 0, frames.length - 1)] ?? null;
@@ -122,7 +167,11 @@ export function layerAt(project, at) {
     return null;
   }
 
-  return frame.layers.find((layer) => layer.key === at.layer) ?? frame.layers.find((layer) => layer.kind !== 'reference') ?? frame.layers[0];
+  return (
+    frame.layers.find((layer) => layer.key === at.layer) ??
+    frame.layers.find((layer) => layer.kind !== 'reference') ??
+    frame.layers[0]
+  );
 }
 
 // every layer in the project, with where it sits

@@ -44,11 +44,11 @@ export function peaks(prof) {
   for (let i = 0; i < prof.length; i++) {
     let total = 0;
 
-    for (let k = 0; k < 5; k++) {
-      const j = i + 2 - k;
+    for (let pass = 0; pass < 5; pass++) {
+      const j = i + 2 - pass;
 
       if (j >= 0 && j < prof.length) {
-        total += prof[j] * kernel[k];
+        total += prof[j] * kernel[pass];
       }
     }
 
@@ -66,17 +66,17 @@ export function peaks(prof) {
 
 // for each candidate spacing: how strongly the edges share one phase on a grid of it (0..1)
 export function coherence(prof, candidates, cachedPeaks = peaks(prof)) {
-  const p = cachedPeaks;
+  const peakList = cachedPeaks;
   let total = 0;
 
-  for (const value of p) {
+  for (const value of peakList) {
     total += value;
   }
 
   const nonzero = [];
 
-  for (let x = 0; x < p.length; x++) {
-    if (p[x] !== 0) {
+  for (let x = 0; x < peakList.length; x++) {
+    if (peakList[x] !== 0) {
       nonzero.push(x);
     }
   }
@@ -87,8 +87,8 @@ export function coherence(prof, candidates, cachedPeaks = peaks(prof)) {
 
     for (const x of nonzero) {
       const angle = (2 * Math.PI * x) / candidate;
-      re += Math.cos(angle) * p[x];
-      im += Math.sin(angle) * p[x];
+      re += Math.cos(angle) * peakList[x];
+      im += Math.sin(angle) * peakList[x];
     }
 
     return Math.hypot(re, im) / (total + 1e-9);
@@ -96,14 +96,14 @@ export function coherence(prof, candidates, cachedPeaks = peaks(prof)) {
 }
 
 export function findOffset(prof, size) {
-  const p = peaks(prof);
+  const peakList = peaks(prof);
   let re = 0;
   let im = 0;
 
-  for (let x = 0; x < p.length; x++) {
+  for (let x = 0; x < peakList.length; x++) {
     const angle = (2 * Math.PI * x) / size;
-    re += Math.cos(angle) * p[x];
-    im += Math.sin(angle) * p[x];
+    re += Math.cos(angle) * peakList[x];
+    im += Math.sin(angle) * peakList[x];
   }
 
   const angle = Math.atan2(im, re);

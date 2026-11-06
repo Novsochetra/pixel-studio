@@ -17,14 +17,14 @@ function borderPixels(image, depth = 4) {
   }
 
   for (let y = 0; y < height; y++) {
-    for (let d = 0; d < depth; d++) {
-      add(d, y);
+    for (let step = 0; step < depth; step++) {
+      add(step, y);
     }
   }
 
   for (let y = 0; y < height; y++) {
-    for (let d = 0; d < depth; d++) {
-      add(width - depth + d, y);
+    for (let step = 0; step < depth; step++) {
+      add(width - depth + step, y);
     }
   }
 
@@ -37,7 +37,8 @@ export function detectBackground(image, share = 0.1) {
   const groups = new Map();
 
   for (const pixel of pixels) {
-    const key = Math.floor(pixel[0] / 24) * 4096 + Math.floor(pixel[1] / 24) * 64 + Math.floor(pixel[2] / 24);
+    const key =
+      Math.floor(pixel[0] / 24) * 4096 + Math.floor(pixel[1] / 24) * 64 + Math.floor(pixel[2] / 24);
 
     if (!groups.has(key)) {
       groups.set(key, []);
@@ -47,7 +48,7 @@ export function detectBackground(image, share = 0.1) {
   }
 
   return [...groups.keys()]
-    .sort((a, b) => a - b)
+    .sort((first, second) => first - second)
     .filter((key) => groups.get(key).length >= share * pixels.length)
     .map((key) => medianColor(groups.get(key)));
 }
@@ -64,11 +65,13 @@ export function backgroundMask(image, backgrounds, tolerance) {
   const whole = backgrounds.map((bg) => bg.map(Math.trunc));
 
   for (let i = 0; i < width * height; i++) {
-    const r = rgb[i * 3];
-    const g = rgb[i * 3 + 1];
-    const b = rgb[i * 3 + 2];
+    const red = rgb[i * 3];
+    const green = rgb[i * 3 + 1];
+    const blue = rgb[i * 3 + 2];
     const nearest = Math.min(
-      ...whole.map((bg) => Math.abs(r - bg[0]) + Math.abs(g - bg[1]) + Math.abs(b - bg[2])),
+      ...whole.map(
+        (bg) => Math.abs(red - bg[0]) + Math.abs(green - bg[1]) + Math.abs(blue - bg[2]),
+      ),
     );
     mask[i] = nearest <= tolerance ? 1 : 0;
   }

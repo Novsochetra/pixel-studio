@@ -38,7 +38,12 @@ export function transparentCells(cells, holeMin, tolerance) {
 
   for (const hole of components(enclosed, width, height)) {
     const { shade, size } = holeShade(cells, hole);
-    const distances = sprite.map((c) => Math.abs(c[0] - shade[0]) + Math.abs(c[1] - shade[1]) + Math.abs(c[2] - shade[2]));
+    const distances = sprite.map(
+      (colour) =>
+        Math.abs(colour[0] - shade[0]) +
+        Math.abs(colour[1] - shade[1]) +
+        Math.abs(colour[2] - shade[2]),
+    );
     const unused = !sprite.length || Math.min(...distances) > 2 * tolerance;
 
     if (size >= holeMin || unused) {

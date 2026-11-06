@@ -1,6 +1,6 @@
 // h('button.btn.primary', { onclick }, 'Save') builds an element; children may be strings,
 // nodes, arrays or null.
-export function h(selector, props = {}, ...children) {
+export function node(selector, props = {}, ...children) {
   const [tag, ...classes] = selector.split('.');
   const el = document.createElement(tag || 'div');
 
@@ -63,7 +63,8 @@ const PATHS = {
   wand: 'M4 20L15 9M14 4v3M19 9h-3M17.5 5.5l-2 2M9 4l.5 1.5M20 14l-1.5-.5',
   shade: 'M12 3a9 9 0 100 18V3zM12 3a9 9 0 010 18',
   eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 9a3 3 0 100 6 3 3 0 000-6z',
-  'eye-off': 'M3 3l18 18M10.6 5.1A9.6 9.6 0 0112 5c6.5 0 10 7 10 7a17 17 0 01-3.2 4.1M6.2 6.2C3.6 8 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1M9.9 9.9a3 3 0 004.2 4.2',
+  'eye-off':
+    'M3 3l18 18M10.6 5.1A9.6 9.6 0 0112 5c6.5 0 10 7 10 7a17 17 0 01-3.2 4.1M6.2 6.2C3.6 8 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1M9.9 9.9a3 3 0 004.2 4.2',
   history: 'M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8M3 3v5h5M12 7v5l3 3',
   outline: 'M7 3h10l4 4v10l-4 4H7l-4-4V7l4-4z',
   select: 'M4 4h3M10 4h4M17 4h3v3M20 10v4M20 17v3h-3M14 20h-4M7 20H4v-3M4 14v-4M4 7V4',
@@ -89,7 +90,7 @@ let toastTimer = null;
 
 export function toast(message) {
   document.querySelector('.toast')?.remove();
-  const el = h('div.toast', { role: 'status' }, message);
+  const el = node('div.toast', { role: 'status' }, message);
   document.body.append(el);
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.remove(), 3200);

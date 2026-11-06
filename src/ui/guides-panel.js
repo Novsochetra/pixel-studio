@@ -1,4 +1,4 @@
-import { h, replace } from './dom.js';
+import { node, replace } from './dom.js';
 import { changeStructure, directionSprite, directionsInUse, referenceSprite } from './actions.js';
 import { GUIDE_RULES, checkGuide, describeCheck, measureGuide, newGuide } from '../views/guides.js';
 import { directionLabel } from '../model/project.js';
@@ -12,14 +12,18 @@ function checks(app, guide) {
     return null;
   }
 
-  return h(
+  return node(
     'div.guide-checks',
     {},
     directionsInUse(state).map((direction) => {
       const sprite = directionSprite(state, direction);
       const check = sprite ? checkGuide(sprite, guide) : { state: 'missing' };
 
-      return h('span.chip', { 'data-state': check.state }, `${directionLabel(direction)}: ${describeCheck(check)}`);
+      return node(
+        'span.chip',
+        { 'data-state': check.state },
+        `${directionLabel(direction)}: ${describeCheck(check)}`,
+      );
     }),
   );
 }
@@ -29,19 +33,35 @@ function ruleFields(app, guide) {
     Object.assign(guide, patch);
     changeStructure(app, 'guides');
   };
-  const rule = h(
+  const rule = node(
     'select.input',
-    { 'aria-label': `What ${guide.name} marks`, id: `guide-rule-${guide.id}`, onchange: (event) => update({ rule: event.target.value }) },
-    Object.entries(GUIDE_RULES).map(([value, label]) => h('option', { value, selected: guide.rule === value }, label)),
+    {
+      'aria-label': `What ${guide.name} marks`,
+      id: `guide-rule-${guide.id}`,
+      onchange: (event) => update({ rule: event.target.value }),
+    },
+    Object.entries(GUIDE_RULES).map(([value, label]) =>
+      node('option', { value, selected: guide.rule === value }, label),
+    ),
   );
   const colours = characterColors(app.store.state);
   const colour =
     guide.rule === 'colour-top'
-      ? h(
+      ? node(
           'select.input.mono',
-          { 'aria-label': `Colour ${guide.name} follows`, id: `guide-colour-${guide.id}`, onchange: (event) => update({ colour: Number(event.target.value) }) },
-          h('option', { value: '' }, 'Pick a colour'),
-          colours.map((c) => h('option', { value: String(c), selected: guide.colour === c }, toHex(c))),
+          {
+            'aria-label': `Colour ${guide.name} follows`,
+            id: `guide-colour-${guide.id}`,
+            onchange: (event) => update({ colour: Number(event.target.value) }),
+          },
+          node('option', { value: '' }, 'Pick a colour'),
+          colours.map((option) =>
+            node(
+              'option',
+              { value: String(option), selected: guide.colour === option },
+              toHex(option),
+            ),
+          ),
         )
       : null;
 
@@ -55,15 +75,20 @@ function guideRow(app, guide) {
     changeStructure(app, 'guides');
   };
   const remove = () => {
-    project.guides = project.guides.filter((g) => g !== guide);
+    project.guides = project.guides.filter((other) => other !== guide);
     changeStructure(app, 'guides');
   };
 
-  return h(
+  return node(
     'div.guide-row',
     {},
-    h('input.input', { value: guide.name, 'aria-label': 'Guide name', id: `guide-name-${guide.id}`, onchange: (event) => update({ name: event.target.value || 'Guide' }) }),
-    h('input.input.mono', {
+    node('input.input', {
+      value: guide.name,
+      'aria-label': 'Guide name',
+      id: `guide-name-${guide.id}`,
+      onchange: (event) => update({ name: event.target.value || 'Guide' }),
+    }),
+    node('input.input.mono', {
       type: 'number',
       min: '0',
       max: String(project.canvas.height - 1),
@@ -72,8 +97,14 @@ function guideRow(app, guide) {
       id: `guide-row-${guide.id}`,
       onchange: (event) => update({ row: Number(event.target.value) }),
     }),
-    h('button.btn.quiet', { 'aria-label': `Remove ${guide.name}`, title: 'Remove guide', onclick: remove }, '×'),
-    ...ruleFields(app, guide).map((field) => (field ? h('div', { style: { gridColumn: '1 / -1', display: 'grid' } }, field) : null)),
+    node(
+      'button.btn.quiet',
+      { 'aria-label': `Remove ${guide.name}`, title: 'Remove guide', onclick: remove },
+      '×',
+    ),
+    ...ruleFields(app, guide).map((field) =>
+      field ? node('div', { style: { gridColumn: '1 / -1', display: 'grid' } }, field) : null,
+    ),
     checks(app, guide),
   );
 }
@@ -98,14 +129,40 @@ export function renderGuidesPanel(el, app) {
 
   replace(
     el,
-    h(
+    node(
       'h2',
       {},
       'Guide lines',
-      h('label.group', { for: 'show-guides' }, h('input', { type: 'checkbox', id: 'show-guides', checked: state.showGuides, onchange: (event) => app.store.set({ showGuides: event.target.checked }) }), 'Show'),
+      node(
+        'label.group',
+        { for: 'show-guides' },
+        node('input', {
+          type: 'checkbox',
+          id: 'show-guides',
+          checked: state.showGuides,
+          onchange: (event) => app.store.set({ showGuides: event.target.checked }),
+        }),
+        'Show',
+      ),
     ),
     state.project.guides.map((guide) => guideRow(app, guide)),
-    h('div.group', { style: { gap: '6px' } }, h('button.btn', { onclick: add }, 'Add guide'), h('button.btn', { onclick: snapToReference, title: 'Move each checked guide to where the front view has it' }, 'Match the front')),
-    h('p.hint', {}, 'A guide that marks the top or bottom of the sprite, or the top of a colour, checks every view and says how many rows off it is.'),
+    node(
+      'div.group',
+      { style: { gap: '6px' } },
+      node('button.btn', { onclick: add }, 'Add guide'),
+      node(
+        'button.btn',
+        {
+          onclick: snapToReference,
+          title: 'Move each checked guide to where the front view has it',
+        },
+        'Match the front',
+      ),
+    ),
+    node(
+      'p.hint',
+      {},
+      'A guide that marks the top or bottom of the sprite, or the top of a colour, checks every view and says how many rows off it is.',
+    ),
   );
 }

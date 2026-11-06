@@ -25,7 +25,7 @@ export function outlineColour(sprite) {
     }
   }
 
-  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  return [...counts.entries()].sort((first, second) => second[1] - first[1])[0]?.[0] ?? null;
 }
 
 function eachPixel(sprite, visit) {
@@ -48,7 +48,8 @@ function eachPixel(sprite, visit) {
 // a one-pixel outline around the whole silhouette, outside it
 export function addOutline(sprite, colour) {
   return eachPixel(sprite, (before, x, y) => {
-    const outside = isClear(before, x, y) && SIDES.some(([dx, dy]) => !isClear(before, x + dx, y + dy));
+    const outside =
+      isClear(before, x, y) && SIDES.some(([dx, dy]) => !isClear(before, x + dx, y + dy));
 
     return outside ? colour : undefined;
   });
@@ -72,7 +73,7 @@ export function thinOutline(sprite, colour) {
         getPixel(before, x - dx, y - dy) === colour &&
         behind !== CLEAR &&
         behind !== colour &&
-        along.every((c) => c === colour)
+        along.every((neighbour) => neighbour === colour)
       );
     });
 
@@ -90,7 +91,10 @@ export function closeGaps(sprite, colour) {
       return undefined;
     }
 
-    const outlined = AROUND.filter(([dx, dy]) => getPixel(before, x + dx, y + dy) === colour && touchesClear(before, x + dx, y + dy));
+    const outlined = AROUND.filter(
+      ([dx, dy]) =>
+        getPixel(before, x + dx, y + dy) === colour && touchesClear(before, x + dx, y + dy),
+    );
 
     return outlined.length >= 2 ? colour : undefined;
   });
@@ -112,4 +116,3 @@ export function previewOutline(sprite, operation, colour) {
 
   return { sprite: copy, count, points };
 }
-

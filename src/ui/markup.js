@@ -7,12 +7,18 @@ export function marksFor(project, direction) {
   const markup = project.markup ?? { strokes: [], notes: [] };
 
   return {
-    strokes: markup.strokes.filter((s) => s.direction === direction),
-    notes: markup.notes.filter((n) => n.direction === direction),
+    strokes: markup.strokes.filter((stroke) => stroke.direction === direction),
+    notes: markup.notes.filter((note) => note.direction === direction),
   };
 }
 
-export function drawMarks(context, project, direction, scale, panelWidth = project.canvas.width * scale) {
+export function drawMarks(
+  context,
+  project,
+  direction,
+  scale,
+  panelWidth = project.canvas.width * scale,
+) {
   const { strokes, notes } = marksFor(project, direction);
   const colour = cssVar('--guide') || '#ff375f';
   context.save();
@@ -23,7 +29,11 @@ export function drawMarks(context, project, direction, scale, panelWidth = proje
 
   for (const stroke of strokes) {
     context.beginPath();
-    stroke.points.forEach(([x, y], i) => (i ? context.lineTo((x + 0.5) * scale, (y + 0.5) * scale) : context.moveTo((x + 0.5) * scale, (y + 0.5) * scale)));
+    stroke.points.forEach(([x, y], i) =>
+      i
+        ? context.lineTo((x + 0.5) * scale, (y + 0.5) * scale)
+        : context.moveTo((x + 0.5) * scale, (y + 0.5) * scale),
+    );
     context.stroke();
   }
 

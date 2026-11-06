@@ -46,7 +46,9 @@ export function placeLike(sprite, ref) {
   const { width, height } = ref;
   const spriteBox = bbox(sprite.opaque, sprite.width);
   const refBox = bbox(ref.opaque, ref.width);
-  const dx = roundHalfEven(bodyColumn(ref.opaque, ref.width) - bodyColumn(sprite.opaque, sprite.width));
+  const dx = roundHalfEven(
+    bodyColumn(ref.opaque, ref.width) - bodyColumn(sprite.opaque, sprite.width),
+  );
   const dy = refBox.bottom - spriteBox.bottom;
   const colors = new Uint8Array(width * height * 3);
   const opaque = new Uint8Array(width * height);

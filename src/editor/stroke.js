@@ -1,8 +1,10 @@
 import { cloneSprite, getPixel, setPixel } from '../model/sprite.js';
 import { linePoints, mirrored, paintPoint } from './paint.js';
 
-const isDiagonal = (a, b) => Math.abs(a[0] - b[0]) === 1 && Math.abs(a[1] - b[1]) === 1;
-const isBeside = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
+const isDiagonal = (first, second) =>
+  Math.abs(first[0] - second[0]) === 1 && Math.abs(first[1] - second[1]) === 1;
+const isBeside = (first, second) =>
+  Math.abs(first[0] - second[0]) + Math.abs(first[1] - second[1]) === 1;
 
 // One drag of the pencil or eraser. With clean lines on, a pixel that turns a diagonal step into
 // an L-shaped corner is put back, so outlines stay one pixel thin without doubled corners.
@@ -36,10 +38,10 @@ export class Stroke {
   }
 
   removeCorner() {
-    const [a, b, c] = this.path.slice(-3);
+    const [first, second, third] = this.path.slice(-3);
 
-    if (isDiagonal(a, c) && isBeside(a, b) && isBeside(b, c)) {
-      for (const [x, y] of mirrored(b[0], b[1], this.options.symmetry)) {
+    if (isDiagonal(first, third) && isBeside(first, second) && isBeside(second, third)) {
+      for (const [x, y] of mirrored(second[0], second[1], this.options.symmetry)) {
         setPixel(this.sprite, x, y, getPixel(this.before, x, y));
       }
 

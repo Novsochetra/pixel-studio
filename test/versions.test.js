@@ -2,16 +2,31 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 
 // versions.js reaches PNG encoding through project-file.js; give it a stand-in for the browser
-globalThis.document = { createElement: () => ({ getContext: () => ({ putImageData() {}, drawImage() {} }), toDataURL: () => 'data:image/png;base64,' + 'A'.repeat(300000) }) };
-globalThis.ImageData = class { constructor(data, w, h) { Object.assign(this, { data, w, h }); } };
+globalThis.document = {
+  createElement: () => ({
+    getContext: () => ({ putImageData() {}, drawImage() {} }),
+    toDataURL: () => `data:image/png;base64,${'A'.repeat(300000)}`,
+  }),
+};
+globalThis.ImageData = class {
+  constructor(data, width, height) {
+    Object.assign(this, { data, w: width, h: height });
+  }
+};
 
-const { saveVersion, listVersions, versionText, deleteVersion } = await import('../src/store/versions.js');
+const { saveVersion, listVersions, versionText, deleteVersion } =
+  await import('../src/store/versions.js');
 const { newProject } = await import('../src/model/project.js');
 
 function memory() {
   const docs = new Map();
 
-  return { docs, read: async (k) => docs.get(k) ?? null, write: async (k, v) => docs.set(k, v), remove: async (k) => docs.delete(k) };
+  return {
+    docs,
+    read: async (key) => docs.get(key) ?? null,
+    write: async (key, value) => docs.set(key, value),
+    remove: async (key) => docs.delete(key),
+  };
 }
 
 test('a version too big for one stored document is split and joined back exactly', async () => {
@@ -26,5 +41,5 @@ test('a version too big for one stored document is split and joined back exactly
   assert.equal(JSON.parse(text).project.name, 'Sochetra');
   await deleteVersion(backend, entry.id);
   assert.equal((await listVersions(backend)).length, 0);
-  assert.equal([...backend.docs.keys()].filter((k) => k.startsWith('version-')).length, 0);
+  assert.equal([...backend.docs.keys()].filter((key) => key.startsWith('version-')).length, 0);
 });

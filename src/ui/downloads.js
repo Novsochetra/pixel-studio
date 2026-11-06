@@ -1,4 +1,4 @@
-import { h, toast } from './dom.js';
+import { node, toast } from './dom.js';
 import { directionSprite, directionsInUse } from './actions.js';
 import { canvasToBlob, checkerPainter, spritePng } from '../io/images.js';
 import { zipFiles } from '../io/zip.js';
@@ -11,7 +11,11 @@ import { chooseFile } from './views-panel.js';
 import { openExportSheet } from './export-sheet.js';
 import { openChatgptSheet } from './chatgpt-sheet.js';
 
-const slug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const slug = (text) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 
 function names(state, direction) {
   return `${slug(state.project.name)}-${slug(directionLabel(direction))}`;
@@ -22,7 +26,10 @@ async function saveView(app, scale, checker = false) {
   const sprite = directionSprite(state, state.at.direction);
   const size = sprite.width * scale;
   const blob = await spritePng(sprite, scale, checker ? checkerPainter(scale * 2) : null);
-  await saveFile(`${names(state, state.at.direction)}-${size}${checker ? '-checker' : ''}.png`, blob);
+  await saveFile(
+    `${names(state, state.at.direction)}-${size}${checker ? '-checker' : ''}.png`,
+    blob,
+  );
 }
 
 async function saveAllViews(app) {
@@ -36,7 +43,10 @@ async function saveAllViews(app) {
     for (const factor of scale > 1 ? [1, scale] : [1]) {
       const suffix = sprite.width * factor;
       const blob = await spritePng(sprite, factor);
-      files.push({ name: `${names(state, direction)}-${suffix}.png`, data: new Uint8Array(await blob.arrayBuffer()) });
+      files.push({
+        name: `${names(state, direction)}-${suffix}.png`,
+        data: new Uint8Array(await blob.arrayBuffer()),
+      });
     }
   }
 
@@ -45,7 +55,9 @@ async function saveAllViews(app) {
 
 async function saveBoard(app) {
   const { state } = app.store;
-  const blob = await canvasToBlob(boardCanvas(state, state.project.canvas.scale, { overlay: null, mapping: null }));
+  const blob = await canvasToBlob(
+    boardCanvas(state, state.project.canvas.scale, { overlay: null, mapping: null }),
+  );
   await saveFile(`${slug(state.project.name)}-views-board.png`, blob);
 }
 
@@ -61,7 +73,9 @@ export function openProjectFile(app, onOpened = () => {}) {
       const { project, background } = await readProjectBundle(await file.text());
       await app.addProject(project, background);
       onOpened();
-      toast(`Opened ${project.name} as a project of its own. Switch projects from its name, top left.`);
+      toast(
+        `Opened ${project.name} as a project of its own. Switch projects from its name, top left.`,
+      );
     } catch (error) {
       toast(error.message);
     }
@@ -105,7 +119,14 @@ function run(action) {
 export function openDownloadMenu(app, anchor) {
   document.querySelector('.menu')?.remove();
   const box = anchor.getBoundingClientRect();
-  const menu = h('div.menu', { role: 'menu', style: { top: `${box.bottom + 6}px`, right: `${Math.max(16, window.innerWidth - box.right)}px`, position: 'fixed' } });
+  const menu = node('div.menu', {
+    role: 'menu',
+    style: {
+      top: `${box.bottom + 6}px`,
+      right: `${Math.max(16, window.innerWidth - box.right)}px`,
+      position: 'fixed',
+    },
+  });
   const close = () => {
     menu.remove();
     document.removeEventListener('pointerdown', outside, true);
@@ -119,8 +140,18 @@ export function openDownloadMenu(app, anchor) {
   for (const item of menuItems(app)) {
     menu.append(
       item
-        ? h('button', { role: 'menuitem', onclick: () => { close(); run(item[1]); } }, item[0])
-        : h('hr'),
+        ? node(
+            'button',
+            {
+              role: 'menuitem',
+              onclick: () => {
+                close();
+                run(item[1]);
+              },
+            },
+            item[0],
+          )
+        : node('hr'),
     );
   }
 

@@ -1,4 +1,4 @@
-import { h } from './dom.js';
+import { node } from './dom.js';
 import { changeStructure } from './actions.js';
 import { characterColors } from './character-colours.js';
 import { sharedColours } from '../palette/kits.js';
@@ -12,27 +12,54 @@ function partRow(app, part, colours, redraw) {
     redraw();
   };
   const toggle = (color) => {
-    part.colours = part.colours.includes(color) ? part.colours.filter((c) => c !== color) : [...part.colours, color];
+    part.colours = part.colours.includes(color)
+      ? part.colours.filter((colour) => colour !== color)
+      : [...part.colours, color];
     save();
   };
 
-  return h(
+  return node(
     'div.part-row',
     {},
-    h('div.group', { style: { gap: '6px' } },
-      h('input.input', { value: part.name, 'aria-label': 'Part name', onchange: (event) => { part.name = event.target.value.trim() || part.name; save(); } }),
-      h('button.btn.quiet', { 'aria-label': `Remove ${part.name}`, title: 'Remove this part', onclick: () => { project.parts = project.parts.filter((p) => p !== part); save(); } }, '×')),
-    h('div.target-picker', { style: { justifyContent: 'flex-start' } }, colours.map((color) => {
-      const on = part.colours.includes(color);
+    node(
+      'div.group',
+      { style: { gap: '6px' } },
+      node('input.input', {
+        value: part.name,
+        'aria-label': 'Part name',
+        onchange: (event) => {
+          part.name = event.target.value.trim() || part.name;
+          save();
+        },
+      }),
+      node(
+        'button.btn.quiet',
+        {
+          'aria-label': `Remove ${part.name}`,
+          title: 'Remove this part',
+          onclick: () => {
+            project.parts = project.parts.filter((other) => other !== part);
+            save();
+          },
+        },
+        '×',
+      ),
+    ),
+    node(
+      'div.target-picker',
+      { style: { justifyContent: 'flex-start' } },
+      colours.map((color) => {
+        const on = part.colours.includes(color);
 
-      return h('button.swatch', {
-        style: { background: toHex(color) },
-        'aria-pressed': String(on),
-        'aria-label': `${on ? 'Remove' : 'Add'} ${toHex(color)} ${on ? 'from' : 'to'} ${part.name}`,
-        title: toHex(color),
-        onclick: () => toggle(color),
-      });
-    })),
+        return node('button.swatch', {
+          style: { background: toHex(color) },
+          'aria-pressed': String(on),
+          'aria-label': `${on ? 'Remove' : 'Add'} ${toHex(color)} ${on ? 'from' : 'to'} ${part.name}`,
+          title: toHex(color),
+          onclick: () => toggle(color),
+        });
+      }),
+    ),
   );
 }
 
@@ -43,17 +70,31 @@ export function partsEditor(app, redraw) {
   const colours = characterColors(app.store.state);
   const shared = sharedColours(project.parts);
   const add = () => {
-    project.parts.push({ id: newId('part'), name: `Part ${project.parts.length + 1}`, colours: [] });
+    project.parts.push({
+      id: newId('part'),
+      name: `Part ${project.parts.length + 1}`,
+      colours: [],
+    });
     changeStructure(app, 'parts');
     redraw();
   };
 
-  return h(
+  return node(
     'div',
     { style: { display: 'grid', gap: '10px' } },
-    h('p.hint', {}, 'Name a part (a shirt, a cape, armour) and tick the colours it is drawn in. Shades of one colour belong in one part.'),
+    node(
+      'p.hint',
+      {},
+      'Name a part (a shirt, a cape, armour) and tick the colours it is drawn in. Shades of one colour belong in one part.',
+    ),
     project.parts.map((part) => partRow(app, part, colours, redraw)),
-    h('div.group', {}, h('button.btn', { onclick: add }, 'Add a part')),
-    shared.length ? h('p.hint', { style: { color: 'var(--warn)' } }, `${shared.map(toHex).join(', ')} is in two parts, so those parts cannot wear different colours. Repaint one of them in its own shades.`) : null,
+    node('div.group', {}, node('button.btn', { onclick: add }, 'Add a part')),
+    shared.length
+      ? node(
+          'p.hint',
+          { style: { color: 'var(--warn)' } },
+          `${shared.map(toHex).join(', ')} is in two parts, so those parts cannot wear different colours. Repaint one of them in its own shades.`,
+        )
+      : null,
   );
 }

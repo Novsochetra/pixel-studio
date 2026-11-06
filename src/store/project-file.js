@@ -4,14 +4,22 @@ import { dataUrlSprite, spriteDataUrl } from '../io/images.js';
 // A whole project as one JSON text: its structure, with each layer's pixels as a PNG data URL, and
 // its own preview background when it has one.
 export function projectFileText(project, background = null) {
-  const copy = JSON.parse(JSON.stringify(project, (key, value) => (key === 'sprite' ? undefined : value)));
+  const copy = JSON.parse(
+    JSON.stringify(project, (key, value) => (key === 'sprite' ? undefined : value)),
+  );
   const pngs = {};
 
   for (const { layer } of allLayers(project)) {
     pngs[layer.id] = layer.sprite ? spriteDataUrl(layer.sprite) : null;
   }
 
-  return JSON.stringify({ kind: 'pixel-clean-studio', version: 1, project: copy, pngs, ...(background ? { background } : {}) });
+  return JSON.stringify({
+    kind: 'pixel-clean-studio',
+    version: 1,
+    project: copy,
+    pngs,
+    ...(background ? { background } : {}),
+  });
 }
 
 // { project, background }: background is a data URL, or null
@@ -27,7 +35,10 @@ export async function readProjectBundle(text) {
     layer.sprite = png ? await dataUrlSprite(png) : null;
   }
 
-  const background = typeof file.background === 'string' && file.background.startsWith('data:image/') ? file.background : null;
+  const background =
+    typeof file.background === 'string' && file.background.startsWith('data:image/')
+      ? file.background
+      : null;
 
   return { project: file.project, background };
 }

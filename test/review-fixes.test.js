@@ -18,17 +18,31 @@ test('Fit the art also holds a foot below the standing feet', () => {
   setPixel(animation.directions.south.frames[1].layers[0].sprite, 80, 131, RED);
   const anchor = { x: 80, y: 128 };
   const fit = fittedFrame(project, animation, anchor);
-  const { warnings } = buildSheet(project, animation, { ...fit, artAnchor: anchor, includeMirrored: false });
-  assert.deepEqual(warnings.filter((w) => w.includes('outside')), []);
+  const { warnings } = buildSheet(project, animation, {
+    ...fit,
+    artAnchor: anchor,
+    includeMirrored: false,
+  });
+  assert.deepEqual(
+    warnings.filter((warning) => warning.includes('outside')),
+    [],
+  );
 });
 
 test('a flipped west row keeps the feet on the anchor column, even frame width too', () => {
   const project = newProject();
   const animation = project.animations[0];
   setPixel(animation.directions.east.frames[0].layers[0].sprite, 80, 128, RED);
-  const { sheet, rows } = buildSheet(project, animation, { ...GAME_FRAME, artAnchor: { x: 80, y: 128 }, includeMirrored: true });
-  const west = rows.findIndex((r) => r.direction === 'west');
-  assert.equal(getPixel(sheet, GAME_FRAME.anchorX, west * GAME_FRAME.frameHeight + GAME_FRAME.anchorY), RED);
+  const { sheet, rows } = buildSheet(project, animation, {
+    ...GAME_FRAME,
+    artAnchor: { x: 80, y: 128 },
+    includeMirrored: true,
+  });
+  const west = rows.findIndex((row) => row.direction === 'west');
+  assert.equal(
+    getPixel(sheet, GAME_FRAME.anchorX, west * GAME_FRAME.frameHeight + GAME_FRAME.anchorY),
+    RED,
+  );
 });
 
 test('a structural change reports every layer whose pixels it changed', () => {
@@ -46,8 +60,16 @@ test('a structural change reports every layer whose pixels it changed', () => {
 
 test('the eraser takes out the corner of an L-shaped drag', () => {
   const sprite = createSprite(8, 8);
-  for (const [x, y] of [[1, 1], [2, 1], [2, 2]]) setPixel(sprite, x, y, RED);
+  for (const [x, y] of [
+    [1, 1],
+    [2, 1],
+    [2, 2],
+  ]) {
+    setPixel(sprite, x, y, RED);
+  }
   const eraser = new Stroke(sprite, CLEAR, { cleanLines: false });
-  eraser.add(1, 1); eraser.add(2, 1); eraser.add(2, 2);
+  eraser.add(1, 1);
+  eraser.add(2, 1);
+  eraser.add(2, 2);
   assert.equal(getPixel(sprite, 2, 1), CLEAR);
 });

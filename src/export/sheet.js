@@ -7,7 +7,9 @@ export const GAME_FRAME = { frameWidth: 64, frameHeight: 62, anchorX: 32, anchor
 
 // the mirrors this animation can use: a direction the set mirrors, from one it has drawn
 function usableMirrors(project, animation) {
-  return Object.entries(mirrorsOf(project)).filter(([direction, source]) => animation.directions[source] && !animation.directions[direction]);
+  return Object.entries(mirrorsOf(project)).filter(
+    ([direction, source]) => animation.directions[source] && !animation.directions[direction],
+  );
 }
 
 // rows in compass order (Naga Eleven's order), then the mirrored ones when they are wanted
@@ -16,7 +18,13 @@ function sheetRows(project, animation, includeMirrored) {
   const rows = drawn.map((direction) => ({ direction, source: direction, flip: false }));
 
   if (includeMirrored) {
-    rows.push(...usableMirrors(project, animation).map(([direction, source]) => ({ direction, source, flip: true })));
+    rows.push(
+      ...usableMirrors(project, animation).map(([direction, source]) => ({
+        direction,
+        source,
+        flip: true,
+      })),
+    );
   }
 
   return rows;
@@ -55,7 +63,12 @@ function manifestRows(project, rows, includeMirrored, animation) {
   const entries = rows.map((row, index) => [row.direction, index]);
 
   if (!includeMirrored) {
-    entries.push(...usableMirrors(project, animation).map(([direction, source]) => [direction, { mirrorOf: source }]));
+    entries.push(
+      ...usableMirrors(project, animation).map(([direction, source]) => [
+        direction,
+        { mirrorOf: source },
+      ]),
+    );
   }
 
   return Object.fromEntries(entries);
@@ -70,28 +83,46 @@ export function buildSheet(project, animation, settings) {
   const sheet = createSprite(frames * frameWidth, rows.length * frameHeight);
   const warnings = [];
 
-  rows.forEach((row, r) => {
+  rows.forEach((row, rowIndex) => {
     const list = animation.directions[row.source].frames;
     let clipped = 0;
 
-    for (let f = 0; f < frames; f++) {
-      const frame = list[Math.min(f, list.length - 1)];
+    for (let frameIndex = 0; frameIndex < frames; frameIndex++) {
+      const frame = list[Math.min(frameIndex, list.length - 1)];
       const art = compositeFrame(frame, project.canvas.width, project.canvas.height);
-      clipped += placeFrame(sheet, art, { x: f * frameWidth, y: r * frameHeight }, settings, row.flip);
+      clipped += placeFrame(
+        sheet,
+        art,
+        { x: frameIndex * frameWidth, y: rowIndex * frameHeight },
+        settings,
+        row.flip,
+      );
     }
 
     if (list.length < frames) {
-      warnings.push(`${row.direction} has ${list.length} of ${frames} frames; its last frame repeats.`);
+      warnings.push(
+        `${row.direction} has ${list.length} of ${frames} frames; its last frame repeats.`,
+      );
     }
 
     if (clipped && !row.flip) {
-      warnings.push(`${row.direction}: ${clipped} pixels fall outside the ${frameWidth}×${frameHeight} frame.`);
+      warnings.push(
+        `${row.direction}: ${clipped} pixels fall outside the ${frameWidth}×${frameHeight} frame.`,
+      );
     }
   });
 
-  const plain = animation.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const plain = animation.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
   const slug = plain || `animation-${project.animations.indexOf(animation) + 1}`;
-  const manifest = { image: `assets/sprites/${slug}.png`, frames, fps: animation.fps, rows: manifestRows(project, rows, settings.includeMirrored, animation) };
+  const manifest = {
+    image: `assets/sprites/${slug}.png`,
+    frames,
+    fps: animation.fps,
+    rows: manifestRows(project, rows, settings.includeMirrored, animation),
+  };
 
   return { sheet, rows, frames, warnings, manifest, name: slug };
 }

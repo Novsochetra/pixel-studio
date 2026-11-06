@@ -33,8 +33,10 @@ function cellColor(image, isBg, rows, cols) {
     groups.get(key).push(color);
   }
 
-  const keys = [...groups.keys()].sort((a, b) => a - b);
-  const winner = keys.reduce((best, key) => (groups.get(key).length > groups.get(best).length ? key : best));
+  const keys = [...groups.keys()].sort((first, second) => first - second);
+  const winner = keys.reduce((best, key) =>
+    groups.get(key).length > groups.get(best).length ? key : best,
+  );
 
   return { color: medianColor(groups.get(winner)).map(Math.trunc), onBg };
 }
@@ -57,10 +59,10 @@ export function rebuild(image, isBg, grid) {
   out.colors = new Uint8Array(out.width * out.height * 3);
   out.bg = new Uint8Array(out.width * out.height);
 
-  rowSpans.forEach((rows, r) => {
-    colSpans.forEach((cols, c) => {
+  rowSpans.forEach((rows, rowIndex) => {
+    colSpans.forEach((cols, columnIndex) => {
       const { color, onBg } = cellColor(image, isBg, rows, cols);
-      const at = r * out.width + c;
+      const at = rowIndex * out.width + columnIndex;
       out.colors.set(color, at * 3);
       out.bg[at] = onBg ? 1 : 0;
     });

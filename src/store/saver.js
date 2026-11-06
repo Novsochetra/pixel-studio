@@ -126,7 +126,10 @@ export class Saver {
 
       if (this.structureDirty || dirty.length || gone.length) {
         this.structureDirty = false;
-        await this.backend.write(this.keys.project, { json: JSON.stringify(projectStructure(project)), savedAt: Date.now() });
+        await this.backend.write(this.keys.project, {
+          json: JSON.stringify(projectStructure(project)),
+          savedAt: Date.now(),
+        });
       }
 
       for (const id of gone) {

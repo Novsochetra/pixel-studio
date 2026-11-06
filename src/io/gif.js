@@ -14,17 +14,23 @@ function paletteOf(frames) {
     }
   }
 
-  const kept = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 255).map(([key]) => key);
+  const kept = [...counts.entries()]
+    .sort((first, second) => second[1] - first[1])
+    .slice(0, 255)
+    .map(([key]) => key);
   const index = new Map(kept.map((key, i) => [key, i + 1]));
   const nearest = (key) => {
     let best = 1;
     let bestDistance = Infinity;
 
     kept.forEach((other, i) => {
-      const d = Math.abs((key >> 16) - (other >> 16)) + Math.abs(((key >> 8) & 255) - ((other >> 8) & 255)) + Math.abs((key & 255) - (other & 255));
+      const distance =
+        Math.abs((key >> 16) - (other >> 16)) +
+        Math.abs(((key >> 8) & 255) - ((other >> 8) & 255)) +
+        Math.abs((key & 255) - (other & 255));
 
-      if (d < bestDistance) {
-        bestDistance = d;
+      if (distance < bestDistance) {
+        bestDistance = distance;
         best = i + 1;
       }
     });
@@ -117,7 +123,7 @@ export function encodeGif(frames, delay) {
   const { colours, indexOf } = paletteOf(frames);
   const depth = Math.max(1, Math.ceil(Math.log2(colours.length)));
   const tableSize = 1 << depth;
-  const bytes = [...'GIF89a'].map((c) => c.charCodeAt(0));
+  const bytes = [...'GIF89a'].map((char) => char.charCodeAt(0));
   bytes.push(...word(width), ...word(height), 0xf0 | (depth - 1), 0, 0);
 
   for (let i = 0; i < tableSize; i++) {
@@ -125,15 +131,27 @@ export function encodeGif(frames, delay) {
     bytes.push((key >> 16) & 255, (key >> 8) & 255, key & 255);
   }
 
-  bytes.push(0x21, 0xff, 11, ...[...'NETSCAPE2.0'].map((c) => c.charCodeAt(0)), 3, 1, 0, 0, 0);
+  bytes.push(
+    0x21,
+    0xff,
+    11,
+    ...[...'NETSCAPE2.0'].map((char) => char.charCodeAt(0)),
+    3,
+    1,
+    0,
+    0,
+    0,
+  );
   const centiseconds = Math.max(2, Math.round(delay / 10));
 
   for (const frame of frames) {
     const indices = new Array(width * height);
 
-    for (let p = 0; p < width * height; p++) {
-      const i = p * 4;
-      indices[p] = frame.pixels[i + 3] ? indexOf((frame.pixels[i] << 16) | (frame.pixels[i + 1] << 8) | frame.pixels[i + 2]) : 0;
+    for (let pixel = 0; pixel < width * height; pixel++) {
+      const i = pixel * 4;
+      indices[pixel] = frame.pixels[i + 3]
+        ? indexOf((frame.pixels[i] << 16) | (frame.pixels[i + 1] << 8) | frame.pixels[i + 2])
+        : 0;
     }
 
     // disposal 2: each frame clears to transparent, so the last frame never shows through

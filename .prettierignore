@@ -1,0 +1,7 @@
+dist/
+shots/
+fixtures/
+assets/
+build/game-kits.json
+build/samples.json
+src/ui/page.html

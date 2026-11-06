@@ -1,8 +1,13 @@
-import { h, replace, toast } from './dom.js';
+import { node, replace, toast } from './dom.js';
 import { currentAnimation, restructure } from './actions.js';
 import { directionLabel } from '../model/project.js';
 import { drawableDirections, mirrorsOf } from '../model/profiles.js';
-import { addAnimation, addDirection, removeAnimation, removeDirection } from '../model/structure.js';
+import {
+  addAnimation,
+  addDirection,
+  removeAnimation,
+  removeDirection,
+} from '../model/structure.js';
 import { compositeFrame } from '../model/composite.js';
 
 // Naga Eleven's animations (src/data/sprites.js), offered as names for new ones
@@ -31,13 +36,21 @@ function directionChips(app, animation) {
       return;
     }
 
-    restructure(app, drawn.includes(id) ? 'Remove direction' : 'Add direction', (state) => toggleDirection(state, id));
+    restructure(app, drawn.includes(id) ? 'Remove direction' : 'Add direction', (state) =>
+      toggleDirection(state, id),
+    );
   };
 
-  return h(
+  return node(
     'div.guide-checks',
     { role: 'group', 'aria-label': 'Directions drawn' },
-    drawableDirections(app.store.state.project).map((id) => h(`button.btn${drawn.includes(id) ? '.on' : ''}`, { 'aria-pressed': String(drawn.includes(id)), onclick: () => toggle(id) }, directionLabel(id))),
+    drawableDirections(app.store.state.project).map((id) =>
+      node(
+        `button.btn${drawn.includes(id) ? '.on' : ''}`,
+        { 'aria-pressed': String(drawn.includes(id)), onclick: () => toggle(id) },
+        directionLabel(id),
+      ),
+    ),
   );
 }
 
@@ -47,7 +60,11 @@ function startAnimation(state, name) {
   const animation = addAnimation(state.project, name, Object.keys(from.directions));
 
   for (const [direction, entry] of Object.entries(animation.directions)) {
-    entry.frames[0].layers[0].sprite = compositeFrame(from.directions[direction].frames[0], state.project.canvas.width, state.project.canvas.height);
+    entry.frames[0].layers[0].sprite = compositeFrame(
+      from.directions[direction].frames[0],
+      state.project.canvas.width,
+      state.project.canvas.height,
+    );
   }
 
   return { animation: animation.id, frame: 0, layer: null };
@@ -55,19 +72,20 @@ function startAnimation(state, name) {
 
 function newAnimationForm(app) {
   const { state } = app.store;
-  const used = new Set(state.project.animations.map((a) => a.name));
-  const choice = h(
+  const used = new Set(state.project.animations.map((animation) => animation.name));
+  const choice = node(
     'select.input',
     { id: 'new-animation', 'aria-label': 'New animation' },
-    h('option', { value: '' }, 'New animation…'),
-    PRESETS.filter((name) => !used.has(name)).map((name) => h('option', { value: name }, name)),
-    h('option', { value: '*' }, 'Another name…'),
+    node('option', { value: '' }, 'New animation…'),
+    PRESETS.filter((name) => !used.has(name)).map((name) => node('option', { value: name }, name)),
+    node('option', { value: '*' }, 'Another name…'),
   );
   choice.addEventListener('change', () => {
-    const name = choice.value === '*' ? `Animation ${state.project.animations.length + 1}` : choice.value;
+    const name =
+      choice.value === '*' ? `Animation ${state.project.animations.length + 1}` : choice.value;
 
     if (name) {
-      restructure(app, `New animation: ${name}`, (s) => startAnimation(s, name));
+      restructure(app, `New animation: ${name}`, (draft) => startAnimation(draft, name));
     }
   });
 
@@ -78,41 +96,73 @@ export function renderAnimationPanel(el, app) {
   const { state } = app.store;
   const animation = currentAnimation(state);
   let confirmDelete = false;
-  const pick = h(
+  const pick = node(
     'select.input',
-    { id: 'animation', 'aria-label': 'Animation', onchange: (event) => app.store.set({ at: { ...state.at, animation: event.target.value, frame: 0, layer: null }, selection: null }) },
-    state.project.animations.map((a) => h('option', { value: a.id, selected: a.id === animation.id }, a.name)),
+    {
+      id: 'animation',
+      'aria-label': 'Animation',
+      onchange: (event) =>
+        app.store.set({
+          at: { ...state.at, animation: event.target.value, frame: 0, layer: null },
+          selection: null,
+        }),
+    },
+    state.project.animations.map((candidate) =>
+      node(
+        'option',
+        { value: candidate.id, selected: candidate.id === animation.id },
+        candidate.name,
+      ),
+    ),
   );
-  const rename = h('input.input', {
+  const rename = node('input.input', {
     value: animation.name,
     id: 'animation-name',
     'aria-label': 'Animation name',
-    onchange: (event) => restructure(app, 'Rename animation', (s) => { currentAnimation(s).name = event.target.value.trim() || currentAnimation(s).name; }),
+    onchange: (event) =>
+      restructure(app, 'Rename animation', (draft) => {
+        currentAnimation(draft).name = event.target.value.trim() || currentAnimation(draft).name;
+      }),
   });
-  const remove = h('button.btn.quiet', {
-    disabled: state.project.animations.length < 2,
-    title: 'Undo brings it back',
-    onclick: (event) => {
-      if (!confirmDelete) {
-        confirmDelete = true;
-        event.currentTarget.textContent = `Delete ${animation.name}? Click again`;
+  const remove = node(
+    'button.btn.quiet',
+    {
+      disabled: state.project.animations.length < 2,
+      title: 'Undo brings it back',
+      onclick: (event) => {
+        if (!confirmDelete) {
+          confirmDelete = true;
+          event.currentTarget.textContent = `Delete ${animation.name}? Click again`;
 
-        return;
-      }
+          return;
+        }
 
-      restructure(app, `Delete ${animation.name}`, (s) => {
-        removeAnimation(s.project, animation.id);
+        restructure(app, `Delete ${animation.name}`, (draft) => {
+          removeAnimation(draft.project, animation.id);
 
-        return { animation: s.project.animations[0].id, frame: 0, layer: null };
-      });
+          return { animation: draft.project.animations[0].id, frame: 0, layer: null };
+        });
+      },
     },
-  }, 'Delete');
+    'Delete',
+  );
 
   replace(
     el,
-    h('h2', {}, 'Animation'),
-    h('div.compare', { style: { gridTemplateColumns: '1fr 1fr' } }, pick, newAnimationForm(app)),
-    h('div.group', { style: { gap: '6px' } }, rename, remove),
-    h('div.field', {}, h('span', {}, Object.keys(mirrorsOf(state.project)).length ? 'Directions drawn (the left side is mirrored from the right)' : 'Directions drawn'), directionChips(app, animation)),
+    node('h2', {}, 'Animation'),
+    node('div.compare', { style: { gridTemplateColumns: '1fr 1fr' } }, pick, newAnimationForm(app)),
+    node('div.group', { style: { gap: '6px' } }, rename, remove),
+    node(
+      'div.field',
+      {},
+      node(
+        'span',
+        {},
+        Object.keys(mirrorsOf(state.project)).length
+          ? 'Directions drawn (the left side is mirrored from the right)'
+          : 'Directions drawn',
+      ),
+      directionChips(app, animation),
+    ),
   );
 }

@@ -16,7 +16,7 @@ function differentPixels(actual, expected) {
   let count = 0;
 
   for (let i = 0; i < expected.length; i += 4) {
-    if (actual.subarray(i, i + 4).some((value, c) => value !== expected[i + c])) {
+    if (actual.subarray(i, i + 4).some((value, colour) => value !== expected[i + colour])) {
       count++;
     }
   }
@@ -40,8 +40,8 @@ for (const name of ['side.webp', 'back.webp', 'back2.webp']) {
     const expected = readFileSync(new URL(`${name}.expected.rgba`, fixtures));
 
     assert.deepEqual(
-      result.report.cell.map((v) => v.toFixed(4)),
-      expectedMeta[name].cell.map((v) => v.toFixed(4)),
+      result.report.cell.map((value) => value.toFixed(4)),
+      expectedMeta[name].cell.map((value) => value.toFixed(4)),
     );
     assert.equal(differentPixels(toRgba(result), expected), 0);
   });

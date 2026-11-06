@@ -25,7 +25,13 @@ export function writeIndex(backend, index) {
 }
 
 export function entryFor(project, prefix) {
-  return { id: project.id, name: project.name, profile: project.profile, prefix, updatedAt: Date.now() };
+  return {
+    id: project.id,
+    name: project.name,
+    profile: project.profile,
+    prefix,
+    updatedAt: Date.now(),
+  };
 }
 
 // the entry for this project, added or refreshed; true when the list changed

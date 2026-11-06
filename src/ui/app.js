@@ -1,4 +1,4 @@
-import { h, replace } from './dom.js';
+import { node, replace } from './dom.js';
 import { renderToolbar } from './toolbar.js';
 import { renderRail } from './rail.js';
 import { fitZoom, mountEditStage } from './edit-stage.js';
@@ -21,11 +21,53 @@ import { bounds, colorCounts } from '../model/sprite.js';
 const ROUTES = {
   toolbar: ['mode', 'zoom', 'showGrid', 'saveStatus', 'storage', 'pixels', 'project', 'viewFilter'],
   rail: ['tool', 'symmetry', 'mode'],
-  stage: ['swapPreview', 'background', 'showPins', 'pinName', 'tool', 'highlight', 'viewFilter', 'markup', 'markupMode', 'mode', 'zoom', 'pixels', 'stroke', 'overlay', 'showGrid', 'showGuides', 'symmetry', 'mirror', 'at', 'preview', 'guides', 'game', 'project', 'onion', 'selection', 'frames', 'layers', 'animations'],
+  stage: [
+    'swapPreview',
+    'background',
+    'showPins',
+    'pinName',
+    'tool',
+    'highlight',
+    'viewFilter',
+    'markup',
+    'markupMode',
+    'mode',
+    'zoom',
+    'pixels',
+    'stroke',
+    'overlay',
+    'showGrid',
+    'showGuides',
+    'symmetry',
+    'mirror',
+    'at',
+    'preview',
+    'guides',
+    'game',
+    'project',
+    'onion',
+    'selection',
+    'frames',
+    'layers',
+    'animations',
+  ],
   views: ['at', 'mode', 'pixels', 'project', 'frames', 'layers', 'animations'],
   animation: ['at', 'project', 'animations', 'frames'],
   layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations'],
-  colours: ['color', 'paintOver', 'paletteLock', 'cleanLines', 'symmetry', 'pixels', 'project', 'tool', 'at', 'frames', 'layers', 'animations'],
+  colours: [
+    'color',
+    'paintOver',
+    'paletteLock',
+    'cleanLines',
+    'symmetry',
+    'pixels',
+    'project',
+    'tool',
+    'at',
+    'frames',
+    'layers',
+    'animations',
+  ],
   guides: ['guides', 'pixels', 'showGuides', 'project', 'at', 'frames', 'layers', 'animations'],
   outline: ['outline', 'pixels', 'at', 'project', 'layers'],
   status: ['cursor', 'at', 'zoom', 'pixels', 'project', 'tool'],
@@ -39,12 +81,26 @@ function renderStatus(el, app) {
 
   replace(
     el,
-    h('span', {}, `${directionLabel(state.at.direction)} · frame ${Math.min(state.at.frame, currentFrames(state).length - 1) + 1} of ${currentFrames(state).length} · ${currentLayer(state).name}`),
-    h('span', {}, `${sprite.width}×${sprite.height} canvas`),
-    h('span', {}, box ? `sprite ${box.right - box.left}×${box.bottom - box.top}, rows ${box.top}–${box.bottom - 1}` : 'empty'),
-    h('span', {}, `${colorCounts(sprite).length} colours`),
-    h('span', {}, cursor ? `x ${cursor.x}, y ${cursor.y} · ${cursor.color}` : ''),
-    h('span', {}, 'Alt-click picks a colour · ⌘Z undo · B E I G R S W tools · M symmetry · , . frames · arrows nudge a selection'),
+    node(
+      'span',
+      {},
+      `${directionLabel(state.at.direction)} · frame ${Math.min(state.at.frame, currentFrames(state).length - 1) + 1} of ${currentFrames(state).length} · ${currentLayer(state).name}`,
+    ),
+    node('span', {}, `${sprite.width}×${sprite.height} canvas`),
+    node(
+      'span',
+      {},
+      box
+        ? `sprite ${box.right - box.left}×${box.bottom - box.top}, rows ${box.top}–${box.bottom - 1}`
+        : 'empty',
+    ),
+    node('span', {}, `${colorCounts(sprite).length} colours`),
+    node('span', {}, cursor ? `x ${cursor.x}, y ${cursor.y} · ${cursor.color}` : ''),
+    node(
+      'span',
+      {},
+      'Alt-click picks a colour · ⌘Z undo · B E I G R S W tools · M symmetry · , . frames · arrows nudge a selection',
+    ),
   );
 }
 
@@ -96,12 +152,12 @@ export function mountApp(app) {
   };
   const inspector = document.getElementById('inspector');
   const sections = {
-    animation: h('section.section'),
-    views: h('section.section'),
-    layers: h('section.section'),
-    colours: h('section.section'),
-    outline: h('section.section'),
-    guides: h('section.section'),
+    animation: node('section.section'),
+    views: node('section.section'),
+    layers: node('section.section'),
+    colours: node('section.section'),
+    outline: node('section.section'),
+    guides: node('section.section'),
   };
   inspector.replaceChildren(...Object.values(sections));
   bindCollapsing(inspector, sections);
@@ -116,7 +172,10 @@ export function mountApp(app) {
 
       if (mode !== stageMode) {
         stageMode = mode;
-        stage = { edit: mountEditStage, board: mountBoard, game: mountGamePreview }[mode](parts.stage, app);
+        stage = { edit: mountEditStage, board: mountBoard, game: mountGamePreview }[mode](
+          parts.stage,
+          app,
+        );
       }
 
       stage.render(patch);

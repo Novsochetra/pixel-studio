@@ -12,7 +12,7 @@ export function drawPins(context, frame, previous, scale) {
   context.lineWidth = 2;
 
   for (const mark of pinsOf(previous)) {
-    const now = pinsOf(frame).find((m) => m.name === mark.name);
+    const now = pinsOf(frame).find((pin) => pin.name === mark.name);
     const [px, py] = centre(mark, scale);
     context.globalAlpha = 0.45;
     context.strokeStyle = colourOf(mark.name);

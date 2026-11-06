@@ -1,4 +1,4 @@
-import { h, toast } from './dom.js';
+import { node, toast } from './dom.js';
 import { newId } from '../model/project.js';
 import { paletteFromPixels, parsePaletteText } from '../palette/palette.js';
 import { decodeSprite } from '../io/images.js';
@@ -13,8 +13,17 @@ async function colorsFromFile(file) {
 
 // Paste hex codes or open a .hex, .gpl, .txt or palette image; calls onAdd({ id, name, colors }).
 export function paletteForm(onAdd) {
-  const name = h('input.input', { placeholder: 'Palette name', id: 'palette-name', 'aria-label': 'Palette name' });
-  const text = h('textarea.input.mono', { rows: 3, placeholder: '#1a1c2c #5d275d #b13e53 …', id: 'palette-text', 'aria-label': 'Hex codes' });
+  const name = node('input.input', {
+    placeholder: 'Palette name',
+    id: 'palette-name',
+    'aria-label': 'Palette name',
+  });
+  const text = node('textarea.input.mono', {
+    rows: 3,
+    placeholder: '#1a1c2c #5d275d #b13e53 …',
+    id: 'palette-text',
+    'aria-label': 'Hex codes',
+  });
   const add = (colors, fallbackName) => {
     if (!colors.length) {
       toast('No colours found. Paste hex codes like #b13e53, or open a .hex, .gpl or image file.');
@@ -24,7 +33,7 @@ export function paletteForm(onAdd) {
 
     onAdd({ id: newId('p'), name: name.value.trim() || fallbackName, colors });
   };
-  const file = h('input', {
+  const file = node('input', {
     type: 'file',
     accept: '.hex,.gpl,.txt,image/*',
     hidden: true,
@@ -37,16 +46,20 @@ export function paletteForm(onAdd) {
     },
   });
 
-  return h(
+  return node(
     'div',
     { style: { display: 'grid', gap: '8px' } },
     name,
     text,
-    h(
+    node(
       'div.group',
       { style: { gap: '6px' } },
-      h('button.btn', { onclick: () => add(parsePaletteText(text.value), 'My palette') }, 'Add pasted colours'),
-      h('button.btn', { onclick: () => file.click() }, 'Open a palette file…'),
+      node(
+        'button.btn',
+        { onclick: () => add(parsePaletteText(text.value), 'My palette') },
+        'Add pasted colours',
+      ),
+      node('button.btn', { onclick: () => file.click() }, 'Open a palette file…'),
       file,
     ),
   );

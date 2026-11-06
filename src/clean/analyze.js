@@ -5,7 +5,14 @@ import { transparentCells } from './transparency.js';
 import { despeckle } from './regions.js';
 import { loneEdgeColours, mergeSimilar, ownPalette, snap } from './snap.js';
 
-export const DEFAULTS = { tolerance: 60, holeMin: 6, merge: 30, cell: null, native: null, background: null };
+export const DEFAULTS = {
+  tolerance: 60,
+  holeMin: 6,
+  merge: 30,
+  cell: null,
+  native: null,
+  background: null,
+};
 
 // A cut-out PNG hides any colour (often black, which would match the outline) under its
 // transparent pixels, so they are painted one flat key colour the background detection then
@@ -42,7 +49,9 @@ function cleanColors(cells, grid, backgrounds, palette, options) {
 export function analyze(imageData, options = {}, palette = null) {
   const settings = { ...DEFAULTS, ...options };
   const { image, cutOut } = flatten(imageData);
-  const backgrounds = settings.keepBackground ? [] : settings.background ?? detectBackground(image);
+  const backgrounds = settings.keepBackground
+    ? []
+    : (settings.background ?? detectBackground(image));
   const isBg = backgroundMask(image, backgrounds, settings.tolerance);
   const grid = findGrid(image, isBg, settings, cutOut);
   const rebuilt = rebuild(image, isBg, grid);

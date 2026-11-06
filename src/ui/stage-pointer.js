@@ -6,7 +6,10 @@ import { getPixel, toHex } from '../model/sprite.js';
 export function pixelAt(canvas, event, scale) {
   const box = canvas.getBoundingClientRect();
 
-  return [Math.floor((event.clientX - box.left) / scale), Math.floor((event.clientY - box.top) / scale)];
+  return [
+    Math.floor((event.clientX - box.left) / scale),
+    Math.floor((event.clientY - box.top) / scale),
+  ];
 }
 
 export function bindPointer(canvas, app, stage) {

@@ -13,8 +13,8 @@ export const VIEW_FILTERS = {
         return CLEAR;
       }
 
-      const [r, g, b] = unpack(color);
-      const value = Math.round(0.2126 * r + 0.7152 * g + 0.0722 * b);
+      const [red, green, blue] = unpack(color);
+      const value = Math.round(0.2126 * red + 0.7152 * green + 0.0722 * blue);
 
       return pack(value, value, value);
     }),

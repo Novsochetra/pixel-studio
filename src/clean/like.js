@@ -4,9 +4,19 @@ import { matchHeight, scaleAxis, toRgba } from './scale.js';
 import { bbox, placeLike } from './layout.js';
 
 export function analyzeReference(refData, options = {}) {
-  const ref = analyze(refData, { ...options, cell: null, native: null, background: null, keepBackground: false });
+  const ref = analyze(refData, {
+    ...options,
+    cell: null,
+    native: null,
+    background: null,
+    keepBackground: false,
+  });
 
-  return { ...ref, source: { width: refData.width, height: refData.height }, palette: uniqueColors(ref.colors, ref.opaque).map((entry) => entry.color) };
+  return {
+    ...ref,
+    source: { width: refData.width, height: refData.height },
+    palette: uniqueColors(ref.colors, ref.opaque).map((entry) => entry.color),
+  };
 }
 
 // Lays a new view out exactly like the reference: same canvas, same pixel size, feet on the same
@@ -68,8 +78,15 @@ export function cleanAlone(imageData, canvas, options = {}) {
   let scaled = null;
 
   if (Math.abs(fy - 1) > 1e-9 || Math.abs(fx - 1) > 0.01) {
-    const rows = toRgba(analyzed).subarray(own.top * analyzed.width * 4, own.bottom * analyzed.width * 4);
-    const out = scaleAxis(scaleAxis({ width: analyzed.width, height: tall, rgba: rows }, fy, 0), fx, 1);
+    const rows = toRgba(analyzed).subarray(
+      own.top * analyzed.width * 4,
+      own.bottom * analyzed.width * 4,
+    );
+    const out = scaleAxis(
+      scaleAxis({ width: analyzed.width, height: tall, rgba: rows }, fy, 0),
+      fx,
+      1,
+    );
     const opaque = new Uint8Array(out.width * out.height);
     const colors = new Uint8Array(out.width * out.height * 3);
 
@@ -82,7 +99,11 @@ export function cleanAlone(imageData, canvas, options = {}) {
     scaled = { fx, fy, drawnHeight: tall };
   }
 
-  const stand = { width: canvas.width, height: canvas.height, opaque: new Uint8Array(canvas.width * canvas.height) };
+  const stand = {
+    width: canvas.width,
+    height: canvas.height,
+    opaque: new Uint8Array(canvas.width * canvas.height),
+  };
   stand.opaque[feetRow * canvas.width + Math.floor(canvas.width / 2)] = 1;
   const placed = placeLike(sprite, stand);
 

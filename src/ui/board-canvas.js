@@ -12,7 +12,11 @@ export const GAP = 16;
 
 // Every view of the current animation side by side on the green checkerboard, with the guide
 // lines across all of them, your marks and, optionally, one view laid see-through over the others.
-export function boardCanvas(state, scale, { overlay = state.overlay, mapping = state.swapPreview, marks = true } = {}) {
+export function boardCanvas(
+  state,
+  scale,
+  { overlay = state.overlay, mapping = state.swapPreview, marks = true } = {},
+) {
   const directions = directionsInUse(state);
   const { width, height } = state.project.canvas;
   const canvas = document.createElement('canvas');
@@ -35,10 +39,20 @@ export function boardCanvas(state, scale, { overlay = state.overlay, mapping = s
     }
 
     if (sprite) {
-      drawSprite(context, VIEW_FILTERS[state.viewFilter ?? 'colour'](mapping ? applyMapping(sprite, mapping) : sprite), 0, 0, scale);
+      drawSprite(
+        context,
+        VIEW_FILTERS[state.viewFilter ?? 'colour'](
+          mapping ? applyMapping(sprite, mapping) : sprite,
+        ),
+        0,
+        0,
+        scale,
+      );
     }
 
-    state.project.guides.forEach((guide) => drawGuide(context, guide, 0, 0, width * scale, scale, i === 0));
+    state.project.guides.forEach((guide) =>
+      drawGuide(context, guide, 0, 0, width * scale, scale, i === 0),
+    );
 
     if (marks) {
       drawMarks(context, state.project, direction, scale);
@@ -71,7 +85,10 @@ export function boardPoint(state, scale, canvas, event) {
 // and sharp), never stretched past it.
 export function boardPreview(state, room, options = {}) {
   const count = directionsInUse(state).length;
-  const scale = Math.max(1, Math.min(6, Math.floor((room - (count - 1) * GAP) / (count * state.project.canvas.width))));
+  const scale = Math.max(
+    1,
+    Math.min(6, Math.floor((room - (count - 1) * GAP) / (count * state.project.canvas.width))),
+  );
   const canvas = boardCanvas(state, scale, options);
   canvas.style.maxWidth = '100%';
   canvas.style.height = 'auto';

@@ -6,7 +6,9 @@ import { openShortcuts } from './shortcuts.js';
 function typing(event) {
   const tag = event.target.tagName;
 
-  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || event.target.isContentEditable;
+  return (
+    tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || event.target.isContentEditable
+  );
 }
 
 export function bindKeyboard(app) {
@@ -18,7 +20,10 @@ export function bindKeyboard(app) {
   });
   document.addEventListener('keydown', (event) => {
     // space pans only from the page itself: on a focused button it still presses the button
-    if (event.key === ' ' && (event.target === document.body || event.target.tagName === 'CANVAS')) {
+    if (
+      event.key === ' ' &&
+      (event.target === document.body || event.target.tagName === 'CANVAS')
+    ) {
       event.preventDefault();
       app.spaceHeld = true;
       document.body.classList.add('panning');
@@ -59,7 +64,7 @@ export function bindKeyboard(app) {
     } else if (!command && key === 'f' && event.shiftKey) {
       flipCurrent(app);
     } else if (!command && !event.altKey) {
-      const tool = TOOLS.find((t) => t.key === key);
+      const tool = TOOLS.find((candidate) => candidate.key === key);
 
       if (tool) {
         app.store.set({ tool: tool.id, mode: 'edit' });

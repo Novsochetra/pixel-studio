@@ -13,30 +13,36 @@ function pixel(rgba, width, height, axis, line, across) {
   return [rgba[at], rgba[at + 1], rgba[at + 2], rgba[at + 3]];
 }
 
-const differ = (a, b) => a[0] !== b[0] || a[1] !== b[1] || a[2] !== b[2] || a[3] !== b[3];
+const differ = (first, second) =>
+  first[0] !== second[0] ||
+  first[1] !== second[1] ||
+  first[2] !== second[2] ||
+  first[3] !== second[3];
 
 // Nearest-neighbour stretch along one axis that keeps 1-pixel lines 1 pixel: where a source pixel
 // is drawn twice and it is a line (unlike both neighbours), the second copy takes the next pixel's
 // colour instead, so outlines and trims don't double.
 export function scaleAxis({ width, height, rgba }, factor, axis) {
-  const n = axis === 0 ? height : width;
+  const length = axis === 0 ? height : width;
   const across = axis === 0 ? width : height;
-  const count = roundHalfEven(n * factor);
-  const pick = Array.from({ length: count }, (_, i) => Math.min(Math.trunc((i + 0.5) / factor), n - 1));
+  const count = roundHalfEven(length * factor);
+  const pick = Array.from({ length: count }, (_, i) =>
+    Math.min(Math.trunc((i + 0.5) / factor), length - 1),
+  );
   const out = { width: axis === 0 ? width : count, height: axis === 0 ? count : height };
   out.rgba = new Uint8Array(out.width * out.height * 4);
 
-  pick.forEach((k, i) => {
-    const doubled = i > 0 && pick[i - 1] === k && k + 1 < n;
+  pick.forEach((index, i) => {
+    const doubled = i > 0 && pick[i - 1] === index && index + 1 < length;
 
-    for (let a = 0; a < across; a++) {
-      const own = pixel(rgba, width, height, axis, k, a);
+    for (let step = 0; step < across; step++) {
+      const own = pixel(rgba, width, height, axis, index, step);
       const thin =
         doubled &&
-        differ(own, pixel(rgba, width, height, axis, k - 1, a)) &&
-        differ(own, pixel(rgba, width, height, axis, k + 1, a));
-      const value = thin ? pixel(rgba, width, height, axis, k + 1, a) : own;
-      const [x, y] = axis === 0 ? [a, i] : [i, a];
+        differ(own, pixel(rgba, width, height, axis, index - 1, step)) &&
+        differ(own, pixel(rgba, width, height, axis, index + 1, step));
+      const value = thin ? pixel(rgba, width, height, axis, index + 1, step) : own;
+      const [x, y] = axis === 0 ? [step, i] : [i, step];
       out.rgba.set(value, (y * out.width + x) * 4);
     }
   });

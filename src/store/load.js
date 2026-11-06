@@ -4,7 +4,9 @@ import { keysFor } from './keys.js';
 
 // the project without its pixels: layers keep their ids, their PNGs are separate documents
 export function projectStructure(project) {
-  return JSON.parse(JSON.stringify(project, (key, value) => (key === 'sprite' ? undefined : value)));
+  return JSON.parse(
+    JSON.stringify(project, (key, value) => (key === 'sprite' ? undefined : value)),
+  );
 }
 
 export async function loadProject(backend, keys = keysFor('')) {

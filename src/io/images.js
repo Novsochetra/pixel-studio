@@ -10,7 +10,10 @@ function makeCanvas(width, height) {
 
 // a file or blob as raw RGBA, colours exactly as stored (no colour-profile conversion)
 export async function decodeImage(blob) {
-  const bitmap = await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' });
+  const bitmap = await createImageBitmap(blob, {
+    colorSpaceConversion: 'none',
+    premultiplyAlpha: 'none',
+  });
   const { width, height } = bitmap;
   const canvas = makeCanvas(width, height);
   const context = canvas.getContext('2d', { willReadFrequently: true });
@@ -35,7 +38,13 @@ export function spriteCanvas(sprite, scale = 1, paintBackground = null) {
   const canvas = makeCanvas(sprite.width * scale, sprite.height * scale);
   const context = canvas.getContext('2d');
   const native = makeCanvas(sprite.width, sprite.height);
-  native.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(sprite.pixels), sprite.width, sprite.height), 0, 0);
+  native
+    .getContext('2d')
+    .putImageData(
+      new ImageData(new Uint8ClampedArray(sprite.pixels), sprite.width, sprite.height),
+      0,
+      0,
+    );
   paintBackground?.(context, canvas.width, canvas.height);
   context.imageSmoothingEnabled = false;
   context.drawImage(native, 0, 0, canvas.width, canvas.height);
@@ -45,7 +54,10 @@ export function spriteCanvas(sprite, scale = 1, paintBackground = null) {
 
 export function canvasToBlob(canvas) {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('The image could not be encoded.'))), 'image/png');
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('The image could not be encoded.'))),
+      'image/png',
+    );
   });
 }
 

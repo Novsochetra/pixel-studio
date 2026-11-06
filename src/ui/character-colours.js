@@ -13,5 +13,7 @@ export function characterColors(state) {
     }
   }
 
-  return [...totals.entries()].sort((a, b) => b[1] - a[1]).map(([color]) => color);
+  return [...totals.entries()]
+    .sort((first, second) => second[1] - first[1])
+    .map(([color]) => color);
 }

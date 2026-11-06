@@ -6,7 +6,9 @@ import { createSprite } from './sprite.js';
 // With `includeHidden`, hidden art layers count too: what the character is, not what is shown.
 export function compositeFrame(frame, width, height, { includeHidden = false } = {}) {
   const out = createSprite(width, height);
-  const art = frame.layers.filter((layer) => layer.kind !== 'reference' && (layer.visible || includeHidden) && layer.sprite);
+  const art = frame.layers.filter(
+    (layer) => layer.kind !== 'reference' && (layer.visible || includeHidden) && layer.sprite,
+  );
 
   if (art.length === 1) {
     out.pixels.set(art[0].sprite.pixels);

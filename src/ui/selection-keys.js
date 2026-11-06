@@ -1,5 +1,11 @@
 import { commit, currentFrames, currentLayer, selectFrame } from './actions.js';
-import { clearSelected, liftPixels, moveSelected, rectSelection, stampPixels } from '../editor/selection.js';
+import {
+  clearSelected,
+  liftPixels,
+  moveSelected,
+  rectSelection,
+  stampPixels,
+} from '../editor/selection.js';
 import { toast } from './dom.js';
 
 const ARROWS = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] };
@@ -30,7 +36,17 @@ export function handleSelectionKey(app, event, key, command) {
   const layer = currentLayer(state);
 
   if (command && key === 'a') {
-    app.store.set({ selection: rectSelection(state.project.canvas.width, state.project.canvas.height, 0, 0, state.project.canvas.width - 1, state.project.canvas.height - 1), tool: 'select' });
+    app.store.set({
+      selection: rectSelection(
+        state.project.canvas.width,
+        state.project.canvas.height,
+        0,
+        0,
+        state.project.canvas.width - 1,
+        state.project.canvas.height - 1,
+      ),
+      tool: 'select',
+    });
   } else if (command && (key === 'c' || key === 'x') && state.selection) {
     app.clipboard = liftPixels(layer.sprite, state.selection);
 

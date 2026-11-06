@@ -19,7 +19,7 @@ export function removePinNear(frame, [x, y], reach = 4) {
   const near = pinsOf(frame)
     .map((mark) => ({ mark, distance: Math.hypot(mark.x - x, mark.y - y) }))
     .filter((entry) => entry.distance <= reach)
-    .sort((a, b) => a.distance - b.distance)[0];
+    .sort((first, second) => first.distance - second.distance)[0];
 
   if (near) {
     removePin(frame, near.mark.name);

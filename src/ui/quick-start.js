@@ -1,4 +1,4 @@
-import { h } from './dom.js';
+import { node } from './dom.js';
 import { openShortcuts } from './shortcuts.js';
 
 const SEEN = 'pixel-clean-quick-start';
@@ -25,14 +25,47 @@ export function showQuickStart(stage) {
     return;
   }
 
-  const card = h('div.quick-start', { role: 'dialog', 'aria-label': 'Quick start' },
-    h('h3', {}, 'Three steps'),
-    h('ol', {},
-      h('li', {}, h('b', {}, 'Clean: '), 'drop a ChatGPT image on the canvas. Each view is fitted to the first one: same pixel size, feet, colours. Projects (top left) holds your other characters.'),
-      h('li', {}, h('b', {}, 'Fix: '), 'touch up pixels with the pencil (B) and eraser (E). ⌘Z undoes anything.'),
-      h('li', {}, h('b', {}, 'Use: '), 'Download gives 160 or 800 px PNGs, or sprite sheets for the game.')),
-    h('div.group', { style: { gap: '6px' } },
-      h('button.btn.primary', { onclick: () => { remember(); card.remove(); } }, 'Got it'),
-      h('button.btn.quiet', { onclick: () => openShortcuts() }, 'Shortcuts (?)')));
+  const card = node(
+    'div.quick-start',
+    { role: 'dialog', 'aria-label': 'Quick start' },
+    node('h3', {}, 'Three steps'),
+    node(
+      'ol',
+      {},
+      node(
+        'li',
+        {},
+        node('b', {}, 'Clean: '),
+        'drop a ChatGPT image on the canvas. Each view is fitted to the first one: same pixel size, feet, colours. Projects (top left) holds your other characters.',
+      ),
+      node(
+        'li',
+        {},
+        node('b', {}, 'Fix: '),
+        'touch up pixels with the pencil (B) and eraser (E). ⌘Z undoes anything.',
+      ),
+      node(
+        'li',
+        {},
+        node('b', {}, 'Use: '),
+        'Download gives 160 or 800 px PNGs, or sprite sheets for the game.',
+      ),
+    ),
+    node(
+      'div.group',
+      { style: { gap: '6px' } },
+      node(
+        'button.btn.primary',
+        {
+          onclick: () => {
+            remember();
+            card.remove();
+          },
+        },
+        'Got it',
+      ),
+      node('button.btn.quiet', { onclick: () => openShortcuts() }, 'Shortcuts (?)'),
+    ),
+  );
   stage.append(card);
 }

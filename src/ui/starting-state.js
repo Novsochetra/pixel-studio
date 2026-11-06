@@ -5,12 +5,16 @@ import { referenceOf } from '../model/reference.js';
 // the editor's state when a project opens
 export function startingState(project) {
   const animation = project.animations[0];
-  const first = animation.directions[referenceOf(project)] ?? Object.values(animation.directions)[0];
+  const first =
+    animation.directions[referenceOf(project)] ?? Object.values(animation.directions)[0];
   const box = bounds(first.frames[0].layers[0].sprite);
 
   return {
     project,
-    at: settleAt({ project, at: { animation: animation.id, direction: referenceOf(project), frame: 0, layer: null } }),
+    at: settleAt({
+      project,
+      at: { animation: animation.id, direction: referenceOf(project), frame: 0, layer: null },
+    }),
     mode: 'edit',
     tool: 'pencil',
     color: fromHex('#df2321'),

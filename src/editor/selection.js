@@ -36,7 +36,14 @@ export function colourSelection(sprite, x, y, everywhere) {
     const [px, py] = stack.pop();
     const at = py * width + px;
 
-    if (px < 0 || py < 0 || px >= width || py >= height || cells[at] || getPixel(sprite, px, py) !== target) {
+    if (
+      px < 0 ||
+      py < 0 ||
+      px >= width ||
+      py >= height ||
+      cells[at] ||
+      getPixel(sprite, px, py) !== target
+    ) {
       continue;
     }
 
@@ -48,7 +55,14 @@ export function colourSelection(sprite, x, y, everywhere) {
 }
 
 export function isSelected(selection, x, y) {
-  return Boolean(selection && x >= 0 && y >= 0 && x < selection.width && y < selection.height && selection.cells[y * selection.width + x]);
+  return Boolean(
+    selection &&
+    x >= 0 &&
+    y >= 0 &&
+    x < selection.width &&
+    y < selection.height &&
+    selection.cells[y * selection.width + x],
+  );
 }
 
 // the selected pixels as [{ x, y, color }]: a clipboard, or what a move lifts
@@ -118,17 +132,17 @@ function selectionBox(selection) {
 }
 
 const TRANSFORMS = {
-  'flip-x': (x, y, b) => [b.left + b.right - x, y],
-  'flip-y': (x, y, b) => [x, b.top + b.bottom - y],
-  'rotate-cw': (x, y, b) => {
-    const cx = (b.left + b.right) / 2;
-    const cy = (b.top + b.bottom) / 2;
+  'flip-x': (x, y, box) => [box.left + box.right - x, y],
+  'flip-y': (x, y, box) => [x, box.top + box.bottom - y],
+  'rotate-cw': (x, y, box) => {
+    const cx = (box.left + box.right) / 2;
+    const cy = (box.top + box.bottom) / 2;
 
     return [Math.round(cx - (y - cy)), Math.round(cy + (x - cx))];
   },
-  'rotate-ccw': (x, y, b) => {
-    const cx = (b.left + b.right) / 2;
-    const cy = (b.top + b.bottom) / 2;
+  'rotate-ccw': (x, y, box) => {
+    const cx = (box.left + box.right) / 2;
+    const cy = (box.top + box.bottom) / 2;
 
     return [Math.round(cx + (y - cy)), Math.round(cy - (x - cx))];
   },

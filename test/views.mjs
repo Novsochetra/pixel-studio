@@ -3,20 +3,28 @@ const { chromium, devices } = createRequire(import.meta.url)('playwright');
 const [url, out] = process.argv.slice(2);
 const browser = await chromium.launch();
 const errors = [];
-const light = await browser.newPage({ viewport: { width: 1280, height: 800 }, colorScheme: 'light' });
-light.on('pageerror', (e) => errors.push(e.message));
-await light.goto(url); await light.waitForTimeout(1200);
+const light = await browser.newPage({
+  viewport: { width: 1280, height: 800 },
+  colorScheme: 'light',
+});
+light.on('pageerror', (error) => errors.push(error.message));
+await light.goto(url);
+await light.waitForTimeout(1200);
 await light.getByRole('button', { name: 'Swap colours…' }).click();
 await light.getByRole('button', { name: 'Make an 8-colour palette from the character' }).click();
 await light.waitForTimeout(400);
 await light.screenshot({ path: `${out}/10-light-swap.png` });
 await light.keyboard.press('Escape');
-await light.getByRole('button', { name: 'Views board' }).click(); await light.waitForTimeout(300);
+await light.getByRole('button', { name: 'Views board' }).click();
+await light.waitForTimeout(300);
 await light.screenshot({ path: `${out}/11-light-board.png` });
 const phone = await browser.newPage({ ...devices['iPhone 13'], colorScheme: 'dark' });
-phone.on('pageerror', (e) => errors.push(e.message));
-await phone.goto(url); await phone.waitForTimeout(1200);
+phone.on('pageerror', (error) => errors.push(error.message));
+await phone.goto(url);
+await phone.waitForTimeout(1200);
 await phone.screenshot({ path: `${out}/12-phone.png`, fullPage: false });
-const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+const overflow = await phone.evaluate(
+  () => document.documentElement.scrollWidth - window.innerWidth,
+);
 console.log('phone horizontal overflow px', overflow, 'errors', errors);
 await browser.close();

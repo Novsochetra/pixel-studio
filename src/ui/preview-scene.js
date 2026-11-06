@@ -8,7 +8,13 @@ const nativeOf = (sprite) => {
   const canvas = document.createElement('canvas');
   canvas.width = sprite.width;
   canvas.height = sprite.height;
-  canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(sprite.pixels), sprite.width, sprite.height), 0, 0);
+  canvas
+    .getContext('2d')
+    .putImageData(
+      new ImageData(new Uint8ClampedArray(sprite.pixels), sprite.width, sprite.height),
+      0,
+      0,
+    );
 
   return canvas;
 };
@@ -16,14 +22,26 @@ const nativeOf = (sprite) => {
 // the whole frame drawn so the character's feet (the anchor) stand on (feetX, groundY)
 export function drawStanding(context, sprite, feetX, groundY, anchor, factor) {
   context.imageSmoothingEnabled = false;
-  context.drawImage(nativeOf(sprite), Math.round(feetX - anchor.x * factor), Math.round(groundY - anchor.y * factor), Math.round(sprite.width * factor), Math.round(sprite.height * factor));
+  context.drawImage(
+    nativeOf(sprite),
+    Math.round(feetX - anchor.x * factor),
+    Math.round(groundY - anchor.y * factor),
+    Math.round(sprite.width * factor),
+    Math.round(sprite.height * factor),
+  );
 }
 
 // what stands in the preview: each drawn direction, then the mirrored ones if asked
 export function cast(project, animation, showMirrored) {
-  const drawn = Object.keys(animation.directions).map((direction) => ({ direction, source: direction, flip: false }));
+  const drawn = Object.keys(animation.directions).map((direction) => ({
+    direction,
+    source: direction,
+    flip: false,
+  }));
   const mirrored = Object.entries(mirrorsOf(project))
-    .filter(([direction, source]) => animation.directions[source] && !animation.directions[direction])
+    .filter(
+      ([direction, source]) => animation.directions[source] && !animation.directions[direction],
+    )
     .map(([direction, source]) => ({ direction, source, flip: true }));
 
   return showMirrored ? [...drawn, ...mirrored] : drawn;
@@ -31,7 +49,11 @@ export function cast(project, animation, showMirrored) {
 
 export function frameSprite(project, animation, member, tick) {
   const frames = animation.directions[member.source].frames;
-  const sprite = compositeFrame(frames[tick % frames.length], project.canvas.width, project.canvas.height);
+  const sprite = compositeFrame(
+    frames[tick % frames.length],
+    project.canvas.width,
+    project.canvas.height,
+  );
 
   return member.flip ? flipHorizontal(sprite) : sprite;
 }

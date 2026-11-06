@@ -1,11 +1,11 @@
-import { h, icon, replace } from './dom.js';
+import { node, icon, replace } from './dom.js';
 import { TOOLS } from './tools.js';
 import { flipCurrent } from './actions.js';
 
 export function renderRail(el, app) {
   const { state } = app.store;
   const toolButtons = TOOLS.map((tool) =>
-    h(
+    node(
       `button.btn.quiet${state.tool === tool.id ? '.on' : ''}`,
       {
         title: `${tool.label} (${tool.key.toUpperCase()})`,
@@ -20,8 +20,8 @@ export function renderRail(el, app) {
   replace(
     el,
     toolButtons,
-    h('hr'),
-    h(
+    node('hr'),
+    node(
       `button.btn.quiet${state.symmetry.on ? '.on' : ''}`,
       {
         title: 'Symmetry: draw one half, the other mirrors (M)',
@@ -31,6 +31,14 @@ export function renderRail(el, app) {
       },
       icon('mirror'),
     ),
-    h('button.btn.quiet', { title: 'Flip this view left to right', 'aria-label': 'Flip view', onclick: () => flipCurrent(app) }, icon('flip')),
+    node(
+      'button.btn.quiet',
+      {
+        title: 'Flip this view left to right',
+        'aria-label': 'Flip view',
+        onclick: () => flipCurrent(app),
+      },
+      icon('flip'),
+    ),
   );
 }

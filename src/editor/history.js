@@ -7,7 +7,17 @@ export function snapshotAnimations(animations) {
     directions: Object.fromEntries(
       Object.entries(animation.directions).map(([direction, entry]) => [
         direction,
-        { ...entry, frames: entry.frames.map((frame) => ({ ...frame, marks: frame.marks?.map((m) => ({ ...m })), layers: frame.layers.map((layer) => ({ ...layer, sprite: layer.sprite && cloneSprite(layer.sprite) })) })) },
+        {
+          ...entry,
+          frames: entry.frames.map((frame) => ({
+            ...frame,
+            marks: frame.marks?.map((mark) => ({ ...mark })),
+            layers: frame.layers.map((layer) => ({
+              ...layer,
+              sprite: layer.sprite && cloneSprite(layer.sprite),
+            })),
+          })),
+        },
       ]),
     ),
   }));
@@ -31,14 +41,19 @@ function layerPixels(animations) {
 
 // ids of layers whose pixels differ between two sets of animations, or that only one has
 export function changedLayers(before, after) {
-  const a = layerPixels(before);
-  const b = layerPixels(after);
+  const first = layerPixels(before);
+  const second = layerPixels(after);
   const ids = [];
 
-  for (const [id, pixels] of b) {
-    const old = a.get(id);
+  for (const [id, pixels] of second) {
+    const old = first.get(id);
 
-    if (!old || !pixels || old.length !== pixels.length || old.some((v, i) => v !== pixels[i])) {
+    if (
+      !old ||
+      !pixels ||
+      old.length !== pixels.length ||
+      old.some((value, i) => value !== pixels[i])
+    ) {
       ids.push(id);
     }
   }
@@ -70,7 +85,15 @@ export class History {
       return false;
     }
 
-    this.push({ label, kind: 'pixels', changes: real.map(({ layer, before }) => ({ id: layer.id, before, after: cloneSprite(layer.sprite) })) });
+    this.push({
+      label,
+      kind: 'pixels',
+      changes: real.map(({ layer, before }) => ({
+        id: layer.id,
+        before,
+        after: cloneSprite(layer.sprite),
+      })),
+    });
 
     return true;
   }

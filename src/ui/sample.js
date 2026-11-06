@@ -10,7 +10,11 @@ export async function sampleProject() {
   const directions = project.animations[0].directions;
   const art = globalThis.SAMPLE ?? {};
 
-  for (const [direction, key] of [['south', 'front'], ['east', 'side'], ['north', 'back']]) {
+  for (const [direction, key] of [
+    ['south', 'front'],
+    ['east', 'side'],
+    ['north', 'back'],
+  ]) {
     if (art[key]) {
       directions[direction].frames[0].layers[0].sprite = await dataUrlSprite(art[key]);
     }

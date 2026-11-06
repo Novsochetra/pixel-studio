@@ -7,8 +7,10 @@ import { addDirection, removeDirection } from '../src/model/structure.js';
 import { fillMissingSprites, install } from '../src/ui/session.js';
 
 const RED = pack(255, 0, 0);
-const counts = (animation) => Object.values(animation.directions).map((entry) => entry.frames.length);
-const art = (animation, direction, frame) => animation.directions[direction].frames[frame].layers[0].sprite;
+const counts = (animation) =>
+  Object.values(animation.directions).map((entry) => entry.frames.length);
+const art = (animation, direction, frame) =>
+  animation.directions[direction].frames[frame].layers[0].sprite;
 
 // marks frame `i` of every view with a pixel in column i, so order can be read back
 function numbered(animation) {
@@ -17,7 +19,10 @@ function numbered(animation) {
   }
 }
 
-const order = (animation, direction) => animation.directions[direction].frames.map((frame) => [0, 1, 2, 3].find((x) => getPixel(frame.layers[0].sprite, x, 0) === RED));
+const order = (animation, direction) =>
+  animation.directions[direction].frames.map((frame) =>
+    [0, 1, 2, 3].find((x) => getPixel(frame.layers[0].sprite, x, 0) === RED),
+  );
 
 test('a new frame is added to every view, so frame 2 exists wherever you upload to it', () => {
   const project = newProject();
@@ -73,7 +78,7 @@ test('a view switched on later gets every frame the others have', () => {
   assert.equal(animation.directions.west.frames.length, 3);
 });
 
-test('an older project with uneven views is evened out with copies of each short view\'s last frame', () => {
+test("an older project with uneven views is evened out with copies of each short view's last frame", () => {
   const project = newProject();
   const animation = project.animations[0];
   setPixel(art(animation, 'east', 0), 1, 1, RED);
@@ -93,7 +98,17 @@ test('frames added to even out a loaded project are saved, so they never come ba
   animation.directions.south.frames.push(structuredClone(animation.directions.south.frames[0]));
   fillMissingSprites(project);
   const added = animation.directions.east.frames[1].layers.map((layer) => layer.id);
-  const app = { store: { state: {}, set() {} }, backend: { async read() { return null; }, async write() {}, async remove() {} }, index: { list: [], current: null } };
+  const app = {
+    store: { state: {}, set() {} },
+    backend: {
+      async read() {
+        return null;
+      },
+      async write() {},
+      async remove() {},
+    },
+    index: { list: [], current: null },
+  };
   install(app, project, '', 'nothing');
   added.forEach((id) => assert.ok(app.saver.dirty.has(id)));
   assert.equal(app.saver.structureDirty, true);

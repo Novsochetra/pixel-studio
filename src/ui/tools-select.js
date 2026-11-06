@@ -1,5 +1,12 @@
 import { cloneSprite } from '../model/sprite.js';
-import { clearSelected, colourSelection, isSelected, liftPixels, rectSelection, stampPixels } from '../editor/selection.js';
+import {
+  clearSelected,
+  colourSelection,
+  isSelected,
+  liftPixels,
+  rectSelection,
+  stampPixels,
+} from '../editor/selection.js';
 import { currentLayer } from './actions.js';
 
 // drag the selected pixels: each move redraws them from where the drag began
@@ -34,7 +41,9 @@ export function select(app, start) {
 
   const { width, height } = state.project.canvas;
   let moved = false;
-  app.store.set({ selection: rectSelection(width, height, start[0], start[1], start[0], start[1]) });
+  app.store.set({
+    selection: rectSelection(width, height, start[0], start[1], start[0], start[1]),
+  });
 
   return {
     move([x, y]) {
@@ -50,7 +59,9 @@ export function select(app, start) {
 }
 
 export function wand(app, [x, y], everywhere) {
-  app.store.set({ selection: colourSelection(currentLayer(app.store.state).sprite, x, y, everywhere) });
+  app.store.set({
+    selection: colourSelection(currentLayer(app.store.state).sprite, x, y, everywhere),
+  });
 
   return null;
 }

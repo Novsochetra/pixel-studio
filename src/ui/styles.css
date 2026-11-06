@@ -124,7 +124,8 @@ textarea {
   align-items: center;
   gap: 8px;
   padding-block: 8px;
-  padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  padding-inline: max(16px, env(safe-area-inset-left, 0px))
+    max(16px, env(safe-area-inset-right, 0px));
   background: var(--chrome);
   border-bottom: 1px solid var(--separator);
   min-width: 0;
@@ -659,7 +660,8 @@ textarea {
 }
 
 .swatch.clear {
-  background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 10px 10px;
+  background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 10px
+    10px;
 }
 
 .current-colour {
@@ -794,7 +796,8 @@ textarea.input {
   display: flex;
   gap: 16px;
   padding-block: 5px;
-  padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  padding-inline: max(16px, env(safe-area-inset-left, 0px))
+    max(16px, env(safe-area-inset-right, 0px));
   background: var(--chrome);
   border-top: 1px solid var(--separator);
   font-size: 11px;
@@ -965,7 +968,10 @@ textarea.input {
 
 @media (max-width: 860px) {
   .app {
-    grid-template: 'bar' auto 'rail' auto 'stage' minmax(360px, 70vh) 'inspector' auto 'status' auto / 1fr;
+    grid-template: 'bar' auto 'rail' auto 'stage' minmax(
+        360px,
+        70vh
+      ) 'inspector' auto 'status' auto / 1fr;
     height: auto;
     min-height: 100%;
   }
@@ -984,7 +990,8 @@ textarea.input {
     flex-wrap: wrap;
     border-right: 0;
     border-bottom: 1px solid var(--separator);
-    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+    padding-inline: max(16px, env(safe-area-inset-left, 0px))
+      max(16px, env(safe-area-inset-right, 0px));
   }
 
   .rail hr {
@@ -999,7 +1006,8 @@ textarea.input {
   }
 
   .section {
-    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+    padding-inline: max(16px, env(safe-area-inset-left, 0px))
+      max(16px, env(safe-area-inset-right, 0px));
   }
 }
 

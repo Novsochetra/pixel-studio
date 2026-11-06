@@ -6,7 +6,11 @@ import { spritePng } from '../io/images.js';
 import { zipFiles } from '../io/zip.js';
 import { saveFile } from './save-file.js';
 
-export const slug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+export const slug = (text) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 
 export async function downloadOutfit(state, mapping, name) {
   const files = [];
@@ -15,7 +19,10 @@ export async function downloadOutfit(state, mapping, name) {
     const sprite = applyMapping(directionSprite(state, direction), mapping);
 
     for (const scale of state.project.canvas.scale > 1 ? [1, state.project.canvas.scale] : [1]) {
-      files.push({ name: `${slug(name)}-${slug(directionLabel(direction))}-${sprite.width * scale}.png`, data: new Uint8Array(await (await spritePng(sprite, scale)).arrayBuffer()) });
+      files.push({
+        name: `${slug(name)}-${slug(directionLabel(direction))}-${sprite.width * scale}.png`,
+        data: new Uint8Array(await (await spritePng(sprite, scale)).arrayBuffer()),
+      });
     }
   }
 

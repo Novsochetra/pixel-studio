@@ -51,5 +51,10 @@ export function fittedFrame(project, animations, anchor, pad = 1) {
 
   const half = Math.max(-left, right) + pad;
 
-  return { frameWidth: half * 2 + 1, frameHeight: -top + 1 + pad + below + (below ? pad : 0), anchorX: half, anchorY: -top + pad };
+  return {
+    frameWidth: half * 2 + 1,
+    frameHeight: -top + 1 + pad + below + (below ? pad : 0),
+    anchorX: half,
+    anchorY: -top + pad,
+  };
 }

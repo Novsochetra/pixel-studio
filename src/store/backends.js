@@ -38,7 +38,10 @@ async function accountBackend() {
       return new Map(snapshot.docs.filter((doc) => doc.exists).map((doc) => [doc.id, doc.data()]));
     },
     async read(key) {
-      const doc = await withTimeout(collection.doc(key).get(), 'Your saved work could not be reached.');
+      const doc = await withTimeout(
+        collection.doc(key).get(),
+        'Your saved work could not be reached.',
+      );
 
       return doc.exists ? doc.data() : null;
     },

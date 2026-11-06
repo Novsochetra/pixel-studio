@@ -6,14 +6,16 @@ import { rampOf } from './ramp.js';
 // ramp, shade for shade.
 
 export function luminance(color) {
-  const [r, g, b] = unpack(color);
+  const [red, green, blue] = unpack(color);
 
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
 }
 
 // an outfit's base colours ({ partId: '#hex' }) as ramps, shaded the way Naga Eleven shades kits
 export function outfitRamps(parts, bases) {
-  return Object.fromEntries(parts.filter((part) => bases[part.id]).map((part) => [part.id, rampOf(bases[part.id])]));
+  return Object.fromEntries(
+    parts.filter((part) => bases[part.id]).map((part) => [part.id, rampOf(bases[part.id])]),
+  );
 }
 
 // Each part's colours, dark to light, take the ramp's shades by rank: the darkest gets the deepest
@@ -22,7 +24,7 @@ export function kitMapping(parts, ramps) {
   const mapping = {};
 
   for (const part of parts) {
-    const own = [...part.colours].sort((a, b) => luminance(a) - luminance(b));
+    const own = [...part.colours].sort((first, second) => luminance(first) - luminance(second));
     const ramp = (ramps[part.id] ?? []).map(fromHex);
 
     if (!ramp.length) {
@@ -30,7 +32,10 @@ export function kitMapping(parts, ramps) {
     }
 
     own.forEach((color, i) => {
-      const rank = own.length === 1 ? Math.floor((ramp.length - 1) / 2) + 1 : Math.round((i * (ramp.length - 1)) / (own.length - 1));
+      const rank =
+        own.length === 1
+          ? Math.floor((ramp.length - 1) / 2) + 1
+          : Math.round((i * (ramp.length - 1)) / (own.length - 1));
       mapping[color] = ramp[Math.min(rank, ramp.length - 1)];
     });
   }

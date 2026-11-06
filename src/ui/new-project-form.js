@@ -1,4 +1,4 @@
-import { h, toast } from './dom.js';
+import { node, toast } from './dom.js';
 import { DIRECTION_SETS, PROFILES } from '../model/profiles.js';
 import { newProject } from '../model/project.js';
 import { newGuide } from '../views/guides.js';
@@ -6,26 +6,64 @@ import { newGuide } from '../views/guides.js';
 const SIZES = [32, 48, 64, 96, 128, 160, 192, 256];
 
 function field(label, control) {
-  return h('label.field', {}, h('span', {}, label), control);
+  return node('label.field', {}, node('span', {}, label), control);
 }
 
 function select(id, options, selected) {
-  return h('select.input', { id }, options.map(([value, label]) => h('option', { value, selected: value === selected }, label)));
+  return node(
+    'select.input',
+    { id },
+    options.map(([value, label]) => node('option', { value, selected: value === selected }, label)),
+  );
 }
 
 function numberInput(id, value, min, max) {
-  return h('input.input.mono', { id, type: 'number', min: String(min), max: String(max), value: String(value) });
+  return node('input.input.mono', {
+    id,
+    type: 'number',
+    min: String(min),
+    max: String(max),
+    value: String(value),
+  });
 }
 
 // One form for every kind of game: the profile sets sensible defaults, the rest can change.
 export function newProjectForm(onCreate) {
-  const name = h('input.input', { id: 'project-name', placeholder: 'Hero, Slime, Knight…', 'aria-label': 'Name' });
-  const profile = select('project-profile', Object.entries(PROFILES).map(([id, p]) => [id, p.label]), 'generic');
-  const directions = select('project-directions', Object.entries(DIRECTION_SETS).map(([id, set]) => [id, set.label]), 'four');
+  const name = node('input.input', {
+    id: 'project-name',
+    placeholder: 'Hero, Slime, Knight…',
+    'aria-label': 'Name',
+  });
+  const profile = select(
+    'project-profile',
+    Object.entries(PROFILES).map(([id, entry]) => [id, entry.label]),
+    'generic',
+  );
+  const directions = select(
+    'project-directions',
+    Object.entries(DIRECTION_SETS).map(([id, set]) => [id, set.label]),
+    'four',
+  );
   const width = numberInput('project-width', 64, 8, 512);
   const height = numberInput('project-height', 64, 8, 512);
   const scale = numberInput('project-scale', 4, 1, 16);
-  const sizes = h('div.group', { style: { gap: '4px', flexWrap: 'wrap' } }, SIZES.map((size) => h('button.btn.quiet', { type: 'button', onclick: () => { width.value = String(size); height.value = String(size); } }, `${size}`)));
+  const sizes = node(
+    'div.group',
+    { style: { gap: '4px', flexWrap: 'wrap' } },
+    SIZES.map((size) =>
+      node(
+        'button.btn.quiet',
+        {
+          type: 'button',
+          onclick: () => {
+            width.value = String(size);
+            height.value = String(size);
+          },
+        },
+        `${size}`,
+      ),
+    ),
+  );
 
   profile.addEventListener('change', () => {
     const naga = profile.value === 'naga-eleven';
@@ -35,7 +73,8 @@ export function newProjectForm(onCreate) {
   });
 
   const create = () => {
-    const clamp = (input, min, max) => Math.max(min, Math.min(max, Math.round(Number(input.value)) || min));
+    const clamp = (input, min, max) =>
+      Math.max(min, Math.min(max, Math.round(Number(input.value)) || min));
     const tall = clamp(height, 8, 512);
     const project = newProject({
       name: name.value.trim() || 'New character',
@@ -47,21 +86,34 @@ export function newProjectForm(onCreate) {
     });
     // cleaned art stands with its feet here, so the guide shows where every view should end
     project.guides = [newGuide('Feet', Math.round(tall * 0.8), 'bottom')];
-    onCreate(project).then(() => toast(`${project.name} is ready. Drop a ChatGPT image on the canvas to start.`), (error) => toast(error.message));
+    onCreate(project).then(
+      () => toast(`${project.name} is ready. Drop a ChatGPT image on the canvas to start.`),
+      (error) => toast(error.message),
+    );
   };
 
-  return h(
+  return node(
     'div',
     { style: { display: 'grid', gap: '12px' } },
-    h('div.compare', { style: { gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' } },
+    node(
+      'div.compare',
+      { style: { gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' } },
       field('Name', name),
       field('For', profile),
-      field('Directions', directions)),
-    h('div.compare', { style: { gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' } },
+      field('Directions', directions),
+    ),
+    node(
+      'div.compare',
+      { style: { gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' } },
       field('Canvas width (art pixels)', width),
       field('Canvas height', height),
-      field('Big copy: pixels per art pixel', scale)),
-    h('div.field', {}, h('span', {}, 'Common sizes'), sizes),
-    h('div.sheet-actions', {}, h('button.btn.primary', { onclick: create }, 'Create project')),
+      field('Big copy: pixels per art pixel', scale),
+    ),
+    node('div.field', {}, node('span', {}, 'Common sizes'), sizes),
+    node(
+      'div.sheet-actions',
+      {},
+      node('button.btn.primary', { onclick: create }, 'Create project'),
+    ),
   );
 }

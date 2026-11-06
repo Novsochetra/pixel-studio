@@ -3,7 +3,16 @@ import { buildSheet } from './sheet.js';
 export const GAME_FOLDER = 'apps/web/games/naga-eleven';
 
 // every direction the game draws, in its order (src/render/actors/directions.js)
-const GAME_DIRECTIONS = ['south', 'south-east', 'east', 'north-east', 'north', 'north-west', 'west', 'south-west'];
+const GAME_DIRECTIONS = [
+  'south',
+  'south-east',
+  'east',
+  'north-east',
+  'north',
+  'north-west',
+  'west',
+  'south-west',
+];
 
 function jsValue(value, indent = '  ') {
   return JSON.stringify(value, null, 2)
@@ -14,7 +23,12 @@ function jsValue(value, indent = '  ') {
 
 // the SPRITES manifest for src/data/sprites.js, describing the sheets in this pack
 export function manifestSource(results, settings, standHeight) {
-  const animations = results.map(({ name, manifest }) => `    ${/^[a-z]+$/.test(name) ? name : `'${name}'`}: ${jsValue(manifest, '    ')},`).join('\n');
+  const animations = results
+    .map(
+      ({ name, manifest }) =>
+        `    ${/^[a-z]+$/.test(name) ? name : `'${name}'`}: ${jsValue(manifest, '    ')},`,
+    )
+    .join('\n');
 
   return [
     '// Made by Pixel Clean Studio: the sheets in assets/sprites/ and how to read them.',
@@ -35,7 +49,9 @@ export function manifestSource(results, settings, standHeight) {
 // Every animation's sheet, laid out at the paths the repo uses, plus the manifest and a note.
 export function gamePack(project, settings, standHeight) {
   const results = project.animations.map((animation) => buildSheet(project, animation, settings));
-  const warnings = results.flatMap((result) => result.warnings.map((w) => `${result.name}: ${w}`));
+  const warnings = results.flatMap((result) =>
+    result.warnings.map((warning) => `${result.name}: ${warning}`),
+  );
   const readme = [
     'Pixel Clean Studio game pack',
     '',
@@ -46,9 +62,15 @@ export function gamePack(project, settings, standHeight) {
   ].join('\n');
 
   return {
-    sheets: results.map((result) => ({ path: `${GAME_FOLDER}/assets/sprites/${result.name}.png`, sprite: result.sheet })),
+    sheets: results.map((result) => ({
+      path: `${GAME_FOLDER}/assets/sprites/${result.name}.png`,
+      sprite: result.sheet,
+    })),
     texts: [
-      { path: `${GAME_FOLDER}/src/data/sprites.pixel-clean.js`, text: manifestSource(results, settings, standHeight) },
+      {
+        path: `${GAME_FOLDER}/src/data/sprites.pixel-clean.js`,
+        text: manifestSource(results, settings, standHeight),
+      },
       { path: 'PIXEL-CLEAN-README.txt', text: readme },
     ],
     warnings,

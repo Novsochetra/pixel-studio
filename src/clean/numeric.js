@@ -78,16 +78,16 @@ export function medianColor(pixels) {
 }
 
 // numpy's default "linear" percentile
-export function percentile(values, q) {
+export function percentile(values, percent) {
   const sorted = Float64Array.from(values).sort();
-  const index = (q / 100) * (sorted.length - 1);
+  const index = (percent / 100) * (sorted.length - 1);
   const lo = Math.floor(index);
   const hi = Math.min(lo + 1, sorted.length - 1);
-  const t = index - lo;
+  const fraction = index - lo;
 
-  return t >= 0.5
-    ? sorted[hi] - (sorted[hi] - sorted[lo]) * (1 - t)
-    : sorted[lo] + (sorted[hi] - sorted[lo]) * t;
+  return fraction >= 0.5
+    ? sorted[hi] - (sorted[hi] - sorted[lo]) * (1 - fraction)
+    : sorted[lo] + (sorted[hi] - sorted[lo]) * fraction;
 }
 
 export function sum(values) {
@@ -112,14 +112,15 @@ export function interp(points, knownIndex, knownValue) {
       return knownValue[last];
     }
 
-    let k = 0;
+    let index = 0;
 
-    while (knownIndex[k + 1] <= point) {
-      k++;
+    while (knownIndex[index + 1] <= point) {
+      index++;
     }
 
-    const slope = (knownValue[k + 1] - knownValue[k]) / (knownIndex[k + 1] - knownIndex[k]);
+    const slope =
+      (knownValue[index + 1] - knownValue[index]) / (knownIndex[index + 1] - knownIndex[index]);
 
-    return slope * (point - knownIndex[k]) + knownValue[k];
+    return slope * (point - knownIndex[index]) + knownValue[index];
   });
 }

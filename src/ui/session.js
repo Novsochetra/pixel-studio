@@ -39,7 +39,9 @@ async function saveBeforeLeaving(app) {
   await app.saver.flushNow();
 
   if (app.saver.failed) {
-    throw new Error(`Your latest changes to ${app.store.state.project.name} could not be saved yet, so it stays open. Try again in a moment.`);
+    throw new Error(
+      `Your latest changes to ${app.store.state.project.name} could not be saved yet, so it stays open. Try again in a moment.`,
+    );
   }
 }
 
@@ -66,7 +68,12 @@ export function install(app, project, prefix, save = 'nothing') {
   app.backgroundImage = null;
   app.keys = keysFor(prefix);
   app.history = new History(app.findLayer);
-  app.saver = new Saver(app.backend, (status) => app.store.set({ saveStatus: status }), app.keys, (saved) => saveIndex(app, saved));
+  app.saver = new Saver(
+    app.backend,
+    (status) => app.store.set({ saveStatus: status }),
+    app.keys,
+    (saved) => saveIndex(app, saved),
+  );
   app.saver.attach(project);
   stored?.forEach((id) => app.saver.stored.add(id));
 
@@ -90,7 +97,10 @@ export function install(app, project, prefix, save = 'nothing') {
   // the open project is always in the list, even before its first save writes the list
   upsertEntry(app.index, project, prefix);
   app.index.current = project.id;
-  app.store.set({ ...startingState(project), saveStatus: save === 'all' || evened.has(project) ? 'pending' : 'saved' });
+  app.store.set({
+    ...startingState(project),
+    saveStatus: save === 'all' || evened.has(project) ? 'pending' : 'saved',
+  });
 }
 
 export async function openProject(app, entry) {
@@ -126,18 +136,21 @@ export async function addProject(app, project, background = null) {
 }
 
 export async function deleteProject(app, id) {
-  const entry = app.index.list.find((e) => e.id === id);
+  const entry = app.index.list.find((listed) => listed.id === id);
 
   if (!entry || app.index.list.length < 2) {
     return;
   }
 
   if (app.index.current === id) {
-    await openProject(app, app.index.list.find((e) => e.id !== id));
+    await openProject(
+      app,
+      app.index.list.find((listed) => listed.id !== id),
+    );
   }
 
   await deleteProjectData(app.backend, entry.prefix);
-  app.index.list = app.index.list.filter((e) => e.id !== id);
+  app.index.list = app.index.list.filter((listed) => listed.id !== id);
   await writeList(app);
 }
 

@@ -17,7 +17,10 @@ function markSlot(frames, from, slot) {
   frames.forEach((frame, i) => {
     frame.classList.toggle('dragging', i === from);
     frame.classList.toggle('drop-before', i === slot && slot !== from && slot !== from + 1);
-    frame.classList.toggle('drop-after', i === frames.length - 1 && slot === frames.length && from !== frames.length - 1);
+    frame.classList.toggle(
+      'drop-after',
+      i === frames.length - 1 && slot === frames.length && from !== frames.length - 1,
+    );
   });
 }
 
@@ -59,7 +62,15 @@ export function bindFrameDrag(strip, onMove) {
       return;
     }
 
-    press = { from: framesOf().indexOf(frame), x: event.clientX, y: event.clientY, pointerId: event.pointerId, touch: event.pointerType === 'touch', dragging: false, slot: null };
+    press = {
+      from: framesOf().indexOf(frame),
+      x: event.clientX,
+      y: event.clientY,
+      pointerId: event.pointerId,
+      touch: event.pointerType === 'touch',
+      dragging: false,
+      slot: null,
+    };
 
     if (press.touch) {
       press.timer = setTimeout(() => press && start(), HOLD_MS);
@@ -101,13 +112,19 @@ export function bindFrameDrag(strip, onMove) {
   });
   strip.addEventListener('pointercancel', end);
   // the click that ends a drag is not a click on a frame
-  strip.addEventListener('click', (event) => {
-    if (strip.dataset.justSorted) {
-      delete strip.dataset.justSorted;
-      event.stopPropagation();
-      event.preventDefault();
-    }
-  }, true);
+  strip.addEventListener(
+    'click',
+    (event) => {
+      if (strip.dataset.justSorted) {
+        delete strip.dataset.justSorted;
+        event.stopPropagation();
+        event.preventDefault();
+      }
+    },
+    true,
+  );
   // once a finger is dragging a frame, it must not scroll the page or the strip
-  strip.addEventListener('touchmove', (event) => press?.dragging && event.preventDefault(), { passive: false });
+  strip.addEventListener('touchmove', (event) => press?.dragging && event.preventDefault(), {
+    passive: false,
+  });
 }

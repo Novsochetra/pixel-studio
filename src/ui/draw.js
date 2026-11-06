@@ -17,7 +17,13 @@ function nativeCanvas(sprite) {
     nativeCanvases.set(sprite, entry);
   }
 
-  entry.canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(sprite.pixels), sprite.width, sprite.height), 0, 0);
+  entry.canvas
+    .getContext('2d')
+    .putImageData(
+      new ImageData(new Uint8ClampedArray(sprite.pixels), sprite.width, sprite.height),
+      0,
+      0,
+    );
 
   return entry.canvas;
 }
@@ -36,7 +42,12 @@ export function drawChecker(context, x, y, width, height, square) {
   for (let row = 0; row * square < height; row++) {
     for (let col = 0; col * square < width; col++) {
       context.fillStyle = colors[(row + col) % 2];
-      context.fillRect(x + col * square, y + row * square, Math.min(square, width - col * square), Math.min(square, height - row * square));
+      context.fillRect(
+        x + col * square,
+        y + row * square,
+        Math.min(square, width - col * square),
+        Math.min(square, height - row * square),
+      );
     }
   }
 }

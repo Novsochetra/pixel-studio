@@ -1,4 +1,4 @@
-import { h, replace } from './dom.js';
+import { node, replace } from './dom.js';
 import { commit, currentLayer } from './actions.js';
 import { clearSelected, liftPixels, transformSelected } from '../editor/selection.js';
 
@@ -31,9 +31,36 @@ export function renderSelectionBar(el, app) {
   el.hidden = false;
   replace(
     el,
-    ACTIONS.map(([kind, label, title]) => h('button.btn.quiet', { title, onclick: () => transform(kind, title.split(' the')[0]) }, label)),
-    h('button.btn.quiet', { title: 'Copy (⌘C); paste in any frame with ⌘V', onclick: () => { app.clipboard = liftPixels(layer.sprite, state.selection); } }, 'Copy'),
-    h('button.btn.quiet', { title: 'Erase the selected pixels (Delete)', onclick: () => commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection)) }, 'Delete'),
-    h('button.btn.quiet', { title: 'Let go of the selection (Esc)', onclick: () => app.store.set({ selection: null }) }, 'Done'),
+    ACTIONS.map(([kind, label, title]) =>
+      node(
+        'button.btn.quiet',
+        { title, onclick: () => transform(kind, title.split(' the')[0]) },
+        label,
+      ),
+    ),
+    node(
+      'button.btn.quiet',
+      {
+        title: 'Copy (⌘C); paste in any frame with ⌘V',
+        onclick: () => {
+          app.clipboard = liftPixels(layer.sprite, state.selection);
+        },
+      },
+      'Copy',
+    ),
+    node(
+      'button.btn.quiet',
+      {
+        title: 'Erase the selected pixels (Delete)',
+        onclick: () =>
+          commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection)),
+      },
+      'Delete',
+    ),
+    node(
+      'button.btn.quiet',
+      { title: 'Let go of the selection (Esc)', onclick: () => app.store.set({ selection: null }) },
+      'Done',
+    ),
   );
 }

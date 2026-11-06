@@ -10,7 +10,9 @@ export function referenceAnchor(state) {
   const ref = referenceSprite(state);
   const { width, height } = state.project.canvas;
 
-  return ref && bounds(ref) ? artAnchor(ref) : { x: Math.floor(width / 2), y: Math.round(height * 0.8) };
+  return ref && bounds(ref)
+    ? artAnchor(ref)
+    : { x: Math.floor(width / 2), y: Math.round(height * 0.8) };
 }
 
 export function characterHeight(state) {
@@ -32,7 +34,11 @@ export function sane(settings) {
 }
 
 export function presetsFor(project) {
-  return [['fit', 'Fit the art'], ...(profileOf(project).gamePack ? [['game', 'Naga Eleven today (64×62)']] : []), ['custom', 'Custom']];
+  return [
+    ['fit', 'Fit the art'],
+    ...(profileOf(project).gamePack ? [['game', 'Naga Eleven today (64×62)']] : []),
+    ['custom', 'Custom'],
+  ];
 }
 
 export function presetSettings(state, preset) {

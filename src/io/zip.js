@@ -1,13 +1,13 @@
 // A minimal .zip writer (stored, not compressed: PNGs are compressed already).
 
-const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
-  let c = n;
+const CRC_TABLE = Array.from({ length: 256 }, (_, byte) => {
+  let crc = byte;
 
-  for (let k = 0; k < 8; k++) {
-    c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  for (let bit = 0; bit < 8; bit++) {
+    crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
   }
 
-  return c >>> 0;
+  return crc >>> 0;
 });
 
 function crc32(bytes) {

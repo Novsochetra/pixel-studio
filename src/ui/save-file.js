@@ -29,7 +29,11 @@ export async function saveFile(filename, blob) {
     return true;
   } catch (error) {
     if (error?.code !== 'declined') {
-      toast(error?.code === 'rate_limited' ? 'Another download is waiting for your answer.' : `The file was not saved: ${error?.message ?? 'unknown error'}`);
+      toast(
+        error?.code === 'rate_limited'
+          ? 'Another download is waiting for your answer.'
+          : `The file was not saved: ${error?.message ?? 'unknown error'}`,
+      );
     }
 
     return false;

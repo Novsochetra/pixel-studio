@@ -20,7 +20,10 @@ export async function backgroundOf(app) {
   const { project } = app.store.state;
 
   if (project.preview?.background) {
-    app.backgroundImage ??= await app.backend.read(app.keys.background).then((doc) => (doc?.url ? imageFrom(doc.url) : null)).catch(() => null);
+    app.backgroundImage ??= await app.backend
+      .read(app.keys.background)
+      .then((doc) => (doc?.url ? imageFrom(doc.url) : null))
+      .catch(() => null);
 
     if (app.backgroundImage) {
       return app.backgroundImage;

@@ -34,7 +34,11 @@ test('a deleted frame comes back with undo, and older pixel undos still land', (
 
   history.undo(project);
   history.undo(project);
-  assert.equal(getPixel(animation().directions.south.frames[0].layers[0].sprite, 3, 3), 0, 'the pixel undo reached the rebuilt layer');
+  assert.equal(
+    getPixel(animation().directions.south.frames[0].layers[0].sprite, 3, 3),
+    0,
+    'the pixel undo reached the rebuilt layer',
+  );
 
   history.redo(project);
   assert.equal(getPixel(animation().directions.south.frames[0].layers[0].sprite, 3, 3), RED);

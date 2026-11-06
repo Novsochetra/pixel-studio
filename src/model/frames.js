@@ -16,7 +16,11 @@ export function frameCount(animation) {
 export function addFrame(project, animation, after, duplicate = false) {
   for (const entry of entriesOf(animation)) {
     const at = Math.min(after, entry.frames.length - 1);
-    entry.frames.splice(at + 1, 0, frameLike(animation, project.canvas, duplicate ? entry.frames[at] : null));
+    entry.frames.splice(
+      at + 1,
+      0,
+      frameLike(animation, project.canvas, duplicate ? entry.frames[at] : null),
+    );
   }
 
   return after + 1;
@@ -52,7 +56,18 @@ export function moveFrame(animation, from, to) {
 }
 
 function copyOfFrame(frame, canvas) {
-  const layers = frame.layers.map((layer) => ({ ...newLayer(canvas.width, canvas.height, layer.name, layer.sprite ? cloneSprite(layer.sprite) : undefined, layer.key, layer.kind), visible: layer.visible, opacity: layer.opacity }));
+  const layers = frame.layers.map((layer) => ({
+    ...newLayer(
+      canvas.width,
+      canvas.height,
+      layer.name,
+      layer.sprite ? cloneSprite(layer.sprite) : undefined,
+      layer.key,
+      layer.kind,
+    ),
+    visible: layer.visible,
+    opacity: layer.opacity,
+  }));
 
   return newFrame(canvas.width, canvas.height, layers);
 }
