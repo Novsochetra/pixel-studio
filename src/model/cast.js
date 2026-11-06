@@ -6,8 +6,7 @@ import { newId } from './project.js';
 const withoutPixels = (project) =>
   JSON.parse(JSON.stringify(project, (key, value) => (key === 'sprite' ? undefined : value)));
 
-// Pictures to trace and pins belong to the art they were placed over, so a blank frame keeps
-// only its art layers (all of them, if it had nothing else), each with nothing drawn.
+// pictures to trace and pins belong to the art they were placed over
 function blankFrame(frame, canvas) {
   const art = frame.layers.filter((layer) => layer.kind !== 'reference');
 
@@ -18,10 +17,7 @@ function blankFrame(frame, canvas) {
   }));
 }
 
-// A new project set up as `project` is: its kind, canvas, views, guides, parts, palettes and
-// every animation with its frames and layers, with nothing drawn. A game's characters share one
-// setup, so each is drawn over the same frames. Outfits and colour swaps are made from the
-// other's colours and stay with it.
+// outfits and colour swaps are made from the other character's colours, so they stay with it
 export function blankCopy(project, name) {
   const copy = withoutPixels(project);
 
@@ -46,7 +42,6 @@ function cropped(sprite, box) {
   return out;
 }
 
-// the frame that pictures the project: the first of its reference view
 export function portraitFrame(project) {
   const direction = referenceOf(project);
   const animation = project.animations.find((candidate) => candidate.directions[direction]);
@@ -54,8 +49,6 @@ export function portraitFrame(project) {
   return animation?.directions[direction].frames[0] ?? null;
 }
 
-// The project as one picture: its portrait frame as it ships, cut to its art. Null while nothing
-// is drawn there.
 export function portraitOf(project) {
   const frame = portraitFrame(project);
 
@@ -69,8 +62,6 @@ export function portraitOf(project) {
   return box ? cropped(sprite, box) : null;
 }
 
-// Pictures side by side, `gap` pixels apart, standing on one line: the bottom of each is the
-// bottom of the whole.
 export function lineUp(sprites, gap) {
   const width = sprites.reduce((sum, sprite) => sum + sprite.width, 0);
   const height = Math.max(0, ...sprites.map((sprite) => sprite.height));
@@ -92,7 +83,7 @@ export function lineUp(sprites, gap) {
   return out;
 }
 
-// the biggest whole-number scale (up to `most`) at which the tallest picture fits `room` pixels
+// whole numbers only: any other scale draws the art's pixels at uneven sizes
 export function lineUpScale(sprites, room, most = 6) {
   const tallest = Math.max(1, ...sprites.map((sprite) => sprite.height));
 

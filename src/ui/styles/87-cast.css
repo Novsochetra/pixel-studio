@@ -68,3 +68,50 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+.folder-group {
+  display: grid;
+  gap: 2px;
+  margin-top: 10px;
+}
+
+.folder-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--separator);
+}
+
+.folder-head svg {
+  width: 18px;
+  height: 18px;
+  color: var(--label-muted);
+}
+
+.folder-name {
+  margin: 0;
+  font-size: 14px;
+}
+
+.folder-head .group {
+  margin-left: auto;
+}
+
+.folder-name-field {
+  max-width: 220px;
+}
+
+.folder-group .project-row {
+  padding-left: 12px;
+}
+
+.folder-picker {
+  width: auto;
+  max-width: 160px;
+}
+
+.open-now {
+  padding: 0 8px;
+}

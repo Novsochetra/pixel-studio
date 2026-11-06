@@ -1,43 +1,130 @@
 # Project rules
 
 Pixel Clean Studio: turns AI pixel art into true pixel art, then edits, animates and exports it for
-any game. One page, built from `src/` by `build/build.py`. The rules follow the fighting-games repo.
+any game. One page, built from `src/` by `build/build.py`. The rules are the fighting-games repo's
+(`Novsochetra/fighting-games`, its `CLAUDE.md`), fitted to one page with no framework.
 
 ## Commands
 
-| Command          | What it runs                                                           |
-| ---------------- | ---------------------------------------------------------------------- |
-| `npm run serve`  | builds the page and serves it on http://localhost:8811/wrapped.html    |
-| `npm run check`  | lint, format check, unit and regression tests, the build, every flow   |
-| `npm run lint`   | ESLint (`eslint.config.js`, local rules in `tools/eslint-rules/`)      |
-| `npm run format` | Prettier, writes files                                                 |
-| `npm test`       | the unit and regression tests (`node --test`)                          |
-| `npm run build`  | `dist/index.html`; the build refuses import cycles and missing exports |
+| Command          | What it runs                                                             |
+| ---------------- | ------------------------------------------------------------------------ |
+| `npm run serve`  | builds the page and serves it on http://localhost:8811/wrapped.html      |
+| `npm run check`  | lint, format check, unit and regression tests, the build, every flow     |
+| `npm run lint`   | ESLint (`eslint.config.js`, local rules in `tools/eslint-rules/`)        |
+| `npm run format` | Prettier, writes files                                                   |
+| `npm test`       | the unit and regression tests, and the tests of `tools/` (`node --test`) |
+| `npm run build`  | `dist/index.html`; the build refuses import cycles and missing exports   |
 
 ## Coding
 
-- Simplest solution that works. Small files and functions with one job each. Lint enforces 150
-  lines a file, 40 lines a function, complexity 10, depth 3 and 4 parameters: split code instead
-  of raising limits. Group related arguments into one object (`{ x, y }`, `{ width, height }`).
-- Names say what a thing is: no one-letter names except `x`, `y`, `i`, `j`.
-- Comments only say why something non-obvious is done. Lint rejects `/* */` blocks, banners and
-  `TODO`s.
-- No raw hex colours in the page's code: the page's colours are tokens in
+- Simplest solution that works. Small files and functions with one job each. Lint enforces size and
+  complexity limits (150 lines a file, 40 lines a function, complexity 10, depth 3, 4 parameters);
+  split code instead of raising limits. Group related arguments into one object (`{ x, y }`,
+  `{ width, height }`).
+- Put code where it belongs (see "Where a file goes"). No god objects, god functions or god files.
+- No comments that say what code does. Only write a comment to explain **why** something
+  non-obvious is done (workarounds, browser quirks, a rule of the art). If deleting the comment
+  loses nothing a reader can't get from the names and the code, delete it:
+  `// the projects list follows each save` over `afterSave` goes;
+  `// claude.ai hands documents back frozen, so the page works on its own copy` stays.
+- Lint enforces this for `/** */` and `/* */` blocks (`local/no-jsdoc-blocks` in
+  `eslint.config.js`) and for section banners (`local/no-banner-comments`): write a why as a short
+  `//` comment. A stylesheet may open with one `/* */` line saying what part of the page it styles.
+- A Claude Code hook (`.claude/settings.json`, `tools/claude-hooks/`) shows Claude each comment an
+  edit or a commit adds, so it deletes the what-comments before going on.
+- No `TODO` / `FIXME` comments (`no-warning-comments`). Put follow-up work in the tracker as an
+  issue.
+- No raw hex colours in the page's code (`local/no-raw-hex`): the page's colours are tokens in
   `src/ui/styles/00-tokens.css`, read with `cssVar()`; colours painted as pixel art (the example's
-  palette, the checkerboard, pins) live in `src/art/`.
-- Logic lives in plain functions under `src/model`, `src/clean`, `src/editor`, `src/palette`,
-  `src/export`, `src/store` and `src/io`, with unit tests. `src/ui` stays thin: it builds elements
-  with `node()` and calls those functions.
+  palette, the checkerboard, pins) are data and live only in `src/art/`.
+- Put logic in plain functions with unit tests. `src/ui` stays thin: it builds elements with
+  `node()` and calls those functions.
 - What a project makes is data: kinds in `src/model/kinds.js`, game presets in
   `src/model/presets.js`. Nothing outside them names a game.
 - Never install packages without asking.
 
+## Code style
+
+- Write self-explaining code: descriptive names, no single-letter names except `x`, `y`, `i`, `j`.
+- Keep comments minimal: no comments that restate the code, no section-banner comments, no long
+  JSDoc on obvious functions.
+- Prettier owns formatting (`.prettierrc.json`), but it never adds a blank line, so space code into
+  steps yourself. Put a blank line:
+  - after the setup (the `const`s that gather what a function needs), before its logic,
+  - after a block (`if`, `for`, `try`, `switch`) that closes with `}` when more code follows,
+  - after an early return (`if (!frame) { return null; }`),
+  - before the final `return`, unless it is the only line of the function,
+  - between the methods of an object.
+
+  Never put one right after `{` or right before `}`. Blank lines don't count toward the lint size
+  limits (`skipBlankLines` in `eslint.config.js`).
+
+  ```js
+  export function portraitOf(project) {
+    const frame = portraitFrame(project);
+
+    if (!frame) {
+      return null;
+    }
+
+    const sprite = compositeFrame(frame, project.canvas.width, project.canvas.height);
+    const box = bounds(sprite);
+
+    return box ? cropped(sprite, box) : null;
+  }
+  ```
+
+## Where a file goes
+
+`src/` holds:
+
+- `model/`: what a project is and plain changes to it (projects, kinds, presets, animations,
+  frames, layers, sprites, the cast),
+- `clean/`: the cleaner, a pixel-exact port of `tools/pixel_clean.py`, run in `worker/`,
+- `editor/`, `palette/`, `export/`, `views/`: drawing tools and history, colours, what leaves the
+  studio (sheets, manifests, game packs, prompts), guides and filters,
+- `io/`: file formats and the browser's images, zips and GIFs,
+- `store/`: saved work: the backends, each project's documents, the projects list and its folders,
+  pictures, versions, presets,
+- `art/`: colours painted as pixel art,
+- `ui/`: the page. One folder per feature (`grid/`, `start/`, `preview/`, `import/`, `projects/`,
+  …), a part two features share at its top, `styles/` and `page.html`.
+
+Where a file goes:
+
+1. It builds elements or reads the page: `ui/`, in its feature's folder.
+2. It reads or writes saved work: `store/`.
+3. It reads or writes a file format, or needs the browser's canvas or images: `io/`.
+4. Everything else is plain logic in the folder of what it is about.
+
+No catch-all folders (`helpers/`, `utils/`, `constants/`): a constant lives with its owner.
+`test/unit/layout.test.js` holds `src/` to these folders and fails when anything outside `ui/`
+imports `ui/`, anything but `ui/` imports `store/`, anything but `store/`, `ui/` and `worker/`
+imports `io/`, or `clean/` or `art/` import anything outside themselves.
+
 ## Testing
 
-- **unit** (`test/unit/`): plain functions. The cleaner must stay pixel for pixel the same as
-  `tools/pixel_clean.py` (`clean.test.js`, fixtures from `test/make_fixtures.py`).
-- **integration** (`test/integration/*.flow.mjs`): the built page in a browser, each flow stating
-  what must be true with `check()`; `run.mjs` runs them all, the monkey runs click everything.
-- **regression** (`test/regression/`): one test per fixed bug, saying what went wrong.
-- Fixing a bug: first a test that fails, then the fix.
-- Look at UI changes in a browser (the flows save screenshots in `shots/`).
+- Unit tests are not enough. Each change needs the right mix of:
+  - **unit** tests (`test/unit/`) for plain functions. The cleaner must stay pixel for pixel the
+    same as `tools/pixel_clean.py` (`clean.test.js`, fixtures from `test/make_fixtures.py`),
+  - **integration** flows (`test/integration/*.flow.mjs`): the built page in a browser, each flow
+    stating what must be true with `check()`; `run.mjs` runs them all, the monkey clicks everything,
+  - **regression** tests (`test/regression/`): one test per fixed bug, saying what went wrong.
+- Fixing a bug: first write a test that reproduces it and fails, then fix it, then keep the test.
+- Verify your work: run `npm run check`, and look at UI changes in a browser (the flows save
+  screenshots in `shots/`).
+
+## Versions
+
+The studio's version is SemVer, the `version` in `package.json`. Raise it without being asked, in
+the change that ships something people using the studio see:
+
+- `npm version patch --no-git-tag-version` for fixes and small changes to how something looks or
+  reads,
+- `npm version minor --no-git-tag-version` for something new: a tool, a sheet, a kind, an export,
+- `npm version major --no-git-tag-version` only for a change that breaks what people keep (saved
+  work, project files, presets), and only once the user agrees.
+
+A change nobody using the studio sees (tests, docs, tooling, a refactor) keeps the version. A branch
+raises it once, by the most its change needs, over the version on `main` as it merges; say in the
+reply which version it now is.

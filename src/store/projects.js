@@ -5,40 +5,42 @@ import { deleteAllVersions } from './versions.js';
 
 const INDEX = 'projects';
 
-// the projects list: { list: [{ id, name, about, prefix, updatedAt }], current: id }; read twice
-// before giving up, then marked unreadable so nothing writes an empty list over the real one
+// The projects list: { list: [{ id, name, about, prefix, updatedAt, folder }], current: id,
+// folders: [{ id, name }] }. Read twice before giving up, then marked unreadable so nothing writes
+// an empty list over the real one.
 export async function readIndex(backend) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const index = await backend.read(INDEX);
 
-      return index?.list ? index : { list: [], current: null };
+      return index?.list ? { folders: [], ...index } : { list: [], current: null, folders: [] };
     } catch {
       // a dropped request: once more
     }
   }
 
-  return { list: [], current: null, unreadable: true };
+  return { list: [], current: null, folders: [], unreadable: true };
 }
 
-export function writeIndex(backend, index) {
-  return backend.write(INDEX, { list: index.list, current: index.current });
+export function writeIndex(backend, { list, current, folders }) {
+  return backend.write(INDEX, { list, current, folders });
 }
 
-function entryFor(project, prefix) {
+function entryFor(project, { prefix, folder }) {
   return {
     id: project.id,
     name: project.name,
     about: describeProject(project),
     prefix,
     updatedAt: Date.now(),
+    ...(folder ? { folder } : {}),
   };
 }
 
 // the entry for this project, added or refreshed; true when the list changed
 export function upsertEntry(index, project, prefix) {
   const at = index.list.findIndex((entry) => entry.id === project.id);
-  const entry = entryFor(project, at >= 0 ? index.list[at].prefix : prefix);
+  const entry = entryFor(project, at >= 0 ? index.list[at] : { prefix });
 
   if (at < 0) {
     index.list.push(entry);
@@ -53,11 +55,23 @@ export function upsertEntry(index, project, prefix) {
   return changed || index.list[at] !== old;
 }
 
-// an entry from this visit put into a list read later, in place of the same project's
+// An entry from this visit put into a list read later, in place of the same project's. This visit
+// could not see the folders, so a project keeps the folder the list read later gives it.
 function mergeEntry(index, entry) {
   const at = index.list.findIndex((listed) => listed.id === entry.id);
+  const folder = entry.folder ?? index.list[at]?.folder;
 
-  at < 0 ? index.list.push(entry) : (index.list[at] = entry);
+  if (at < 0) {
+    index.list.push(entry);
+  } else {
+    index.list[at] = { ...entry, ...(folder ? { folder } : {}) };
+  }
+}
+
+function mergeFolders(index, folders) {
+  const known = new Set(index.folders.map((folder) => folder.id));
+
+  index.folders.push(...folders.filter((folder) => !known.has(folder.id)));
 }
 
 // The list is only written when it was read: one written from an empty guess would drop every
@@ -72,8 +86,10 @@ export async function saveProjectList(backend, index) {
     }
 
     index.list.forEach((entry) => mergeEntry(read, entry));
+    mergeFolders(read, index.folders ?? []);
     delete index.unreadable;
     index.list = read.list;
+    index.folders = read.folders;
   }
 
   await writeIndex(backend, index);

@@ -33,7 +33,6 @@ function drawnHero() {
 
 const layerNames = (frame) => frame.layers.map((layer) => layer.name);
 
-// every animation's name and speed, and the layer names of each frame of each view
 const shape = (project) =>
   project.animations.map((animation) => [
     animation.name,

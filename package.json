@@ -1,6 +1,6 @@
 {
   "name": "pixel-clean-studio",
-  "version": "6.1.0",
+  "version": "6.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,7 @@
     "serve": "python3 build/build.py && python3 test/wrap.py && python3 -m http.server 8811 --directory dist",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "node --test test/unit/*.test.js test/regression/*.test.js",
+    "test": "node --test test/unit/*.test.js test/regression/*.test.js tools/*/test/*.test.js",
     "test:flows": "bash test/run-all.sh",
     "check": "bash test/run-all.sh"
   },

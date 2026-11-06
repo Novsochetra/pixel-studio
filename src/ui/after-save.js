@@ -1,7 +1,6 @@
 import { saveProjectList, upsertEntry } from '../store/projects.js';
 import { savePortrait } from '../store/portraits.js';
 
-// the projects list follows each save: names, kinds, which one is open
 function saveIndex(app, project) {
   const changed = upsertEntry(app.index, project, app.keys.prefix);
 
@@ -15,8 +14,7 @@ function saveIndex(app, project) {
   return null;
 }
 
-// After each save of the open project: the projects list, then the picture it shows of the
-// project. The picture is only for show, so failing to write it never counts as a failed save.
+// the picture is only for show: failing to write it is no failed save
 export async function afterSave(app, project) {
   await saveIndex(app, project);
 

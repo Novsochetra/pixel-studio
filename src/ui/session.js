@@ -6,6 +6,7 @@ import { Saver } from '../store/saver.js';
 import { loadProject } from '../store/load.js';
 import { keysFor, prefixFor } from '../store/keys.js';
 import { deleteProjectData, saveProjectList, upsertEntry } from '../store/projects.js';
+import { folderOf, moveToFolder } from '../store/folders.js';
 import { allLayers, newId } from '../model/project.js';
 import { normalizeProject } from '../model/normalize.js';
 import { createSprite } from '../model/sprite.js';
@@ -141,9 +142,13 @@ export async function openProject(app, entry) {
 // the new project is written before the list names it, so the list never points at nothing
 export async function addProject(app, project, background = null) {
   await saveBeforeLeaving(app);
+  // a game's next character is made while another of it is open, so it joins that one's folder
+  const folder = folderOf(app.index, app.index.current);
+
   project.id = newId('p');
   fillMissingSprites(project);
   install(app, project, { prefix: prefixFor(project.id), save: 'all' });
+  moveToFolder(app.index, project.id, folder);
 
   if (background) {
     await app.backend.write(app.keys.background, { url: background });

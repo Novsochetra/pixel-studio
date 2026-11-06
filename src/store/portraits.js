@@ -3,8 +3,8 @@ import { normalizeProject } from '../model/normalize.js';
 import { dataUrlSprite, spriteDataUrl } from '../io/images.js';
 import { keysFor } from './keys.js';
 
-// Each project's picture, for the projects list and the line-up, is a small document of its own:
-// the list itself stays small, and pictures are only read when they are shown.
+// Each picture is a document of its own, not part of the projects list, so the list stays small
+// and pictures are read only when they are shown.
 
 export function portraitUrl(project) {
   const sprite = portraitOf(project);
@@ -12,8 +12,6 @@ export function portraitUrl(project) {
   return sprite ? spriteDataUrl(sprite) : null;
 }
 
-// the project's picture, written when it differs from `last`, the one written before; gives back
-// the one now stored
 export async function savePortrait(backend, keys, project, last) {
   const url = portraitUrl(project);
 
@@ -24,8 +22,8 @@ export async function savePortrait(backend, keys, project, last) {
   return url;
 }
 
-// A project saved before pictures were kept: made from its saved structure and only the layers of
-// the one frame it shows, then kept for next time.
+// Projects saved before pictures were kept have none. Reading the one frame the picture shows,
+// not the whole project, keeps a long list quick to open.
 async function portraitFromProject(backend, keys) {
   const stored = await backend.read(keys.project);
 
@@ -42,12 +40,12 @@ async function portraitFromProject(backend, keys) {
   }
 
   const url = portraitUrl(project);
+
   await backend.write(keys.portrait, { png: url });
 
   return url;
 }
 
-// the picture of the project kept under `prefix`, or null when it has none or cannot be read
 export async function readPortrait(backend, prefix) {
   const keys = keysFor(prefix);
 

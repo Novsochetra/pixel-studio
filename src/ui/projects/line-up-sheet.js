@@ -4,15 +4,13 @@ import { saveFile } from '../save-file.js';
 import { dataUrlSprite, spriteCanvas, spritePng } from '../../io/images.js';
 import { lineUp, lineUpScale } from '../../model/cast.js';
 
-// art pixels between neighbours in the downloaded picture; screen pixels the tallest may take
-const GAP = 8;
-const ROOM = 240;
+const DOWNLOAD_GAP_PIXELS = 8;
+const TALLEST_ON_SCREEN_PX = 240;
 
 const HINT =
   'Every project at the same pixel size, standing on one line, so heights and widths can be ' +
   'checked against each other. Each shows the first frame of its reference view. Click one to open it.';
 
-// the cast with their pictures as sprites; those with nothing drawn are named apart
 async function readCast(cast) {
   const urls = await Promise.all(cast.map((member) => member.url));
   const sprites = await Promise.all(
@@ -44,7 +42,7 @@ function memberButton({ name, sprite, open }, { scale, close }) {
 async function download(drawn, scale) {
   const picture = lineUp(
     drawn.map((each) => each.sprite),
-    GAP,
+    DOWNLOAD_GAP_PIXELS,
   );
 
   await saveFile(`line-up-${scale}x.png`, await spritePng(picture, scale));
@@ -53,7 +51,7 @@ async function download(drawn, scale) {
 function lineUpBody({ drawn, empty }, close) {
   const scale = lineUpScale(
     drawn.map((each) => each.sprite),
-    ROOM,
+    TALLEST_ON_SCREEN_PX,
   );
   const save = () => download(drawn, scale).catch((error) => toast(error.message));
 
@@ -78,7 +76,6 @@ function lineUpBody({ drawn, empty }, close) {
   ];
 }
 
-// cast: [{ name, url (a promise of the picture), open }] from castPictures
 export async function openLineUp(cast) {
   const sheet = openSheet('Line-up', null, { wide: true });
   const body = node('div', {}, node('p.hint', {}, 'Lining up…'));
