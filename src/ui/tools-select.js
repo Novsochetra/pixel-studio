@@ -8,7 +8,7 @@ import {
   stampPixels,
 } from '../editor/selection.js';
 import { currentLayer } from './actions.js';
-import { lassoSelection } from '../editor/lasso-select.js';
+import { combineSelections, lassoPiece, lassoSelection } from '../editor/lasso-select.js';
 import { refusesPaint } from './body/body-lock.js';
 
 // drag the selected pixels: each move redraws them from where the drag began
@@ -73,18 +73,28 @@ export function wand(app, [x, y], everywhere) {
   return null;
 }
 
-// A loop drawn round a part selects it; a drag that starts on a selected pixel moves the
-// selection, as a box selection's does. The loop shows while it is drawn.
-export function lasso(app, start) {
-  const { selection, project } = app.store.state;
+const lassoMode = (event) => {
+  if (event.shiftKey) {
+    return 'add';
+  }
 
-  if (isSelected(selection, ...start)) {
+  return event.altKey ? 'remove' : 'new';
+};
+
+// A loop drawn round a part selects it; with Shift it adds to the selection, with Alt it takes
+// away, and a click with either is the one pixel under it. A drag that starts on a selected pixel
+// moves the selection, as a box selection's does. The loop shows while it is drawn.
+export function lasso(app, start, event) {
+  const { selection, project } = app.store.state;
+  const mode = lassoMode(event);
+
+  if (mode === 'new' && isSelected(selection, ...start)) {
     return moveSelection(app, start);
   }
 
   const loop = [start];
 
-  app.store.set({ selection: null, lassoLoop: [...loop] });
+  app.store.set({ selection: mode === 'new' ? null : selection, lassoLoop: [...loop] });
 
   return {
     move([x, y]) {
@@ -96,7 +106,13 @@ export function lasso(app, start) {
       }
     },
     end() {
-      app.store.set({ lassoLoop: null, selection: lassoSelection(project.canvas, loop) });
+      const piece =
+        mode === 'new' ? lassoSelection(project.canvas, loop) : lassoPiece(project.canvas, loop);
+
+      app.store.set({
+        lassoLoop: null,
+        selection: combineSelections(app.store.state.selection, piece, mode),
+      });
     },
     cancel() {
       app.store.set({ lassoLoop: null });

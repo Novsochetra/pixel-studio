@@ -19,7 +19,12 @@ const TOOLS = [
   { id: 'shade', label: 'Light and dark brush (Shift: darker)', key: 'd' },
   { id: 'select', label: 'Select and move', key: 's' },
   { id: 'wand', label: 'Select a colour (Shift: everywhere)', key: 'w' },
-  { id: 'lasso', label: 'Lasso: draw round a part to select it, drag inside to move it', key: 'l' },
+  {
+    id: 'lasso',
+    label:
+      'Lasso: draw round a part to select it, drag inside to move it (Shift: add, Alt: take away)',
+    key: 'l',
+  },
   { id: 'pin', label: 'Pin a body part (Alt-click removes it)', key: 'p' },
   { id: 'moveframe', label: 'Move the whole frame: drag it, or use the arrow keys', key: 'v' },
   { id: 'pose', label: 'Pose the body parts: drag a part, or its handle to turn it', key: 'o' },
@@ -92,7 +97,8 @@ export function startTool(app, point, event) {
     return null;
   }
 
-  if (event.altKey || tool === 'picker') {
+  // the lasso takes Alt to take pixels away, as image editors do
+  if ((event.altKey && tool !== 'lasso') || tool === 'picker') {
     return pick(app, point);
   }
 

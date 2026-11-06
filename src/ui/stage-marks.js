@@ -1,4 +1,5 @@
 import { cssVar } from './draw.js';
+import { lassoSelection, loopPixels } from '../editor/lasso-select.js';
 
 function traceEdges(context, cells, on, scale) {
   for (const [x, y] of cells) {
@@ -68,17 +69,22 @@ export function drawBrush(context, pixels, scale) {
   context.restore();
 }
 
-// the lasso's loop as it is drawn, through the middles of the pixels it passed, closed back
-export function drawLoop(context, loop, scale) {
+// The lasso as it is drawn, in whole pixels: the pixels its line went over, and round what it
+// would select if let go now, the same outline a selection has.
+export function drawLoop(context, loop, { canvas, scale }) {
+  const holds = lassoSelection(canvas, loop);
+
   context.save();
-  context.beginPath();
-  loop.forEach(([x, y]) => context.lineTo((x + 0.5) * scale, (y + 0.5) * scale));
-  context.closePath();
-  context.lineWidth = 2;
-  context.strokeStyle = cssVar('--ink');
-  context.stroke();
-  context.setLineDash([4, 4]);
-  context.strokeStyle = cssVar('--tint');
-  context.stroke();
+  context.globalAlpha = 0.55;
+  context.fillStyle = cssVar('--tint');
+
+  for (const [x, y] of loopPixels(loop)) {
+    context.fillRect(x * scale, y * scale, scale, scale);
+  }
+
   context.restore();
+
+  if (holds) {
+    drawSelection(context, holds, scale);
+  }
 }

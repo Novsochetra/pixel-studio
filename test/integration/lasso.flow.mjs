@@ -69,6 +69,43 @@ await page.keyboard.press('Escape');
 await page.waitForTimeout(150);
 check((await picture()) === before, '⌘V puts it back where it was');
 
+// the colour shown at the middle of art pixel (x, y)
+async function colourAt(point) {
+  const [x, y] = await over(point);
+  const box = await canvas.boundingBox();
+
+  return canvas.evaluate(
+    (element, [cx, cy]) => [...element.getContext('2d').getImageData(cx, cy, 1, 1).data].join(),
+    [x - box.x, y - box.y],
+  );
+}
+
+const [kept, gone, far] = [
+  [58, 88],
+  [56, 86],
+  [80, 40],
+];
+const colours = await Promise.all([kept, gone, far].map(colourAt));
+// ⌘V leaves the box tool picked, to place what was pasted
+await page.keyboard.press('l');
+await stroke(roundTheFist);
+await page.keyboard.down('Alt');
+await page.mouse.click(...(await over(kept)));
+await page.keyboard.up('Alt');
+await page.keyboard.down('Shift');
+await page.mouse.click(...(await over(far)));
+await page.keyboard.up('Shift');
+await page.keyboard.press('Delete');
+await page.waitForTimeout(150);
+check(
+  (await colourAt(kept)) === colours[0],
+  'Alt and a click takes one pixel out of the selection',
+);
+check((await colourAt(gone)) !== colours[1], 'the rest of what the lasso held is deleted');
+check((await colourAt(far)) !== colours[2], 'Shift and a click adds one pixel far from it');
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(150);
+
 await page.keyboard.press('l');
 await stroke(roundTheFist);
 await page.mouse.click(...(await over([10, 10])));

@@ -123,7 +123,7 @@ function paintSelecting(context, state, scale) {
   }
 
   if (state.lassoLoop) {
-    drawLoop(context, state.lassoLoop, scale);
+    drawLoop(context, state.lassoLoop, { canvas: state.project.canvas, scale });
   }
 }
 
