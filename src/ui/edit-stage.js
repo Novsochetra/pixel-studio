@@ -34,6 +34,7 @@ const GRID_KEYS = [
   'layers',
   'project',
   'gridAll',
+  'gridOpen',
   'onion',
   'showPins',
   'pinName',
@@ -57,6 +58,26 @@ export function fitZoom(stage, sprite) {
   return Math.max(1, Math.min(24, Math.floor(room)));
 }
 
+function renderStage(app, { canvas, bar, empty, grid }, patch) {
+  if (Object.keys(patch).some((key) => STOPS_PLAYING.includes(key))) {
+    stopPlayback(app);
+  }
+
+  paint(canvas, app);
+
+  // the pointer moving only moves the brush's ring, and that is on the canvas
+  if (Object.keys(patch).join() === 'cursor') {
+    return;
+  }
+
+  renderSelectionBar(bar, app);
+  renderEmptyFrame(empty, app);
+
+  if (showsInGrid(patch)) {
+    grid.render();
+  }
+}
+
 export function mountEditStage(container, app) {
   const canvas = node('canvas', { 'aria-label': 'Pixel canvas' });
   const bar = node('div.selection-bar', {
@@ -73,7 +94,10 @@ export function mountEditStage(container, app) {
   const scroller = node('div.edit-scroll', {}, inner);
   const grid = mountGridPanel(app, {
     isShown: () => canvas.isConnected,
-    onPlayFrame: () => paint(canvas, app),
+    onPlayFrame: () => {
+      paint(canvas, app);
+      renderEmptyFrame(empty, app);
+    },
   });
 
   container.replaceChildren(node('div.edit-layout', {}, scroller, grid.el));
@@ -82,24 +106,7 @@ export function mountEditStage(container, app) {
   keepFitted(app, scroller, canvas);
   grid.render();
 
-  return {
-    render(patch = {}) {
-      if (Object.keys(patch).some((key) => STOPS_PLAYING.includes(key))) {
-        stopPlayback(app);
-      }
+  const parts = { canvas, bar, empty, grid };
 
-      paint(canvas, app);
-
-      // the pointer moving only moves the brush's ring, which is drawn on the canvas
-      if (Object.keys(patch).join() === 'cursor') {
-        return;
-      }
-      renderSelectionBar(bar, app);
-      renderEmptyFrame(empty, app);
-
-      if (showsInGrid(patch)) {
-        grid.render();
-      }
-    },
-  };
+  return { render: (patch = {}) => renderStage(app, parts, patch) };
 }

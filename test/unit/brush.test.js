@@ -10,7 +10,6 @@ const RED = pack(255, 0, 0);
 const sorted = (points) =>
   [...points].sort((first, second) => first[1] - second[1] || first[0] - second[0]);
 
-// how many pixels wide each row of the brush is, top to bottom
 function rowWidths(offsets) {
   const rows = new Map();
 

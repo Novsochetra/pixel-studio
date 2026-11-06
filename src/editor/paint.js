@@ -54,7 +54,6 @@ export function canPaint(sprite, x, y, paintOver) {
   return paintOver === null || paintOver === undefined || getPixel(sprite, x, y) === paintOver;
 }
 
-// every pixel the brush covers at a point, and their mirrors when symmetry is on
 export function brushPixels([x, y], { brush = FIRST_BRUSH, symmetry } = {}) {
   return brushOffsets(brush).flatMap(([dx, dy]) => mirrored(x + dx, y + dy, symmetry));
 }

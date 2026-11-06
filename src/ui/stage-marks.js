@@ -1,6 +1,5 @@
 import { cssVar } from './draw.js';
 
-// the edges between cells that are on and cells that are not, added to the context's path
 function traceEdges(context, cells, on, scale) {
   for (const [x, y] of cells) {
     if (!on(x, y - 1)) {
@@ -53,7 +52,7 @@ export function drawHighlight(context, points, scale) {
   context.restore();
 }
 
-// the pixels the brush would paint, ringed dark and light so the ring shows on any colour
+// dark and light, so the ring shows on any colour
 export function drawBrush(context, pixels, scale) {
   const covered = new Set(pixels.map(([x, y]) => `${x},${y}`));
 

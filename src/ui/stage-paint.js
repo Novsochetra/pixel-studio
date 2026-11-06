@@ -11,6 +11,7 @@ import { drawPins } from './pins-draw.js';
 import { drawBrush, drawHighlight, drawSelection } from './stage-marks.js';
 import { BRUSH_TOOLS } from './tools-paint.js';
 import { brushPixels } from '../editor/paint.js';
+import { paintAllViews, playsAllViews } from './play-all-views.js';
 import { frameAt } from '../model/project.js';
 import { compositeFrame } from '../model/composite.js';
 import { applyMapping } from '../palette/palette.js';
@@ -133,6 +134,12 @@ function paintMarks(context, state, scale) {
 }
 
 export function paint(canvas, app) {
+  if (playsAllViews(app)) {
+    paintAllViews(canvas, app);
+
+    return;
+  }
+
   const state = shownState(app);
   const { width, height } = state.project.canvas;
   const scale = state.zoom;

@@ -36,6 +36,7 @@ export const ROUTES = {
     'layers',
     'animations',
     'gridAll',
+    'gridOpen',
   ],
   layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations'],
   colours: [

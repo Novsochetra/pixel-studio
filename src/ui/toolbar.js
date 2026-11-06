@@ -35,7 +35,10 @@ function workspaces(app) {
 function projectButton(app) {
   return node(
     'button.wordmark',
-    { title: 'Projects: switch, start a new one, rename', onclick: () => openProjectsSheet(app) },
+    {
+      title: 'Projects: switch, start a new one, line them up',
+      onclick: () => openProjectsSheet(app),
+    },
     'PIXEL CLEAN',
     node('small', {}, `${app.store.state.project.name} ▾`),
   );

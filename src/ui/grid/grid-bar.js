@@ -3,7 +3,7 @@ import { currentAnimation, restructure } from '../actions.js';
 import { chooseFiles } from '../choose-file.js';
 import { openBatchSheet } from '../batch-sheet.js';
 import { animationTabs } from './tabs.js';
-import { setGridAll } from './all-views.js';
+import { setGridAll, setGridOpen } from './all-views.js';
 import { togglePlayback } from './playback.js';
 import { PIN_NAMES } from '../../model/pins.js';
 import { isSingleView, kindOf } from '../../model/kinds.js';
@@ -108,6 +108,23 @@ function pinControls(app) {
   ];
 }
 
+// many views and animations make a tall panel: folded, only this bar stays, and the canvas fills
+// the room
+function foldButton(app) {
+  const open = app.store.state.gridOpen;
+
+  return node(
+    'button.btn.quiet.icon-toggle.grid-fold',
+    {
+      'aria-expanded': String(open),
+      'aria-label': open ? 'Hide the frames' : 'Show the frames',
+      title: open ? 'Hide the frames' : 'Show the frames',
+      onclick: () => setGridOpen(app, !open),
+    },
+    icon(open ? 'chevron-down' : 'chevron-up'),
+  );
+}
+
 export function gridBar(app, { playing, onPlay }) {
   const { state } = app.store;
 
@@ -144,5 +161,6 @@ export function gridBar(app, { playing, onPlay }) {
       },
       icon(playing ? 'pause' : 'play'),
     ),
+    foldButton(app),
   );
 }

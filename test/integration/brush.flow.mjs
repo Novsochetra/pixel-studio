@@ -19,7 +19,7 @@ const pressed = (name) =>
     .getByRole('group', { name: 'Brush shape' })
     .getByRole('button', { name })
     .getAttribute('aria-pressed');
-// which pixels of the art around [x, y] are pure green, read from the middle of each
+// read from the middle of each pixel, clear of the grid lines and the brush's ring
 const green = ([x, y], reach = 4) =>
   canvas.evaluate(
     (element, spot) => {

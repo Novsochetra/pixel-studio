@@ -86,8 +86,6 @@ function mirrorField(app) {
   );
 }
 
-// How the pencil draws: its brush, clean lines, only the character's colours, only over one
-// colour, and mirrored about a line.
 export function drawingSettings(app, colors) {
   const { state } = app.store;
   const lock = (on) =>

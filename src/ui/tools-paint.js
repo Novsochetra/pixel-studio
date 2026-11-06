@@ -6,7 +6,6 @@ import { characterColors } from './character-colours.js';
 import { commit, currentLayer } from './actions.js';
 import { toast } from './dom.js';
 
-// the tools that paint with the brush, and show its outline under the pointer
 export const BRUSH_TOOLS = new Set(['pencil', 'eraser', 'shade']);
 
 // clean lines tidies drawn lines; for the eraser it would put erased corners back

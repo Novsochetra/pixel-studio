@@ -27,8 +27,8 @@ function shapeButtons(app) {
   );
 }
 
-// How big the pencil, the eraser and the light and dark brush paint, and in what shape. The
-// slider changes the size in place, so the panel is not drawn again under a drag or the arrow keys.
+// The slider changes the size in place: drawing the panel again would end a drag, or take the
+// focus from the arrow keys.
 export function brushField(app) {
   const { state } = app.store;
   const label = node('span', {}, caption(state.brush.size));

@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 PORT=${PORT:-8811}
 eslint .
 prettier --check . >/dev/null
-node --test test/unit/*.test.js test/regression/*.test.js 2>&1 | grep -E "^not ok|^# (pass|fail)"
+node --test test/unit/*.test.js test/regression/*.test.js tools/*/test/*.test.js 2>&1 | grep -E "^not ok|^# (pass|fail)"
 python3 build/build.py
 python3 test/wrap.py
 python3 -m http.server "$PORT" --directory dist >/dev/null 2>&1 &

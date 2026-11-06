@@ -8,3 +8,4 @@ src/ui/page.html
 test/images/
 docs/*.png
 tools/pixel_clean.py
+.claude/
