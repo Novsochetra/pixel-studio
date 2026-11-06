@@ -7,6 +7,7 @@ import { mirrorRows, rowArt } from './row-art.js';
 import { openAddViewMenu, openViewMenu } from './view-menu.js';
 import { drawnDirections, missingDirections } from '../../model/directions.js';
 import { referenceOf } from '../../model/reference.js';
+import { isFrameHidden } from '../../model/frame-play.js';
 import { isSingleView, viewName } from '../../model/kinds.js';
 
 function label(app, direction) {
@@ -53,7 +54,8 @@ function addFrameTile(app, last) {
 
 function viewRow(app, direction, playFrame) {
   const { state } = app.store;
-  const frames = currentAnimation(state).directions[direction].frames;
+  const animation = currentAnimation(state);
+  const frames = animation.directions[direction].frames;
   const { sprites, box } = rowArt(state.project, frames);
   const current = direction === state.at.direction;
   const single = isSingleView(state.project);
@@ -68,6 +70,7 @@ function viewRow(app, direction, playFrame) {
         box,
         selected: current && index === state.at.frame,
         playing: index === playFrame,
+        hidden: isFrameHidden(animation, index),
       }),
     ),
     current ? addFrameTile(app, frames.length - 1) : null,
@@ -83,9 +86,16 @@ function viewRow(app, direction, playFrame) {
   );
 }
 
-function numbersRow(state, count, playFrame) {
+function numbersRow(state, playFrame) {
+  const animation = currentAnimation(state);
+  const count = animation.directions[state.at.direction].frames.length;
   const numbers = Array.from({ length: count }, (_, index) => {
-    const classes = `${index === state.at.frame ? '.on' : ''}${index === playFrame ? '.playing' : ''}`;
+    const marks = [
+      index === state.at.frame && '.on',
+      index === playFrame && '.playing',
+      isFrameHidden(animation, index) && '.hidden-frame',
+    ];
+    const classes = marks.filter(Boolean).join('');
 
     return node(`span.grid-number${classes}`, {}, String(index + 1));
   });
@@ -115,11 +125,7 @@ export function gridBody(app, { all, playFrame }) {
     node(
       'div.grid-table',
       { role: 'grid', 'aria-label': gridName },
-      numbersRow(
-        state,
-        currentAnimation(state).directions[state.at.direction].frames.length,
-        playFrame,
-      ),
+      numbersRow(state, playFrame),
       rows.map((direction) => viewRow(app, direction, playFrame)),
       all ? mirrorRows(state) : null,
     ),

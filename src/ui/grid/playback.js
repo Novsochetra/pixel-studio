@@ -1,5 +1,5 @@
-import { currentAnimation, currentFrames } from '../actions.js';
-import { frameAtTime } from '../../model/frames.js';
+import { currentAnimation } from '../actions.js';
+import { frameAtTime, playedFrames } from '../../model/frame-play.js';
 
 // Play runs the animation on the canvas itself: app.playback.frame is the frame on show, and
 // onFrame repaints whatever shows it. Any edit, or a click on a frame, stops it.
@@ -16,9 +16,9 @@ function tick(app, playback, time) {
     return;
   }
 
-  const { state } = app.store;
+  const animation = currentAnimation(app.store.state);
   const frame = frameAtTime(
-    { from: playback.from, fps: currentAnimation(state).fps, count: currentFrames(state).length },
+    { from: playback.from, fps: animation.fps, order: playedFrames(animation) },
     time - playback.start,
   );
 
@@ -51,8 +51,10 @@ export function togglePlayback(app, { isShown, onFrame }) {
     return;
   }
 
+  const animation = currentAnimation(app.store.state);
   const from = app.store.state.at.frame;
-  const playback = { start: performance.now(), from, frame: from, isShown, onFrame };
+  const first = frameAtTime({ from, fps: animation.fps, order: playedFrames(animation) }, 0);
+  const playback = { start: performance.now(), from, frame: first, isShown, onFrame };
   app.playback = playback;
   onFrame();
   requestAnimationFrame((time) => tick(app, playback, time));

@@ -100,11 +100,3 @@ export function hasArt(frame) {
       layer.kind !== 'reference' && layer.sprite?.pixels.some((value, i) => i % 4 === 3 && value),
   );
 }
-
-// The frame on show `elapsed` ms into a play that began at frame `from`, going round. A screen
-// frame's time can come just before the play's start, which must not step back before `from`.
-export function frameAtTime({ from, fps, count }, elapsed) {
-  const step = Math.floor((Math.max(0, elapsed) / 1000) * fps);
-
-  return (from + step) % count;
-}
