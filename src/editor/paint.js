@@ -53,7 +53,7 @@ export function canPaint(sprite, x, y, paintOver) {
   return paintOver === null || paintOver === undefined || getPixel(sprite, x, y) === paintOver;
 }
 
-export function paintPoint(sprite, x, y, color, options = {}) {
+export function paintPoint(sprite, [x, y], color, options = {}) {
   const changed = [];
 
   for (const [px, py] of mirrored(x, y, options.symmetry)) {
@@ -67,35 +67,32 @@ export function paintPoint(sprite, x, y, color, options = {}) {
   return changed;
 }
 
+const inside = (sprite, x, y) => x >= 0 && y >= 0 && x < sprite.width && y < sprite.height;
+
+// the pixels of `target` connected (4-way) to the start take `color`; each one is noted in changed
+function fillFrom(sprite, start, { target, color, changed }) {
+  const stack = [start];
+
+  while (stack.length) {
+    const [px, py] = stack.pop();
+
+    if (inside(sprite, px, py) && getPixel(sprite, px, py) === target) {
+      setPixel(sprite, px, py, color);
+      changed.push({ x: px, y: py, before: target });
+      stack.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
+    }
+  }
+}
+
 // All pixels of one colour connected (4-way) to the start take the new colour.
-export function floodFill(sprite, x, y, color, options = {}) {
+export function floodFill(sprite, [x, y], color, options = {}) {
   const changed = [];
 
   for (const [sx, sy] of mirrored(x, y, options.symmetry)) {
     const target = getPixel(sprite, sx, sy);
 
-    if (target === color || sx < 0 || sy < 0 || sx >= sprite.width || sy >= sprite.height) {
-      continue;
-    }
-
-    const stack = [[sx, sy]];
-
-    while (stack.length) {
-      const [px, py] = stack.pop();
-
-      if (
-        getPixel(sprite, px, py) !== target ||
-        px < 0 ||
-        py < 0 ||
-        px >= sprite.width ||
-        py >= sprite.height
-      ) {
-        continue;
-      }
-
-      setPixel(sprite, px, py, color);
-      changed.push({ x: px, y: py, before: target });
-      stack.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
+    if (target !== color && inside(sprite, sx, sy)) {
+      fillFrom(sprite, [sx, sy], { target, color, changed });
     }
   }
 

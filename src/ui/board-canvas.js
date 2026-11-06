@@ -2,7 +2,7 @@ import { cssVar, drawGuide, drawSprite } from './draw.js';
 import { directionSprite, directionsInUse } from './actions.js';
 import { drawMarks } from './markup.js';
 import { checkerPainter } from '../io/images.js';
-import { directionLabel } from '../model/project.js';
+import { viewName } from '../model/kinds.js';
 import { applyMapping } from '../palette/palette.js';
 import { VIEW_FILTERS } from '../views/filters.js';
 
@@ -10,58 +10,60 @@ export const CAPTION = 30;
 
 export const GAP = 16;
 
-// Every view of the current animation side by side on the green checkerboard, with the guide
-// lines across all of them, your marks and, optionally, one view laid see-through over the others.
-export function boardCanvas(
-  state,
-  scale,
-  { overlay = state.overlay, mapping = state.swapPreview, marks = true } = {},
-) {
+// one view's column: its art (and the overlay) on the checkerboard, the guides, the marks
+function drawView(context, state, view) {
+  const { direction, scale, ghost, options } = view;
+  const { width, height } = state.project.canvas;
+  const sprite = directionSprite(state, direction);
+  const filter = VIEW_FILTERS[state.viewFilter ?? 'colour'];
+  checkerPainter(scale * 2)(context, width * scale, height * scale);
+
+  if (ghost && direction !== options.overlay.direction) {
+    drawSprite(context, ghost, scale, options.overlay.opacity);
+  }
+
+  if (sprite) {
+    drawSprite(
+      context,
+      filter(options.mapping ? applyMapping(sprite, options.mapping) : sprite),
+      scale,
+    );
+  }
+
+  state.project.guides.forEach((guide) =>
+    drawGuide(context, guide, { width: width * scale, scale, label: view.first }),
+  );
+
+  if (options.marks) {
+    drawMarks(context, state.project, direction, scale);
+  }
+}
+
+// Every view of the current animation side by side on the checkerboard, with the guide lines
+// across all of them, your marks and, optionally, one view laid see-through over the others.
+export function boardCanvas(state, scale, overrides = {}) {
+  const options = { overlay: state.overlay, mapping: state.swapPreview, marks: true, ...overrides };
   const directions = directionsInUse(state);
   const { width, height } = state.project.canvas;
   const canvas = document.createElement('canvas');
   canvas.width = directions.length * width * scale + (directions.length - 1) * GAP;
   canvas.height = height * scale + CAPTION;
   const context = canvas.getContext('2d');
-  context.fillStyle = cssVar('--stage') || '#2a2a2d';
+  context.fillStyle = cssVar('--stage');
   context.fillRect(0, 0, canvas.width, canvas.height);
-  const ghost = overlay?.direction ? directionSprite(state, overlay.direction) : null;
+  const ghost = options.overlay?.direction
+    ? directionSprite(state, options.overlay.direction)
+    : null;
 
   directions.forEach((direction, i) => {
     const x = i * (width * scale + GAP);
-    const sprite = directionSprite(state, direction);
     context.save();
     context.translate(x, CAPTION);
-    checkerPainter(scale * 2)(context, width * scale, height * scale);
-
-    if (ghost && direction !== overlay.direction) {
-      drawSprite(context, ghost, 0, 0, scale, overlay.opacity);
-    }
-
-    if (sprite) {
-      drawSprite(
-        context,
-        VIEW_FILTERS[state.viewFilter ?? 'colour'](
-          mapping ? applyMapping(sprite, mapping) : sprite,
-        ),
-        0,
-        0,
-        scale,
-      );
-    }
-
-    state.project.guides.forEach((guide) =>
-      drawGuide(context, guide, 0, 0, width * scale, scale, i === 0),
-    );
-
-    if (marks) {
-      drawMarks(context, state.project, direction, scale);
-    }
-
+    drawView(context, state, { direction, scale, ghost, options, first: i === 0 });
     context.restore();
     context.font = '700 11px Silkscreen, ui-monospace, monospace';
-    context.fillStyle = cssVar('--label') || '#ffffff';
-    context.fillText(directionLabel(direction).toUpperCase(), x, 18);
+    context.fillStyle = cssVar('--label');
+    context.fillText(viewName(state.project, direction).toUpperCase(), x, 18);
   });
 
   return canvas;

@@ -19,20 +19,27 @@ export function keepVersion(app, name) {
   return saveVersion(app.backend, app.store.state.project, name, app.keys).catch(() => null);
 }
 
-function row(app, entry, redraw, close) {
-  let confirming = false;
-  const restore = async () => {
+async function restore(app, entry, close) {
+  try {
     await keepVersion(app, 'Before going back to an earlier version');
     const project = await loadVersion(app.backend, entry, app.keys);
     await restoreProject(app, project);
     toast(`Back to "${entry.name}". Your work just before is saved as a version too.`);
     close();
-  };
-  const download = async () =>
-    saveFile(
-      `${entry.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.json`,
-      new Blob([await versionText(app.backend, entry, app.keys)], { type: 'application/json' }),
-    );
+  } catch (error) {
+    toast(`Could not go back to "${entry.name}": ${error.message}`);
+  }
+}
+
+async function download(app, entry) {
+  const text = await versionText(app.backend, entry, app.keys);
+  const name = `${entry.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.json`;
+  await saveFile(name, new Blob([text], { type: 'application/json' }));
+}
+
+// asks once more before the version is gone for good
+function deleteButton(app, entry, redraw) {
+  let confirming = false;
   const remove = async (event) => {
     if (!confirming) {
       confirming = true;
@@ -41,10 +48,14 @@ function row(app, entry, redraw, close) {
       return;
     }
 
-    await deleteVersion(app.backend, entry.id, app.keys);
+    await deleteVersion(app.backend, entry.id, app.keys).catch((error) => toast(error.message));
     redraw();
   };
 
+  return node('button.btn.quiet', { onclick: remove }, 'Delete');
+}
+
+function row(app, entry, { redraw, close }) {
   return node(
     'div.version-row',
     {},
@@ -57,12 +68,15 @@ function row(app, entry, redraw, close) {
     node(
       'div.group',
       { style: { gap: '4px' } },
-      node('button.btn', { onclick: restore }, 'Go back to this'),
-      node('button.btn.quiet', { onclick: download }, 'Download'),
-      node('button.btn.quiet', { onclick: remove }, 'Delete'),
+      node('button.btn', { onclick: () => restore(app, entry, close) }, 'Go back to this'),
+      node('button.btn.quiet', { onclick: () => download(app, entry) }, 'Download'),
+      deleteButton(app, entry, redraw),
     ),
   );
 }
+
+const NONE_YET =
+  'No versions yet. One is kept before every cleaning, kit or restore, and whenever you save one here.';
 
 export function openVersionsSheet(app) {
   const sheet = openSheet('History');
@@ -76,27 +90,14 @@ export function openVersionsSheet(app) {
     app.backend.kind === 'none'
       ? 'Versions last until you close this page here.'
       : 'Up to 30 versions are kept; the oldest go first.';
-
   const redraw = async () => {
     const versions = await listVersions(app.backend, app.keys);
-    replace(
-      list,
-      versions.length
-        ? versions.map((entry) => row(app, entry, redraw, sheet.close))
-        : node(
-            'p.hint',
-            {},
-            'No versions yet. One is kept before every cleaning, kit or restore, and whenever you save one here.',
-          ),
-    );
+    const rows = versions.map((entry) => row(app, entry, { redraw, close: sheet.close }));
+    replace(list, versions.length ? rows : node('p.hint', {}, NONE_YET));
   };
   const save = async () => {
-    await saveVersion(
-      app.backend,
-      app.store.state.project,
-      name.value.trim() || `Version of ${when(Date.now())}`,
-      app.keys,
-    );
+    const named = name.value.trim() || `Version of ${when(Date.now())}`;
+    await saveVersion(app.backend, app.store.state.project, named, app.keys);
     name.value = '';
     toast('Version saved');
     redraw();

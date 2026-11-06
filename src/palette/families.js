@@ -1,6 +1,15 @@
 import { unpack } from '../model/sprite.js';
 import { luminance } from './kits.js';
 
+// which sixth of the colour wheel the colour sits in, as a fraction: the hue before degrees
+function hueSector({ red, green, blue }, high, span) {
+  if (high === red) {
+    return ((green - blue) / span) % 6;
+  }
+
+  return high === green ? (blue - red) / span + 2 : (red - green) / span + 4;
+}
+
 function hsl(color) {
   const [red, green, blue] = unpack(color)
     .slice(0, 3)
@@ -15,13 +24,7 @@ function hsl(color) {
   }
 
   const saturation = span / (1 - Math.abs(2 * light - 1));
-  let hue =
-    high === red
-      ? ((green - blue) / span) % 6
-      : high === green
-        ? (blue - red) / span + 2
-        : (red - green) / span + 4;
-  hue = (hue * 60 + 360) % 360;
+  const hue = (hueSector({ red, green, blue }, high, span) * 60 + 360) % 360;
 
   return { hue, saturation, light };
 }

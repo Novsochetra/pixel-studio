@@ -9,6 +9,7 @@ import { newId } from '../model/project.js';
 import { gameOf } from '../model/presets.js';
 import { keepVersion } from './versions-sheet.js';
 import { downloadOutfit, keepAsSwap } from './outfit-files.js';
+import { UNPICKED_PART } from '../art/editor-colours.js';
 
 const title = (id) =>
   id
@@ -113,7 +114,7 @@ function choiceControls(app, choice, onChange) {
             { style: { gap: '4px' } },
             node('input', {
               type: 'color',
-              value: choice.custom[part.id] ?? '#808080',
+              value: choice.custom[part.id] ?? UNPICKED_PART,
               'aria-label': `${part.name} colour`,
               oninput: (event) =>
                 onChange({ custom: { ...choice.custom, [part.id]: event.target.value } }),

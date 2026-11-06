@@ -12,58 +12,70 @@ export function pixelAt(canvas, event, scale) {
   ];
 }
 
+// What a press starts: a two-finger pan and pinch, a pan (middle button, or space held), or the
+// current tool. Returns the session that follows the pointer, or null.
+function pressSession(app, view, event) {
+  const { canvas, stage, touches, session } = view;
+
+  if (touches.size === 2) {
+    // a second finger: what the first one started was the start of a pan, not a stroke
+    session?.cancel?.();
+
+    return twoFingerSession(app, stage, canvas, touches);
+  }
+
+  if (event.button === 1 || (event.button === 0 && app.spaceHeld)) {
+    event.preventDefault();
+    canvas.setPointerCapture(event.pointerId);
+
+    return panSession(stage, event);
+  }
+
+  if (event.button !== 0) {
+    return session;
+  }
+
+  canvas.setPointerCapture(event.pointerId);
+
+  return startTool(app, pixelAt(canvas, event, app.store.state.zoom), event);
+}
+
+function showCursor(app, point) {
+  const color = getPixel(currentLayer(app.store.state).sprite, ...point);
+  app.store.set({
+    cursor: { x: point[0], y: point[1], color: color ? toHex(color) : 'transparent' },
+  });
+}
+
 export function bindPointer(canvas, app, stage) {
-  let session = null;
-  const touches = new Map();
+  const view = { canvas, stage, touches: new Map(), session: null };
+  const place = (event) =>
+    view.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  const finish = (event) => {
+    view.touches.delete(event.pointerId);
+
+    if (view.touches.size !== 1) {
+      view.session?.end?.();
+      view.session = null;
+    }
+  };
 
   canvas.addEventListener('pointerdown', (event) => {
     if (event.pointerType === 'touch') {
-      touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      place(event);
     }
 
-    if (touches.size === 2) {
-      // a second finger: what the first one started was the start of a pan, not a stroke
-      session?.cancel?.();
-      session = twoFingerSession(app, stage, canvas, touches);
-
-      return;
-    }
-
-    if (event.button === 1 || (event.button === 0 && app.spaceHeld)) {
-      event.preventDefault();
-      canvas.setPointerCapture(event.pointerId);
-      session = panSession(stage, event);
-
-      return;
-    }
-
-    if (event.button !== 0) {
-      return;
-    }
-
-    canvas.setPointerCapture(event.pointerId);
-    session = startTool(app, pixelAt(canvas, event, app.store.state.zoom), event);
+    view.session = pressSession(app, view, event);
   });
   canvas.addEventListener('pointermove', (event) => {
-    if (touches.has(event.pointerId)) {
-      touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (view.touches.has(event.pointerId)) {
+      place(event);
     }
 
-    const [x, y] = pixelAt(canvas, event, app.store.state.zoom);
-    const color = getPixel(currentLayer(app.store.state).sprite, x, y);
-    app.store.set({ cursor: { x, y, color: color ? toHex(color) : 'transparent' } });
-    session?.move?.([x, y], event);
+    const point = pixelAt(canvas, event, app.store.state.zoom);
+    showCursor(app, point);
+    view.session?.move?.(point, event);
   });
-  const finish = (event) => {
-    touches.delete(event.pointerId);
-
-    if (touches.size === 1) {
-      return;
-    }
-
-    session?.end?.();
-    session = null;
-  };
   canvas.addEventListener('pointerup', finish);
   canvas.addEventListener('pointercancel', finish);
 }

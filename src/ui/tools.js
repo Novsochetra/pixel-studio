@@ -42,8 +42,27 @@ function pin(app, [x, y]) {
 
 const PAINTING = new Set(['pencil', 'eraser', 'fill', 'replace', 'shade']);
 
+// the tools a press starts; each returns the drag that follows, or null
+const ON_PRESS = {
+  select: (app, point) => select(app, point),
+  wand: (app, point, event) => wand(app, point, event.shiftKey),
+  pin: (app, point) => pin(app, point),
+  shade: (app, point, event) => shade(app, point, event.shiftKey),
+  pencil: (app, point) => stroke(app, point, app.store.state.color),
+  eraser: (app, point) => stroke(app, point, CLEAR),
+  fill: (app, point) => fill(app, point),
+  replace: (app, point) => replace(app, point),
+};
+
+function hiddenLayer(app) {
+  const layer = currentLayer(app.store.state);
+  toast(`${layer.name} is hidden, so you would not see what you draw. Show it in Layers first.`);
+
+  return null;
+}
+
 export function startTool(app, point, event) {
-  const { tool, color } = app.store.state;
+  const { tool } = app.store.state;
 
   if (tool === 'pin' && event.altKey) {
     restructure(app, 'Remove pin', (state) =>
@@ -58,32 +77,8 @@ export function startTool(app, point, event) {
   }
 
   if (PAINTING.has(tool) && !currentLayer(app.store.state).visible) {
-    toast(
-      `${currentLayer(app.store.state).name} is hidden, so you would not see what you draw. Show it in Layers first.`,
-    );
-
-    return null;
+    return hiddenLayer(app);
   }
 
-  if (tool === 'select') {
-    return select(app, point);
-  }
-
-  if (tool === 'wand') {
-    return wand(app, point, event.shiftKey);
-  }
-
-  if (tool === 'pin') {
-    return pin(app, point, event.altKey);
-  }
-
-  if (tool === 'shade') {
-    return shade(app, point, event.shiftKey);
-  }
-
-  if (tool === 'pencil' || tool === 'eraser') {
-    return stroke(app, point, tool === 'eraser' ? CLEAR : color);
-  }
-
-  return tool === 'fill' ? fill(app, point) : replace(app, point);
+  return ON_PRESS[tool](app, point, event);
 }

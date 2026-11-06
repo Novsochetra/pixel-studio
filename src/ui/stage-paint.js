@@ -25,7 +25,7 @@ export function drawOnion(context, state, scale) {
 
   for (const [i, alpha] of neighbours) {
     if (i >= 0 && i < frames.length) {
-      drawSprite(context, compositeFrame(frames[i], width, height), 0, 0, scale, alpha);
+      drawSprite(context, compositeFrame(frames[i], width, height), scale, alpha);
     }
   }
 }
@@ -43,7 +43,7 @@ export function drawLayers(context, state, scale) {
         ? applyMapping(layer.sprite, state.swapPreview)
         : layer.sprite;
     const sprite = layer.kind === 'reference' ? mapped : VIEW_FILTERS[state.viewFilter](mapped);
-    drawSprite(context, sprite, 0, 0, scale, layer.kind === 'reference' ? layer.opacity : 1);
+    drawSprite(context, sprite, scale, layer.kind === 'reference' ? layer.opacity : 1);
   }
 }
 
@@ -109,7 +109,7 @@ function paintArt(context, state, scale) {
       : null;
 
   if (ghost) {
-    drawSprite(context, ghost, 0, 0, scale, state.overlay.opacity);
+    drawSprite(context, ghost, scale, state.overlay.opacity);
   }
 
   if (state.onion) {
@@ -123,15 +123,17 @@ function paintHelpers(context, state, { scale, ratio }) {
   const { width, height } = state.project.canvas;
 
   if (state.showGrid && scale >= 6) {
-    drawGrid(context, 0, 0, width, height, scale, ratio);
+    drawGrid(context, { cols: width, rows: height }, { scale, ratio });
   }
 
   if (state.showGuides) {
-    state.project.guides.forEach((guide) => drawGuide(context, guide, 0, 0, width * scale, scale));
+    state.project.guides.forEach((guide) =>
+      drawGuide(context, guide, { width: width * scale, scale }),
+    );
   }
 
   if (state.symmetry.on) {
-    drawMirrorLine(context, state.symmetry.axisSum, 0, 0, height * scale, scale);
+    drawMirrorLine(context, state.symmetry.axisSum, { height: height * scale, scale });
   }
 }
 
@@ -156,7 +158,7 @@ export function paint(canvas, app) {
   const { width, height } = state.project.canvas;
   const scale = state.zoom;
   const { context, ratio } = sizeCanvas(canvas, width * scale, height * scale);
-  drawChecker(context, 0, 0, width * scale, height * scale, scale * 2);
+  drawChecker(context, { width: width * scale, height: height * scale }, scale * 2);
   paintArt(context, state, scale);
   paintHelpers(context, state, { scale, ratio });
   paintMarks(context, state, scale);

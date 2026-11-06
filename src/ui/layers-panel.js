@@ -1,6 +1,7 @@
-import { node, icon, replace, toast } from './dom.js';
+import { node, replace, toast } from './dom.js';
 import { commit, currentAnimation, currentLayer, restructure } from './actions.js';
-import { addLayer, layerStack, moveLayer, removeLayer, updateLayer } from '../model/structure.js';
+import { addLayer, layerStack, moveLayer, updateLayer } from '../model/structure.js';
+import { layerRow } from './layer-row.js';
 import { frameAt } from '../model/project.js';
 import { decodeImage } from '../io/images.js';
 import { createSprite } from '../model/sprite.js';
@@ -60,95 +61,6 @@ function addReference(app) {
   });
 }
 
-function layerRow(app, entry, active) {
-  const { state } = app.store;
-  const animation = currentAnimation(state);
-  const update = (label, patch) =>
-    restructure(app, label, (draft) => {
-      updateLayer(currentAnimation(draft), entry.key, patch);
-    });
-  const move = (event, step) => {
-    event.stopPropagation();
-    restructure(app, 'Move layer', (draft) => {
-      moveLayer(currentAnimation(draft), entry.key, step);
-    });
-  };
-
-  return node(
-    'div.layer-row',
-    {
-      'aria-current': String(active),
-      'data-hidden': String(!entry.visible),
-      onclick: () => app.store.set({ at: { ...state.at, layer: entry.key }, selection: null }),
-    },
-    node(
-      `button.btn.quiet.eye${entry.visible ? '' : '.off'}`,
-      {
-        'aria-pressed': String(entry.visible),
-        'aria-label': `${entry.visible ? 'Hide' : 'Show'} ${entry.name}`,
-        title: entry.visible
-          ? 'Shown. Click to hide (hidden layers stay out of downloads)'
-          : 'Hidden. Click to show',
-        onclick: (event) => {
-          event.stopPropagation();
-          update(entry.visible ? 'Hide layer' : 'Show layer', { visible: !entry.visible });
-        },
-      },
-      icon(entry.visible ? 'eye' : 'eye-off'),
-    ),
-    node('input.input', {
-      value: entry.name,
-      'aria-label': 'Layer name',
-      onclick: (event) => event.stopPropagation(),
-      onchange: (event) =>
-        update('Rename layer', { name: event.target.value.trim() || entry.name }),
-    }),
-    entry.kind === 'reference' ? node('span.badge', {}, 'Trace') : null,
-    entry.visible ? null : node('span.badge', {}, 'Hidden'),
-    node(
-      'button.btn.quiet',
-      {
-        title: 'Move up',
-        'aria-label': `Move ${entry.name} up`,
-        onclick: (event) => move(event, 1),
-      },
-      '↑',
-    ),
-    node(
-      'button.btn.quiet',
-      {
-        title: 'Move down',
-        'aria-label': `Move ${entry.name} down`,
-        onclick: (event) => move(event, -1),
-      },
-      '↓',
-    ),
-    node(
-      'button.btn.quiet',
-      {
-        title: 'Delete layer',
-        'aria-label': `Delete ${entry.name}`,
-        onclick: (event) => {
-          event.stopPropagation();
-
-          const arts = layerStack(animation).filter((layer) => layer.kind !== 'reference');
-
-          if (entry.kind !== 'reference' && arts.length <= 1) {
-            toast('Keep at least one art layer.');
-
-            return;
-          }
-
-          restructure(app, `Delete ${entry.name}`, (draft) => {
-            removeLayer(currentAnimation(draft), entry.key);
-          });
-        },
-      },
-      '×',
-    ),
-  );
-}
-
 function referenceStrength(app, layer) {
   return node(
     'label.field',
@@ -169,50 +81,47 @@ function referenceStrength(app, layer) {
   );
 }
 
+const ABOUT =
+  'Layers are see-through sheets stacked inside every frame: your art, and pictures to trace. The frames below the canvas are the steps of the animation.';
+
+function layerButtons(app, active) {
+  const animation = currentAnimation(app.store.state);
+  const add = () =>
+    restructure(app, 'Add layer', (draft) => ({
+      layer: addLayer(draft.project, currentAnimation(draft), {
+        name: `Layer ${layerStack(animation).length + 1}`,
+        above: active.key,
+      }),
+    }));
+  const clear = () => commit(app, 'Clear layer', [active], () => active.sprite.pixels.fill(0));
+
+  return node(
+    'div.group',
+    { style: { gap: '6px', flexWrap: 'wrap' } },
+    node('button.btn', { onclick: add }, 'Add layer'),
+    node('button.btn', { onclick: () => addReference(app) }, 'Add picture to trace…'),
+    node(
+      'button.btn.quiet',
+      { onclick: clear, title: 'Erase everything on this layer in this frame' },
+      'Clear',
+    ),
+  );
+}
+
 export function renderLayersPanel(el, app) {
   const { state } = app.store;
   const animation = currentAnimation(state);
   const active = currentLayer(state);
-  const clearLayer = () => commit(app, 'Clear layer', [active], () => active.sprite.pixels.fill(0));
+  const rows = [...layerStack(animation)]
+    .reverse()
+    .map((entry) => layerRow(app, entry, entry.key === active.key));
 
   replace(
     el,
     node('h2', {}, 'Layers', node('span.hint', {}, 'top first')),
-    node(
-      'div.view-list',
-      {},
-      [...layerStack(animation)]
-        .reverse()
-        .map((entry) => layerRow(app, entry, entry.key === active.key)),
-    ),
+    node('div.view-list', {}, rows),
     active.kind === 'reference' ? referenceStrength(app, active) : null,
-    node(
-      'p.hint',
-      {},
-      'Layers are see-through sheets stacked inside every frame: your art, and pictures to trace. The frames below the canvas are the steps of the animation.',
-    ),
-    node(
-      'div.group',
-      { style: { gap: '6px', flexWrap: 'wrap' } },
-      node(
-        'button.btn',
-        {
-          onclick: () =>
-            restructure(app, 'Add layer', (draft) => ({
-              layer: addLayer(draft.project, currentAnimation(draft), {
-                name: `Layer ${layerStack(animation).length + 1}`,
-                above: active.key,
-              }),
-            })),
-        },
-        'Add layer',
-      ),
-      node('button.btn', { onclick: () => addReference(app) }, 'Add picture to trace…'),
-      node(
-        'button.btn.quiet',
-        { onclick: clearLayer, title: 'Erase everything on this layer in this frame' },
-        'Clear',
-      ),
-    ),
+    node('p.hint', {}, ABOUT),
+    layerButtons(app, active),
   );
 }

@@ -29,7 +29,7 @@ export class Stroke {
   }
 
   place(point) {
-    paintPoint(this.sprite, point[0], point[1], this.color, this.options);
+    paintPoint(this.sprite, point, this.color, this.options);
     this.path.push(point);
 
     if (this.options.cleanLines && this.path.length >= 3) {

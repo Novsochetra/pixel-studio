@@ -28,44 +28,49 @@ function nativeCanvas(sprite) {
   return entry.canvas;
 }
 
-export function drawSprite(context, sprite, x, y, scale, alpha = 1) {
+// The drawing helpers paint at the context's origin: a caller drawing elsewhere translates first.
+
+export function drawSprite(context, sprite, scale, alpha = 1) {
   context.save();
   context.globalAlpha = alpha;
   context.imageSmoothingEnabled = false;
-  context.drawImage(nativeCanvas(sprite), x, y, sprite.width * scale, sprite.height * scale);
+  context.drawImage(nativeCanvas(sprite), 0, 0, sprite.width * scale, sprite.height * scale);
   context.restore();
 }
 
-export function drawChecker(context, x, y, width, height, square) {
+export function drawChecker(context, { width, height }, square) {
   const colors = [cssVar('--checker-a'), cssVar('--checker-b')];
 
   for (let row = 0; row * square < height; row++) {
     for (let col = 0; col * square < width; col++) {
       context.fillStyle = colors[(row + col) % 2];
+      const cellWidth = Math.min(square, width - col * square);
       context.fillRect(
-        x + col * square,
-        y + row * square,
-        Math.min(square, width - col * square),
+        col * square,
+        row * square,
+        cellWidth,
         Math.min(square, height - row * square),
       );
     }
   }
 }
 
-export function drawGrid(context, x, y, cols, rows, scale, ratio) {
+// lines between the art pixels, one device pixel wide at any zoom
+export function drawGrid(context, { cols, rows }, { scale, ratio }) {
+  const half = 0.5 / ratio;
   context.save();
   context.strokeStyle = cssVar('--separator');
   context.lineWidth = 1 / ratio;
   context.beginPath();
 
   for (let col = 0; col <= cols; col++) {
-    context.moveTo(x + col * scale + 0.5 / ratio, y);
-    context.lineTo(x + col * scale + 0.5 / ratio, y + rows * scale);
+    context.moveTo(col * scale + half, 0);
+    context.lineTo(col * scale + half, rows * scale);
   }
 
   for (let row = 0; row <= rows; row++) {
-    context.moveTo(x, y + row * scale + 0.5 / ratio);
-    context.lineTo(x + cols * scale, y + row * scale + 0.5 / ratio);
+    context.moveTo(0, row * scale + half);
+    context.lineTo(cols * scale, row * scale + half);
   }
 
   context.stroke();
@@ -74,35 +79,36 @@ export function drawGrid(context, x, y, cols, rows, scale, ratio) {
 
 // a horizontal guide across the art: the line sits on the guide row's top edge for a "top" rule
 // and on its bottom edge for a "bottom" rule, so it hugs the pixels it marks
-export function drawGuide(context, guide, x, y, width, scale, label = true) {
+export function drawGuide(context, guide, { width, scale, label = true }) {
   const edge = guide.rule === 'bottom' ? guide.row + 1 : guide.row;
-  const lineY = Math.round(y + edge * scale) + 0.5;
+  const lineY = Math.round(edge * scale) + 0.5;
   context.save();
   context.strokeStyle = cssVar('--guide');
   context.setLineDash([6, 4]);
   context.beginPath();
-  context.moveTo(x, lineY);
-  context.lineTo(x + width, lineY);
+  context.moveTo(0, lineY);
+  context.lineTo(width, lineY);
   context.stroke();
 
   if (label) {
     context.setLineDash([]);
     context.font = '700 10px Silkscreen, ui-monospace, monospace';
     context.fillStyle = cssVar('--guide');
-    context.fillText(`${guide.name.toUpperCase()} · ${guide.row}`, x + 6, lineY - 4);
+    context.fillText(`${guide.name.toUpperCase()} · ${guide.row}`, 6, lineY - 4);
   }
 
   context.restore();
 }
 
-export function drawMirrorLine(context, axisSum, x, y, height, scale) {
-  const lineX = Math.round(x + ((axisSum + 1) / 2) * scale) + 0.5;
+// the symmetry axis, between columns when the two halves are an even width apart
+export function drawMirrorLine(context, axisSum, { height, scale }) {
+  const lineX = Math.round(((axisSum + 1) / 2) * scale) + 0.5;
   context.save();
   context.strokeStyle = cssVar('--mirror');
   context.setLineDash([3, 3]);
   context.beginPath();
-  context.moveTo(lineX, y);
-  context.lineTo(lineX, y + height);
+  context.moveTo(lineX, 0);
+  context.lineTo(lineX, height);
   context.stroke();
   context.restore();
 }

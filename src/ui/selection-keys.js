@@ -30,44 +30,74 @@ function paste(app) {
   toast('Pasted where it was copied from. Drag it or use the arrow keys to place it.');
 }
 
-// Selection, clipboard and frame keys. Returns true when it handled the key.
-export function handleSelectionKey(app, event, key, command) {
+function selectAll(app) {
+  const { canvas } = app.store.state.project;
+  const corner = [canvas.width - 1, canvas.height - 1];
+  app.store.set({ selection: rectSelection(canvas, [0, 0], corner), tool: 'select' });
+}
+
+function copy(app, cut) {
   const { state } = app.store;
   const layer = currentLayer(state);
+  app.clipboard = liftPixels(layer.sprite, state.selection);
 
-  if (command && key === 'a') {
-    app.store.set({
-      selection: rectSelection(
-        state.project.canvas.width,
-        state.project.canvas.height,
-        0,
-        0,
-        state.project.canvas.width - 1,
-        state.project.canvas.height - 1,
-      ),
-      tool: 'select',
-    });
-  } else if (command && (key === 'c' || key === 'x') && state.selection) {
-    app.clipboard = liftPixels(layer.sprite, state.selection);
+  if (cut) {
+    commit(app, 'Cut', [layer], () => clearSelected(layer.sprite, state.selection));
+  }
+}
 
-    if (key === 'x') {
-      commit(app, 'Cut', [layer], () => clearSelected(layer.sprite, state.selection));
-    }
-  } else if (command && key === 'v' && app.clipboard?.length) {
-    paste(app);
-  } else if (ARROWS[key] && state.selection && !command) {
-    nudge(app, ARROWS[key], event.shiftKey);
-  } else if ((key === 'delete' || key === 'backspace') && state.selection) {
-    commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection));
-  } else if (key === 'escape' && state.selection) {
-    app.store.set({ selection: null });
-  } else if (!command && (key === ',' || key === '.')) {
-    const count = currentFrames(state).length;
-    selectFrame(app, (state.at.frame + (key === '.' ? 1 : count - 1)) % count);
-  } else {
+function eraseSelected(app) {
+  const { state } = app.store;
+  const layer = currentLayer(state);
+  commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection));
+}
+
+function stepFrame(app, step) {
+  const { state } = app.store;
+  const count = currentFrames(state).length;
+  selectFrame(app, (state.at.frame + step + count) % count);
+}
+
+// What each key does, and when it applies: { when(state, app), run(app, event) }. ⌘ keys first.
+const COMMAND_KEYS = {
+  a: { when: () => true, run: selectAll },
+  c: { when: (state) => state.selection, run: (app) => copy(app, false) },
+  x: { when: (state) => state.selection, run: (app) => copy(app, true) },
+  v: { when: (state, app) => app.clipboard?.length, run: paste },
+};
+
+const PLAIN_KEYS = {
+  delete: { when: (state) => state.selection, run: eraseSelected },
+  backspace: { when: (state) => state.selection, run: eraseSelected },
+  escape: { when: (state) => state.selection, run: (app) => app.store.set({ selection: null }) },
+  ',': { when: () => true, run: (app) => stepFrame(app, -1) },
+  '.': { when: () => true, run: (app) => stepFrame(app, 1) },
+};
+
+function handlerFor(key, command) {
+  if (command) {
+    return COMMAND_KEYS[key];
+  }
+
+  if (ARROWS[key]) {
+    return {
+      when: (state) => state.selection,
+      run: (app, event) => nudge(app, ARROWS[key], event.shiftKey),
+    };
+  }
+
+  return PLAIN_KEYS[key];
+}
+
+// Selection, clipboard and frame keys. Returns true when it handled the key.
+export function handleSelectionKey(app, event, key, command) {
+  const handler = handlerFor(key, command);
+
+  if (!handler || !handler.when(app.store.state, app)) {
     return false;
   }
 
+  handler.run(app, event);
   event.preventDefault();
 
   return true;

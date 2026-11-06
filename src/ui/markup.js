@@ -1,4 +1,5 @@
 import { cssVar } from './draw.js';
+import { NOTE_TEXT } from '../art/editor-colours.js';
 
 // Marks are kept in art pixels on each view, so they stay put at any zoom:
 // project.markup = { strokes: [{ direction, points: [[x, y], …] }], notes: [{ direction, x, y, text }] }
@@ -12,15 +13,11 @@ export function marksFor(project, direction) {
   };
 }
 
-export function drawMarks(
-  context,
-  project,
-  direction,
-  scale,
-  panelWidth = project.canvas.width * scale,
-) {
+// the marks and notes on one view's panel of the board, at its scale
+export function drawMarks(context, project, direction, scale) {
+  const panelWidth = project.canvas.width * scale;
   const { strokes, notes } = marksFor(project, direction);
-  const colour = cssVar('--guide') || '#ff375f';
+  const colour = cssVar('--guide');
   context.save();
   context.strokeStyle = colour;
   context.lineWidth = Math.max(2, scale * 0.8);
@@ -47,7 +44,7 @@ export function drawMarks(
     const y = Math.max(height, note.y * scale);
     context.fillStyle = colour;
     context.fillRect(x, y - height, width, height);
-    context.fillStyle = '#ffffff';
+    context.fillStyle = NOTE_TEXT;
     context.fillText(note.text, x + 5, y - height * 0.28);
   }
 

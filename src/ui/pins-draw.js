@@ -1,7 +1,7 @@
 import { pinsOf, PIN_NAMES } from '../model/pins.js';
+import { PIN_COLOURS, PIN_RING } from '../art/editor-colours.js';
 
 // one fixed colour per body part, so a pin is the same colour in every frame
-const PIN_COLOURS = ['#ff375f', '#ff9f0a', '#ffd60a', '#30d158', '#64d2ff', '#bf5af2'];
 const colourOf = (name) => PIN_COLOURS[Math.max(0, PIN_NAMES.indexOf(name)) % PIN_COLOURS.length];
 const centre = (mark, scale) => [(mark.x + 0.5) * scale, (mark.y + 0.5) * scale];
 
@@ -35,7 +35,7 @@ export function drawPins(context, frame, previous, scale) {
   for (const mark of pinsOf(frame)) {
     const [x, y] = centre(mark, scale);
     context.fillStyle = colourOf(mark.name);
-    context.strokeStyle = '#000000';
+    context.strokeStyle = PIN_RING;
     context.beginPath();
     context.arc(x, y, radius, 0, Math.PI * 2);
     context.fill();

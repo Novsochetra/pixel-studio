@@ -42,13 +42,13 @@ export function select(app, start) {
   const { width, height } = state.project.canvas;
   let moved = false;
   app.store.set({
-    selection: rectSelection(width, height, start[0], start[1], start[0], start[1]),
+    selection: rectSelection({ width, height }, start, start),
   });
 
   return {
     move([x, y]) {
       moved ||= x !== start[0] || y !== start[1];
-      app.store.set({ selection: rectSelection(width, height, start[0], start[1], x, y) });
+      app.store.set({ selection: rectSelection({ width, height }, start, [x, y]) });
     },
     end() {
       if (!moved) {

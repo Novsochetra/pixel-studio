@@ -1,4 +1,5 @@
 import { createSprite } from '../model/sprite.js';
+import { REFERENCE_CHECKER } from '../art/editor-colours.js';
 
 function makeCanvas(width, height) {
   const canvas = document.createElement('canvas');
@@ -84,7 +85,7 @@ export async function dataUrlSprite(url) {
 }
 
 // the green and white checkerboard of the original front image: squares of 2x2 art pixels
-export function checkerPainter(squarePx, colors = ['#00ff00', '#ffffff']) {
+export function checkerPainter(squarePx, colors = REFERENCE_CHECKER) {
   return (context, width, height) => {
     for (let y = 0; y < height; y += squarePx) {
       for (let x = 0; x < width; x += squarePx) {

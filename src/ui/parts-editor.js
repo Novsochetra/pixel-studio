@@ -5,8 +5,44 @@ import { sharedColours } from '../palette/kits.js';
 import { newId } from '../model/project.js';
 import { toHex } from '../model/sprite.js';
 
-function partRow(app, part, colours, redraw) {
+// a colour button for a part: pressed when the part is drawn in it
+function colourChip(part, color, toggle) {
+  const on = part.colours.includes(color);
+  const hex = toHex(color);
+
+  return node('button.swatch', {
+    style: { background: hex },
+    'aria-pressed': String(on),
+    'aria-label': `${on ? 'Remove' : 'Add'} ${hex} ${on ? 'from' : 'to'} ${part.name}`,
+    title: hex,
+    onclick: () => toggle(color),
+  });
+}
+
+function nameAndRemove(app, part, save) {
   const { project } = app.store.state;
+  const rename = (event) => {
+    part.name = event.target.value.trim() || part.name;
+    save();
+  };
+  const remove = () => {
+    project.parts = project.parts.filter((other) => other !== part);
+    save();
+  };
+
+  return node(
+    'div.group',
+    { style: { gap: '6px' } },
+    node('input.input', { value: part.name, 'aria-label': 'Part name', onchange: rename }),
+    node(
+      'button.btn.quiet',
+      { 'aria-label': `Remove ${part.name}`, title: 'Remove this part', onclick: remove },
+      '×',
+    ),
+  );
+}
+
+function partRow(app, part, colours, redraw) {
   const save = () => {
     changeStructure(app, 'parts');
     redraw();
@@ -21,44 +57,11 @@ function partRow(app, part, colours, redraw) {
   return node(
     'div.part-row',
     {},
-    node(
-      'div.group',
-      { style: { gap: '6px' } },
-      node('input.input', {
-        value: part.name,
-        'aria-label': 'Part name',
-        onchange: (event) => {
-          part.name = event.target.value.trim() || part.name;
-          save();
-        },
-      }),
-      node(
-        'button.btn.quiet',
-        {
-          'aria-label': `Remove ${part.name}`,
-          title: 'Remove this part',
-          onclick: () => {
-            project.parts = project.parts.filter((other) => other !== part);
-            save();
-          },
-        },
-        '×',
-      ),
-    ),
+    nameAndRemove(app, part, save),
     node(
       'div.target-picker',
       { style: { justifyContent: 'flex-start' } },
-      colours.map((color) => {
-        const on = part.colours.includes(color);
-
-        return node('button.swatch', {
-          style: { background: toHex(color) },
-          'aria-pressed': String(on),
-          'aria-label': `${on ? 'Remove' : 'Add'} ${toHex(color)} ${on ? 'from' : 'to'} ${part.name}`,
-          title: toHex(color),
-          onclick: () => toggle(color),
-        });
-      }),
+      colours.map((color) => colourChip(part, color, toggle)),
     ),
   );
 }

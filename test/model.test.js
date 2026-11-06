@@ -51,7 +51,7 @@ test('the composite stacks visible art layers and leaves out pictures to trace',
 test('moving a selection carries its pixels and leaves the gap clear', () => {
   const sprite = createSprite(8, 8);
   setPixel(sprite, 2, 2, RED);
-  const moved = moveSelected(sprite, rectSelection(8, 8, 2, 2, 2, 2), 3, 1);
+  const moved = moveSelected(sprite, rectSelection({ width: 8, height: 8 }, [2, 2], [2, 2]), 3, 1);
   assert.equal(getPixel(sprite, 2, 2), 0);
   assert.equal(getPixel(sprite, 5, 3), RED);
   assert.equal(moved.cells[3 * 8 + 5], 1);

@@ -9,58 +9,45 @@ const ACTIONS = [
   ['rotate-cw', '⟳ 90°', 'Turn the selection a quarter right'],
 ];
 
+function transform(app, kind, label) {
+  const layer = currentLayer(app.store.state);
+  let selection = app.store.state.selection;
+  commit(app, label, [layer], () => {
+    selection = transformSelected(layer.sprite, selection, kind);
+  });
+  app.store.set({ selection });
+}
+
+function copySelected(app) {
+  const { state } = app.store;
+  app.clipboard = liftPixels(currentLayer(state).sprite, state.selection);
+}
+
+function eraseSelected(app) {
+  const { state } = app.store;
+  const layer = currentLayer(state);
+  commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection));
+}
+
+const button = (title, onclick, label) => node('button.btn.quiet', { title, onclick }, label);
+
 // Shown over the canvas while something is selected: turn, flip, copy, delete, let go.
 export function renderSelectionBar(el, app) {
-  const { state } = app.store;
+  el.hidden = !app.store.state.selection;
 
-  if (!state.selection) {
+  if (el.hidden) {
     replace(el);
-    el.hidden = true;
 
     return;
   }
 
-  const layer = currentLayer(state);
-  const transform = (kind, label) => {
-    let selection = state.selection;
-    commit(app, label, [layer], () => {
-      selection = transformSelected(layer.sprite, selection, kind);
-    });
-    app.store.set({ selection });
-  };
-  el.hidden = false;
   replace(
     el,
     ACTIONS.map(([kind, label, title]) =>
-      node(
-        'button.btn.quiet',
-        { title, onclick: () => transform(kind, title.split(' the')[0]) },
-        label,
-      ),
+      button(title, () => transform(app, kind, title.split(' the')[0]), label),
     ),
-    node(
-      'button.btn.quiet',
-      {
-        title: 'Copy (⌘C); paste in any frame with ⌘V',
-        onclick: () => {
-          app.clipboard = liftPixels(layer.sprite, state.selection);
-        },
-      },
-      'Copy',
-    ),
-    node(
-      'button.btn.quiet',
-      {
-        title: 'Erase the selected pixels (Delete)',
-        onclick: () =>
-          commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection)),
-      },
-      'Delete',
-    ),
-    node(
-      'button.btn.quiet',
-      { title: 'Let go of the selection (Esc)', onclick: () => app.store.set({ selection: null }) },
-      'Done',
-    ),
+    button('Copy (⌘C); paste in any frame with ⌘V', () => copySelected(app), 'Copy'),
+    button('Erase the selected pixels (Delete)', () => eraseSelected(app), 'Delete'),
+    button('Let go of the selection (Esc)', () => app.store.set({ selection: null }), 'Done'),
   );
 }

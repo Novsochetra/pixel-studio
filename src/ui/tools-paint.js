@@ -44,7 +44,7 @@ export function stroke(app, point, color) {
 export function fill(app, [x, y]) {
   const layer = currentLayer(app.store.state);
   commit(app, 'Fill', [layer], () =>
-    floodFill(layer.sprite, x, y, app.store.state.color, paintOptions(app.store.state)),
+    floodFill(layer.sprite, [x, y], app.store.state.color, paintOptions(app.store.state)),
   );
 
   return null;

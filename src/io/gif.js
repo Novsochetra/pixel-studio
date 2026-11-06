@@ -41,61 +41,71 @@ function paletteOf(frames) {
   return { colours: [0, ...kept], indexOf: (key) => index.get(key) ?? nearest(key) };
 }
 
-function lzw(indices, minCodeSize) {
-  const out = [];
+// codes of growing width packed least significant bit first, as GIF wants them
+function bitWriter() {
+  const bytes = [];
   let bits = 0;
-  let bitCount = 0;
-  const write = (code, size) => {
-    bits |= code << bitCount;
-    bitCount += size;
+  let count = 0;
 
-    while (bitCount >= 8) {
-      out.push(bits & 255);
-      bits >>>= 8;
-      bitCount -= 8;
-    }
+  return {
+    bytes,
+    write(code, size) {
+      bits |= code << count;
+      count += size;
+
+      while (count >= 8) {
+        bytes.push(bits & 255);
+        bits >>>= 8;
+        count -= 8;
+      }
+    },
+    flush() {
+      if (count) {
+        bytes.push(bits & 255);
+      }
+    },
   };
+}
+
+function lzw(indices, minCodeSize) {
+  const out = bitWriter();
   const clear = 1 << minCodeSize;
   const end = clear + 1;
-  let table = new Map();
-  let next = end + 1;
-  let size = minCodeSize + 1;
-  write(clear, size);
+  const codes = { table: new Map(), next: end + 1, size: minCodeSize + 1 };
+  const reset = () =>
+    Object.assign(codes, { table: new Map(), next: end + 1, size: minCodeSize + 1 });
+  out.write(clear, codes.size);
   let prefix = indices[0];
 
   for (let i = 1; i < indices.length; i++) {
     const key = prefix * 256 + indices[i];
 
-    if (table.has(key)) {
-      prefix = table.get(key);
+    if (codes.table.has(key)) {
+      prefix = codes.table.get(key);
       continue;
     }
 
-    write(prefix, size);
-    table.set(key, next++);
+    out.write(prefix, codes.size);
+    codes.table.set(key, codes.next++);
 
-    if (next > 1 << size && size < 12) {
-      size++;
+    if (codes.next > 1 << codes.size && codes.size < 12) {
+      codes.size++;
     }
 
-    if (next === 4096) {
-      write(clear, size);
-      table = new Map();
-      next = end + 1;
-      size = minCodeSize + 1;
+    // the table is full: a clear code starts it over
+    if (codes.next === 4096) {
+      out.write(clear, codes.size);
+      reset();
     }
 
     prefix = indices[i];
   }
 
-  write(prefix, size);
-  write(end, size);
+  out.write(prefix, codes.size);
+  out.write(end, codes.size);
+  out.flush();
 
-  if (bitCount) {
-    out.push(bits & 255);
-  }
-
-  return out;
+  return out.bytes;
 }
 
 // appended in place: spreading a big frame's bytes into push() overflows the call stack

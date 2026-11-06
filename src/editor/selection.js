@@ -2,7 +2,8 @@ import { CLEAR, getPixel, setPixel } from '../model/sprite.js';
 
 // A selection is a mask over the canvas: { width, height, cells: Uint8Array }.
 
-export function rectSelection(width, height, x0, y0, x1, y1) {
+// the box between two corners, clipped to the canvas ({ width, height })
+export function rectSelection({ width, height }, [x0, y0], [x1, y1]) {
   const cells = new Uint8Array(width * height);
   const [left, right] = [Math.max(0, Math.min(x0, x1)), Math.min(width - 1, Math.max(x0, x1))];
   const [top, bottom] = [Math.max(0, Math.min(y0, y1)), Math.min(height - 1, Math.max(y0, y1))];
@@ -14,44 +15,40 @@ export function rectSelection(width, height, x0, y0, x1, y1) {
   return { width, height, cells };
 }
 
-// pixels of the clicked colour: touching it (4-way) or, with `everywhere`, anywhere
-export function colourSelection(sprite, x, y, everywhere) {
-  const { width, height } = sprite;
-  const cells = new Uint8Array(width * height);
-  const target = getPixel(sprite, x, y);
+function everywhere(sprite, target) {
+  const cells = new Uint8Array(sprite.width * sprite.height);
 
-  if (everywhere) {
-    for (let py = 0; py < height; py++) {
-      for (let px = 0; px < width; px++) {
-        cells[py * width + px] = getPixel(sprite, px, py) === target ? 1 : 0;
-      }
-    }
-
-    return { width, height, cells };
+  for (let i = 0; i < cells.length; i++) {
+    cells[i] = getPixel(sprite, i % sprite.width, Math.floor(i / sprite.width)) === target ? 1 : 0;
   }
 
+  return cells;
+}
+
+function connected(sprite, [x, y], target) {
+  const { width, height } = sprite;
+  const cells = new Uint8Array(width * height);
   const stack = [[x, y]];
 
   while (stack.length) {
     const [px, py] = stack.pop();
-    const at = py * width + px;
+    const inside = px >= 0 && py >= 0 && px < width && py < height;
 
-    if (
-      px < 0 ||
-      py < 0 ||
-      px >= width ||
-      py >= height ||
-      cells[at] ||
-      getPixel(sprite, px, py) !== target
-    ) {
-      continue;
+    if (inside && !cells[py * width + px] && getPixel(sprite, px, py) === target) {
+      cells[py * width + px] = 1;
+      stack.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
     }
-
-    cells[at] = 1;
-    stack.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
   }
 
-  return { width, height, cells };
+  return cells;
+}
+
+// pixels of the clicked colour: touching it (4-way) or, with `anywhere`, anywhere
+export function colourSelection(sprite, x, y, anywhere) {
+  const target = getPixel(sprite, x, y);
+  const cells = anywhere ? everywhere(sprite, target) : connected(sprite, [x, y], target);
+
+  return { width: sprite.width, height: sprite.height, cells };
 }
 
 export function isSelected(selection, x, y) {
