@@ -15,7 +15,7 @@ import { frameAt } from '../model/project.js';
 import { applyMapping, suggestMapping } from '../palette/palette.js';
 
 const NO_PALETTE =
-  "Add the palette you want to use: paste its hex codes or open a palette file. Or start from 8 of the character's own colours.";
+  "Add the palette you want to use: paste its hex codes or open a palette file. Or start from 8 of the art's own colours.";
 
 function layersFor(state, scope) {
   return scope === 'view'

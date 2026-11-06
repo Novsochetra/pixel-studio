@@ -156,6 +156,10 @@ check(
 );
 await createProject(page, { kind: 'Tiles' });
 check(
+  (await page.getByLabel('Pixel canvas').boundingBox()).width > 200,
+  'a new tiles project opens fitted to the window, not at the last zoom',
+);
+check(
   (await page.getByRole('button', { name: /Pin a body part/ }).count()) === 0,
   'tiles have no pin tool',
 );

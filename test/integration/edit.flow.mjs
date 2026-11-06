@@ -169,7 +169,7 @@ check((await pixels()) !== plain, 'a team kit recolours the character');
 await page.keyboard.press('Meta+z');
 check((await colours()) === coloursBefore, 'and undo takes it off');
 await page.getByRole('button', { name: 'Swap colours…' }).click();
-await page.getByRole('button', { name: 'Make an 8-colour palette from the character' }).click();
+await page.getByRole('button', { name: 'Make an 8-colour palette from the art' }).click();
 await page.waitForTimeout(400);
 check((await page.locator('.sheet .swatch').count()) >= 8, 'swap colours makes a palette');
 await page.keyboard.press('Escape');

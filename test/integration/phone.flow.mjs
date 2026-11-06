@@ -14,6 +14,22 @@ await page.locator('.cell-add').click();
 await page.locator('.cell-add').click();
 await page.waitForTimeout(300);
 await page.screenshot({ path: `${shots}/phone.png` });
+await page.getByRole('button', { name: 'Download' }).click();
+const menu = await page.locator('.menu').boundingBox();
+check(
+  menu.x >= 0 && menu.x + menu.width <= (await page.evaluate(() => innerWidth)),
+  'the download menu stays on the screen',
+);
+await page.keyboard.press('Escape');
+await page.getByRole('button', { name: 'Views board', exact: true }).click();
+await page.waitForTimeout(300);
+const controls = await page.locator('.board-controls').boundingBox();
+check(
+  controls.x >= 0 && controls.x + controls.width <= (await page.evaluate(() => innerWidth)),
+  'the board controls wrap within the screen',
+);
+await page.getByRole('button', { name: 'Edit', exact: true }).click();
+await page.waitForTimeout(300);
 const stage = await page.locator('.edit-scroll').boundingBox();
 check(stage.height > 150, 'the canvas keeps room above the frames');
 

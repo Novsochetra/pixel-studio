@@ -17,7 +17,9 @@ function position(menu, anchor, align) {
   const below = box.bottom + 6 + height <= window.innerHeight - 8;
   menu.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - height)}px`;
 
-  if (align === 'right') {
+  // a right-aligned menu under a button near the left edge (a phone's wrapped toolbar) would run
+  // off the screen, so it is held inside it
+  if (align === 'right' && box.right - menu.offsetWidth >= 8) {
     menu.style.right = `${Math.max(8, window.innerWidth - box.right)}px`;
   } else {
     menu.style.left = `${Math.max(8, Math.min(box.left, window.innerWidth - menu.offsetWidth - 8))}px`;

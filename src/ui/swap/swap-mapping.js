@@ -45,12 +45,12 @@ export function mappingRows(state, palette, mapping, onChange) {
   );
 }
 
-// a palette of the character's own colours, cut down to `size`, added to the project
+// a palette of the art's own colours, cut down to `size`, added to the project
 export function makeReducedPalette(app, size) {
   const { state } = app.store;
 
   if (!characterColors(state).length) {
-    toast('The character has no colours yet. Clean or draw a view first.');
+    toast('The art has no colours yet. Clean or draw a view first.');
 
     return null;
   }

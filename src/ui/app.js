@@ -49,6 +49,8 @@ export function mountApp(app) {
     ...mountInspector(app),
   };
 
+  let shownProject = app.store.state.project.id;
+
   app.store.subscribe((_, patch) => {
     const keys = Object.keys(patch);
 
@@ -56,6 +58,12 @@ export function mountApp(app) {
       if (keys.some((key) => triggers.includes(key))) {
         draw[part](patch);
       }
+    }
+
+    // another project's canvas has its own size: it opens fitted, not at the last one's zoom
+    if (app.store.state.project.id !== shownProject) {
+      shownProject = app.store.state.project.id;
+      queueMicrotask(app.fitCanvas);
     }
   });
 

@@ -53,7 +53,7 @@ export function reduceButton(job) {
     job.draw();
   };
 
-  return node('button.btn', { onclick: reduce }, 'Make an 8-colour palette from the character');
+  return node('button.btn', { onclick: reduce }, 'Make an 8-colour palette from the art');
 }
 
 export function previewToggle(job, mapping) {

@@ -37,6 +37,7 @@
 }
 
 h4.start-heading {
+  margin-top: 12px;
   color: var(--label-secondary);
   font-size: 13px;
   font-weight: 600;

@@ -90,7 +90,9 @@
   text-align: center;
 }
 
+/* the board fits the stage: on a phone it is drawn smaller, its pixels kept sharp */
 .stage-inner.board {
+  width: 100%;
   gap: 16px;
   align-content: center;
 }
@@ -117,5 +119,6 @@
 
 .board-canvas {
   max-width: 100%;
+  height: auto;
   touch-action: none;
 }
