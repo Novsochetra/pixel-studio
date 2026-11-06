@@ -2,6 +2,7 @@ import { commit, currentAnimation, restructure } from './actions.js';
 import { chooseFile } from './choose-file.js';
 import { openImport } from './import-sheet.js';
 import { addFrame, moveFrame, removeFrame } from '../model/frames.js';
+import { isFrameHidden, setFrameHidden } from '../model/frame-play.js';
 import { copyFrameToViews } from '../model/structure.js';
 import { cloneSprite } from '../model/sprite.js';
 import { matchingLayer } from '../model/project.js';
@@ -52,3 +53,8 @@ export const copyToOtherViews = (app, direction, index) =>
 
     return index;
   });
+
+export const toggleFrameHidden = (app, index) =>
+  frameChange(app, 'Hide frame from play', (animation) =>
+    setFrameHidden(animation, index, !isFrameHidden(animation, index)),
+  );

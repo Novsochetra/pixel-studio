@@ -1,6 +1,7 @@
 import { currentAnimation } from '../actions.js';
 import { openMenu } from '../menu.js';
 import { frameCount, hasArt } from '../../model/frames.js';
+import { isFrameHidden } from '../../model/frame-play.js';
 import { viewName } from '../../model/kinds.js';
 import {
   copyToOtherViews,
@@ -9,6 +10,7 @@ import {
   imageIntoFrame,
   moveFrameTo,
   startFromPrevious,
+  toggleFrameHidden,
 } from '../frame-actions.js';
 
 // the selected frame's actions; moving is also a drag, here for the keyboard and for clarity
@@ -27,8 +29,13 @@ export function openCellMenu(app, anchor, direction, index) {
     previous && [`Start from frame ${index}`, () => startFromPrevious(app, direction, index)],
     ['Duplicate frame', () => duplicateFrame(app, index)],
     viewCount > 1 && [
-      `Copy ${viewName(state.project, direction)}'s frame to the other viewCount`,
+      `Copy ${viewName(state.project, direction)}'s frame to the other views`,
       () => copyToOtherViews(app, direction, index),
+    ],
+    [
+      isFrameHidden(animation, index) ? 'Show in play' : 'Hide from play',
+      () => toggleFrameHidden(app, index),
+      { title: 'Play skips a hidden frame; it stays in every view and every download' },
     ],
     null,
     ['Move earlier', () => moveFrameTo(app, index, index - 1), { disabled: index === 0 }],

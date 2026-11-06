@@ -55,12 +55,14 @@ export function mountGridPanel(app, { isShown, onPlayFrame }) {
   const render = () =>
     !el.querySelector('.tab-rename') &&
     keepFocus(el, () => {
+      const { gridAll, gridOpen } = app.store.state;
       shownPlaying = isPlaying(app);
       const onPlay = () => togglePlayback(app, { isShown, onFrame });
+      el.classList.toggle('folded', !gridOpen);
       replace(
         el,
         gridBar(app, { playing: shownPlaying, onPlay }),
-        gridBody(app, { all: app.store.state.gridAll, playFrame: app.playback?.frame ?? null }),
+        gridOpen ? gridBody(app, { all: gridAll, playFrame: app.playback?.frame ?? null }) : null,
       );
       showOpenTab(el);
     });

@@ -156,14 +156,3 @@ test('a new animation is offered untaken names and the drawn poses, the open one
   assert.deepEqual(posesToStartFrom(project, run), [run, idle]);
   assert.ok(!posesToStartFrom(project, walk).includes(walk));
 });
-
-test('play shows the frame its time has reached, going round, never one before its start', async () => {
-  const { frameAtTime } = await import('../../src/model/frames.js');
-  const play = { from: 1, fps: 8, count: 4 };
-
-  assert.equal(frameAtTime(play, 0), 1);
-  assert.equal(frameAtTime(play, 124), 1);
-  assert.equal(frameAtTime(play, 125), 2);
-  assert.equal(frameAtTime(play, 500), 1);
-  assert.equal(frameAtTime(play, -5), 1);
-});

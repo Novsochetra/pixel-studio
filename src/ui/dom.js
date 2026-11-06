@@ -81,6 +81,8 @@ const PATHS = {
   picture: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 8.5h.01',
   trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6',
   more: 'M5 12h.01M12 12h.01M19 12h.01',
+  'chevron-down': 'M6 9l6 6 6-6',
+  'chevron-up': 'M6 15l6-6 6 6',
   close: 'M6 6l12 12M18 6L6 18',
   swap: 'M7 7h11l-3-3M17 17H6l3 3',
   wand: 'M4 20L15 9M14 4v3M19 9h-3M17.5 5.5l-2 2M9 4l.5 1.5M20 14l-1.5-.5',

@@ -1,5 +1,5 @@
 import { settleAt } from './actions.js';
-import { readGridAll } from './grid/all-views.js';
+import { readGridAll, readGridOpen } from './grid/all-views.js';
 import { bounds, fromHex } from '../model/sprite.js';
 import { referenceOf } from '../model/reference.js';
 import { FIRST_PENCIL_COLOUR } from '../art/editor-colours.js';
@@ -34,6 +34,7 @@ export function startingState(project) {
     onion: false,
     frameDrag: null,
     gridAll: readGridAll(),
+    gridOpen: readGridOpen(),
     viewFilter: 'colour',
     showPins: false,
     pinName: 'Head',

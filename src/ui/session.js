@@ -99,6 +99,7 @@ const VIEW = [
   'viewFilter',
   'onion',
   'gridAll',
+  'gridOpen',
   'symmetry',
   'showPins',
   'pinName',

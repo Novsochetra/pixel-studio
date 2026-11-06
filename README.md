@@ -10,7 +10,8 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
   centred. Later animation frames keep their own pixel size.
 - **Edit**: pencil, eraser, fill, colour swap, selection, outlines, guides, layers, pictures to trace.
 - **Animate**: each animation is a grid, views down and frames across, as the sheet will be: drag
-  frames to reorder them, play them on the canvas, see the mirrored side.
+  frames to reorder them, play them on the canvas (every view side by side with All views), hide a
+  frame from play without deleting it, see the mirrored side, fold the frames away for room.
 - **Preview**: characters in a scene (the pitch for Naga Eleven), tiles laid as a floor, effects and
   icons at 1×, 2× and 4×.
 - **Export**: sprite sheet + Aseprite-style JSON (Phaser, Godot, Unity), separate frames, GIFs, and

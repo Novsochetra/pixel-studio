@@ -1,6 +1,8 @@
 import { currentLayer } from './actions.js';
 import { startTool } from './tools.js';
 import { panSession, twoFingerSession } from './navigate.js';
+import { stopPlayback } from './grid/playback.js';
+import { playsAllViews } from './play-all-views.js';
 import { getPixel, toHex } from '../model/sprite.js';
 
 export function pixelAt(canvas, event, scale) {
@@ -62,6 +64,14 @@ export function bindPointer(canvas, app, stage) {
   };
 
   canvas.addEventListener('pointerdown', (event) => {
+    // every view side by side has no one frame under the pointer to draw on: a press stops play
+    if (playsAllViews(app)) {
+      stopPlayback(app);
+      app.store.touch('at');
+
+      return;
+    }
+
     if (event.pointerType === 'touch') {
       place(event);
     }
@@ -69,6 +79,10 @@ export function bindPointer(canvas, app, stage) {
     view.session = pressSession(app, view, event);
   });
   canvas.addEventListener('pointermove', (event) => {
+    if (playsAllViews(app)) {
+      return;
+    }
+
     if (view.touches.has(event.pointerId)) {
       place(event);
     }

@@ -5,6 +5,7 @@ import { cast } from '../preview-scene.js';
 import { drawScene } from './scene-draw.js';
 import { drawCentred, drawTiles } from './flat-draw.js';
 import { sceneControls } from './scene-controls.js';
+import { frameAtTick } from '../../model/frame-play.js';
 import { kindOf, viewName } from '../../model/kinds.js';
 
 const ZOOMS = { scene: [1, 2, 3], tiled: [1, 2, 4], centred: [1] };
@@ -77,8 +78,11 @@ function paintPreview(canvas, app, { clock, time }) {
   const { state } = app.store;
   const mode = kindOf(state.project).preview;
   const seconds = clock.started === null ? null : (time - clock.started) / 1000;
-  const fps = currentAnimation(state).fps;
-  const tick = seconds === null ? Math.min(state.at.frame, 99) : Math.floor(seconds * fps);
+  const animation = currentAnimation(state);
+  const tick =
+    seconds === null
+      ? Math.min(state.at.frame, 99)
+      : frameAtTick(animation, Math.floor(seconds * animation.fps));
   const flat = mode === 'tiled' ? drawTiles : drawCentred;
   const size =
     mode === 'scene'

@@ -34,6 +34,7 @@ const GRID_KEYS = [
   'layers',
   'project',
   'gridAll',
+  'gridOpen',
   'onion',
   'showPins',
   'pinName',
@@ -73,7 +74,10 @@ export function mountEditStage(container, app) {
   const scroller = node('div.edit-scroll', {}, inner);
   const grid = mountGridPanel(app, {
     isShown: () => canvas.isConnected,
-    onPlayFrame: () => paint(canvas, app),
+    onPlayFrame: () => {
+      paint(canvas, app);
+      renderEmptyFrame(empty, app);
+    },
   });
 
   container.replaceChildren(node('div.edit-layout', {}, scroller, grid.el));
