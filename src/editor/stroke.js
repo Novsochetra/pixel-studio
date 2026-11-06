@@ -7,12 +7,14 @@ const isBeside = (first, second) =>
   Math.abs(first[0] - second[0]) + Math.abs(first[1] - second[1]) === 1;
 
 // One drag of the pencil or eraser. With clean lines on, a pixel that turns a diagonal step into
-// an L-shaped corner is put back, so outlines stay one pixel thin without doubled corners.
+// an L-shaped corner is put back, so outlines stay one pixel thin without doubled corners. A
+// thicker brush has no such corners: putting one back would cut a notch out of its stroke.
 export class Stroke {
   constructor(sprite, color, options = {}) {
     this.sprite = sprite;
     this.color = color;
     this.options = options;
+    this.cleans = options.cleanLines && (options.brush?.size ?? 1) === 1;
     this.before = cloneSprite(sprite);
     this.path = [];
     this.last = null;
@@ -32,7 +34,7 @@ export class Stroke {
     paintPoint(this.sprite, point, this.color, this.options);
     this.path.push(point);
 
-    if (this.options.cleanLines && this.path.length >= 3) {
+    if (this.cleans && this.path.length >= 3) {
       this.removeCorner();
     }
   }

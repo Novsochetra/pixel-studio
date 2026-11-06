@@ -8,7 +8,9 @@ import {
 } from './draw.js';
 import { currentFrames, directionSprite } from './actions.js';
 import { drawPins } from './pins-draw.js';
-import { drawHighlight, drawSelection } from './stage-marks.js';
+import { drawBrush, drawHighlight, drawSelection } from './stage-marks.js';
+import { BRUSH_TOOLS } from './tools-paint.js';
+import { brushPixels } from '../editor/paint.js';
 import { frameAt } from '../model/project.js';
 import { compositeFrame } from '../model/composite.js';
 import { applyMapping } from '../palette/palette.js';
@@ -68,6 +70,7 @@ function shownState(app) {
     selection: null,
     highlight: null,
     showPins: false,
+    cursor: null,
   };
 }
 
@@ -121,6 +124,11 @@ function paintMarks(context, state, scale) {
 
   if (state.highlight?.length) {
     drawHighlight(context, state.highlight, scale);
+  }
+
+  // one pixel needs no ring: the pointer is on it
+  if (state.cursor && state.brush.size > 1 && BRUSH_TOOLS.has(state.tool)) {
+    drawBrush(context, brushPixels([state.cursor.x, state.cursor.y], state), scale);
   }
 }
 

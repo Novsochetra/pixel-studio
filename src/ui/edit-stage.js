@@ -89,6 +89,11 @@ export function mountEditStage(container, app) {
       }
 
       paint(canvas, app);
+
+      // the pointer moving only moves the brush's ring, which is drawn on the canvas
+      if (Object.keys(patch).join() === 'cursor') {
+        return;
+      }
       renderSelectionBar(bar, app);
       renderEmptyFrame(empty, app);
 

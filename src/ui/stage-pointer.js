@@ -77,6 +77,8 @@ export function bindPointer(canvas, app, stage) {
     showCursor(app, point);
     view.session?.move?.(point, event);
   });
+  // the brush's ring goes with the pointer
+  canvas.addEventListener('pointerleave', () => app.store.set({ cursor: null }));
   canvas.addEventListener('pointerup', finish);
   canvas.addEventListener('pointercancel', finish);
 }

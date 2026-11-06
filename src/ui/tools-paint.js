@@ -1,14 +1,18 @@
 import { CLEAR, cloneSprite, getPixel, setPixel } from '../model/sprite.js';
-import { canPaint, floodFill, linePoints, mirrored, replaceColor } from '../editor/paint.js';
+import { brushPixels, canPaint, floodFill, linePoints, replaceColor } from '../editor/paint.js';
 import { shadeFamilies, shiftShade } from '../palette/families.js';
 import { Stroke } from '../editor/stroke.js';
 import { characterColors } from './character-colours.js';
 import { commit, currentLayer } from './actions.js';
 import { toast } from './dom.js';
 
+// the tools that paint with the brush, and show its outline under the pointer
+export const BRUSH_TOOLS = new Set(['pencil', 'eraser', 'shade']);
+
 // clean lines tidies drawn lines; for the eraser it would put erased corners back
 export function paintOptions(state, color = state.color) {
   return {
+    brush: state.brush,
     symmetry: state.symmetry,
     paintOver: state.paintOver,
     cleanLines: state.cleanLines && color !== CLEAR,
@@ -76,7 +80,7 @@ export function shade(app, point, darker) {
   let last = null;
   const step = ([x, y]) => {
     for (const [px, py] of last ? linePoints(last[0], last[1], x, y) : [[x, y]]) {
-      for (const [mx, my] of mirrored(px, py, state.symmetry)) {
+      for (const [mx, my] of brushPixels([px, py], state)) {
         const key = my * layer.sprite.width + mx;
         const color = getPixel(before, mx, my);
 

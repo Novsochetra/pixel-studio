@@ -12,6 +12,7 @@ const GROUPS = [
       ['G', 'Fill'],
       ['R', 'Replace a colour everywhere'],
       ['D', 'Lighter shade (Shift: darker)'],
+      ['[  ]', 'Brush smaller, bigger'],
       ['S', 'Select and move'],
       ['W', 'Select a colour (Shift: everywhere)'],
       ['P', 'Pin a body part (Alt-click removes)'],

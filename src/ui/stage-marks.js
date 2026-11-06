@@ -1,37 +1,36 @@
 import { cssVar } from './draw.js';
 
+// the edges between cells that are on and cells that are not, added to the context's path
+function traceEdges(context, cells, on, scale) {
+  for (const [x, y] of cells) {
+    if (!on(x, y - 1)) {
+      context.rect(x * scale, y * scale, scale, 0);
+    }
+
+    if (!on(x, y + 1)) {
+      context.rect(x * scale, (y + 1) * scale, scale, 0);
+    }
+
+    if (!on(x - 1, y)) {
+      context.rect(x * scale, y * scale, 0, scale);
+    }
+
+    if (!on(x + 1, y)) {
+      context.rect((x + 1) * scale, y * scale, 0, scale);
+    }
+  }
+}
+
 // a dashed outline round the selected cells
 export function drawSelection(context, selection, scale) {
   const { width, height, cells } = selection;
   const on = (x, y) => x >= 0 && y >= 0 && x < width && y < height && cells[y * width + x];
+  const selected = [];
 
+  cells.forEach((cell, i) => cell && selected.push([i % width, Math.floor(i / width)]));
   context.save();
   context.beginPath();
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      if (!on(x, y)) {
-        continue;
-      }
-
-      if (!on(x, y - 1)) {
-        context.rect(x * scale, y * scale, scale, 0);
-      }
-
-      if (!on(x, y + 1)) {
-        context.rect(x * scale, (y + 1) * scale, scale, 0);
-      }
-
-      if (!on(x - 1, y)) {
-        context.rect(x * scale, y * scale, 0, scale);
-      }
-
-      if (!on(x + 1, y)) {
-        context.rect((x + 1) * scale, y * scale, 0, scale);
-      }
-    }
-  }
-
+  traceEdges(context, selected, on, scale);
   context.lineWidth = 2;
   context.strokeStyle = cssVar('--ink');
   context.stroke();
@@ -51,5 +50,21 @@ export function drawHighlight(context, points, scale) {
     context.strokeRect(x * scale + 0.5, y * scale + 0.5, scale - 1, scale - 1);
   }
 
+  context.restore();
+}
+
+// the pixels the brush would paint, ringed dark and light so the ring shows on any colour
+export function drawBrush(context, pixels, scale) {
+  const covered = new Set(pixels.map(([x, y]) => `${x},${y}`));
+
+  context.save();
+  context.beginPath();
+  traceEdges(context, pixels, (x, y) => covered.has(`${x},${y}`), scale);
+  context.lineWidth = 3;
+  context.strokeStyle = cssVar('--ink');
+  context.stroke();
+  context.lineWidth = 1;
+  context.strokeStyle = cssVar('--on-tint');
+  context.stroke();
   context.restore();
 }

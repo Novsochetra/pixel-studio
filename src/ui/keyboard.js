@@ -2,6 +2,7 @@ import { toolsFor } from './tools.js';
 import { flipCurrent, redo, undo } from './actions.js';
 import { handleSelectionKey } from './selection-keys.js';
 import { openShortcuts } from './shortcuts.js';
+import { resizeBrush } from '../editor/brush.js';
 
 function typing(event) {
   const tag = event.target.tagName;
@@ -31,6 +32,8 @@ const PLAIN_KEYS = {
 
     app.store.set({ symmetry: { ...symmetry, on: !symmetry.on } });
   },
+  '[': (app) => app.store.set({ brush: resizeBrush(app.store.state.brush, -1) }),
+  ']': (app) => app.store.set({ brush: resizeBrush(app.store.state.brush, 1) }),
 };
 
 function plainKey(app, event, key) {

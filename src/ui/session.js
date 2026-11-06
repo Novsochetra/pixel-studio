@@ -94,6 +94,7 @@ const VIEW = [
   'zoom',
   'tool',
   'color',
+  'brush',
   'showGrid',
   'showGuides',
   'viewFilter',

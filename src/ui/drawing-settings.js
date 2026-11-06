@@ -1,6 +1,7 @@
 import { node } from './dom.js';
 import { directionSprite } from './actions.js';
 import { bounds, toHex } from '../model/sprite.js';
+import { brushField } from './brush-settings.js';
 
 function paintOverField(app, colors) {
   const { state } = app.store;
@@ -85,8 +86,8 @@ function mirrorField(app) {
   );
 }
 
-// How the pencil draws: clean lines, only the character's colours, only over one colour, and
-// mirrored about a line.
+// How the pencil draws: its brush, clean lines, only the character's colours, only over one
+// colour, and mirrored about a line.
 export function drawingSettings(app, colors) {
   const { state } = app.store;
   const lock = (on) =>
@@ -97,8 +98,13 @@ export function drawingSettings(app, colors) {
 
   return [
     node('h2', { tabindex: '0' }, 'Drawing'),
+    brushField(app),
     toggle(
-      { id: 'clean-lines', label: 'Clean lines', hint: 'Removes doubled corners while you draw' },
+      {
+        id: 'clean-lines',
+        label: 'Clean lines',
+        hint: 'Removes doubled corners while you draw with a 1 px brush',
+      },
       state.cleanLines,
       (on) => app.store.set({ cleanLines: on }),
     ),

@@ -21,6 +21,9 @@ export const ROUTES = {
     'showGuides',
     'symmetry',
     'mirror',
+    'brush',
+    'brushSize',
+    'cursor',
     'at',
     'preview',
     'guides',
@@ -50,6 +53,7 @@ export const ROUTES = {
     'animations',
   ],
   drawing: [
+    'brush',
     'color',
     'paintOver',
     'paletteLock',

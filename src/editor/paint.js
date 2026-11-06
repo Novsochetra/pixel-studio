@@ -1,4 +1,5 @@
 import { getPixel, setPixel } from '../model/sprite.js';
+import { FIRST_BRUSH, brushOffsets } from './brush.js';
 
 // every point on the line between two pixels (Bresenham)
 export function linePoints(x0, y0, x1, y1) {
@@ -53,10 +54,15 @@ export function canPaint(sprite, x, y, paintOver) {
   return paintOver === null || paintOver === undefined || getPixel(sprite, x, y) === paintOver;
 }
 
-export function paintPoint(sprite, [x, y], color, options = {}) {
+// every pixel the brush covers at a point, and their mirrors when symmetry is on
+export function brushPixels([x, y], { brush = FIRST_BRUSH, symmetry } = {}) {
+  return brushOffsets(brush).flatMap(([dx, dy]) => mirrored(x + dx, y + dy, symmetry));
+}
+
+export function paintPoint(sprite, point, color, options = {}) {
   const changed = [];
 
-  for (const [px, py] of mirrored(x, y, options.symmetry)) {
+  for (const [px, py] of brushPixels(point, options)) {
     const before = getPixel(sprite, px, py);
 
     if (canPaint(sprite, px, py, options.paintOver) && setPixel(sprite, px, py, color)) {
