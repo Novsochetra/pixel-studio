@@ -6,7 +6,7 @@ import { characterColors } from './character-colours.js';
 import { commit, currentLayer } from './actions.js';
 import { toast } from './dom.js';
 
-export const BRUSH_TOOLS = new Set(['pencil', 'eraser', 'shade', 'pixels']);
+export const BRUSH_TOOLS = new Set(['pencil', 'eraser', 'shade']);
 
 // clean lines tidies drawn lines; for the eraser it would put erased corners back
 export function paintOptions(state, color = state.color) {

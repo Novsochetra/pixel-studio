@@ -60,7 +60,7 @@ check(
   'the brush unpaints pixels from a part',
 );
 await page.getByRole('button', { name: 'Paint', exact: true }).click();
-await page.getByRole('button', { name: 'Lasso' }).click();
+await page.locator('.sheet').getByRole('button', { name: 'Lasso', exact: true }).click();
 await page.getByRole('button', { name: 'Paint Torso' }).click();
 const torso = page.locator('.cut-part', { has: page.getByRole('button', { name: 'Paint Torso' }) });
 const torsoSize = await torso.locator('.cut-size').textContent();

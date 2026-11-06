@@ -4,7 +4,7 @@ import { removePinNear, setPin } from '../model/pins.js';
 import { currentLayer, restructure } from './actions.js';
 import { toast } from './dom.js';
 import { fill, replace, shade, stroke } from './tools-paint.js';
-import { select, selectPixels, wand } from './tools-select.js';
+import { lasso, select, wand } from './tools-select.js';
 import { moveFrameDrag } from './frame-move.js';
 import { kindOf } from '../model/kinds.js';
 import { refusesPaint } from './body/body-lock.js';
@@ -19,7 +19,7 @@ const TOOLS = [
   { id: 'shade', label: 'Light and dark brush (Shift: darker)', key: 'd' },
   { id: 'select', label: 'Select and move', key: 's' },
   { id: 'wand', label: 'Select a colour (Shift: everywhere)', key: 'w' },
-  { id: 'pixels', label: 'Select pixels: drag over them (Shift: let them go)', key: 'q' },
+  { id: 'lasso', label: 'Lasso: draw round a part to select it, drag inside to move it', key: 'l' },
   { id: 'pin', label: 'Pin a body part (Alt-click removes it)', key: 'p' },
   { id: 'moveframe', label: 'Move the whole frame: drag it, or use the arrow keys', key: 'v' },
   { id: 'pose', label: 'Pose the body parts: drag a part, or its handle to turn it', key: 'o' },
@@ -70,7 +70,7 @@ const ON_PRESS = {
   fill,
   replace,
   pose: poseTool,
-  pixels: selectPixels,
+  lasso,
 };
 
 function hiddenLayer(app) {

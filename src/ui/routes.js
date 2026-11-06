@@ -8,6 +8,7 @@ export const ROUTES = {
     'showPins',
     'pinName',
     'piece',
+    'lassoLoop',
     'tool',
     'highlight',
     'viewFilter',

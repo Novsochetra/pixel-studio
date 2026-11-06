@@ -67,3 +67,18 @@ export function drawBrush(context, pixels, scale) {
   context.stroke();
   context.restore();
 }
+
+// the lasso's loop as it is drawn, through the middles of the pixels it passed, closed back
+export function drawLoop(context, loop, scale) {
+  context.save();
+  context.beginPath();
+  loop.forEach(([x, y]) => context.lineTo((x + 0.5) * scale, (y + 0.5) * scale));
+  context.closePath();
+  context.lineWidth = 2;
+  context.strokeStyle = cssVar('--ink');
+  context.stroke();
+  context.setLineDash([4, 4]);
+  context.strokeStyle = cssVar('--tint');
+  context.stroke();
+  context.restore();
+}

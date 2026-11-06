@@ -8,7 +8,7 @@ import {
 } from './draw.js';
 import { currentFrames, directionSprite } from './actions.js';
 import { drawPins } from './pins-draw.js';
-import { drawBrush, drawHighlight, drawSelection } from './stage-marks.js';
+import { drawBrush, drawHighlight, drawLoop, drawSelection } from './stage-marks.js';
 import { BRUSH_TOOLS } from './tools-paint.js';
 import { brushPixels } from '../editor/paint.js';
 import { paintAllViews, playsAllViews } from './play-all-views.js';
@@ -113,6 +113,20 @@ function paintHelpers(context, state, { scale, ratio }) {
   }
 }
 
+function paintSelecting(context, state, scale) {
+  if (state.selection) {
+    drawSelection(context, state.selection, scale);
+  }
+
+  if (state.highlight?.length) {
+    drawHighlight(context, state.highlight, scale);
+  }
+
+  if (state.lassoLoop) {
+    drawLoop(context, state.lassoLoop, scale);
+  }
+}
+
 function paintMarks(context, state, scale) {
   if (state.showPins) {
     const frames = currentFrames(state);
@@ -121,13 +135,7 @@ function paintMarks(context, state, scale) {
     drawPins(context, frames[index], frames[index - 1] ?? null, scale);
   }
 
-  if (state.selection) {
-    drawSelection(context, state.selection, scale);
-  }
-
-  if (state.highlight?.length) {
-    drawHighlight(context, state.highlight, scale);
-  }
+  paintSelecting(context, state, scale);
 
   // one pixel needs no ring: the pointer is on it
   if (state.cursor && state.brush.size > 1 && BRUSH_TOOLS.has(state.tool)) {

@@ -8,7 +8,7 @@ import {
   stampPixels,
 } from '../editor/selection.js';
 import { currentLayer } from './actions.js';
-import { selectAlong } from '../editor/select-pixels.js';
+import { lassoSelection } from '../editor/lasso-select.js';
 import { refusesPaint } from './body/body-lock.js';
 
 // drag the selected pixels: each move redraws them from where the drag began
@@ -73,20 +73,33 @@ export function wand(app, [x, y], everywhere) {
   return null;
 }
 
-// a drag selects the pixels it passes over, at the brush's size; with Shift it lets them go
-export function selectPixels(app, start, event) {
-  const { project, brush, symmetry } = app.store.state;
-  const options = { canvas: project.canvas, brush, symmetry };
-  const remove = event.shiftKey;
-  let last = start;
-  const along = (to) => {
-    const selection = selectAlong(app.store.state.selection, options, { from: last, to, remove });
+// A loop drawn round a part selects it; a drag that starts on a selected pixel moves the
+// selection, as a box selection's does. The loop shows while it is drawn.
+export function lasso(app, start) {
+  const { selection, project } = app.store.state;
 
-    app.store.set({ selection });
-    last = to;
+  if (isSelected(selection, ...start)) {
+    return moveSelection(app, start);
+  }
+
+  const loop = [start];
+
+  app.store.set({ selection: null, lassoLoop: [...loop] });
+
+  return {
+    move([x, y]) {
+      const [lastX, lastY] = loop.at(-1);
+
+      if (x !== lastX || y !== lastY) {
+        loop.push([x, y]);
+        app.store.set({ lassoLoop: [...loop] });
+      }
+    },
+    end() {
+      app.store.set({ lassoLoop: null, selection: lassoSelection(project.canvas, loop) });
+    },
+    cancel() {
+      app.store.set({ lassoLoop: null });
+    },
   };
-
-  along(start);
-
-  return { move: along };
 }

@@ -15,7 +15,7 @@ const GROUPS = [
       ['[  ]', 'Brush smaller, bigger'],
       ['S', 'Select and move'],
       ['W', 'Select a colour (Shift: everywhere)'],
-      ['Q', 'Select pixels: drag over them, at the brush size (Shift: let them go)'],
+      ['L', 'Lasso: draw round a part to select it, drag inside to move it'],
       ['P', 'Pin a body part (Alt-click removes)'],
       ['V', 'Move the whole frame: drag or arrow keys (Shift: 10 px)'],
       ['O', 'Pose the body parts: drag a part, or its handle to turn it'],
