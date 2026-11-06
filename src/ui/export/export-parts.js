@@ -1,5 +1,5 @@
 import { node, toast } from '../dom.js';
-import { checkerPainter } from '../../io/images.js';
+import { drawChecker } from '../draw.js';
 import { saveFrames, saveGamePack, saveGifs, saveSheetsWithJson } from '../export-files.js';
 
 export function numberField(label, value, id, onChange) {
@@ -38,7 +38,7 @@ export function sheetPreview(result) {
   canvas.width = sheet.width * scale;
   canvas.height = sheet.height * scale;
   const context = canvas.getContext('2d');
-  checkerPainter(scale * 2)(context, canvas.width, canvas.height);
+  drawChecker(context, canvas, scale * 4);
   context.imageSmoothingEnabled = false;
   context.drawImage(nativeOf(sheet), 0, 0, canvas.width, canvas.height);
 

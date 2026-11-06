@@ -42,7 +42,7 @@ function currentColour(app, colors) {
       'div.field',
       {},
       hex,
-      node('span', {}, outside ? 'Not one of the character colours yet' : 'Character colour'),
+      node('span', {}, outside ? "Not one of the art's colours yet" : "One of the art's colours"),
     ),
   );
 }
@@ -78,16 +78,19 @@ export function renderColourPanel(el, app) {
 
   replace(
     el,
-    node('h2', {}, 'Colours', node('span.mono', {}, `${colors.length}`)),
+    node('h2', { tabindex: '0' }, 'Colours', node('span.mono', {}, `${colors.length}`)),
     currentColour(app, colors),
     node(
       'div.swatches',
-      { role: 'group', 'aria-label': 'Character colours' },
+      { role: 'group', 'aria-label': "The art's colours" },
       colors.map((color) =>
         swatch(color, state.color === color, () => pickColor(color), toHex(color)),
       ),
     ),
     colourButtons(app),
-    drawingSettings(app, colors),
   );
+}
+
+export function renderDrawingPanel(el, app) {
+  replace(el, drawingSettings(app, characterColors(app.store.state)));
 }

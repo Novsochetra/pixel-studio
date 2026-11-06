@@ -1,7 +1,7 @@
 // which parts of the screen each kind of change redraws
 export const ROUTES = {
   toolbar: ['mode', 'zoom', 'showGrid', 'saveStatus', 'storage', 'pixels', 'project', 'viewFilter'],
-  rail: ['tool', 'symmetry', 'mode'],
+  rail: ['tool', 'symmetry', 'mode', 'project'],
   stage: [
     'swapPreview',
     'background',
@@ -27,6 +27,7 @@ export const ROUTES = {
     'game',
     'project',
     'onion',
+    'frameDrag',
     'selection',
     'frames',
     'layers',
@@ -43,6 +44,19 @@ export const ROUTES = {
     'pixels',
     'project',
     'tool',
+    'at',
+    'frames',
+    'layers',
+    'animations',
+  ],
+  drawing: [
+    'color',
+    'paintOver',
+    'paletteLock',
+    'cleanLines',
+    'symmetry',
+    'pixels',
+    'project',
     'at',
     'frames',
     'layers',

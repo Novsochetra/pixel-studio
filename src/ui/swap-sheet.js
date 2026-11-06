@@ -122,7 +122,9 @@ function drawMapping(job, palette) {
 // Every character colour changed to one of a palette's, shown before it is applied to a frame or
 // to the whole character.
 export function openSwapSheet(app) {
-  const sheet = openSheet('Swap colours', () => app.store.set({ swapPreview: null }));
+  const sheet = openSheet('Swap colours', () => app.store.set({ swapPreview: null }), {
+    wide: true,
+  });
   const slot = node('div', { style: { display: 'grid', gap: '12px' } });
   const { palettes } = app.store.state.project;
   const job = {

@@ -48,8 +48,12 @@ h4.start-heading {
   gap: 8px;
 }
 
-.start-card {
+.start-choice {
   position: relative;
+  display: grid;
+}
+
+.start-card {
   display: flex;
   align-items: flex-start;
   gap: 10px;

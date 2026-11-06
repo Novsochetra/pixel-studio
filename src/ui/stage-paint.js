@@ -1,5 +1,4 @@
 import {
-  cssVar,
   drawChecker,
   drawGrid,
   drawGuide,
@@ -9,6 +8,7 @@ import {
 } from './draw.js';
 import { currentFrames, directionSprite } from './actions.js';
 import { drawPins } from './pins-draw.js';
+import { drawHighlight, drawSelection } from './stage-marks.js';
 import { frameAt } from '../model/project.js';
 import { compositeFrame } from '../model/composite.js';
 import { applyMapping } from '../palette/palette.js';
@@ -32,6 +32,9 @@ export function drawOnion(context, state, scale) {
 
 export function drawLayers(context, state, scale) {
   const frame = frameAt(state.project, state.at);
+  const drag = state.frameDrag ?? { x: 0, y: 0 };
+  context.save();
+  context.translate(drag.x * scale, drag.y * scale);
 
   for (const layer of frame.layers) {
     if (!layer.visible || !layer.sprite) {
@@ -45,42 +48,7 @@ export function drawLayers(context, state, scale) {
     const sprite = layer.kind === 'reference' ? mapped : VIEW_FILTERS[state.viewFilter](mapped);
     drawSprite(context, sprite, scale, layer.kind === 'reference' ? layer.opacity : 1);
   }
-}
 
-// a dashed outline round the selected cells
-export function drawSelection(context, selection, scale) {
-  const { width, height, cells } = selection;
-  const on = (x, y) => x >= 0 && y >= 0 && x < width && y < height && cells[y * width + x];
-  context.save();
-  context.beginPath();
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      if (!on(x, y)) {
-        continue;
-      }
-
-      if (!on(x, y - 1)) {
-        context.rect(x * scale, y * scale, scale, 0);
-      }
-      if (!on(x, y + 1)) {
-        context.rect(x * scale, (y + 1) * scale, scale, 0);
-      }
-      if (!on(x - 1, y)) {
-        context.rect(x * scale, y * scale, 0, scale);
-      }
-      if (!on(x + 1, y)) {
-        context.rect((x + 1) * scale, y * scale, 0, scale);
-      }
-    }
-  }
-
-  context.lineWidth = 2;
-  context.strokeStyle = cssVar('--ink');
-  context.stroke();
-  context.setLineDash([4, 4]);
-  context.strokeStyle = cssVar('--tint');
-  context.stroke();
   context.restore();
 }
 
@@ -112,7 +80,8 @@ function paintArt(context, state, scale) {
     drawSprite(context, ghost, scale, state.overlay.opacity);
   }
 
-  if (state.onion) {
+  // lining a frame up with its neighbours needs them showing
+  if (state.onion || state.tool === 'moveframe') {
     drawOnion(context, state, scale);
   }
 
@@ -162,17 +131,4 @@ export function paint(canvas, app) {
   paintArt(context, state, scale);
   paintHelpers(context, state, { scale, ratio });
   paintMarks(context, state, scale);
-}
-
-// pixels an outline tool would change, ringed so they show on any colour
-export function drawHighlight(context, points, scale) {
-  context.save();
-  context.lineWidth = Math.max(1, scale / 4);
-  context.strokeStyle = cssVar('--mirror');
-
-  for (const [x, y] of points) {
-    context.strokeRect(x * scale + 0.5, y * scale + 0.5, scale - 1, scale - 1);
-  }
-
-  context.restore();
 }

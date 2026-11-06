@@ -28,6 +28,7 @@
   inset: 12px;
   display: grid;
   place-items: center;
+  z-index: 3;
   border: 2px dashed var(--tint);
   border-radius: var(--radius-lg);
   background: var(--tint-quiet);
@@ -43,7 +44,22 @@
   gap: 18px;
 }
 
+.canvas-holder {
+  box-shadow:
+    0 0 0 1px var(--separator),
+    0 10px 30px rgb(0 0 0 / 14%);
+}
+
+/* floats over the canvas, so the canvas never moves when it shows */
 .selection-bar {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
   gap: 2px;

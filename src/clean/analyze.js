@@ -30,7 +30,6 @@ export function flatten({ width, height, data }) {
   return { image: { width, height, rgb }, cutOut };
 }
 
-// colours: { backgrounds, palette, merge }
 function cleanColors(cells, grid, { backgrounds, palette, merge }) {
   let out = cells;
 

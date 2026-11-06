@@ -70,8 +70,13 @@ export function nearestColor(color, palette) {
   );
 }
 
-// a suggested mapping: each source colour to the target colour that looks closest
+// a suggested mapping: each source colour to the target colour that looks closest; a palette with
+// no colours suggests nothing
 export function suggestMapping(sources, targets) {
+  if (!targets.length) {
+    return {};
+  }
+
   return Object.fromEntries(sources.map((source) => [source, nearestColor(source, targets)]));
 }
 

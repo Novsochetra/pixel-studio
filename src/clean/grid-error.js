@@ -21,7 +21,6 @@ function innerShade(rgb, width, [ya, yb], [xa, xb]) {
   return channels.map(median);
 }
 
-// source: { image, isBg }
 function cellError({ image, isBg }, rows, cols, inner) {
   const { width, rgb } = image;
   const [ya, yb] = rows;

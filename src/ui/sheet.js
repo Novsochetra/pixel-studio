@@ -1,25 +1,44 @@
 import { node } from './dom.js';
-import { drawGuide, drawSprite } from './draw.js';
-import { checkerPainter } from '../io/images.js';
+import { drawChecker, drawGuide, drawSprite } from './draw.js';
+import { focusables, rememberFocus, trapTab } from './focus.js';
 
-// A modal sheet; Escape or a click on the backdrop runs onClose.
-export function openSheet(title, onClose) {
-  const body = node(
-    'div.sheet',
-    { role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
+function sheetHead(title, close) {
+  return node(
+    'div.sheet-head',
+    {},
     node('h3', {}, title),
+    node(
+      'button.btn.quiet.sheet-close',
+      { 'aria-label': 'Close window', title: 'Close (Esc)', onclick: () => close() },
+      '×',
+    ),
   );
+}
+
+// A modal sheet; Escape, × or a click on the backdrop runs onClose and gives focus back.
+export function openSheet(title, onClose, { wide = false } = {}) {
+  const restoreFocus = rememberFocus();
+  const body = node(`div.sheet${wide ? '.wide' : ''}`, {
+    role: 'dialog',
+    'aria-modal': 'true',
+    'aria-label': title,
+  });
   const backdrop = node('div.sheet-backdrop', {}, body);
   const close = () => {
     backdrop.remove();
     document.removeEventListener('keydown', onKey);
     onClose?.();
+    restoreFocus();
   };
   const onKey = (event) => {
     if (event.key === 'Escape') {
       close();
     }
+
+    trapTab(body, event);
   };
+
+  body.append(sheetHead(title, close));
   backdrop.addEventListener('pointerdown', (event) => {
     if (event.target === backdrop) {
       close();
@@ -27,17 +46,26 @@ export function openSheet(title, onClose) {
   });
   document.addEventListener('keydown', onKey);
   document.body.append(backdrop);
+  // the content is added after this returns. A phone's keyboard would cover the sheet, so a
+  // field takes focus only where there is a pointer.
+  queueMicrotask(() => {
+    const controls = focusables(body);
+    const field = matchMedia('(pointer: fine)').matches
+      ? controls.find((control) => control.matches('input:not([type=file]), textarea'))
+      : null;
+    (field ?? controls[0])?.focus();
+  });
 
   return { body, close };
 }
 
-// a sprite on the original front image's green and white checkerboard, with the guide lines
+// a sprite on the app's own checkerboard, with the guide lines
 export function previewCanvas(sprite, guides = [], scale = 3) {
   const canvas = node('canvas');
   canvas.width = sprite.width * scale;
   canvas.height = sprite.height * scale;
   const context = canvas.getContext('2d');
-  checkerPainter(scale * 2)(context, canvas.width, canvas.height);
+  drawChecker(context, canvas, scale * 4);
   drawSprite(context, sprite, scale);
   guides.forEach((guide) =>
     drawGuide(context, guide, { width: canvas.width, scale, label: false }),

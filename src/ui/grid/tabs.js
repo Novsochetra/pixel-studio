@@ -1,7 +1,7 @@
 import { icon, node } from '../dom.js';
 import { currentAnimation, restructure } from '../actions.js';
 import { openMenu } from '../menu.js';
-import { removeAnimation } from '../../model/structure.js';
+import { removeAnimation, uniqueName } from '../../model/structure.js';
 import { duplicateAnimation } from '../../model/animations.js';
 import { kindOf } from '../../model/kinds.js';
 import { openNewAnimationSheet } from './new-animation-sheet.js';
@@ -9,16 +9,40 @@ import { openNewAnimationSheet } from './new-animation-sheet.js';
 const select = (app, id) =>
   app.store.set({ at: { ...app.store.state.at, animation: id, layer: null }, selection: null });
 
+// Leaving the field with a press on another tab: the bar is drawn again only once the press is
+// over, so the click still lands on the tab it was meant for.
+function afterPress(pressing, then) {
+  if (pressing()) {
+    window.addEventListener('pointerup', () => setTimeout(then), { once: true, capture: true });
+  } else {
+    then();
+  }
+}
+
+function renameTo(app, animation, name) {
+  restructure(app, 'Rename animation', (draft) => {
+    const renamed = draft.project.animations.find((other) => other.id === animation.id);
+
+    if (renamed) {
+      renamed.name = uniqueName(draft.project, name, renamed);
+    }
+  });
+}
+
 // the tab turns into a text field; Enter or leaving it renames, Escape keeps the name
 function rename(app, tabButton, animation) {
   const field = node('input.input.tab-rename', { value: animation.name, 'aria-label': 'Name' });
+  let pressed = false;
+  const press = () => (pressed = true);
+  const release = () => (pressed = false);
   const done = (keep) => {
     const name = field.value.trim();
+    document.removeEventListener('pointerdown', press, true);
+    document.removeEventListener('pointerup', release, true);
+    field.onblur = null;
 
     if (keep && name && name !== animation.name) {
-      restructure(app, 'Rename animation', (draft) => {
-        currentAnimation(draft).name = name;
-      });
+      renameTo(app, animation, name);
     } else {
       app.store.touch('animations');
     }
@@ -26,11 +50,16 @@ function rename(app, tabButton, animation) {
   field.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === 'Escape') {
       event.preventDefault();
-      field.onblur = null;
       done(event.key === 'Enter');
     }
   });
-  field.onblur = () => done(true);
+  document.addEventListener('pointerdown', press, true);
+  document.addEventListener('pointerup', release, true);
+  field.onblur = () =>
+    afterPress(
+      () => pressed,
+      () => done(true),
+    );
   tabButton.replaceWith(field);
   field.select();
 }
@@ -90,7 +119,6 @@ function tab(app, animation, active) {
   return active ? node('span.grid-tab-group', {}, button, more) : button;
 }
 
-// the animations (or tiles, or icons) of the project, one tab each, and + to start another
 export function animationTabs(app) {
   const { state } = app.store;
   const current = currentAnimation(state);

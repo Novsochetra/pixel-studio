@@ -89,21 +89,21 @@ function numbersRow(state, count, playFrame) {
   );
 }
 
-// The animation as a grid: views down, frames across. Shows the view being edited, or every view
-// as the sheet will be ({ all }); the frame playing is marked.
 export function gridBody(app, { all, playFrame }) {
   const { state } = app.store;
   const drawn = ALL_DIRECTIONS.filter((direction) => currentAnimation(state).directions[direction]);
   const rows = all ? drawn : [state.at.direction];
-
   const canAdd = all && !isSingleView(state.project) && missingViews(state).length > 0;
+  const gridName = all
+    ? 'Frames of every view'
+    : `Frames of ${viewName(state.project, state.at.direction)}`;
 
   return node(
     'div.grid-scroll',
     {},
     node(
       'div.grid-table',
-      { role: 'grid', 'aria-label': 'Frames of every view' },
+      { role: 'grid', 'aria-label': gridName },
       numbersRow(
         state,
         currentAnimation(state).directions[state.at.direction].frames.length,
@@ -111,14 +111,15 @@ export function gridBody(app, { all, playFrame }) {
       ),
       rows.map((direction) => viewRow(app, direction, playFrame)),
       all ? mirrorRows(state) : null,
-      canAdd
-        ? node(
-            'button.btn.quiet.grid-add-view',
-            { onclick: (event) => openAddViewMenu(app, event.currentTarget) },
-            icon('plus'),
-            'Add a view',
-          )
-        : null,
     ),
+    // a grid holds rows of cells only, so the button that adds a row sits under it
+    canAdd
+      ? node(
+          'button.btn.quiet.grid-add-view',
+          { onclick: (event) => openAddViewMenu(app, event.currentTarget) },
+          icon('plus'),
+          'Add a view',
+        )
+      : null,
   );
 }

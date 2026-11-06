@@ -33,7 +33,12 @@ function heading(app) {
     onchange: (event) => app.store.set({ showGuides: event.target.checked }),
   });
 
-  return node('h2', {}, 'Guide lines', node('label.group', { for: 'show-guides' }, show, 'Show'));
+  return node(
+    'h2',
+    { tabindex: '0' },
+    'Guide lines',
+    node('label.group', { for: 'show-guides' }, show, 'Show'),
+  );
 }
 
 const ABOUT =

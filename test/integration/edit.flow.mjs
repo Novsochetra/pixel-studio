@@ -1,7 +1,7 @@
 // Editing a character: drawing and undo, layers, selection, pins, zoom and pan, the panels and the
 // sheets they open, and saved versions.
 import { openStudio } from './harness.mjs';
-import { openExample, waitSaved } from './studio.mjs';
+import { openExample, openPanel, waitSaved } from './studio.mjs';
 
 const { page, check, finish, shots } = await openStudio();
 await openExample(page);
@@ -39,6 +39,11 @@ await page.keyboard.press('Meta+Shift+z');
 check((await pixels()) !== plain, '⇧⌘Z redoes it');
 await page.keyboard.press('Meta+z');
 
+check(
+  (await page.locator('.section[data-name="layers"]').getAttribute('data-collapsed')) === 'true',
+  'Layers starts folded away',
+);
+await openPanel(page, 'Layers');
 await page.getByRole('button', { name: 'Add layer' }).click();
 check((await page.locator('.layer-row').count()) === 2, 'a layer is added to every frame');
 await page.getByRole('button', { name: 'Hide Art' }).click();
@@ -64,6 +69,47 @@ check(await page.locator('.selection-bar').isHidden(), 'Done lets go of it');
 await page.keyboard.press('Meta+z');
 await page.keyboard.press('Meta+z');
 await page.keyboard.press('Meta+z');
+
+const unselected = await pixels();
+await page.keyboard.press('s');
+await page.mouse.move(...at(50, 60));
+await page.mouse.down();
+await page.mouse.move(...at(70, 95), { steps: 5 });
+await page.mouse.up();
+await page.keyboard.press('Meta+Backspace');
+check((await pixels()) !== unselected, '⌘⌫ erases the selection, as a Mac deletes');
+await page.keyboard.press('Meta+Escape');
+check(await page.locator('.selection-bar').isHidden(), '⌘Esc lets go of it');
+await page.keyboard.press('Meta+z');
+check((await pixels()) === unselected, 'and undo brings the pixels back');
+
+await page.keyboard.press('v');
+check(
+  (await page
+    .getByRole('button', { name: /Move the whole frame/ })
+    .getAttribute('aria-pressed')) === 'true',
+  'V picks the tool that moves the whole frame',
+);
+const unmoved = await pixels();
+await page.keyboard.press('ArrowLeft');
+check((await pixels()) !== unmoved, 'an arrow key moves the whole frame');
+await page.keyboard.press('Meta+z');
+check((await pixels()) === unmoved, 'in one undo step');
+await page.mouse.move(...at(80, 80));
+await page.mouse.down();
+await page.mouse.move(...at(90, 84), { steps: 5 });
+check((await pixels()) !== unmoved, 'a drag shows the frame moving');
+await page.mouse.up();
+await page.keyboard.press('Meta+z');
+check((await pixels()) === unmoved, 'and letting go moves it, one undo step too');
+await page.keyboard.press('b');
+
+await page.getByRole('button', { name: 'Zoom in' }).click();
+await page.getByRole('button', { name: 'Fit' }).click();
+check(
+  (await canvas.boundingBox()).width === art.width,
+  'Fit brings back the zoom that fills the window',
+);
 
 await page.keyboard.press('p');
 await page.mouse.click(...at(80, 40));
@@ -103,10 +149,16 @@ check((await page.locator('.shortcut').count()) > 15, '? lists the shortcuts');
 await page.keyboard.press('Escape');
 await page.locator('section[data-name="guides"] > h2').click();
 check(
-  (await page.locator('section[data-name="guides"]').getAttribute('data-collapsed')) === 'true',
-  'a panel folds away',
+  (await page.locator('section[data-name="guides"]').getAttribute('data-collapsed')) === 'false',
+  'a folded panel opens from its title',
 );
-await page.locator('section[data-name="guides"] > h2').click();
+await page.locator('section[data-name="guides"] > h2').focus();
+await page.keyboard.press('Enter');
+check(
+  (await page.locator('section[data-name="guides"]').getAttribute('data-collapsed')) === 'true',
+  'and Enter on the title folds it away again',
+);
+await openPanel(page, 'Outline');
 
 const coloursBefore = await colours();
 await page.getByRole('button', { name: 'Team kits…' }).click();

@@ -45,9 +45,9 @@ function endButtons(app) {
   return [
     node(
       'button.btn.quiet',
-      { title: 'Saved versions', onclick: () => openVersionsSheet(app) },
+      { title: 'Saved versions', 'aria-label': 'History', onclick: () => openVersionsSheet(app) },
       icon('history'),
-      'History',
+      node('span.btn-text', {}, 'History'),
     ),
     node(
       'button.btn.quiet',
@@ -78,7 +78,11 @@ export function renderToolbar(el, app) {
     state.mode === 'edit' ? zoomControls(app) : null,
     state.mode !== 'game' ? viewFilter(app) : null,
     node('div.spacer'),
-    node('span.save-status', { 'data-state': state.saveStatus }, saveText(state)),
+    node(
+      'span.save-status',
+      { 'data-state': state.saveStatus, title: saveText(state) },
+      saveText(state),
+    ),
     endButtons(app),
   );
 }

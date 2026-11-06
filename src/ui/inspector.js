@@ -1,35 +1,25 @@
 import { node } from './dom.js';
-import { renderColourPanel } from './colour-panel.js';
+import { renderColourPanel, renderDrawingPanel } from './colour-panel.js';
 import { renderGuidesPanel } from './guides-panel.js';
 import { renderLayersPanel } from './layers-panel.js';
 import { renderOutlinePanel } from './outline-panel.js';
 
 const FOLDED = 'pixel-clean-folded';
+// what is used on every visit stays open; the rest waits one click away
+const FOLDED_AT_FIRST = ['layers', 'outline', 'guides'];
 
 function readFolded() {
   try {
-    return JSON.parse(localStorage.getItem(FOLDED) ?? '[]');
+    const saved = localStorage.getItem(FOLDED);
+
+    return saved === null ? FOLDED_AT_FIRST : JSON.parse(saved);
   } catch {
-    return [];
+    return FOLDED_AT_FIRST;
   }
 }
 
-// a click on a section's title folds it away; which are folded is remembered in this browser
-function bindCollapsing(inspector, sections) {
-  const folded = new Set(readFolded());
-
-  for (const [name, section] of Object.entries(sections)) {
-    section.dataset.name = name;
-    section.dataset.collapsed = String(folded.has(name));
-  }
-
-  inspector.addEventListener('click', (event) => {
-    const title = event.target.closest('.section > h2');
-
-    if (!title || event.target.closest('input, button, label, select')) {
-      return;
-    }
-
+function folding(folded) {
+  return (title) => {
     const section = title.parentElement;
     const now = section.dataset.collapsed !== 'true';
     section.dataset.collapsed = String(now);
@@ -40,15 +30,41 @@ function bindCollapsing(inspector, sections) {
     } catch {
       // nothing to remember it in: it stays folded for this visit
     }
+  };
+}
+
+// a click, or Enter or Space, on a section's title folds it away; which are folded is remembered
+function bindCollapsing(inspector, sections) {
+  const folded = new Set(readFolded());
+  const toggle = folding(folded);
+
+  for (const [name, section] of Object.entries(sections)) {
+    section.dataset.name = name;
+    section.dataset.collapsed = String(folded.has(name));
+  }
+
+  inspector.addEventListener('click', (event) => {
+    const title = event.target.closest('.section > h2');
+
+    if (title && !event.target.closest('input, button, label, select')) {
+      toggle(title);
+    }
+  });
+  inspector.addEventListener('keydown', (event) => {
+    if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('.section > h2')) {
+      event.preventDefault();
+      toggle(event.target);
+    }
   });
 }
 
-// The panels on the right, each folding away on a click on its title. Returns a drawer for each.
+// The panels on the right, each folding away from its title. Returns a drawer for each.
 export function mountInspector(app) {
   const inspector = document.getElementById('inspector');
   const sections = {
-    layers: node('section.section'),
     colours: node('section.section'),
+    drawing: node('section.section'),
+    layers: node('section.section'),
     outline: node('section.section'),
     guides: node('section.section'),
   };
@@ -56,8 +72,9 @@ export function mountInspector(app) {
   bindCollapsing(inspector, sections);
 
   return {
-    layers: () => renderLayersPanel(sections.layers, app),
     colours: () => renderColourPanel(sections.colours, app),
+    drawing: () => renderDrawingPanel(sections.drawing, app),
+    layers: () => renderLayersPanel(sections.layers, app),
     outline: () => renderOutlinePanel(sections.outline, app),
     guides: () => renderGuidesPanel(sections.guides, app),
   };

@@ -5,6 +5,9 @@ import { currentLayer, restructure } from './actions.js';
 import { toast } from './dom.js';
 import { fill, replace, shade, stroke } from './tools-paint.js';
 import { select, wand } from './tools-select.js';
+import { moveFrameDrag } from './frame-move.js';
+import { kindOf } from '../model/kinds.js';
+
 export const TOOLS = [
   { id: 'pencil', label: 'Pencil', key: 'b' },
   { id: 'eraser', label: 'Eraser', key: 'e' },
@@ -15,6 +18,7 @@ export const TOOLS = [
   { id: 'select', label: 'Select and move', key: 's' },
   { id: 'wand', label: 'Select a colour (Shift: everywhere)', key: 'w' },
   { id: 'pin', label: 'Pin a body part (Alt-click removes it)', key: 'p' },
+  { id: 'moveframe', label: 'Move the whole frame: drag it, or use the arrow keys', key: 'v' },
 ];
 
 function pick(app, [x, y]) {
@@ -40,6 +44,11 @@ function pin(app, [x, y]) {
   return null;
 }
 
+// pins mark body parts, on what stands on its feet; tiles, effects and icons have none
+export function toolsFor(project) {
+  return TOOLS.filter((tool) => tool.id !== 'pin' || kindOf(project).place === 'feet');
+}
+
 const PAINTING = new Set(['pencil', 'eraser', 'fill', 'replace', 'shade']);
 
 // the tools a press starts; each returns the drag that follows, or null
@@ -47,6 +56,7 @@ const ON_PRESS = {
   select: (app, point) => select(app, point),
   wand: (app, point, event) => wand(app, point, event.shiftKey),
   pin: (app, point) => pin(app, point),
+  moveframe: (app, point) => moveFrameDrag(app, point),
   shade: (app, point, event) => shade(app, point, event.shiftKey),
   pencil: (app, point) => stroke(app, point, app.store.state.color),
   eraser: (app, point) => stroke(app, point, CLEAR),

@@ -71,7 +71,7 @@ function sheetBody(job, file, fields) {
 export async function openImport(app, direction, file, frame = app.store.state.at.frame) {
   const { state } = app.store;
   const place = placeName(state, direction, frame);
-  const sheet = openSheet(`Clean into ${place}`);
+  const sheet = openSheet(`Clean into ${place}`, null, { wide: true });
   const alone = cleansAlone(state, direction, frame);
   // a later frame of an animation is another pose: by default it keeps its own height
   const fields = optionFields({ matching: !alone, keepScale: frame > 0 });

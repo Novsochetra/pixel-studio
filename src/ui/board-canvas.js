@@ -1,4 +1,4 @@
-import { cssVar, drawGuide, drawSprite } from './draw.js';
+import { cssVar, drawChecker, drawGuide, drawSprite } from './draw.js';
 import { directionSprite, directionsInUse } from './actions.js';
 import { drawMarks } from './markup.js';
 import { checkerPainter } from '../io/images.js';
@@ -16,7 +16,14 @@ function drawView(context, state, view) {
   const { width, height } = state.project.canvas;
   const sprite = directionSprite(state, direction);
   const filter = VIEW_FILTERS[state.viewFilter ?? 'colour'];
-  checkerPainter(scale * 2)(context, width * scale, height * scale);
+
+  // files and the AI's reference sheet keep the original's green checkerboard; the screen uses
+  // the app's own quiet one
+  if (options.onScreen) {
+    drawChecker(context, { width: width * scale, height: height * scale }, scale * 4);
+  } else {
+    checkerPainter(scale * 2)(context, width * scale, height * scale);
+  }
 
   if (ghost && direction !== options.overlay.direction) {
     drawSprite(context, ghost, scale, options.overlay.opacity);
@@ -39,10 +46,16 @@ function drawView(context, state, view) {
   }
 }
 
-// Every view of the current animation side by side on the checkerboard, with the guide lines
+// Every view of the current animation side by side, with the guide lines
 // across all of them, your marks and, optionally, one view laid see-through over the others.
 export function boardCanvas(state, scale, overrides = {}) {
-  const options = { overlay: state.overlay, mapping: state.swapPreview, marks: true, ...overrides };
+  const options = {
+    overlay: state.overlay,
+    mapping: state.swapPreview,
+    marks: true,
+    onScreen: false,
+    ...overrides,
+  };
   const directions = directionsInUse(state);
   const { width, height } = state.project.canvas;
   const canvas = document.createElement('canvas');
@@ -61,7 +74,7 @@ export function boardCanvas(state, scale, overrides = {}) {
     context.translate(x, CAPTION);
     drawView(context, state, { direction, scale, ghost, options, first: i === 0 });
     context.restore();
-    context.font = '700 11px Silkscreen, ui-monospace, monospace';
+    context.font = '700 16px Silkscreen, ui-monospace, monospace';
     context.fillStyle = cssVar('--label');
     context.fillText(viewName(state.project, direction).toUpperCase(), x, 18);
   });

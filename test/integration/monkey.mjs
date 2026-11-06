@@ -3,6 +3,8 @@
 import { createProject, openExample } from './studio.mjs';
 
 const SKIP = /Delete|Clear marks|Go back|Wear it|Apply to|Use them all|Use for|Forget|Remove/;
+// the workspace buttons are left alone, so each workspace's own panels are clicked through
+const TOOLBAR_SKIP = /Download|History|^\?$|PIXEL|^Edit$|Views board|On the pitch|^Preview$/;
 const DIALOGS = [
   ['Swap colours…', null],
   ['Team kits…', null],
@@ -61,12 +63,16 @@ async function everyWorkspace(run) {
     .locator('#toolbar .segmented[aria-label="Workspace"] button')
     .allTextContents();
 
+  await page
+    .locator('.section[data-collapsed="true"] > h2')
+    .evaluateAll((titles) => titles.forEach((title) => title.click()));
+
   for (const mode of modes) {
     await page.getByRole('button', { name: mode, exact: true }).click();
     await page.waitForTimeout(250);
 
     for (const scope of ['#toolbar', '#rail', '#stage', '#inspector']) {
-      await clickAll(run, scope, scope === '#toolbar' ? /Download|History|^\?$|PIXEL/ : SKIP);
+      await clickAll(run, scope, scope === '#toolbar' ? TOOLBAR_SKIP : SKIP);
     }
   }
 

@@ -7,6 +7,7 @@ import {
   stampPixels,
 } from '../editor/selection.js';
 import { toast } from './dom.js';
+import { shiftCurrentFrame } from './frame-move.js';
 
 const ARROWS = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] };
 
@@ -74,16 +75,32 @@ const PLAIN_KEYS = {
   '.': { when: () => true, run: (app) => stepFrame(app, 1) },
 };
 
+// an arrow nudges the selection, or with Move frame on, the whole frame
+function arrowKey([dx, dy]) {
+  return {
+    when: (state) => state.selection || state.tool === 'moveframe',
+    run(app, event) {
+      const step = event.shiftKey ? 10 : 1;
+
+      if (app.store.state.selection) {
+        nudge(app, [dx, dy], event.shiftKey);
+      } else {
+        shiftCurrentFrame(app, [dx * step, dy * step]);
+      }
+    },
+  };
+}
+
+// erasing and letting go work with ⌘ or Ctrl held too, as ⌘⌫ is how a Mac deletes
+const WITH_COMMAND_TOO = new Set(['delete', 'backspace', 'escape']);
+
 function handlerFor(key, command) {
   if (command) {
-    return COMMAND_KEYS[key];
+    return COMMAND_KEYS[key] ?? (WITH_COMMAND_TOO.has(key) ? PLAIN_KEYS[key] : undefined);
   }
 
   if (ARROWS[key]) {
-    return {
-      when: (state) => state.selection,
-      run: (app, event) => nudge(app, ARROWS[key], event.shiftKey),
-    };
+    return arrowKey(ARROWS[key]);
   }
 
   return PLAIN_KEYS[key];

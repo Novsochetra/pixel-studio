@@ -3,6 +3,7 @@ const shared = [
   'globalThis',
   'console',
   'setTimeout',
+  'queueMicrotask',
   'clearTimeout',
   'URL',
   'TextEncoder',

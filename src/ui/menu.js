@@ -1,4 +1,5 @@
 import { node } from './dom.js';
+import { focusables, rememberFocus } from './focus.js';
 
 // called straight from the click, so a file picker it opens still counts as the viewer's doing
 function run(action, onError) {
@@ -19,7 +20,7 @@ function position(menu, anchor, align) {
   if (align === 'right') {
     menu.style.right = `${Math.max(8, window.innerWidth - box.right)}px`;
   } else {
-    menu.style.left = `${Math.min(box.left, window.innerWidth - menu.offsetWidth - 8)}px`;
+    menu.style.left = `${Math.max(8, Math.min(box.left, window.innerWidth - menu.offsetWidth - 8))}px`;
   }
 }
 
@@ -41,26 +42,64 @@ function item(entry, close, onError) {
   );
 }
 
+const STEPS = { ArrowDown: 1, ArrowUp: -1 };
+
+// the arrow keys walk the items, round from the last to the first; Home and End jump
+function moveFocus(menu, key) {
+  const items = focusables(menu);
+  const at = items.indexOf(document.activeElement);
+  const jumps = { Home: 0, End: items.length - 1 };
+  const next = key in jumps ? jumps[key] : (at + STEPS[key] + items.length) % items.length;
+  items[next]?.focus();
+}
+
+// a menu is modal: other keys do nothing behind it, as the tool keys would redraw what it is for
+function menuKey(menu, event, close) {
+  event.stopPropagation();
+
+  if (event.key === 'Escape' || event.key === 'Tab') {
+    close();
+  } else if (event.key in STEPS || event.key === 'Home' || event.key === 'End') {
+    event.preventDefault();
+    moveFocus(menu, event.key);
+  }
+}
+
 // A small menu of actions: entries are [label, action, { danger, disabled, title }] or null for
 // a line between groups. Escape, a click outside or a choice closes it.
+let closeOpenMenu = null;
+
+// the whole menu stays on screen, wherever its button has wrapped to
+const MENU_STYLE = {
+  position: 'fixed',
+  top: '0',
+  maxWidth: 'calc(100vw - 32px)',
+  maxHeight: 'calc(100vh - 16px)',
+  overflowY: 'auto',
+};
+
 export function openMenu(anchor, entries, { align = 'left', onError = () => {} } = {}) {
-  document.querySelector('.menu')?.remove();
-  const menu = node('div.menu', { role: 'menu', style: { position: 'fixed', top: '0' } });
+  closeOpenMenu?.();
+  const restoreFocus = rememberFocus();
+  const menu = node('div.menu', { role: 'menu', style: MENU_STYLE });
   const close = () => {
     menu.remove();
     document.removeEventListener('pointerdown', outside, true);
     document.removeEventListener('keydown', onKey, true);
+    closeOpenMenu = null;
+    restoreFocus();
   };
+  // a menu taken away with the page drawn over it lets go of the keys too
   const outside = (event) => {
-    if (!menu.contains(event.target) && !anchor.contains(event.target)) {
+    if (!menu.isConnected || (!menu.contains(event.target) && !anchor.contains(event.target))) {
       close();
     }
   };
   const onKey = (event) => {
-    if (event.key === 'Escape') {
-      event.stopPropagation();
+    if (!menu.isConnected) {
       close();
-      anchor.focus();
+    } else if (event.key !== 'Enter' && event.key !== ' ') {
+      menuKey(menu, event, close);
     }
   };
 
@@ -69,6 +108,7 @@ export function openMenu(anchor, entries, { align = 'left', onError = () => {} }
   position(menu, anchor, align);
   document.addEventListener('pointerdown', outside, true);
   document.addEventListener('keydown', onKey, true);
+  closeOpenMenu = close;
   menu.querySelector('button:not(:disabled)')?.focus();
 
   return close;

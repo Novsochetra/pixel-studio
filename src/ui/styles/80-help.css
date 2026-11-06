@@ -1,7 +1,7 @@
 .quick-start {
   position: fixed;
   top: calc(64px + env(safe-area-inset-top, 0px));
-  right: calc(316px + env(safe-area-inset-right, 0px));
+  left: calc(72px + env(safe-area-inset-left, 0px));
   width: min(340px, calc(100% - 32px));
   box-sizing: border-box;
   background: var(--chrome-raised);
@@ -17,10 +17,8 @@
 .quick-start h3,
 .eyebrow {
   margin: 0;
-  font: 700 11px/1.2 var(--font-pixel);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--label-muted);
+  font: 600 13px/1.3 var(--font-ui);
+  color: var(--label);
 }
 
 .quick-start ol {
@@ -69,4 +67,9 @@ kbd {
 
 .section[data-collapsed='true'] > h2::before {
   content: '▸';
+}
+
+.section > h2:focus-visible {
+  outline-offset: 4px;
+  border-radius: 2px;
 }

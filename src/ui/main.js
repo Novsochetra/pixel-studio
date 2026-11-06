@@ -24,9 +24,16 @@ async function startEditor(backend, index, { project, prefix, save, background =
 
   if (background) {
     await backend.write(app.keys.background, { url: background });
+  } else if (project.preview?.background) {
+    project.preview = { ...project.preview, background: false };
   }
 
   mountApp(app);
+
+  // a project made or opened here is written at once, as adding one in the editor is
+  if (save === 'all') {
+    await app.saver.flushNow();
+  }
 }
 
 // a project made or opened on the start screen: new documents of its own, saved whole

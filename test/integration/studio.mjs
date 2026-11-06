@@ -130,3 +130,12 @@ export async function chooseFiles(page, click, files) {
   await click();
   await (await chooser).setFiles(files);
 }
+
+// Layers, Outline and Guide lines start folded; a click on the title opens one
+export async function openPanel(page, name) {
+  const section = page.locator('.section', { has: page.locator('h2', { hasText: name }) });
+
+  if ((await section.getAttribute('data-collapsed')) === 'true') {
+    await section.locator('h2').click({ position: { x: 4, y: 6 } });
+  }
+}

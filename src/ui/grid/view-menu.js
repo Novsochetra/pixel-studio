@@ -21,7 +21,7 @@ export function openViewMenu(app, anchor, direction) {
 
   openMenu(anchor, [
     [
-      `Match the other views to ${name}`,
+      `Make ${name} the view the others match`,
       () => makeReference(app, direction),
       {
         disabled: referenceOf(state.project) === direction,
@@ -40,7 +40,6 @@ export function openViewMenu(app, anchor, direction) {
   ]);
 }
 
-// the directions this project can draw that the animation does not have yet
 export function missingViews(state) {
   const drawn = Object.keys(currentAnimation(state).directions);
 

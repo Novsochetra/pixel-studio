@@ -22,7 +22,6 @@ export function fitZoom(stage, sprite) {
   return Math.max(1, Math.min(24, Math.floor(room)));
 }
 
-// The canvas, scrolling and zooming on its own, over the frame grid docked below it.
 export function mountEditStage(container, app) {
   const canvas = node('canvas', { 'aria-label': 'Pixel canvas' });
   const bar = node('div.selection-bar', {
@@ -30,7 +29,11 @@ export function mountEditStage(container, app) {
     'aria-label': 'Selection',
     hidden: true,
   });
-  const empty = node('div.empty-frame', { role: 'status', hidden: true });
+  const empty = node('div.empty-frame', {
+    role: 'group',
+    'aria-label': 'This frame is empty',
+    hidden: true,
+  });
   const inner = node('div.stage-inner.edit', {}, bar, empty, node('div.canvas-holder', {}, canvas));
   const scroller = node('div.edit-scroll', {}, inner);
   const grid = mountGridPanel(app, {

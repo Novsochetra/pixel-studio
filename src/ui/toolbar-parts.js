@@ -38,6 +38,11 @@ export function zoomControls(app) {
       icon('plus'),
     ),
     node(
+      'button.btn.quiet',
+      { title: 'Fit the canvas in the window', onclick: app.fitCanvas },
+      'Fit',
+    ),
+    node(
       `button.btn.quiet${state.showGrid ? '.on' : ''}`,
       {
         title: 'Pixel grid',

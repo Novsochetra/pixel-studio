@@ -104,14 +104,22 @@ function placeRow(sheet, row, place) {
   return warnings;
 }
 
-// the file name an animation's sheet gets; a name with no Latin letters or digits gets its place
-function slugOf(project, animation) {
-  const plain = animation.name
+const plainSlug = (name) =>
+  name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
-  return plain || `animation-${project.animations.indexOf(animation) + 1}`;
+// The file name an animation's sheet gets; a name with no Latin letters or digits gets its place.
+// Names that come out the same ("Run" and "Run!") get -2, -3 so no file overwrites another.
+function slugOf(project, animation) {
+  const at = project.animations.indexOf(animation);
+  const plain = plainSlug(animation.name) || `animation-${at + 1}`;
+  const before = project.animations
+    .slice(0, at)
+    .filter((other, i) => (plainSlug(other.name) || `animation-${i + 1}`) === plain).length;
+
+  return before ? `${plain}-${before + 1}` : plain;
 }
 
 // The animation as one sheet: frames left to right, directions top to bottom, plus the entry

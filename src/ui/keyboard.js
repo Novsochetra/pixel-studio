@@ -1,4 +1,4 @@
-import { TOOLS } from './tools.js';
+import { toolsFor } from './tools.js';
 import { flipCurrent, redo, undo } from './actions.js';
 import { handleSelectionKey } from './selection-keys.js';
 import { openShortcuts } from './shortcuts.js';
@@ -11,7 +11,7 @@ function typing(event) {
   );
 }
 
-const sheetOpen = () => Boolean(document.querySelector('.sheet-backdrop'));
+const modalOpen = () => Boolean(document.querySelector('.sheet-backdrop, .menu'));
 
 const zoomBy = (app, step) =>
   app.store.set({ zoom: Math.max(1, Math.min(24, app.store.state.zoom + step)) });
@@ -45,7 +45,8 @@ function plainKey(app, event, key) {
     return;
   }
 
-  const tool = event.altKey ? null : TOOLS.find((candidate) => candidate.key === key);
+  const tools = toolsFor(app.store.state.project);
+  const tool = event.altKey ? null : tools.find((candidate) => candidate.key === key);
 
   if (tool) {
     app.store.set({ tool: tool.id, mode: 'edit' });
@@ -91,7 +92,7 @@ export function bindKeyboard(app) {
     }
   });
   document.addEventListener('keydown', (event) => {
-    if (startPanning(app, event) || typing(event) || sheetOpen()) {
+    if (startPanning(app, event) || typing(event) || modalOpen()) {
       return;
     }
 

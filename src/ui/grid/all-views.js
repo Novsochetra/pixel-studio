@@ -1,4 +1,3 @@
-// whether the frame grid shows every view or only the one being edited, remembered per browser
 const GRID_ALL = 'pixel-clean-grid-all';
 
 export function readGridAll() {

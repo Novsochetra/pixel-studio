@@ -125,7 +125,7 @@ export function renderOutlinePanel(el, app) {
 
   replace(
     el,
-    node('h2', {}, 'Outline'),
+    node('h2', { tabindex: '0' }, 'Outline'),
     colourField(app, colour),
     OPERATIONS.map((operation) => operationButton(app, operation, colour)),
     everywhereToggle(app),

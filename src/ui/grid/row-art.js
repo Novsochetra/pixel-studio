@@ -22,7 +22,6 @@ function unionBox(sprites) {
   };
 }
 
-// a row's frames as they ship, and the one box that frames them all
 export function rowArt(project, frames) {
   const sprites = frames.map((frame) =>
     compositeFrame(frame, project.canvas.width, project.canvas.height),

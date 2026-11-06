@@ -44,7 +44,11 @@ export function bindBoardPointer(app, canvas, scale) {
 
   canvas.addEventListener('pointerdown', (event) => {
     const point = pointOf(event);
-    stroke = point ? press(app, canvas, point, event) : null;
+
+    // a press off the art (a second finger on a gap) leaves the mark being drawn alone
+    if (point) {
+      stroke = press(app, canvas, point, event);
+    }
   });
   canvas.addEventListener('pointermove', (event) => {
     const point = stroke && pointOf(event);

@@ -58,8 +58,9 @@ export function legacyGame(profile) {
   return profile === 'generic' ? {} : structuredClone(NAGA_ELEVEN.game);
 }
 
+// a kind this version does not know (from a newer file) is drawn as a character, as kindOf has it
 export function validDirectionSet(id, kindId) {
-  if (kindId !== 'character') {
+  if (KINDS[kindId] && kindId !== 'character') {
     return 'single';
   }
 

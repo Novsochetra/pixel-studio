@@ -4,6 +4,7 @@ import { chooseFiles } from '../choose-file.js';
 import { openBatchSheet } from '../batch-sheet.js';
 import { animationTabs } from './tabs.js';
 import { setGridAll } from './all-views.js';
+import { togglePlayback } from './playback.js';
 import { PIN_NAMES } from '../../model/pins.js';
 import { isSingleView, kindOf } from '../../model/kinds.js';
 
@@ -43,13 +44,20 @@ function viewSwitch(app) {
 
 function fpsField(app) {
   const animation = currentAnimation(app.store.state);
-  const setFps = (event) =>
+  // the frame rate is tuned while watching, so playing goes on at the new rate
+  const setFps = (event) => {
+    const playback = app.playback;
     restructure(app, 'Frame rate', (draft) => {
       currentAnimation(draft).fps = Math.max(
         1,
         Math.min(30, Math.round(Number(event.target.value)) || 8),
       );
     });
+
+    if (playback && !app.playback) {
+      togglePlayback(app, playback);
+    }
+  };
 
   return node(
     'label.grid-fps',
@@ -96,7 +104,6 @@ function pinControls(app) {
   ];
 }
 
-// tabs on the left; how the frames show and play on the right
 export function gridBar(app, { playing, onPlay }) {
   const { state } = app.store;
 

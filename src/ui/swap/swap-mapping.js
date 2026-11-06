@@ -1,23 +1,8 @@
 import { node, toast } from '../dom.js';
-import { directionSprite, directionsInUse } from '../actions.js';
-import { characterColors } from '../character-colours.js';
+import { characterColors, characterCounts } from '../character-colours.js';
 import { newId } from '../../model/project.js';
-import { colorCounts, toHex } from '../../model/sprite.js';
+import { toHex } from '../../model/sprite.js';
 import { reducePalette } from '../../palette/reduce.js';
-
-function characterEntries(state) {
-  const totals = new Map();
-
-  for (const direction of directionsInUse(state)) {
-    const sprite = directionSprite(state, direction);
-
-    for (const { color, count } of sprite ? colorCounts(sprite) : []) {
-      totals.set(color, (totals.get(color) ?? 0) + count);
-    }
-  }
-
-  return [...totals.entries()].map(([color, count]) => ({ color, count }));
-}
 
 function targetPicker(palette, current, onPick) {
   return node(
@@ -46,7 +31,7 @@ function targetPicker(palette, current, onPick) {
 
 // one row per character colour: the colour, how much of it there is, and what it becomes
 export function mappingRows(state, palette, mapping, onChange) {
-  const counts = new Map(characterEntries(state).map((entry) => [entry.color, entry.count]));
+  const counts = new Map(characterCounts(state).map((entry) => [entry.color, entry.count]));
 
   return characterColors(state).map((color) =>
     node(
@@ -73,7 +58,7 @@ export function makeReducedPalette(app, size) {
   const palette = {
     id: newId('p'),
     name: `Character, ${size} colours`,
-    colors: reducePalette(characterEntries(state), size),
+    colors: reducePalette(characterCounts(state), size),
   };
   state.project.palettes.push(palette);
   app.saver.markStructure();

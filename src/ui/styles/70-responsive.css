@@ -2,7 +2,7 @@
   .app {
     grid-template:
       'bar' auto 'rail' auto 'stage' minmax(360px, 70vh)
-      'inspector' auto 'status' auto / 1fr;
+      'inspector' auto 'status' auto / minmax(0, 1fr);
     height: auto;
     min-height: 100%;
   }
@@ -16,9 +16,8 @@
   }
 
   .rail {
-    overflow: visible;
+    overflow-x: auto;
     flex-direction: row;
-    flex-wrap: wrap;
     border-right: 0;
     border-bottom: 1px solid var(--separator);
     padding-inline: max(16px, env(safe-area-inset-left, 0px))
@@ -40,13 +39,88 @@
     padding-inline: max(16px, env(safe-area-inset-left, 0px))
       max(16px, env(safe-area-inset-right, 0px));
   }
-}
 
-@media (max-width: 860px) {
+  .status-help {
+    display: none;
+  }
+
+  .batch-row {
+    grid-template-columns: 56px minmax(0, 1fr) 72px;
+  }
+
+  .batch-row img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .batch-row canvas {
+    width: 72px;
+    height: 72px;
+  }
+
+  .map-row {
+    grid-template-columns: 22px minmax(0, 1fr) 16px;
+  }
+
+  .map-row .target-picker {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .map-row > span:nth-child(3) {
+    display: none;
+  }
+
   .quick-start {
     top: auto;
-    right: 16px;
+    left: 16px;
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* a narrower window keeps one toolbar row: the words go first, their meaning stays in the tooltip */
+@media (max-width: 1360px) {
+  .save-status {
+    font-size: 0;
+  }
+
+  .save-status::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+  }
+
+  .save-status[data-state='pending']::before,
+  .save-status[data-state='saving']::before {
+    background: var(--warn);
+  }
+
+  .save-status[data-state='error']::before {
+    background: var(--bad);
+  }
+}
+
+@media (max-width: 1240px) {
+  .btn-text {
+    display: none;
+  }
+}
+
+/* fingers need bigger targets than a pointer */
+@media (pointer: coarse) {
+  .btn {
+    min-height: 40px;
+  }
+
+  .segmented button {
+    padding: 8px 12px;
+  }
+
+  .layer-row .btn {
+    min-height: 36px;
   }
 }
 

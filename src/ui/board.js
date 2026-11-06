@@ -4,12 +4,14 @@ import { GAP, boardCanvas } from './board-canvas.js';
 import { boardControls, guideSummary } from './board/board-controls.js';
 import { bindBoardPointer } from './board/board-pointer.js';
 
-// the largest scale (up to 5) at which every view fits side by side
+// the largest scale (up to 5) at which every view fits side by side, with room for the controls
 function fittingScale(container, state) {
   const count = directionsInUse(state).length;
-  const room = container.clientWidth - 64 - (count - 1) * GAP;
+  const { width, height } = state.project.canvas;
+  const across = (container.clientWidth - 64 - (count - 1) * GAP) / (count * width);
+  const down = container.clientHeight > 200 ? (container.clientHeight - 200) / height : across;
 
-  return Math.max(1, Math.min(5, Math.floor(room / (count * state.project.canvas.width))));
+  return Math.max(1, Math.min(5, Math.floor(Math.min(across, down))));
 }
 
 function noteField(app) {
@@ -36,7 +38,7 @@ export function mountBoard(container, app) {
     render() {
       const { state } = app.store;
       const scale = fittingScale(container, state);
-      const next = boardCanvas(state, scale);
+      const next = boardCanvas(state, scale, { onScreen: true });
       const same = shown.canvas?.width === next.width && shown.canvas?.height === next.height;
 
       // repaint in place when the size holds, so a mark being drawn keeps its pointer

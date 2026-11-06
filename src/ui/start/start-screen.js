@@ -18,7 +18,6 @@ function moreWays(handlers) {
   );
 }
 
-// The page's first screen when nothing is saved yet: what to make, or the example to try.
 // handlers: { onCreate(project), onExample(), onOpenFile(file), onDeletePreset(preset) }
 export function showStartScreen({ presets, failed, handlers }) {
   const chooser = newProjectChooser({

@@ -46,8 +46,11 @@ function scaled(analyzed, own, { fx, fy }, fill) {
 }
 
 function place(sprite, canvas, options) {
+  // art the canvas's own size was not cut to its box, so its margin is taken off here
   if (options.place === 'fill') {
-    return shiftInto(sprite, canvas, 0, 0);
+    const box = bbox(sprite.opaque, sprite.width);
+
+    return shiftInto(sprite, canvas, -box.left, -box.top);
   }
 
   if (options.place === 'centre') {
@@ -88,11 +91,11 @@ export function cleanAlone(imageData, canvas, options = {}) {
     throw new Error('nothing found: the whole picture looked like background');
   }
 
-  const by = factors(own, canvas, options, analyzed.cell);
-  const unchanged = Math.abs(by.fy - 1) <= 1e-9 && Math.abs(by.fx - 1) <= 0.01;
-  const sprite = unchanged ? analyzed : scaled(analyzed, own, by, options.place === 'fill');
+  const scaleBy = factors(own, canvas, options, analyzed.cell);
+  const unchanged = Math.abs(scaleBy.fy - 1) <= 1e-9 && Math.abs(scaleBy.fx - 1) <= 0.01;
+  const sprite = unchanged ? analyzed : scaled(analyzed, own, scaleBy, options.place === 'fill');
   const placed = place(sprite, canvas, options);
-  const scaledBy = unchanged ? null : { ...by, drawnHeight: own.bottom - own.top };
+  const scaledBy = unchanged ? null : { ...scaleBy, drawnHeight: own.bottom - own.top };
 
   return { ...placed, report: report(analyzed, placed, scaledBy) };
 }

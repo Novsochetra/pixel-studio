@@ -18,25 +18,46 @@ function forgetButton(choice, onDelete) {
   );
 }
 
-function card(choice, picked, { onPick, onDelete }) {
+const STEPS = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+
+// as radio buttons do: the arrow keys pick the next or the one before, Enter or Space this one
+function cardKey(event, choice, { order, onPick }) {
+  if (event.key in STEPS) {
+    event.preventDefault();
+    const at = order.indexOf(choice);
+    onPick(order[(at + STEPS[event.key] + order.length) % order.length], { focus: true });
+  } else if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    onPick(choice, { focus: true });
+  }
+}
+
+// a card, and beside it (not in it, as a radio holds no button) Forget for a saved preset
+function card(choice, picked, handlers) {
   return node(
-    'div.start-card',
-    {
-      role: 'radio',
-      tabindex: '0',
-      'aria-checked': String(picked),
-      onclick: () => onPick(choice),
-      onkeydown: (event) => (event.key === 'Enter' || event.key === ' ') && onPick(choice),
-    },
-    icon(choice.icon),
-    node('div', {}, node('strong', {}, choice.label), node('span', {}, choice.about)),
-    choice.saved ? forgetButton(choice, onDelete) : null,
+    'div.start-choice',
+    {},
+    node(
+      'div.start-card',
+      {
+        role: 'radio',
+        tabindex: picked ? '0' : '-1',
+        'aria-checked': String(picked),
+        'data-choice': choice.id,
+        onclick: () => handlers.onPick(choice),
+        onkeydown: (event) => cardKey(event, choice, handlers),
+      },
+      icon(choice.icon),
+      node('div', {}, node('strong', {}, choice.label), node('span', {}, choice.about)),
+    ),
+    choice.saved ? forgetButton(choice, handlers.onDelete) : null,
   );
 }
 
 function drawCards(el, saved, picked, handlers) {
   const { kinds, presets } = startChoices(saved);
-  const one = (choice) => card(choice, choice.id === picked.id, handlers);
+  const order = [...kinds, ...presets];
+  const one = (choice) => card(choice, choice.id === picked.id, { ...handlers, order });
 
   replace(
     el,
@@ -58,10 +79,14 @@ export function newProjectChooser({ presets, onCreate, onDeletePreset }) {
   let saved = presets;
   let picked = startChoices(saved).kinds[0];
   const handlers = {
-    onPick(choice) {
+    onPick(choice, { focus = false } = {}) {
       picked = choice;
       fields.fill(choice.preset);
       drawCards(cards, saved, picked, handlers);
+
+      if (focus) {
+        cards.querySelector('.start-card[aria-checked="true"]')?.focus();
+      }
     },
     onDelete(preset) {
       saved = saved.filter((entry) => entry !== preset);

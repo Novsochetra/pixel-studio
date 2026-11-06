@@ -1,10 +1,11 @@
 import { node, replace, toast } from '../dom.js';
 import { openSheet } from '../sheet.js';
-import { currentAnimation, referenceSprite } from '../actions.js';
+import { artSprite, currentAnimation, directionsInUse, referenceSprite } from '../actions.js';
 import { boardCanvas, boardPreview } from '../board-canvas.js';
 import { saveFile } from '../save-file.js';
 import { hasMarks } from '../markup.js';
 import { promptText } from './prompt-text.js';
+import { poseField } from './prompt-pose.js';
 import { canvasToBlob } from '../../io/images.js';
 import { bounds } from '../../model/sprite.js';
 import { drawableDirections } from '../../model/directions.js';
@@ -57,9 +58,9 @@ function choices(state, ask, redraw) {
   return node('div.group', { style: { gap: '8px', flexWrap: 'wrap' } }, views, segmented);
 }
 
-function copyButton(text, box) {
+function copyButton(box) {
   const copy = () =>
-    navigator.clipboard.writeText(text).then(
+    navigator.clipboard.writeText(box.value).then(
       () => toast('Prompt copied'),
       () => {
         box.select();
@@ -70,14 +71,23 @@ function copyButton(text, box) {
   return node('button.btn', { onclick: copy }, 'Copy the prompt');
 }
 
+// the AI has to see the art: a frame not drawn in every view yet shows the first frame instead
+function shownState(state) {
+  const unfinished = directionsInUse(state).some(
+    (direction) => !bounds(artSprite(state, direction)),
+  );
+
+  return unfinished ? { ...state, at: { ...state.at, frame: 0 } } : state;
+}
+
 function draw(slot, state, ask, { close, redraw }) {
   const scale = state.project.canvas.scale;
-  const board = boardCanvas(state, scale, { overlay: null, mapping: null });
-  const text = promptText(state, ask.direction, ask.task);
+  const shown = shownState(state);
+  const board = boardCanvas(shown, scale, { overlay: null, mapping: null });
   const box = node(
     'textarea.input.mono',
     { rows: 9, id: 'prompt-text', 'aria-label': 'Prompt', readonly: true },
-    text,
+    promptText(state, ask.direction, ask.task, ask.pose),
   );
   const marks = hasMarks(state.project) ? ', with your marks' : '';
   const download = async () => saveFile('reference-sheet.png', await canvasToBlob(board));
@@ -88,19 +98,20 @@ function draw(slot, state, ask, { close, redraw }) {
     node(
       'div',
       { style: { overflowX: 'auto' } },
-      boardPreview(state, 860, { overlay: null, mapping: null }),
+      boardPreview(shown, 860, { overlay: null, mapping: null }),
     ),
     node(
       'p.hint',
       {},
       `Attach the reference sheet (${board.width}×${board.height}, ${scale}× pixels${marks}) and paste the prompt. Then drop the AI's answer on the canvas to clean it.`,
     ),
+    ask.task === 'frame' ? poseField(state, ask, box) : null,
     box,
     node(
       'div.sheet-actions',
       {},
       node('button.btn', { onclick: close }, 'Close'),
-      copyButton(text, box),
+      copyButton(box),
       node('button.btn.primary', { onclick: download }, 'Download the reference sheet'),
     ),
   );
@@ -109,7 +120,7 @@ function draw(slot, state, ask, { close, redraw }) {
 // A prompt and a reference sheet to ask ChatGPT (or another image AI) for art that fits.
 export function openChatgptSheet(app) {
   const { state } = app.store;
-  const sheet = openSheet('Ask ChatGPT for new art');
+  const sheet = openSheet('Ask ChatGPT for new art', null, { wide: true });
   const reference = viewName(state.project, referenceOf(state.project)).toLowerCase();
 
   // the prompt is made of the reference view's numbers, so that view has to be drawn first
@@ -133,6 +144,7 @@ export function openChatgptSheet(app) {
   const ask = {
     direction: others[0] ?? state.at.direction,
     task: isSingleView(state.project) ? 'frame' : 'view',
+    pose: '',
   };
   const redraw = (patch) => {
     Object.assign(ask, patch);

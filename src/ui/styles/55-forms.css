@@ -92,8 +92,9 @@ textarea.input {
   appearance: none;
   width: 36px;
   height: 22px;
+  margin: 0;
   border-radius: 11px;
-  background: var(--fill-quiet);
+  background: color-mix(in srgb, var(--label-muted), transparent 45%);
   position: relative;
   cursor: pointer;
   flex: none;

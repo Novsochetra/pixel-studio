@@ -58,6 +58,11 @@
   padding: 3px 12px;
   border-radius: 6px;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.segmented button:hover {
+  background: var(--fill-quiet);
 }
 
 .segmented button[aria-pressed='true'] {

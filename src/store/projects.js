@@ -5,7 +5,7 @@ import { deleteAllVersions } from './versions.js';
 
 const INDEX = 'projects';
 
-// the projects list: { list: [{ id, name, profile, prefix, updatedAt }], current: id }; read twice
+// the projects list: { list: [{ id, name, about, prefix, updatedAt }], current: id }; read twice
 // before giving up, then marked unreadable so nothing writes an empty list over the real one
 export async function readIndex(backend) {
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -51,6 +51,12 @@ export function upsertEntry(index, project, prefix) {
   index.list[at] = changed || Date.now() - old.updatedAt > 60000 ? entry : old;
 
   return changed || index.list[at] !== old;
+}
+
+// an entry from this visit put into a list read later, in place of the same project's
+export function mergeEntry(index, entry) {
+  const at = index.list.findIndex((listed) => listed.id === entry.id);
+  at < 0 ? index.list.push(entry) : (index.list[at] = entry);
 }
 
 // every document of one project: its layers, structure, background and versions

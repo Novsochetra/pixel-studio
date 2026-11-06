@@ -22,10 +22,19 @@ await openExample(page);
 check(JSON.stringify(await tabs()) === '["Idle"]', 'the example has one animation, Idle');
 
 await page.getByRole('button', { name: 'New animation' }).click();
+check(
+  (await page.evaluate(() => document.activeElement.id)) === 'new-animation-name',
+  'the new animation sheet starts in its name field',
+);
 await page.getByRole('button', { name: 'Run', exact: true }).click();
-await page.getByLabel('Every frame starts as').check();
-await page.getByRole('button', { name: 'Create animation' }).click();
+await page.selectOption('#new-animation-start', { label: "Every frame as Idle's first frame" });
+await page.locator('#new-animation-name').press('Enter');
 await page.waitForTimeout(300);
+check(
+  (await page.evaluate(() => document.activeElement.getAttribute('aria-label'))) ===
+    'New animation',
+  'and closing it gives focus back to +',
+);
 check(JSON.stringify(await tabs()) === '["Idle","Run"]', 'a new animation gets its own tab, open');
 check(
   JSON.stringify(await frames()) === '["1","2","3","4"]',
@@ -37,6 +46,24 @@ await page.fill('.tab-rename', 'Sprint');
 await page.keyboard.press('Enter');
 await page.waitForTimeout(200);
 check((await tabs()).includes('Sprint'), 'a double-click renames the tab');
+await page.getByRole('button', { name: 'New animation' }).click();
+await page.fill('#new-animation-name', 'Sprint');
+await page.getByRole('button', { name: 'Create animation' }).click();
+await page.waitForTimeout(300);
+check((await tabs()).includes('Sprint 2'), 'a name already taken gets a number');
+await page.locator('.grid-tab[aria-selected="true"]').dblclick();
+await page.fill('.tab-rename', 'Dash');
+await page.getByRole('tab', { name: 'Idle' }).click();
+await page.waitForTimeout(300);
+check(
+  (await tabs()).includes('Dash') &&
+    (await page.locator('.grid-tab[aria-selected="true"]').textContent()) === 'Idle',
+  'renaming, then clicking another tab, renames and opens that tab',
+);
+await page.getByRole('tab', { name: 'Dash' }).click();
+await tabMenu(/^Delete Dash/);
+await page.getByRole('tab', { name: 'Sprint' }).click();
+await page.waitForTimeout(200);
 await tabMenu('Duplicate');
 check((await tabs()).includes('Sprint copy'), 'the tab menu duplicates an animation');
 await tabMenu(/^Delete Sprint copy/);
@@ -123,7 +150,7 @@ check(
 );
 await selectView(page, 'Side');
 await page.locator('.grid-row.current .grid-view-more').click();
-await page.getByRole('menuitem', { name: 'Match the other views to Side' }).click();
+await page.getByRole('menuitem', { name: 'Make Side the view the others match' }).click();
 await page.waitForTimeout(250);
 check(
   (await page.locator('.grid-row.current .grid-star').count()) === 1,

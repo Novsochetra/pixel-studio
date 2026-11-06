@@ -14,6 +14,7 @@ const GROUPS = [
       ['S', 'Select and move'],
       ['W', 'Select a colour (Shift: everywhere)'],
       ['P', 'Pin a body part (Alt-click removes)'],
+      ['V', 'Move the whole frame: drag or arrow keys (Shift: 10 px)'],
       ['M', 'Symmetry on or off'],
       ['Shift F', 'Flip the view'],
     ],
@@ -32,6 +33,7 @@ const GROUPS = [
     'Frames and view',
     [
       [',  .', 'Previous, next frame'],
+      ['Alt ←  →', 'Move the selected frame earlier or later'],
       ['+  −', 'Zoom'],
       ['⌘ + scroll, pinch', 'Zoom around the pointer'],
       ['Space + drag, middle drag', 'Pan'],
@@ -49,7 +51,7 @@ const GROUPS = [
 ];
 
 export function openShortcuts() {
-  const sheet = openSheet('Keyboard shortcuts');
+  const sheet = openSheet('Keyboard shortcuts', null, { wide: true });
   sheet.body.append(
     node(
       'div.compare',

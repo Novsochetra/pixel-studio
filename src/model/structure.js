@@ -63,11 +63,10 @@ export function removeDirection(animation, direction) {
 // a new layer in every frame of the animation, placed above the layer keyed `above` (or on top)
 export function addLayer(project, animation, { name, kind = 'art', above = null }) {
   const key = newId('k');
-  const aboveKey = above;
 
   for (const frame of framesOf(animation)) {
-    const at = aboveKey
-      ? frame.layers.findIndex((layer) => layer.key === aboveKey) + 1
+    const at = above
+      ? frame.layers.findIndex((layer) => layer.key === above) + 1
       : frame.layers.length;
     frame.layers.splice(
       at,
@@ -115,8 +114,24 @@ export function moveLayer(animation, key, step) {
   }
 }
 
+// a name no other animation of the project has: "Run", then "Run 2", "Run 3"
+export function uniqueName(project, name, except = null) {
+  const taken = new Set(
+    project.animations
+      .filter((animation) => animation !== except)
+      .map((animation) => animation.name),
+  );
+  let candidate = name;
+
+  for (let count = 2; taken.has(candidate); count++) {
+    candidate = `${name} ${count}`;
+  }
+
+  return candidate;
+}
+
 export function addAnimation(project, name, directions) {
-  const animation = newAnimation(name, project.canvas, directions);
+  const animation = newAnimation(uniqueName(project, name), project.canvas, directions);
   project.animations.push(animation);
 
   return animation;

@@ -2,12 +2,14 @@ import { cloneSprite } from './sprite.js';
 import { newId } from './project.js';
 import { compositeFrame } from './composite.js';
 import { addFrame } from './frames.js';
-import { addAnimation } from './structure.js';
+import { addAnimation, uniqueName } from './structure.js';
 
 // a deep copy whose animation, frames and layers have ids of their own, so both are saved
 function copyFrames(frames) {
   return frames.map((frame) => ({
+    ...frame,
     id: newId('f'),
+    marks: structuredClone(frame.marks ?? []),
     layers: frame.layers.map((layer) => ({
       ...layer,
       id: newId('l'),
@@ -20,7 +22,7 @@ export function duplicateAnimation(project, animation, name = `${animation.name}
   const copy = {
     ...animation,
     id: newId('a'),
-    name,
+    name: uniqueName(project, name),
     directions: Object.fromEntries(
       Object.entries(animation.directions).map(([direction, entry]) => [
         direction,

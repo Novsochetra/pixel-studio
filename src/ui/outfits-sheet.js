@@ -88,7 +88,7 @@ function drawOutfits(job) {
     node(
       'div',
       { style: { overflowX: 'auto' } },
-      boardPreview(state, 860, { overlay: null, mapping }),
+      boardPreview(state, 860, { overlay: null, mapping, onScreen: true }),
     ),
     Object.keys(mapping).length
       ? null
@@ -103,7 +103,7 @@ function drawOutfits(job) {
 export function openOutfitsSheet(app) {
   const { project } = app.store.state;
   const teams = gameOf(project).teamKits;
-  const sheet = openSheet(teams ? 'Team kits and outfits' : 'Outfits');
+  const sheet = openSheet(teams ? 'Team kits and outfits' : 'Outfits', null, { wide: true });
   const slot = node('div', { style: { display: 'grid', gap: '14px' } });
   const choice = {
     source: teams ? 'team' : 'custom',

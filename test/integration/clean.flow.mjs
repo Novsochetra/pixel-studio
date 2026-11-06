@@ -11,6 +11,7 @@ import {
   openExample,
   selectFrame,
   selectView,
+  openPanel,
 } from './studio.mjs';
 
 const { page, check, finish, images, shots } = await openStudio();
@@ -75,6 +76,7 @@ check(
   'the image fills frame 2, frame 1 keeps its art',
 );
 
+await openPanel(page, 'Layers');
 await chooseFiles(page, () => page.getByRole('button', { name: 'Add picture to trace…' }).click(), [
   imageFile(back, 'trace.webp'),
 ]);

@@ -26,7 +26,10 @@ async function startSection(app, sheet) {
   const chooser = newProjectChooser({
     presets: await readPresets(app.backend),
     onCreate: opened,
-    onDeletePreset: (preset) => deletePreset(app.backend, preset.id),
+    onDeletePreset: (preset) =>
+      deletePreset(app.backend, preset.id).catch((error) =>
+        toast(`The preset could not be forgotten: ${error.message}`),
+      ),
   });
 
   return node(

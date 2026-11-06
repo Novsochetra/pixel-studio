@@ -1,6 +1,6 @@
 import { node } from '../dom.js';
-import { changeStructure, directionSprite, directionsInUse } from '../actions.js';
-import { checkGuide, describeCheck } from '../../views/guides.js';
+import { changeStructure, directionsInUse } from '../actions.js';
+import { guideChips } from '../guide-chips.js';
 import { viewName } from '../../model/kinds.js';
 
 const CLICKS = [
@@ -87,21 +87,7 @@ export function guideSummary(state) {
   const lines = state.project.guides
     .filter((guide) => guide.rule !== 'fixed')
     .map((guide) =>
-      node(
-        'div.guide-checks',
-        {},
-        node('span.chip', {}, guide.name),
-        directionsInUse(state).map((direction) => {
-          const sprite = directionSprite(state, direction);
-          const check = sprite ? checkGuide(sprite, guide) : { state: 'missing' };
-
-          return node(
-            'span.chip',
-            { 'data-state': check.state },
-            `${viewName(state.project, direction)}: ${describeCheck(check)}`,
-          );
-        }),
-      ),
+      node('div.guide-checks', {}, node('span.chip', {}, guide.name), guideChips(state, guide)),
     );
 
   return node('div.board-guides', {}, lines);

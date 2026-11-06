@@ -52,6 +52,7 @@
 }
 
 .grid-tabs {
+  position: relative;
   display: flex;
   gap: 2px;
   max-width: 100%;
@@ -307,6 +308,7 @@
 }
 
 .grid-add-view {
+  margin-top: 6px;
   justify-self: start;
 }
 
@@ -327,4 +329,12 @@
   .grid-label {
     width: 88px;
   }
+}
+
+/* the strip scrolls sideways; + to start another stays at its end, in sight */
+.grid-tab-add {
+  position: sticky;
+  right: 0;
+  flex: none;
+  background: var(--well);
 }

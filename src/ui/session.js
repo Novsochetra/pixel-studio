@@ -4,7 +4,8 @@ import { History } from '../editor/history.js';
 import { Saver } from '../store/saver.js';
 import { loadProject } from '../store/load.js';
 import { keysFor, prefixFor } from '../store/keys.js';
-import { deleteProjectData, upsertEntry, writeIndex } from '../store/projects.js';
+import { deleteProjectData, upsertEntry } from '../store/projects.js';
+import { writeList } from './project-list.js';
 import { allLayers, newId } from '../model/project.js';
 import { normalizeProject } from '../model/normalize.js';
 import { createSprite } from '../model/sprite.js';
@@ -29,12 +30,6 @@ export function fillMissingSprites(project) {
   return project;
 }
 
-// the list is only written when it was read: one written from an empty guess would drop
-// every project this visit did not see
-function writeList(app) {
-  return app.index.unreadable ? null : writeIndex(app.backend, app.index);
-}
-
 // Saves the open project before another takes its place; refuses while saving fails, so
 // nothing unsaved is dropped.
 async function saveBeforeLeaving(app) {
@@ -47,11 +42,11 @@ async function saveBeforeLeaving(app) {
   }
 }
 
-// the projects list follows each save: names, profiles, which one is open
+// the projects list follows each save: names, kinds, which one is open
 function saveIndex(app, project) {
   const changed = upsertEntry(app.index, project, app.keys.prefix);
 
-  if (changed || app.index.current !== project.id) {
+  if (changed || app.index.current !== project.id || app.index.unreadable) {
     app.index.current = project.id;
 
     return writeList(app);

@@ -64,7 +64,7 @@ function hintText(state) {
 export function openBatchSheet(app, files) {
   const { state } = app.store;
   const animation = currentAnimation(state);
-  const sheet = openSheet(`Clean ${files.length} images`);
+  const sheet = openSheet(`Clean ${files.length} images`, null, { wide: true });
   const list = node('div.view-list');
   const items = batchItems(state, files);
   const accept = node('button.btn.primary', { disabled: true }, 'Use them all');

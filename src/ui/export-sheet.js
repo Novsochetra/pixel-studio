@@ -16,6 +16,8 @@ import { gameOf } from '../model/presets.js';
 import { mirrorsOf } from '../model/directions.js';
 import { placementOf } from '../model/kinds.js';
 
+const count = (number, word) => `${number} ${word}${number === 1 ? '' : 's'}`;
+
 function warn(warnings) {
   if (warnings.length) {
     const more = warnings.length > 3 ? ` (and ${warnings.length - 3} more)` : '';
@@ -78,7 +80,7 @@ function summary(result, animation, state) {
     node(
       'p.hint',
       {},
-      `${result.frames} frames × ${result.rows.length} rows (${rows}) · ${result.sheet.width}×${result.sheet.height} px · ${animation.fps} fps`,
+      `${count(result.frames, 'frame')} × ${count(result.rows.length, 'row')} (${rows}) · ${result.sheet.width}×${result.sheet.height} px · ${animation.fps} fps`,
     ),
     outside
       ? node(
@@ -132,7 +134,7 @@ function drawExport(slot, job) {
 export function openExportSheet(app) {
   const { state } = app.store;
   const animation = currentAnimation(state);
-  const sheet = openSheet(`Sprite sheet: ${animation.name}`);
+  const sheet = openSheet(`Sprite sheet: ${animation.name}`, null, { wide: true });
   const slot = node('div', { style: { display: 'grid', gap: '12px' } });
   const choice = startingChoice(state);
   const job = { state, animation, choice, close: sheet.close };

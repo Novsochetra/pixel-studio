@@ -1,9 +1,9 @@
 import { node } from './dom.js';
-import { changeStructure, directionSprite, directionsInUse } from './actions.js';
+import { changeStructure } from './actions.js';
 import { characterColors } from './character-colours.js';
-import { GUIDE_RULES, checkGuide, describeCheck } from '../views/guides.js';
+import { GUIDE_RULES } from '../views/guides.js';
+import { guideChips } from './guide-chips.js';
 import { toHex } from '../model/sprite.js';
-import { viewName } from '../model/kinds.js';
 
 function checks(app, guide) {
   const { state } = app.store;
@@ -12,20 +12,7 @@ function checks(app, guide) {
     return null;
   }
 
-  return node(
-    'div.guide-checks',
-    {},
-    directionsInUse(state).map((direction) => {
-      const sprite = directionSprite(state, direction);
-      const check = sprite ? checkGuide(sprite, guide) : { state: 'missing' };
-
-      return node(
-        'span.chip',
-        { 'data-state': check.state },
-        `${viewName(state.project, direction)}: ${describeCheck(check)}`,
-      );
-    }),
-  );
+  return node('div.guide-checks', {}, guideChips(state, guide));
 }
 
 function ruleFields(app, guide) {

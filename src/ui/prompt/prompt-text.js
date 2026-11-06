@@ -68,7 +68,7 @@ function sizeLine(state, box) {
 }
 
 // The prompt that makes an AI image fit: the grid, the size and place of the art, the colours.
-export function promptText(state, direction, task) {
+export function promptText(state, direction, task, pose = '') {
   const { width, height, scale } = state.project.canvas;
   const ref = referenceSprite(state);
   const colours = characterColors(state).map(toHex);
@@ -85,6 +85,7 @@ export function promptText(state, direction, task) {
       : 'No anti-aliasing, no gradients, no soft edges.',
     `A flat magenta (${KEY_BACKGROUND}) background, nothing else in the picture.`,
     hasMarks(state.project) ? 'The red marks and notes on the sheet show what to change.' : null,
+    task === 'frame' && pose.trim() ? `Pose: ${pose.trim()}` : null,
   ]
     .filter((line) => line !== null)
     .join('\n');

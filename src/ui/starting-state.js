@@ -32,6 +32,7 @@ export function startingState(project) {
     swapPreview: null,
     cursor: null,
     onion: false,
+    frameDrag: null,
     gridAll: readGridAll(),
     viewFilter: 'colour',
     showPins: false,

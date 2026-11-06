@@ -96,14 +96,14 @@ export function drawingSettings(app, colors) {
     });
 
   return [
-    node('h2', {}, 'Drawing'),
+    node('h2', { tabindex: '0' }, 'Drawing'),
     toggle(
       { id: 'clean-lines', label: 'Clean lines', hint: 'Removes doubled corners while you draw' },
       state.cleanLines,
       (on) => app.store.set({ cleanLines: on }),
     ),
     toggle(
-      { id: 'palette-lock', label: 'Palette lock', hint: 'Draw only with the character colours' },
+      { id: 'palette-lock', label: 'Palette lock', hint: "Draw only with the art's colours" },
       state.paletteLock,
       lock,
     ),

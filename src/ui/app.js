@@ -23,11 +23,20 @@ function stageDrawer(element, app) {
 
     if (mode !== shownMode) {
       shownMode = mode;
+      element.closest('.app').dataset.mode = mode;
       stage = WORKSPACES[mode](element, app);
     }
 
     stage.render(patch);
   };
+}
+
+function followResize(app, drawStage) {
+  if (app.store.state.mode !== 'edit') {
+    drawStage();
+  } else if (app.store.state.zoom === app.fittedZoom) {
+    app.fitCanvas();
+  }
 }
 
 export function mountApp(app) {
@@ -51,9 +60,14 @@ export function mountApp(app) {
   });
 
   Object.values(draw).forEach((fn) => fn());
-  app.store.set({ zoom: fitZoom(stage, currentLayer(app.store.state).sprite) });
+  // the zoom that fills the window; a resize follows it unless another zoom was chosen
+  app.fitCanvas = () => {
+    app.fittedZoom = fitZoom(stage, currentLayer(app.store.state).sprite);
+    app.store.set({ zoom: app.fittedZoom });
+  };
+  app.fitCanvas();
   bindKeyboard(app);
   bindDrop(stage, app);
   showQuickStart(document.body);
-  window.addEventListener('resize', () => app.store.state.mode !== 'edit' && draw.stage());
+  window.addEventListener('resize', () => followResize(app, draw.stage));
 }

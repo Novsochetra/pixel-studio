@@ -3,7 +3,12 @@ body {
   height: 100%;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--label);
   font: 13px/1.4 var(--font-ui);

@@ -81,9 +81,6 @@ function referenceStrength(app, layer) {
   );
 }
 
-const ABOUT =
-  'Layers are see-through sheets stacked inside every frame: your art, and pictures to trace. The frames below the canvas are the steps of the animation.';
-
 function layerButtons(app, active) {
   const animation = currentAnimation(app.store.state);
   const add = () =>
@@ -118,10 +115,9 @@ export function renderLayersPanel(el, app) {
 
   replace(
     el,
-    node('h2', {}, 'Layers', node('span.hint', {}, 'top first')),
+    node('h2', { tabindex: '0' }, 'Layers', node('span.hint', {}, 'top first')),
     node('div.view-list', {}, rows),
     active.kind === 'reference' ? referenceStrength(app, active) : null,
-    node('p.hint', {}, ABOUT),
     layerButtons(app, active),
   );
 }

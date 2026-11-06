@@ -1,14 +1,15 @@
 import { node, icon, replace } from './dom.js';
-import { TOOLS } from './tools.js';
+import { toolsFor } from './tools.js';
 import { flipCurrent } from './actions.js';
 
 export function renderRail(el, app) {
   const { state } = app.store;
-  const toolButtons = TOOLS.map((tool) =>
+  const toolButtons = toolsFor(state.project).map((tool) =>
     node(
       `button.btn.quiet${state.tool === tool.id ? '.on' : ''}`,
       {
         title: `${tool.label} (${tool.key.toUpperCase()})`,
+        'data-key': tool.key.toUpperCase(),
         'aria-label': tool.label,
         'aria-pressed': String(state.tool === tool.id),
         onclick: () => app.store.set({ tool: tool.id, mode: 'edit' }),
