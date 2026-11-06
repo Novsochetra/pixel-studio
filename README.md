@@ -13,6 +13,10 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
   frames to reorder them, play them on the canvas, see the mirrored side.
 - **Preview**: characters in a scene (the pitch for Naga Eleven), tiles laid as a floor, effects and
   icons at 1×, 2× and 4×.
+- **Cast**: every project in Projects (the name, top left) with its picture. "New character like
+  this" sets up the next character of a game as the open one is: the same canvas, views,
+  animations, frames, layers and guide lines, with nothing drawn. "Line them up" stands every
+  project side by side at one pixel size, to check heights agree, and downloads it as a PNG.
 - **Export**: sprite sheet + Aseprite-style JSON (Phaser, Godot, Unity), separate frames, GIFs, and
   the Naga Eleven game pack.
 

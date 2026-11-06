@@ -1,0 +1,70 @@
+/* The projects list with a picture of each project, and the line-up of them all. */
+.project-row {
+  justify-content: flex-start;
+}
+
+.project-text {
+  flex: 1;
+  min-width: 180px;
+}
+
+.project-picture {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--well);
+  image-rendering: pixelated;
+}
+
+.line-up {
+  display: flex;
+  align-items: flex-end;
+  overflow-x: auto;
+  padding: 16px 0 8px;
+}
+
+.line-up-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.line-up-art {
+  display: flex;
+  align-items: flex-end;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--label-muted);
+}
+
+.line-up-art canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.line-up-member:focus-visible .line-up-art {
+  background: var(--fill-quiet);
+}
+
+/* a tap leaves no hover behind on a touch screen */
+@media (hover: hover) {
+  .line-up-member:hover .line-up-art {
+    background: var(--fill-quiet);
+  }
+}
+
+.line-up-name {
+  max-width: 160px;
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

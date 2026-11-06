@@ -8,6 +8,7 @@ export function keysFor(prefix = '') {
     versions: `${prefix}versions`,
     versionChunk: (id, chunk) => `${prefix}version-${id}-${chunk}`,
     background: `${prefix}background`,
+    portrait: `${prefix}portrait`,
   };
 }
 

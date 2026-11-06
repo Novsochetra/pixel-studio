@@ -79,7 +79,7 @@ export async function saveProjectList(backend, index) {
   await writeIndex(backend, index);
 }
 
-// every document of one project: its layers, structure, background and versions
+// every document of one project: its layers, structure, background, picture and versions
 export async function deleteProjectData(backend, prefix) {
   const keys = keysFor(prefix);
   const stored = await backend.read(keys.project);
@@ -92,5 +92,6 @@ export async function deleteProjectData(backend, prefix) {
 
   await backend.remove(keys.project);
   await backend.remove(keys.background);
+  await backend.remove(keys.portrait);
   await deleteAllVersions(backend, keys);
 }

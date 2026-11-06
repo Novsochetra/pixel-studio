@@ -1,5 +1,6 @@
 import { startingState } from './starting-state.js';
 import { settleAt } from './actions.js';
+import { afterSave } from './after-save.js';
 import { History } from '../editor/history.js';
 import { Saver } from '../store/saver.js';
 import { loadProject } from '../store/load.js';
@@ -41,29 +42,17 @@ async function saveBeforeLeaving(app) {
   }
 }
 
-// the projects list follows each save: names, kinds, which one is open
-function saveIndex(app, project) {
-  const changed = upsertEntry(app.index, project, app.keys.prefix);
-
-  if (changed || app.index.current !== project.id || app.index.unreadable || app.index.unwritten) {
-    app.index.current = project.id;
-    app.index.unwritten = false;
-
-    return saveProjectList(app.backend, app.index);
-  }
-
-  return null;
-}
-
 // A saver for `project`. save: 'nothing' (just loaded), 'on-change' (an example, written once
 // edited) or 'all' (new). stored: the layers already written, when a version replaces the project.
 function startSaving(app, project, save, stored) {
   app.saver?.detach();
+  // the picture last written is not known yet: the first save writes it
+  app.portrait = undefined;
   app.saver = new Saver(
     app.backend,
     (status) => app.store.set({ saveStatus: status }),
     app.keys,
-    (saved) => saveIndex(app, saved),
+    (saved) => afterSave(app, saved),
   );
   app.saver.attach(project);
   stored?.forEach((id) => app.saver.stored.add(id));
