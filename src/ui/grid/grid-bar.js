@@ -99,14 +99,14 @@ function pinControls(app) {
 // tabs on the left; how the frames show and play on the right
 export function gridBar(app, { playing, onPlay }) {
   const { state } = app.store;
-  const views = Object.keys(currentAnimation(state).directions).length;
 
   return node(
     'div.grid-bar',
     {},
     animationTabs(app),
     node('span.spacer'),
-    views > 1 && !isSingleView(state.project) ? viewSwitch(app) : null,
+    // a character always has more to show: its other views, the mirrored side, a view to add
+    isSingleView(state.project) ? null : viewSwitch(app),
     node(
       'button.btn.quiet.icon-toggle',
       {

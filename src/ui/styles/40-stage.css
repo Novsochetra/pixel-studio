@@ -60,6 +60,9 @@
 }
 
 .preview-bar {
+  /* the stage grows to fit a zoomed scene; its controls wrap instead of widening it */
+  contain: inline-size;
+  width: min(100%, 900px);
   gap: 10px;
   flex-wrap: wrap;
   justify-content: center;

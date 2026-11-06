@@ -114,6 +114,13 @@ function afterHistory(app, step) {
     return;
   }
 
+  if (step.kind === 'setting') {
+    app.saver.markStructure();
+    app.store.touch('project');
+
+    return;
+  }
+
   app.saver.markLayers(step.changes.map(({ id }) => id));
   app.store.touch('pixels');
 }
@@ -146,15 +153,9 @@ export function flipCurrent(app) {
   });
 }
 
-// a cleaned image into one frame of a view: onto the layer being edited, unless that is a picture
-// to trace, which never reaches a download
-export function replaceDirectionArt(
-  app,
-  direction,
-  sprite,
-  label,
-  frame = app.store.state.at.frame,
-) {
+// a cleaned image into one frame of a view ({ direction, frame }): onto the layer being edited,
+// unless that is a picture to trace, which never reaches a download
+export function replaceDirectionArt(app, { direction, frame }, sprite, label) {
   const at = { ...app.store.state.at, direction, frame };
   const chosen = layerAt(app.store.state.project, at);
   const layer =

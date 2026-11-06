@@ -1,5 +1,16 @@
 import { cloneSprite, samePixels } from '../model/sprite.js';
 
+function snapshotFrame(frame) {
+  return {
+    ...frame,
+    marks: frame.marks?.map((mark) => ({ ...mark })),
+    layers: frame.layers.map((layer) => ({
+      ...layer,
+      sprite: layer.sprite && cloneSprite(layer.sprite),
+    })),
+  };
+}
+
 // A copy of every animation, pixels included, so a frame, layer or animation change can be undone.
 export function snapshotAnimations(animations) {
   return animations.map((animation) => ({
@@ -7,36 +18,20 @@ export function snapshotAnimations(animations) {
     directions: Object.fromEntries(
       Object.entries(animation.directions).map(([direction, entry]) => [
         direction,
-        {
-          ...entry,
-          frames: entry.frames.map((frame) => ({
-            ...frame,
-            marks: frame.marks?.map((mark) => ({ ...mark })),
-            layers: frame.layers.map((layer) => ({
-              ...layer,
-              sprite: layer.sprite && cloneSprite(layer.sprite),
-            })),
-          })),
-        },
+        { ...entry, frames: entry.frames.map(snapshotFrame) },
       ]),
     ),
   }));
 }
 
 function layerPixels(animations) {
-  const pixels = new Map();
+  const frames = animations.flatMap((animation) =>
+    Object.values(animation.directions).flatMap((entry) => entry.frames),
+  );
 
-  for (const animation of animations) {
-    for (const entry of Object.values(animation.directions)) {
-      for (const frame of entry.frames) {
-        for (const layer of frame.layers) {
-          pixels.set(layer.id, layer.sprite?.pixels);
-        }
-      }
-    }
-  }
-
-  return pixels;
+  return new Map(
+    frames.flatMap((frame) => frame.layers.map((layer) => [layer.id, layer.sprite?.pixels])),
+  );
 }
 
 // ids of layers whose pixels differ between two sets of animations, or that only one has
@@ -62,7 +57,7 @@ export function changedLayers(before, after) {
 }
 
 // Undo steps are pixel changes to some layers (found again by id, so a step still works after
-// frames or layers were rebuilt) or a change to the animations themselves.
+// frames or layers were rebuilt), a change to the animations themselves, or a project setting.
 export class History {
   constructor(findLayer, limit = 120) {
     this.findLayer = findLayer;
@@ -102,9 +97,20 @@ export class History {
     this.push({ label, kind: 'structure', before, after: snapshotAnimations(project.animations) });
   }
 
+  // one of the project's own settings (which view is the reference), before and after
+  recordSetting(label, key, before, after) {
+    this.push({ label, kind: 'setting', key, before, after });
+  }
+
   apply(step, side, project) {
     if (step.kind === 'structure') {
       project.animations = snapshotAnimations(step[side]);
+
+      return;
+    }
+
+    if (step.kind === 'setting') {
+      project[step.key] = step[side];
 
       return;
     }

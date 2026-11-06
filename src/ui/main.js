@@ -19,7 +19,7 @@ async function startEditor(backend, index, { project, prefix, save, background =
   const app = { store, backend, index };
   app.findLayer = (id) =>
     [...allLayers(store.state.project)].find(({ layer }) => layer.id === id)?.layer ?? null;
-  install(app, project, prefix, save);
+  install(app, project, { prefix, save });
   app.addProject = (next, nextBackground) => addProject(app, next, nextBackground);
 
   if (background) {

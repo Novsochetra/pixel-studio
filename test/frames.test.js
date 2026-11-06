@@ -109,7 +109,7 @@ test('frames added to even out a loaded project are saved, so they never come ba
     },
     index: { list: [], current: null },
   };
-  install(app, project, '', 'nothing');
+  install(app, project, { prefix: '' });
   added.forEach((id) => assert.ok(app.saver.dirty.has(id)));
   assert.equal(app.saver.structureDirty, true);
   app.saver.detach();

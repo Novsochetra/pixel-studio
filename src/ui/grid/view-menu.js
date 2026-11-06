@@ -6,7 +6,10 @@ import { referenceOf } from '../../model/reference.js';
 import { viewName } from '../../model/kinds.js';
 
 function makeReference(app, direction) {
-  app.store.state.project.referenceDirection = direction;
+  const { project } = app.store.state;
+  const before = project.referenceDirection;
+  project.referenceDirection = direction;
+  app.history.recordSetting('Reference view', 'referenceDirection', before, direction);
   changeStructure(app, 'project');
 }
 

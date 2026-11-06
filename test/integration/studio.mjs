@@ -1,0 +1,132 @@
+import { readFileSync } from 'node:fs';
+
+// What a person does in the studio, as steps the flows share.
+
+export async function openExample(page) {
+  await page.getByRole('button', { name: 'Try the example character' }).click();
+  await page.waitForSelector('.grid-panel');
+  await page.waitForTimeout(400);
+}
+
+// a project from the start screen (or the projects sheet's New project): kind is a card's label
+export async function createProject(page, { kind = 'Character', name, width, height, directions }) {
+  await page.getByRole('radio', { name: new RegExp(`^${kind}`) }).click();
+
+  if (name) {
+    await page.fill('#project-name', name);
+  }
+
+  if (width) {
+    await page.fill('#project-width', String(width));
+    await page.fill('#project-height', String(height ?? width));
+  }
+
+  if (directions) {
+    await page.selectOption('#project-directions', directions);
+  }
+
+  await page.getByRole('button', { name: 'Create', exact: true }).click();
+  await page.waitForSelector('.grid-panel');
+  await page.waitForTimeout(400);
+}
+
+export async function showAllViews(page) {
+  const all = page.getByRole('button', { name: 'All views' });
+
+  if (await all.count()) {
+    await all.click();
+    await page.waitForTimeout(200);
+  }
+}
+
+// the frames of the view being edited, as "1", "2 · empty"
+export async function frameLabels(page) {
+  const labels = await page
+    .locator('.grid-row.current .cell')
+    .evaluateAll((cells) => cells.map((cell) => cell.getAttribute('aria-label')));
+
+  return labels.map((label) => {
+    const [, number, empty] = label.match(/frame (\d+)(, empty)?/);
+
+    return empty ? `${number} · empty` : number;
+  });
+}
+
+export async function selectView(page, name) {
+  await showAllViews(page);
+  await page.locator('.grid-view', { hasText: new RegExp(`^${name}$`) }).click();
+  await page.waitForTimeout(200);
+}
+
+export async function selectFrame(page, index) {
+  await page.locator('.grid-row.current .cell').nth(index).click();
+  await page.waitForTimeout(150);
+}
+
+// one of the selected frame's actions, from its menu
+export async function frameAction(page, name) {
+  await page.locator('.grid-row.current .cell.selected .cell-more').click();
+  await page.getByRole('menuitem', { name }).click();
+  await page.waitForTimeout(250);
+}
+
+export async function dropImage(page, path, name = 'picture.webp') {
+  const transfer = await page.evaluateHandle(
+    ([bytes, fileName]) => {
+      const data = new DataTransfer();
+      data.items.add(new File([new Uint8Array(bytes)], fileName, { type: 'image/webp' }));
+
+      return data;
+    },
+    [[...readFileSync(path)], name],
+  );
+  await page.dispatchEvent('#stage', 'drop', { dataTransfer: transfer });
+}
+
+export async function cleanReport(page) {
+  await page.waitForSelector('pre.report', { timeout: 25000 });
+  await page
+    .waitForFunction(
+      () => document.querySelector('pre.report')?.textContent.startsWith('Grid'),
+      null,
+      { timeout: 25000 },
+    )
+    .catch(() => null);
+
+  return page.locator('pre.report').first().textContent();
+}
+
+export const status = (page) => page.locator('#statusbar').textContent();
+
+export async function waitSaved(page) {
+  await page
+    .waitForFunction(
+      () => /^Saved/.test(document.querySelector('.save-status')?.textContent ?? ''),
+      null,
+      { timeout: 8000 },
+    )
+    .catch(() => null);
+
+  return page.locator('.save-status').textContent();
+}
+
+export async function download(page, click) {
+  const [file] = await Promise.all([
+    page.waitForEvent('download', { timeout: 15000 }).catch(() => null),
+    click(),
+  ]);
+
+  return file;
+}
+
+export const imageFile = (path, name) => ({
+  name,
+  mimeType: 'image/webp',
+  buffer: readFileSync(path),
+});
+
+export async function chooseFiles(page, click, files) {
+  const chooser = page.waitForEvent('filechooser', { timeout: 5000 });
+  await click();
+  await (await chooser).setFiles(files);
+}

@@ -33,7 +33,7 @@ function cleansAlone(state, direction, frame) {
 function accept(job, place) {
   const { app, direction, frame } = job;
   keepVersion(app, `Before cleaning into ${place}`);
-  replaceDirectionArt(app, direction, job.result, `Clean into ${place}`, frame);
+  replaceDirectionArt(app, { direction, frame }, job.result, `Clean into ${place}`);
   app.store.set({ at: { ...app.store.state.at, direction, frame }, mode: 'edit', selection: null });
   job.close();
   toast(`${place} updated. Undo brings the old one back.`);

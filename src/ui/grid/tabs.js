@@ -53,9 +53,12 @@ function tabMenu(app, anchor, tabButton, animation) {
       `Delete ${animation.name}`,
       () =>
         restructure(app, `Delete ${animation.name}`, (draft) => {
+          const at = draft.project.animations.indexOf(animation);
           removeAnimation(draft.project, animation.id);
+          // the tab beside the deleted one opens, as closing a tab does
+          const next = draft.project.animations[Math.max(0, at - 1)];
 
-          return { animation: draft.project.animations[0].id, frame: 0, layer: null };
+          return { animation: next.id, frame: 0, layer: null };
         }),
       { danger: true, disabled: project.animations.length < 2, title: `Keep at least one ${item}` },
     ],
