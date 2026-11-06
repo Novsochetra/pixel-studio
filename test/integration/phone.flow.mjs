@@ -52,6 +52,26 @@ check(
   'press, hold and drag moves a frame',
 );
 
+for (const name of ['Walk', 'Run', 'Jump', 'Attack', 'Hurt']) {
+  await page.getByRole('button', { name: 'New animation' }).click();
+  await page.fill('#new-animation-name', name);
+  await page.getByRole('button', { name: 'Create animation' }).click();
+  await page.waitForTimeout(250);
+}
+
+const inSight = (selector) =>
+  page.locator(selector).evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    const strip = element.closest('.grid-tabs')?.getBoundingClientRect() ?? {
+      left: 0,
+      right: innerWidth,
+    };
+
+    return box.left >= strip.left - 1 && box.right <= Math.min(strip.right, innerWidth) + 1;
+  });
+check(await inSight('.grid-tab[aria-selected="true"]'), 'with many tabs, the open one is in sight');
+check((await inSight('.tab-more')) && (await inSight('.grid-tab-add')), 'and so are its ⋯ and +');
+
 await page.goto(studio.url);
 await page.waitForTimeout(800);
 await page.evaluate(() => indexedDB.deleteDatabase('pixel-clean-studio'));

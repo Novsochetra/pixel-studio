@@ -54,6 +54,8 @@
 .grid-tabs {
   position: relative;
   display: flex;
+  flex: 0 1 auto;
+  min-width: 0;
   gap: 2px;
   max-width: 100%;
   padding: 2px;
@@ -70,17 +72,18 @@
   white-space: nowrap;
 }
 
-.grid-tab-group {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 6px;
+.grid-tab[aria-selected='true'] {
+  color: var(--label);
   background: var(--chrome-raised);
   box-shadow: var(--lift);
 }
 
-.grid-tab-group .grid-tab {
-  color: var(--label);
-  padding-right: 4px;
+.grid-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .tab-more,
@@ -92,11 +95,6 @@
   width: 30px;
   height: 28px;
   padding: 0;
-}
-
-.tab-more {
-  width: 24px;
-  height: 24px;
 }
 
 .tab-rename {
@@ -180,6 +178,11 @@
 .grid-cells {
   display: flex;
   gap: 6px;
+}
+
+.cell-slot {
+  display: flex;
+  flex: none;
 }
 
 .grid-number {
@@ -329,12 +332,4 @@
   .grid-label {
     width: 88px;
   }
-}
-
-/* the strip scrolls sideways; + to start another stays at its end, in sight */
-.grid-tab-add {
-  position: sticky;
-  right: 0;
-  flex: none;
-  background: var(--well);
 }

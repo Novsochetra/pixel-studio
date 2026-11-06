@@ -3,10 +3,14 @@ import { currentAnimation, currentFrames } from '../actions.js';
 // Play runs the animation on the canvas itself: app.playback.frame is the frame on show, and
 // onFrame repaints whatever shows it. Any edit, or a click on a frame, stops it.
 
-function tick(app, time) {
-  const playback = app.playback;
+// Each play has its own loop, which ends once that play is stopped or another takes its place.
+// A frame's time can come just before the play's start, which must not step back to frame -1.
+function tick(app, playback, time) {
+  if (app.playback !== playback) {
+    return;
+  }
 
-  if (!playback || !playback.isShown()) {
+  if (!playback.isShown()) {
     app.playback = null;
 
     return;
@@ -14,7 +18,8 @@ function tick(app, time) {
 
   const { state } = app.store;
   const count = currentFrames(state).length;
-  const step = Math.floor(((time - playback.start) / 1000) * currentAnimation(state).fps);
+  const elapsed = Math.max(0, time - playback.start);
+  const step = Math.floor((elapsed / 1000) * currentAnimation(state).fps);
   const frame = (playback.from + step) % count;
 
   if (frame !== playback.frame) {
@@ -22,7 +27,7 @@ function tick(app, time) {
     playback.onFrame();
   }
 
-  requestAnimationFrame((next) => tick(app, next));
+  requestAnimationFrame((next) => tick(app, playback, next));
 }
 
 export function isPlaying(app) {
@@ -48,7 +53,8 @@ export function togglePlayback(app, { isShown, onFrame }) {
   }
 
   const from = app.store.state.at.frame;
-  app.playback = { start: performance.now(), from, frame: from, isShown, onFrame };
+  const playback = { start: performance.now(), from, frame: from, isShown, onFrame };
+  app.playback = playback;
   onFrame();
-  requestAnimationFrame((time) => tick(app, time));
+  requestAnimationFrame((time) => tick(app, playback, time));
 }

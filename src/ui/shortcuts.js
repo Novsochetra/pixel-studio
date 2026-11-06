@@ -34,6 +34,8 @@ const GROUPS = [
     [
       [',  .', 'Previous, next frame'],
       ['Alt ←  →', 'Move the selected frame earlier or later'],
+      ['Arrows, Home, End', 'In the frames: walk the frames and views; on a tab: the tabs'],
+      ['Shift F10, right-click', 'A tab’s menu: rename, duplicate, delete'],
       ['+  −', 'Zoom'],
       ['⌘ + scroll, pinch', 'Zoom around the pointer'],
       ['Space + drag, middle drag', 'Pan'],

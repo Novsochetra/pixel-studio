@@ -10,15 +10,45 @@ const THUMB = 52;
 const select = (app, direction, index) =>
   app.store.set({ at: { ...app.store.state.at, direction, frame: index }, selection: null });
 
-// Enter opens the selected frame's menu (or selects it); Alt+← and Alt+→ move the frame
+const ACROSS = { ArrowLeft: -1, ArrowRight: 1 };
+const DOWN = { ArrowUp: -1, ArrowDown: 1 };
+
+// where an arrow, Home or End goes from a cell: along its row, or to the same frame a row up or down
+function neighbour(event, { direction, index }) {
+  const row = event.currentTarget.closest('.grid-row');
+  const count = row.querySelectorAll('.cell:not(.mirror)').length;
+  const along = { Home: 0, End: count - 1 }[event.key] ?? index + (ACROSS[event.key] ?? 0);
+
+  if (!(event.key in DOWN)) {
+    return { direction, index: Math.max(0, Math.min(count - 1, along)) };
+  }
+
+  const rows = [...row.parentElement.querySelectorAll(':scope > .grid-row[data-direction]')];
+  const next = rows[rows.indexOf(row) + DOWN[event.key]];
+
+  return next ? { direction: next.dataset.direction, index } : null;
+}
+
+const MOVES_FOCUS = new Set([...Object.keys(ACROSS), ...Object.keys(DOWN), 'Home', 'End']);
+
+// The arrows, Home and End walk the frames; Alt+← and Alt+→ move the frame; Enter opens the
+// selected frame's menu (or selects it).
 function onCellKey(app, event, place) {
   const { direction, index, selected } = place;
-  const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+  const step = ACROSS[event.key];
 
   if (event.altKey && step) {
     event.preventDefault();
     event.stopPropagation();
     moveFrameTo(app, index, index + step);
+  } else if (MOVES_FOCUS.has(event.key) && !event.metaKey && !event.ctrlKey) {
+    event.preventDefault();
+    event.stopPropagation();
+    const to = neighbour(event, place);
+
+    if (to) {
+      select(app, to.direction, to.index);
+    }
   } else if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault();
     event.stopPropagation();

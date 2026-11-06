@@ -39,6 +39,26 @@ check(
   'any view can be laid over the others',
 );
 await page.screenshot({ path: `${shots}/board.png` });
+await page.getByRole('button', { name: 'Draws a mark' }).click();
+const boardPixels = () => board.evaluate((canvas) => canvas.toDataURL().length);
+const before = await boardPixels();
+await board.evaluate((canvas) => {
+  const area = canvas.getBoundingClientRect();
+  const at = (pointerId, x, y) => ({
+    pointerId,
+    pointerType: 'touch',
+    bubbles: true,
+    clientX: area.left + area.width * x,
+    clientY: area.top + area.height * y,
+  });
+  canvas.dispatchEvent(new window.PointerEvent('pointerdown', at(1, 0.2, 0.5)));
+  // a second finger lands on the captions, off the art
+  canvas.dispatchEvent(new window.PointerEvent('pointerdown', at(2, 0.2, 0.01)));
+  canvas.dispatchEvent(new window.PointerEvent('pointermove', at(1, 0.25, 0.7)));
+  canvas.dispatchEvent(new window.PointerEvent('pointerup', at(1, 0.25, 0.7)));
+});
+await page.waitForTimeout(200);
+check((await boardPixels()) !== before, 'a second finger off the art leaves the mark being drawn');
 await page.getByRole('button', { name: 'Clear marks' }).click();
 
 await workspace('On the pitch');

@@ -231,3 +231,30 @@ test('suggesting a mapping onto a palette with no colours suggests nothing', asy
 
   assert.deepEqual(suggestMapping([1, 2], []), {});
 });
+
+// changing the frame rate while playing restarted play beside the old loop, whose next frame came
+// a moment before the new start and asked the canvas for frame -1
+test('play restarted keeps one loop, and never steps back before its first frame', async () => {
+  const { stopPlayback, togglePlayback } = await import('../../src/ui/grid/playback.js');
+  const project = newProject();
+  const state = {
+    project,
+    at: { animation: project.animations[0].id, direction: 'south', frame: 0 },
+  };
+  const frames = [];
+  const app = { store: { state } };
+  const queued = [];
+  globalThis.requestAnimationFrame = (callback) => queued.push(callback);
+  const options = { isShown: () => true, onFrame: () => frames.push(app.playback?.frame) };
+
+  togglePlayback(app, options);
+  const oldLoop = queued.shift();
+  stopPlayback(app);
+  togglePlayback(app, options);
+  const shown = frames.length;
+  oldLoop(app.playback.start - 5);
+  assert.equal(frames.length, shown, 'the old loop has ended');
+  queued.at(-1)(app.playback.start - 5);
+  assert.ok(app.playback.frame >= 0);
+  delete globalThis.requestAnimationFrame;
+});

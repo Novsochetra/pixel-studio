@@ -3,13 +3,16 @@ import { gridBar } from './grid-bar.js';
 import { gridBody } from './rows.js';
 import { isPlaying, togglePlayback } from './playback.js';
 
-// keyboard focus stays on the selected frame when the grid redraws around it
+const FOCUS_FOLLOWS = { '.cell': '.cell.selected', '.grid-tab': '.grid-tab[aria-selected="true"]' };
+
+// keyboard focus stays on the selected frame, or the open tab, when the panel redraws around it
 function keepFocus(el, draw) {
-  const hadFocus = el.contains(document.activeElement) && document.activeElement.closest('.cell');
+  const focused = el.contains(document.activeElement) ? document.activeElement : null;
+  const kind = Object.keys(FOCUS_FOLLOWS).find((selector) => focused?.closest(selector));
   draw();
 
-  if (hadFocus) {
-    el.querySelector('.cell.selected')?.focus();
+  if (kind) {
+    el.querySelector(FOCUS_FOLLOWS[kind])?.focus();
   }
 }
 
@@ -25,14 +28,13 @@ function markPlayFrame(el, frame) {
 // the strip is drawn anew each time, scrolled to its start: the open tab is brought back in sight
 function showOpenTab(el) {
   const strip = el.querySelector('.grid-tabs');
-  const open = strip?.querySelector('.grid-tab-group, .grid-tab[aria-selected="true"]');
+  const open = strip?.querySelector('.grid-tab[aria-selected="true"]');
 
   if (!open || strip.scrollWidth <= strip.clientWidth) {
     return;
   }
 
-  const room = strip.clientWidth - (strip.querySelector('.grid-tab-add')?.offsetWidth ?? 0);
-  strip.scrollLeft = Math.max(0, open.offsetLeft + open.offsetWidth - room);
+  strip.scrollLeft = Math.max(0, open.offsetLeft + open.offsetWidth - strip.clientWidth);
 }
 
 // The animation panel under the canvas: tabs, the frame grid, and play. onPlayFrame repaints the

@@ -31,15 +31,20 @@ function label(app, direction) {
   );
 }
 
+// a row of a grid holds cells only, so the button sits in a cell of its own
 function addFrameTile(app, last) {
   return node(
-    'button.cell-add',
-    {
-      'aria-label': 'New frame at the end',
-      title: 'New frame at the end, in every view',
-      onclick: () => newFrameAfter(app, last),
-    },
-    icon('plus'),
+    'div.cell-slot',
+    { role: 'gridcell' },
+    node(
+      'button.cell-add',
+      {
+        'aria-label': 'New frame at the end',
+        title: 'New frame at the end, in every view',
+        onclick: () => newFrameAfter(app, last),
+      },
+      icon('plus'),
+    ),
   );
 }
 
@@ -68,7 +73,7 @@ function viewRow(app, direction, playFrame) {
 
   return node(
     `div.grid-row${current ? '.current' : ''}`,
-    { role: 'row' },
+    { role: 'row', 'data-direction': direction },
     single ? null : label(app, direction),
     cells,
   );

@@ -1,68 +1,14 @@
 import { icon, node } from '../dom.js';
 import { currentAnimation, restructure } from '../actions.js';
 import { openMenu } from '../menu.js';
-import { removeAnimation, uniqueName } from '../../model/structure.js';
+import { removeAnimation } from '../../model/structure.js';
+import { rename } from './tab-rename.js';
 import { duplicateAnimation } from '../../model/animations.js';
 import { kindOf } from '../../model/kinds.js';
 import { openNewAnimationSheet } from './new-animation-sheet.js';
 
 const select = (app, id) =>
   app.store.set({ at: { ...app.store.state.at, animation: id, layer: null }, selection: null });
-
-// Leaving the field with a press on another tab: the bar is drawn again only once the press is
-// over, so the click still lands on the tab it was meant for.
-function afterPress(pressing, then) {
-  if (pressing()) {
-    window.addEventListener('pointerup', () => setTimeout(then), { once: true, capture: true });
-  } else {
-    then();
-  }
-}
-
-function renameTo(app, animation, name) {
-  restructure(app, 'Rename animation', (draft) => {
-    const renamed = draft.project.animations.find((other) => other.id === animation.id);
-
-    if (renamed) {
-      renamed.name = uniqueName(draft.project, name, renamed);
-    }
-  });
-}
-
-// the tab turns into a text field; Enter or leaving it renames, Escape keeps the name
-function rename(app, tabButton, animation) {
-  const field = node('input.input.tab-rename', { value: animation.name, 'aria-label': 'Name' });
-  let pressed = false;
-  const press = () => (pressed = true);
-  const release = () => (pressed = false);
-  const done = (keep) => {
-    const name = field.value.trim();
-    document.removeEventListener('pointerdown', press, true);
-    document.removeEventListener('pointerup', release, true);
-    field.onblur = null;
-
-    if (keep && name && name !== animation.name) {
-      renameTo(app, animation, name);
-    } else {
-      app.store.touch('animations');
-    }
-  };
-  field.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' || event.key === 'Escape') {
-      event.preventDefault();
-      done(event.key === 'Enter');
-    }
-  });
-  document.addEventListener('pointerdown', press, true);
-  document.addEventListener('pointerup', release, true);
-  field.onblur = () =>
-    afterPress(
-      () => pressed,
-      () => done(true),
-    );
-  tabButton.replaceWith(field);
-  field.select();
-}
 
 function tabMenu(app, anchor, tabButton, animation) {
   const { project } = app.store.state;
@@ -94,40 +40,74 @@ function tabMenu(app, anchor, tabButton, animation) {
   ]);
 }
 
+const STEPS = { ArrowLeft: -1, ArrowRight: 1 };
+
+// as tabs do: the arrows open the tab beside, Home and End the first and last; the menu key or
+// Shift+F10 opens the tab's menu, as a right-click does
+function onTabKey(app, event, animation) {
+  const { animations } = app.store.state.project;
+  const at = animations.indexOf(animation);
+  const to = { Home: 0, End: animations.length - 1 }[event.key] ?? at + (STEPS[event.key] ?? NaN);
+
+  if (animations[to]) {
+    event.preventDefault();
+    event.stopPropagation();
+    select(app, animations[to].id);
+  } else if (event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey)) {
+    event.preventDefault();
+    tabMenu(app, event.currentTarget, event.currentTarget, animation);
+  }
+}
+
 function tab(app, animation, active) {
   const button = node(
     'button.grid-tab',
     {
       role: 'tab',
+      tabindex: active ? '0' : '-1',
       'aria-selected': String(active),
-      title: active ? 'Double-click to rename' : animation.name,
+      title: active ? 'Double-click to rename; right-click for more' : animation.name,
       onclick: () => !active && select(app, animation.id),
       ondblclick: () => rename(app, button, animation),
+      oncontextmenu: (event) => {
+        event.preventDefault();
+        tabMenu(app, button, button, animation);
+      },
+      onkeydown: (event) => onTabKey(app, event, animation),
     },
     animation.name,
   );
-  const more = node(
-    'button.btn.quiet.tab-more',
-    {
-      'aria-label': `More for ${animation.name}`,
-      title: 'Rename, duplicate or delete',
-      onclick: (event) => tabMenu(app, event.currentTarget, button, animation),
-    },
-    icon('more'),
-  );
 
-  return active ? node('span.grid-tab-group', {}, button, more) : button;
+  return button;
 }
 
+// the tabs scroll in a strip of their own: the open tab's ⋯ and + to start another stay beside it
 export function animationTabs(app) {
   const { state } = app.store;
   const current = currentAnimation(state);
   const item = kindOf(state.project).itemName;
+  const tabs = state.project.animations.map((animation) =>
+    tab(app, animation, animation === current),
+  );
+  const open = tabs[state.project.animations.indexOf(current)];
 
   return node(
-    'div.grid-tabs',
-    { role: 'tablist', 'aria-label': `${item[0].toUpperCase()}${item.slice(1)}s` },
-    state.project.animations.map((animation) => tab(app, animation, animation === current)),
+    'div.grid-tabs-bar',
+    {},
+    node(
+      'div.grid-tabs',
+      { role: 'tablist', 'aria-label': `${item[0].toUpperCase()}${item.slice(1)}s` },
+      tabs,
+    ),
+    node(
+      'button.btn.quiet.tab-more',
+      {
+        'aria-label': `More for ${current.name}`,
+        title: `Rename, duplicate or delete ${current.name}`,
+        onclick: (event) => tabMenu(app, event.currentTarget, open, current),
+      },
+      icon('more'),
+    ),
     node(
       'button.btn.quiet.grid-tab-add',
       {

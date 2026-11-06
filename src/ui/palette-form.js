@@ -42,7 +42,9 @@ export function paletteForm(onAdd) {
   });
   const add = (colors, fallbackName) => {
     if (!colors.length) {
-      toast('No colours found. Paste hex codes, or open a .hex, .gpl or image file.');
+      toast(
+        `No colours found. Paste hex codes like ${EXAMPLE_HEX_CODES.split(' ').at(-1)}, or open a .hex, .gpl or image file.`,
+      );
 
       return;
     }
