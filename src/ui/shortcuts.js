@@ -17,6 +17,7 @@ const GROUPS = [
       ['W', 'Select a colour (Shift: everywhere)'],
       ['P', 'Pin a body part (Alt-click removes)'],
       ['V', 'Move the whole frame: drag or arrow keys (Shift: 10 px)'],
+      ['O', 'Pose the body parts: drag a part, or its handle to turn it'],
       ['M', 'Symmetry on or off'],
       ['Shift F', 'Flip the view'],
     ],
@@ -29,6 +30,15 @@ const GROUPS = [
       ['Delete', 'Erase the selection'],
       ['Esc', 'Let go'],
       ['⌘A', 'Select everything'],
+    ],
+  ],
+  [
+    'Posing a part',
+    [
+      ['Arrows', 'Move it 1 px (Shift: 10 px)'],
+      ['[  ]', 'Turn it 5° (Shift: 1°)'],
+      ['Shift + drag', 'Turn it (Shift on the handle: steps of 15°)'],
+      ['Esc', 'Let go of it'],
     ],
   ],
   [

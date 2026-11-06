@@ -56,6 +56,32 @@ export function changedLayers(before, after) {
   return ids;
 }
 
+function layerChange({ layer, before, poseBefore }) {
+  return {
+    id: layer.id,
+    before,
+    after: cloneSprite(layer.sprite),
+    poses: { before: poseBefore, after: layer.pose },
+  };
+}
+
+function setPose(layer, pose) {
+  if (pose) {
+    layer.pose = pose;
+  } else {
+    delete layer.pose;
+  }
+}
+
+function setRig(project, change, side) {
+  const animation = project.animations.find((candidate) => candidate.id === change.animation);
+  const entry = animation?.directions[change.direction];
+
+  if (entry) {
+    entry.rig = change[side];
+  }
+}
+
 // Undo steps are pixel changes to some layers (found again by id, so a step still works after
 // frames or layers were rebuilt), a change to the animations themselves, or a project setting.
 export class History {
@@ -72,23 +98,21 @@ export class History {
     this.undone = [];
   }
 
-  // record the layers' state after a change, given their state before it
-  record(label, changes) {
-    const real = changes.filter(({ layer, before }) => !samePixels(before, layer.sprite));
+  // Record the layers' state after a change, given their state before it: { layer, before } with
+  // before its pixels, and poseBefore when a Body's pose may have changed too. rigs are the cuts
+  // the change reached: { animation, direction, before, after }.
+  record(label, changes, rigs = []) {
+    const real = changes
+      .map((change) => ({ poseBefore: change.layer.pose, ...change }))
+      .filter(({ layer, before, poseBefore }) => {
+        return !samePixels(before, layer.sprite) || poseBefore !== layer.pose;
+      });
 
-    if (!real.length) {
+    if (!real.length && !rigs.length) {
       return false;
     }
 
-    this.push({
-      label,
-      kind: 'pixels',
-      changes: real.map(({ layer, before }) => ({
-        id: layer.id,
-        before,
-        after: cloneSprite(layer.sprite),
-      })),
-    });
+    this.push({ label, kind: 'pixels', changes: real.map(layerChange), rigs });
 
     return true;
   }
@@ -120,8 +144,11 @@ export class History {
 
       if (layer) {
         layer.sprite = cloneSprite(change[side]);
+        setPose(layer, change.poses[side]);
       }
     }
+
+    step.rigs?.forEach((rig) => setRig(project, rig, side));
   }
 
   undo(project) {

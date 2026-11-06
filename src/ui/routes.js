@@ -7,6 +7,7 @@ export const ROUTES = {
     'background',
     'showPins',
     'pinName',
+    'piece',
     'tool',
     'highlight',
     'viewFilter',

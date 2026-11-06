@@ -4,6 +4,8 @@ import { imageIntoFrame, startFromPrevious } from './frame-actions.js';
 import { hasArt } from '../model/frames.js';
 import { frameAt } from '../model/project.js';
 import { viewName } from '../model/kinds.js';
+import { rigOf } from '../model/body/body.js';
+import { poseHere } from './body/pose-actions.js';
 
 function isEmptyFrame(state) {
   const frame = frameAt(state.project, state.at);
@@ -36,7 +38,9 @@ function fromPrevious(app, { direction, index }) {
 export function renderEmptyFrame(el, app) {
   const { state } = app.store;
 
-  el.hidden = state.mode !== 'edit' || Boolean(app.playback) || !isEmptyFrame(state);
+  // the Pose tool's own bar says what an empty frame can do
+  el.hidden =
+    state.mode !== 'edit' || state.tool === 'pose' || Boolean(app.playback) || !isEmptyFrame(state);
 
   if (el.hidden) {
     return;
@@ -62,6 +66,9 @@ export function renderEmptyFrame(el, app) {
       icon('upload'),
       'Image into this frame…',
     ),
+    rigOf(currentAnimation(state), direction)
+      ? node('button.btn', { onclick: () => poseHere(app) }, icon('pose'), 'Pose the parts')
+      : null,
     previous ? fromPrevious(app, { direction, index }) : null,
   );
 }

@@ -15,7 +15,9 @@ function sheetHead(title, close) {
   );
 }
 
-export function openSheet(title, onClose, { wide = false } = {}) {
+// focusField: a text field takes focus first, where there is a pointer; a sheet whose fields
+// are a list of names to change now and then leaves them be
+export function openSheet(title, onClose, { wide = false, focusField = true } = {}) {
   const restoreFocus = rememberFocus();
   const body = node(`div.sheet${wide ? '.wide' : ''}`, {
     role: 'dialog',
@@ -49,9 +51,10 @@ export function openSheet(title, onClose, { wide = false } = {}) {
   // field takes focus only where there is a pointer.
   queueMicrotask(() => {
     const controls = focusables(body);
-    const field = matchMedia('(pointer: fine)').matches
-      ? controls.find((control) => control.matches('input:not([type=file]), textarea'))
-      : null;
+    const field =
+      focusField && matchMedia('(pointer: fine)').matches
+        ? controls.find((control) => control.matches('input:not([type=file]), textarea'))
+        : null;
     (field ?? controls[0])?.focus();
   });
 

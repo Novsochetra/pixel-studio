@@ -1,5 +1,6 @@
 import { cloneSprite, createSprite } from './sprite.js';
-import { matchingLayer, newAnimation, newFrame, newId, newLayer } from './project.js';
+import { newAnimation, newFrame, newId, newLayer } from './project.js';
+import { BODY_KIND } from './body/body-kind.js';
 
 export const framesOf = (animation) =>
   Object.values(animation.directions).flatMap((entry) => entry.frames);
@@ -22,17 +23,18 @@ export function layerStack(animation) {
 export function frameLike(animation, canvas, source = null) {
   const stack = layerStack(animation);
   const layers = stack.map((entry) => {
-    const copy = source?.layers.find((layer) => layer.key === entry.key)?.sprite;
+    const from = source?.layers.find((layer) => layer.key === entry.key);
 
     return {
       ...newLayer(canvas.width, canvas.height, {
         name: entry.name,
-        sprite: copy ? cloneSprite(copy) : createSprite(canvas.width, canvas.height),
+        sprite: from?.sprite ? cloneSprite(from.sprite) : createSprite(canvas.width, canvas.height),
         key: entry.key,
         kind: entry.kind,
       }),
       visible: entry.visible,
       opacity: entry.opacity,
+      ...(from?.pose ? { pose: from.pose } : {}),
     };
   });
 
@@ -47,10 +49,13 @@ export function addDirection(project, animation, direction, copyFrom = null) {
     ...Object.values(animation.directions).map((entry) => entry.frames.length),
   );
 
+  const rig = copyFrom ? animation.directions[copyFrom]?.rig : null;
+
   animation.directions[direction] = {
     frames: source
       ? source.map((frame) => frameLike(animation, project.canvas, frame))
       : Array.from({ length: count }, () => frameLike(animation, project.canvas)),
+    ...(rig ? { rig } : {}),
   };
 }
 
@@ -95,11 +100,24 @@ export function removeLayer(animation, key) {
     return false;
   }
 
+  const body = layerStack(animation).find((entry) => entry.key === key)?.kind === BODY_KIND;
+
   for (const frame of framesOf(animation)) {
     frame.layers = frame.layers.filter((layer) => layer.key !== key);
   }
 
+  if (body) {
+    forgetCuts(animation);
+  }
+
   return true;
+}
+
+// once the Body layer is gone, the cuts it was drawn from go too
+export function forgetCuts(animation) {
+  for (const entry of Object.values(animation.directions)) {
+    delete entry.rig;
+  }
 }
 
 export function moveLayer(animation, key, step) {
@@ -147,23 +165,4 @@ export function removeAnimation(project, id) {
   }
 
   return project.animations[Math.max(0, at - 1)];
-}
-
-// the current frame of one view becomes the same frame of every other view: a start for them
-export function copyFrameToViews(project, animation, direction, index) {
-  const source = animation.directions[direction].frames[index];
-
-  for (const [other, entry] of Object.entries(animation.directions)) {
-    if (other === direction) {
-      continue;
-    }
-
-    for (const layer of entry.frames[index].layers) {
-      const copy = matchingLayer(source, layer)?.sprite;
-
-      layer.sprite = copy
-        ? cloneSprite(copy)
-        : createSprite(project.canvas.width, project.canvas.height);
-    }
-  }
 }

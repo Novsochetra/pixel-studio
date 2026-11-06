@@ -1,6 +1,7 @@
 import { CLEAR, cloneSprite, getPixel, setPixel } from './sprite.js';
 import { newId } from './project.js';
-import { framesOf, layerStack } from './structure.js';
+import { forgetCuts, framesOf, layerStack } from './structure.js';
+import { BODY_KIND, isBody, withoutPose } from './body/body-kind.js';
 
 const indexIn = (frame, key) => frame.layers.findIndex((layer) => layer.key === key);
 
@@ -11,8 +12,10 @@ export function duplicateLayer(animation, key) {
   for (const frame of framesOf(animation)) {
     const at = indexIn(frame, key);
     const layer = frame.layers[at];
+    // a copy of the Body is plain art: the parts draw only the Body itself
+    const original = isBody(layer) ? { ...withoutPose(layer), kind: 'art' } : layer;
     const copy = {
-      ...layer,
+      ...original,
       id: newId('l'),
       key: copyKey,
       name: `${layer.name} copy`,
@@ -31,12 +34,14 @@ export function layerBelow(animation, key) {
 
   return below &&
     below.kind !== 'reference' &&
+    below.kind !== BODY_KIND &&
     stack.find((entry) => entry.key === key).kind !== 'reference'
     ? below
     : null;
 }
 
-function paintOver(lower, upper) {
+// upper's pixels over lower's, as the two layers show
+export function paintOver(lower, upper) {
   for (let y = 0; y < upper.height; y++) {
     for (let x = 0; x < upper.width; x++) {
       const color = getPixel(upper, x, y);
@@ -57,6 +62,8 @@ export function mergeDown(animation, key) {
     return null;
   }
 
+  const body = layerStack(animation).find((entry) => entry.key === key).kind === BODY_KIND;
+
   for (const frame of framesOf(animation)) {
     const at = indexIn(frame, key);
     const [upper, lower] = [frame.layers[at], frame.layers[at - 1]];
@@ -66,6 +73,10 @@ export function mergeDown(animation, key) {
     }
 
     frame.layers.splice(at, 1);
+  }
+
+  if (body) {
+    forgetCuts(animation);
   }
 
   return below.key;

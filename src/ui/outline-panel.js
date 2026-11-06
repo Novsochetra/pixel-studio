@@ -1,5 +1,7 @@
 import { node, replace, toast } from './dom.js';
 import { allArtLayers, commit, currentLayer, directionSprite } from './actions.js';
+import { isPosedBody } from '../model/body/body-kind.js';
+import { refusesPaint } from './body/body-lock.js';
 import {
   addOutline,
   closeGaps,
@@ -33,8 +35,15 @@ const OPERATIONS = [
 
 function apply(app, operation, colour) {
   const { state } = app.store;
-  const layers = state.outline.everywhere ? allArtLayers(state) : [currentLayer(state)];
+  // across the character, frames posed from parts are left as their parts draw them
+  const layers = state.outline.everywhere
+    ? allArtLayers(state).filter((layer) => !isPosedBody(layer))
+    : [currentLayer(state)];
   let count = 0;
+
+  if (refusesPaint(layers)) {
+    return;
+  }
 
   commit(app, operation.label, layers, () =>
     layers.forEach((other) => {

@@ -51,7 +51,8 @@
 }
 
 /* floats over the canvas, so the canvas never moves when it shows */
-.selection-bar {
+.selection-bar,
+.pose-bar {
   position: absolute;
   top: 12px;
   left: 50%;

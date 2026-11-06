@@ -61,6 +61,24 @@ export const KINDS = {
   },
 };
 
+// The parts a character is cut into, bottom one first, each following the part it hangs from.
+// L and R are as the picture shows them.
+export const BODY_PARTS = [
+  { id: 'thigh-l', name: 'Thigh L', parent: 'hips' },
+  { id: 'shin-l', name: 'Shin L', parent: 'thigh-l' },
+  { id: 'foot-l', name: 'Foot L', parent: 'shin-l' },
+  { id: 'thigh-r', name: 'Thigh R', parent: 'hips' },
+  { id: 'shin-r', name: 'Shin R', parent: 'thigh-r' },
+  { id: 'foot-r', name: 'Foot R', parent: 'shin-r' },
+  { id: 'hips', name: 'Hips', parent: null },
+  { id: 'torso', name: 'Torso', parent: 'hips' },
+  { id: 'head', name: 'Head', parent: 'torso' },
+  { id: 'upper-arm-l', name: 'Upper arm L', parent: 'torso' },
+  { id: 'lower-arm-l', name: 'Lower arm L', parent: 'upper-arm-l' },
+  { id: 'upper-arm-r', name: 'Upper arm R', parent: 'torso' },
+  { id: 'lower-arm-r', name: 'Lower arm R', parent: 'upper-arm-r' },
+];
+
 export function kindOf(project) {
   return KINDS[project.kind] ?? KINDS.character;
 }

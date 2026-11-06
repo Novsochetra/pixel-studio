@@ -7,6 +7,8 @@ import { fill, replace, shade, stroke } from './tools-paint.js';
 import { select, wand } from './tools-select.js';
 import { moveFrameDrag } from './frame-move.js';
 import { kindOf } from '../model/kinds.js';
+import { refusesPaint } from './body/body-lock.js';
+import { poseTool } from './body/pose-tool.js';
 
 const TOOLS = [
   { id: 'pencil', label: 'Pencil', key: 'b' },
@@ -19,6 +21,7 @@ const TOOLS = [
   { id: 'wand', label: 'Select a colour (Shift: everywhere)', key: 'w' },
   { id: 'pin', label: 'Pin a body part (Alt-click removes it)', key: 'p' },
   { id: 'moveframe', label: 'Move the whole frame: drag it, or use the arrow keys', key: 'v' },
+  { id: 'pose', label: 'Pose the body parts: drag a part, or its handle to turn it', key: 'o' },
 ];
 
 function pick(app, [x, y]) {
@@ -45,9 +48,11 @@ function pin(app, [x, y]) {
   return null;
 }
 
-// pins mark body parts, on what stands on its feet; tiles, effects and icons have none
+// pins and body parts are for what stands on its feet; tiles, effects and icons have none
+const STANDING_ONLY = new Set(['pin', 'pose']);
+
 export function toolsFor(project) {
-  return TOOLS.filter((tool) => tool.id !== 'pin' || kindOf(project).place === 'feet');
+  return TOOLS.filter((tool) => !STANDING_ONLY.has(tool.id) || kindOf(project).place === 'feet');
 }
 
 const PAINTING = new Set(['pencil', 'eraser', 'fill', 'replace', 'shade']);
@@ -63,6 +68,7 @@ const ON_PRESS = {
   eraser: (app, point) => stroke(app, point, CLEAR),
   fill,
   replace,
+  pose: poseTool,
 };
 
 function hiddenLayer(app) {
@@ -90,6 +96,10 @@ export function startTool(app, point, event) {
 
   if (PAINTING.has(tool) && !currentLayer(app.store.state).visible) {
     return hiddenLayer(app);
+  }
+
+  if (PAINTING.has(tool) && refusesPaint([currentLayer(app.store.state)])) {
+    return null;
   }
 
   return ON_PRESS[tool](app, point, event);

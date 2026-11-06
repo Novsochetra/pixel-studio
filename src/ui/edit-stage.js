@@ -6,6 +6,7 @@ import { bindPointer } from './stage-pointer.js';
 import { renderEmptyFrame } from './empty-frame.js';
 import { mountGridPanel } from './grid/grid-panel.js';
 import { stopPlayback } from './grid/playback.js';
+import { renderPoseBar } from './body/pose-bar.js';
 
 // The room above the frames changes as the grid grows (All views, a new animation) or the window
 // does: a canvas that was fitted stays fitted, so its feet never hide under the frames.
@@ -58,7 +59,7 @@ export function fitZoom(stage, sprite) {
   return Math.max(1, Math.min(24, Math.floor(room)));
 }
 
-function renderStage(app, { canvas, bar, empty, grid }, patch) {
+function renderStage(app, { canvas, bar, poseBar, empty, grid }, patch) {
   if (Object.keys(patch).some((key) => STOPS_PLAYING.includes(key))) {
     stopPlayback(app);
   }
@@ -71,6 +72,7 @@ function renderStage(app, { canvas, bar, empty, grid }, patch) {
   }
 
   renderSelectionBar(bar, app);
+  renderPoseBar(poseBar, app);
   renderEmptyFrame(empty, app);
 
   if (showsInGrid(patch)) {
@@ -78,19 +80,27 @@ function renderStage(app, { canvas, bar, empty, grid }, patch) {
   }
 }
 
+// what floats over the canvas: the selection's bar, the Pose tool's bar, an empty frame's card
+function overlays() {
+  const bar = (className, label) =>
+    node(className, { role: 'toolbar', 'aria-label': label, hidden: true });
+
+  return {
+    bar: bar('div.selection-bar', 'Selection'),
+    poseBar: bar('div.pose-bar', 'Pose'),
+    empty: node('div.empty-frame', {
+      role: 'group',
+      'aria-label': 'This frame is empty',
+      hidden: true,
+    }),
+  };
+}
+
 export function mountEditStage(container, app) {
   const canvas = node('canvas', { 'aria-label': 'Pixel canvas' });
-  const bar = node('div.selection-bar', {
-    role: 'toolbar',
-    'aria-label': 'Selection',
-    hidden: true,
-  });
-  const empty = node('div.empty-frame', {
-    role: 'group',
-    'aria-label': 'This frame is empty',
-    hidden: true,
-  });
-  const inner = node('div.stage-inner.edit', {}, bar, empty, node('div.canvas-holder', {}, canvas));
+  const { bar, poseBar, empty } = overlays();
+  const holder = node('div.canvas-holder', {}, canvas);
+  const inner = node('div.stage-inner.edit', {}, bar, poseBar, empty, holder);
   const scroller = node('div.edit-scroll', {}, inner);
   const grid = mountGridPanel(app, {
     isShown: () => canvas.isConnected,
@@ -106,7 +116,7 @@ export function mountEditStage(container, app) {
   keepFitted(app, scroller, canvas);
   grid.render();
 
-  const parts = { canvas, bar, empty, grid };
+  const parts = { canvas, bar, poseBar, empty, grid };
 
   return { render: (patch = {}) => renderStage(app, parts, patch) };
 }

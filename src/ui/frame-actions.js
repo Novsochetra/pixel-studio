@@ -1,11 +1,12 @@
-import { commit, currentAnimation, restructure } from './actions.js';
+import { commitPose, currentAnimation, restructure } from './actions.js';
 import { chooseFile } from './choose-file.js';
 import { openImport } from './import-sheet.js';
 import { addFrame, moveFrame, removeFrame } from '../model/frames.js';
 import { isFrameHidden, setFrameHidden } from '../model/frame-play.js';
-import { copyFrameToViews } from '../model/structure.js';
+import { copyFrameToViews } from '../model/copy-frame.js';
 import { cloneSprite } from '../model/sprite.js';
 import { matchingLayer } from '../model/project.js';
+import { isBody } from '../model/body/body-kind.js';
 
 // What can be done to one frame, from its menu, its empty-frame card or the keyboard. Adding,
 // moving and deleting change every view; the rest change this view only.
@@ -22,12 +23,17 @@ export function startFromPrevious(app, direction, index) {
   const frames = currentAnimation(app.store.state).directions[direction].frames;
   const [previous, frame] = [frames[index - 1], frames[index]];
 
-  commit(app, `Copy frame ${index} here`, frame.layers, () => {
+  // the Body comes with its pose, so the copy is posed on from where the last frame stood
+  commitPose(app, { label: `Copy frame ${index} here`, layers: frame.layers }, () => {
     for (const layer of frame.layers) {
-      const source = matchingLayer(previous, layer)?.sprite;
+      const source = matchingLayer(previous, layer);
 
-      if (source) {
-        layer.sprite = cloneSprite(source);
+      if (source?.sprite) {
+        layer.sprite = cloneSprite(source.sprite);
+      }
+
+      if (isBody(layer)) {
+        Object.assign(layer, { pose: source?.pose });
       }
     }
   });

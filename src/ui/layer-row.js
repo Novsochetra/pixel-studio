@@ -4,6 +4,7 @@ import { renameInPlace } from './rename-field.js';
 import { updateLayer } from '../model/structure.js';
 import { frameAt, matchingLayer } from '../model/project.js';
 import { drawThumbnail } from './thumbnail.js';
+import { isBody } from '../model/body/body-kind.js';
 
 function changeLayer(app, entry, label, patch) {
   restructure(app, label, (draft) => {
@@ -78,6 +79,13 @@ export function layerRow(app, entry, active) {
     thumbnail(app.store.state, entry),
     label,
     entry.kind === 'reference' ? node('span.badge', { title: 'Never downloaded' }, 'Trace') : null,
+    isBody(entry)
+      ? node(
+          'span.badge',
+          { title: 'Drawn from the parts: pose it with the Pose tool (O)' },
+          'Parts',
+        )
+      : null,
     entry.visible ? null : node('span.badge', {}, 'Hidden'),
   );
 }

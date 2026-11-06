@@ -5,6 +5,7 @@ import { addFrame, hasArt } from './frames.js';
 import { kindOf } from './kinds.js';
 import { gameOf } from './presets.js';
 import { addAnimation, uniqueName } from './structure.js';
+import { bodyKey } from './body/body.js';
 
 // a deep copy whose animation, frames and layers have ids of their own, so both are saved
 function copyFrames(frames) {
@@ -28,7 +29,7 @@ export function duplicateAnimation(project, animation, name = `${animation.name}
     directions: Object.fromEntries(
       Object.entries(animation.directions).map(([direction, entry]) => [
         direction,
-        { frames: copyFrames(entry.frames) },
+        { ...entry, frames: copyFrames(entry.frames) },
       ]),
     ),
   };
@@ -39,9 +40,29 @@ export function duplicateAnimation(project, animation, name = `${animation.name}
   return copy;
 }
 
+// a body cut into parts stays in parts: every frame is a copy of the first, Body and all
+function copyFirstFrames(animation, from) {
+  animation.directions = Object.fromEntries(
+    Object.entries(animation.directions).map(([direction, entry]) => {
+      const source = from.directions[direction];
+
+      return [
+        direction,
+        { ...source, frames: entry.frames.flatMap(() => copyFrames([source.frames[0]])) },
+      ];
+    }),
+  );
+}
+
 // every frame of a view starts as that view's first frame of `from`, flattened to one layer
 function fillFromPose(project, animation, from) {
   const { width, height } = project.canvas;
+
+  if (bodyKey(from)) {
+    copyFirstFrames(animation, from);
+
+    return;
+  }
 
   for (const [direction, entry] of Object.entries(animation.directions)) {
     const pose = from.directions[direction]?.frames[0];

@@ -95,6 +95,8 @@ const PATHS = {
   search: 'M10.5 4a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM20 20l-4.8-4.8',
   outline: 'M7 3h10l4 4v10l-4 4H7l-4-4V7l4-4z',
   select: 'M4 4h3M10 4h4M17 4h3v3M20 10v4M20 17v3h-3M14 20h-4M7 20H4v-3M4 14v-4M4 7V4',
+  pose: 'M12 3a2 2 0 100 4 2 2 0 000-4zM12 8v6M12 10l-5 2M12 10l4-4M12 14l-3 7M12 14l4 6M16 6h.01',
+  cut: 'M6 3a3 3 0 100 6 3 3 0 000-6zM6 15a3 3 0 100 6 3 3 0 000-6zM8.5 7.5L20 19M8.5 16.5L20 5',
 };
 
 export function icon(name) {

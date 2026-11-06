@@ -1,0 +1,173 @@
+/* Posing: the bar over the canvas while the Pose tool is on. */
+.pose-bar {
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+}
+
+.pose-bar > span:not(.pose-gap) {
+  padding-inline: 6px;
+  color: var(--label-secondary);
+}
+
+.pose-bar .hint {
+  margin: 0;
+}
+
+.pose-gap {
+  width: 1px;
+  height: 20px;
+  margin-inline: 4px;
+  background: var(--separator);
+}
+
+.pose-angle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--label-secondary);
+}
+
+.pose-angle .input {
+  width: 58px;
+}
+
+.pose-bar select.input {
+  max-width: 150px;
+}
+
+/* a phone's canvas is small, so the bar sits above it, as an empty frame's card does */
+@media (max-width: 700px) {
+  .pose-bar {
+    position: static;
+    transform: none;
+    contain: inline-size;
+    width: min(100%, calc(100vw - 32px));
+    justify-content: center;
+  }
+
+  .pose-gap {
+    display: none;
+  }
+}
+
+/* Cutting into parts: the art, painted by part, beside the list of parts. */
+.cut-layout {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(300px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.cut-art {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 8px;
+  border-radius: var(--radius);
+  background: var(--well);
+}
+
+.cut-canvas {
+  max-width: 100%;
+  cursor: crosshair;
+  image-rendering: pixelated;
+  touch-action: none;
+}
+
+.cut-side {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cut-brush {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cut-parts {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+.cut-parts [role='list'] {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  max-height: min(480px, 60vh);
+  overflow-y: auto;
+}
+
+.cut-part {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1.2fr) 44px repeat(3, 28px);
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px;
+  border-radius: 8px;
+}
+
+.cut-part.picked {
+  background: var(--fill-quiet);
+}
+
+.cut-part .input {
+  box-sizing: border-box;
+  min-width: 0;
+  height: 28px;
+  padding-block: 0;
+  padding-inline: 6px;
+}
+
+.cut-swatch {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cut-swatch[aria-pressed='true'] {
+  border-color: var(--label);
+}
+
+.cut-size {
+  color: var(--label-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.cut-part .btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+@media (max-width: 760px) {
+  .cut-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* on a phone a part takes two lines: its name and buttons, then what it follows */
+  .cut-part {
+    grid-template-columns: 22px minmax(0, 1fr) repeat(3, 32px);
+    padding-block: 6px;
+  }
+
+  .cut-part select.input {
+    grid-row: 2;
+    grid-column: 2 / -1;
+  }
+
+  .cut-size {
+    display: none;
+  }
+
+  .cut-parts [role='list'] {
+    max-height: none;
+  }
+}

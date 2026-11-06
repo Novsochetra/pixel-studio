@@ -3,6 +3,7 @@ import { currentAnimation, restructure } from '../actions.js';
 import { addFrame, frameCount } from '../../model/frames.js';
 import { referenceOf } from '../../model/reference.js';
 import { isSingleView } from '../../model/kinds.js';
+import { clearPosedBody } from '../../model/body/body.js';
 
 // most specific first: "south-west" must not be read as "south"
 const NAME_HINTS = [
@@ -86,7 +87,8 @@ export function placeAll(app, items) {
     items.forEach((item, i) => {
       const frame = animation.directions[item.direction].frames[indexes[i]];
 
-      frame.layers.find((layer) => layer.kind !== 'reference').sprite = item.sprite;
+      frame.layers.find((layer) => layer.kind === 'art').sprite = item.sprite;
+      clearPosedBody(frame, state.project.canvas);
     });
 
     return { frame: indexes[0] };

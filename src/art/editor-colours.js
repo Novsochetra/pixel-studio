@@ -19,3 +19,21 @@ export const UNPICKED_PART = '#808080';
 
 // an example palette to type over, from the free Sweetie 16
 export const EXAMPLE_HEX_CODES = '#1a1c2c #5d275d #b13e53';
+
+// one colour per body part while cutting, so neighbouring parts tell apart at a glance
+export const PART_COLOURS = [
+  '#ff375f',
+  '#30d158',
+  '#0a84ff',
+  '#ffd60a',
+  '#bf5af2',
+  '#ff9f0a',
+  '#64d2ff',
+  '#ac8e68',
+  '#ff6482',
+  '#66d4cf',
+  '#5e5ce6',
+  '#d4e157',
+  '#ff453a',
+  '#8e8e93',
+];

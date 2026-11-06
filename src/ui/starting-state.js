@@ -41,6 +41,7 @@ export function startingState(project) {
     showPins: false,
     pinName: 'Head',
     selection: null,
+    piece: null,
     highlight: null,
     saveStatus: 'saved',
   };

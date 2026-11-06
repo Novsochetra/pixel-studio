@@ -44,6 +44,11 @@ export function shiftFrame(frame, [dx, dy]) {
     if (layer.sprite) {
       layer.sprite = shifted(layer.sprite, [dx, dy]);
     }
+
+    // the Body moves as a whole, so its next pose is drawn where it now stands
+    if (layer.pose) {
+      layer.pose = { ...layer.pose, x: layer.pose.x + dx, y: layer.pose.y + dy };
+    }
   }
 
   frame.marks = frame.marks?.map((mark) => ({ ...mark, x: mark.x + dx, y: mark.y + dy }));

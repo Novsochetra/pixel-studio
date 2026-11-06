@@ -1,5 +1,6 @@
 import { newId } from './project.js';
 import { legacyGame, validDirectionSet } from './presets.js';
+import { joinCuts } from './body/shared-cuts.js';
 
 function normalizeLayers(project) {
   for (const animation of project.animations) {
@@ -44,6 +45,7 @@ export function normalizeProject(project) {
   delete project.profile;
   project.directionSet = validDirectionSet(project.directionSet ?? 'naga', project.kind);
   normalizeLayers(project);
+  joinCuts(project);
   normalizeParts(project);
   normalizeSettings(project);
 

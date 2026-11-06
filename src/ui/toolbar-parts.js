@@ -1,5 +1,5 @@
 import { node, icon } from './dom.js';
-import { redo, undo } from './actions.js';
+import { redo, undo } from './undo.js';
 import { keyNames } from './platform-keys.js';
 
 const SAVE_TEXT = {

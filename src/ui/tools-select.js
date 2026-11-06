@@ -8,10 +8,16 @@ import {
   stampPixels,
 } from '../editor/selection.js';
 import { currentLayer } from './actions.js';
+import { refusesPaint } from './body/body-lock.js';
 
 // drag the selected pixels: each move redraws them from where the drag began
 export function moveSelection(app, start) {
   const layer = currentLayer(app.store.state);
+
+  if (refusesPaint([layer])) {
+    return null;
+  }
+
   const before = cloneSprite(layer.sprite);
   const lifted = liftPixels(before, app.store.state.selection);
   const startMask = app.store.state.selection;

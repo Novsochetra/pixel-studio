@@ -3,7 +3,9 @@ import { allLayers, frameAt, layerAt } from '../model/project.js';
 import { compositeFrame } from '../model/composite.js';
 import { changedLayers, snapshotAnimations } from '../editor/history.js';
 import { referenceOf } from '../model/reference.js';
-import { toast } from './dom.js';
+import { refusesPaint } from './body/body-lock.js';
+import { bodyOf, isBody } from '../model/body/body-kind.js';
+import { clearPosedBody } from '../model/body/body.js';
 
 export function currentAnimation(state) {
   return (
@@ -70,16 +72,41 @@ export function referenceSprite(state) {
     : null;
 }
 
-// Change some layers as one undoable step, then save and redraw.
+// Change some layers as one undoable step, then save and redraw. Returns whether anything
+// changed, or null when painting there was refused.
 export function commit(app, label, layers, mutate) {
-  const before = layers.map((layer) => ({ layer, before: cloneSprite(layer.sprite) }));
+  if (refusesPaint(layers)) {
+    return null;
+  }
+
+  return commitPose(app, { label, layers }, mutate);
+}
+
+// as commit, where a Body's pose may change with its pixels; rigs are cuts that change too
+// ({ animation, direction, before, after }), set by `mutate`
+export function commitPose(app, { label, layers, rigs = [] }, mutate) {
+  const before = layers.map((layer) => ({
+    layer,
+    before: cloneSprite(layer.sprite),
+    poseBefore: layer.pose,
+  }));
 
   mutate();
 
-  if (app.history.record(label, before)) {
-    app.saver.markLayers(layers.map((layer) => layer.id));
-    app.store.touch('pixels');
+  if (!app.history.record(label, before, rigs)) {
+    return false;
   }
+
+  app.saver.markLayers(layers.map((layer) => layer.id));
+
+  // a pose and a cut are kept with the project's structure, not its pixels
+  if (rigs.length || layers.some(isBody)) {
+    app.saver.markStructure();
+  }
+
+  app.store.touch('pixels');
+
+  return true;
 }
 
 // After frames, layers or animations change, the place being edited may no longer exist: keep
@@ -95,53 +122,6 @@ export function settleAt(state) {
     : null;
 
   return { animation: animation.id, direction, frame, layer };
-}
-
-function afterHistory(app, step) {
-  if (!step) {
-    return;
-  }
-
-  if (step.kind === 'structure') {
-    // either side may hold layers the other lacks, so compare both ways
-    app.saver.markLayers([
-      ...changedLayers(step.before, step.after),
-      ...changedLayers(step.after, step.before),
-    ]);
-    app.saver.markNewLayers(app.store.state.project);
-    app.saver.markStructure();
-    app.store.set({ at: settleAt(app.store.state), selection: null });
-    app.store.touch('animations');
-
-    return;
-  }
-
-  if (step.kind === 'setting') {
-    app.saver.markStructure();
-    app.store.touch('project');
-
-    return;
-  }
-
-  app.saver.markLayers(step.changes.map(({ id }) => id));
-  app.store.touch('pixels');
-}
-
-// says what went back or came again, as the canvas alone may not show it (a frame elsewhere)
-function tellStep(step, done) {
-  toast(step ? `${done}: ${step.label}` : `Nothing to ${done === 'Undone' ? 'undo' : 'redo'}`);
-}
-
-export function undo(app) {
-  const step = app.history.undo(app.store.state.project);
-  afterHistory(app, step);
-  tellStep(step, 'Undone');
-}
-
-export function redo(app) {
-  const step = app.history.redo(app.store.state.project);
-  afterHistory(app, step);
-  tellStep(step, 'Redone');
 }
 
 // An undoable change to frames, layers or animations: `mutate` returns where to go after it.
@@ -167,14 +147,18 @@ export function flipCurrent(app) {
 }
 
 // a cleaned image into one frame of a view ({ direction, frame }): onto the layer being edited,
-// unless that is a picture to trace, which never reaches a download
+// unless that is a picture to trace, which never reaches a download, or the Body, which is posed
 export function replaceDirectionArt(app, { direction, frame }, sprite, label) {
   const at = { ...app.store.state.at, direction, frame };
   const chosen = layerAt(app.store.state.project, at);
-  const layer =
-    chosen.kind === 'reference' ? layerAt(app.store.state.project, { ...at, layer: null }) : chosen;
-  commit(app, label, [layer], () => {
+  const { project } = app.store.state;
+  const shown = frameAt(project, at);
+  const layer = chosen.kind === 'art' ? chosen : shown.layers.find((other) => other.kind === 'art');
+  const layers = [layer, bodyOf(shown)].filter(Boolean);
+
+  commitPose(app, { label, layers }, () => {
     layer.sprite = cloneSprite(sprite);
+    clearPosedBody(shown, project.canvas);
   });
 }
 

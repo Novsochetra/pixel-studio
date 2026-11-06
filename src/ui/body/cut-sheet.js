@@ -1,0 +1,158 @@
+import { node, replace, toast } from '../dom.js';
+import { openSheet } from '../sheet.js';
+import { currentAnimation, currentLayer, restructure } from '../actions.js';
+import { cloneSprite } from '../../model/sprite.js';
+import { frameAt } from '../../model/project.js';
+import { BODY_PARTS, viewName } from '../../model/kinds.js';
+import { hasArt } from '../../model/frames.js';
+import { planFromRig, planFromTemplate } from '../../model/body/cut-plan.js';
+import { guessOwners } from '../../model/body/guess.js';
+import { cutIntoParts, leftOver } from '../../model/body/cut.js';
+import { applyCut, bodyKey, rigOf } from '../../model/body/body.js';
+import { cutCanvas } from './cut-canvas.js';
+import { partsList } from './cut-list.js';
+
+const isArt = (layer) => layer.kind === 'art' && hasArt({ layers: [layer] });
+
+// the layer the parts are cut from: the one being edited if it has art, else the first that does
+function cutFrom(state) {
+  const chosen = currentLayer(state);
+
+  return isArt(chosen) ? chosen : frameAt(state.project, state.at).layers.find(isArt);
+}
+
+// the part picked to paint first is the top one, first in the list, so it is in sight
+const withTopPicked = (job) => ({ ...job, selected: job.plan.parts.length - 1 });
+
+function newJob(app) {
+  const { state } = app.store;
+  const { direction, frame } = state.at;
+  const rig = rigOf(currentAnimation(state), direction);
+  const place = { app, direction, frame, brush: 2, erase: false };
+
+  if (rig) {
+    const plan = planFromRig(rig, state.project.canvas);
+
+    return withTopPicked({ ...place, plan, source: plan.source, recut: true });
+  }
+
+  const layer = cutFrom(state);
+
+  if (!layer) {
+    return null;
+  }
+
+  const source = cloneSprite(layer.sprite);
+  const plan = planFromTemplate(source, BODY_PARTS);
+
+  return withTopPicked({ ...place, plan, source, layer, recut: false });
+}
+
+function cut(job) {
+  const { app } = job;
+  const parts = job.plan.parts.map(({ id, name, parent, pivot }) => ({ id, name, parent, pivot }));
+  const rig = cutIntoParts(job.source, job.plan.owners, parts);
+  let frames = 0;
+
+  restructure(app, job.recut ? 'Edit the cut' : 'Cut into parts', (draft) => {
+    const animation = currentAnimation(draft);
+    const cutOf = { direction: job.direction, frame: job.frame, rig, source: job.source };
+
+    frames = applyCut(draft.project, animation, {
+      ...cutOf,
+      layerKey: job.layer?.key,
+      leftover: leftOver(job.source, job.plan.owners),
+    });
+
+    return { layer: bodyKey(animation) };
+  });
+  app.store.set({ tool: 'pose', piece: null });
+  job.close();
+  toast(
+    `Cut into ${rig.pieces.length} parts${frames > 1 ? `, in ${frames} frames` : ''}. Drag a part to pose it; its handle turns it.`,
+  );
+}
+
+function brushControls(job, change) {
+  const choice = (label, pressed, onclick) =>
+    node('button', { 'aria-pressed': String(pressed), onclick: () => change(onclick) }, label);
+
+  return node(
+    'div.cut-brush',
+    {},
+    node(
+      'div.segmented',
+      { role: 'group', 'aria-label': 'Brush' },
+      choice('Paint', !job.erase, () => (job.erase = false)),
+      choice('Unpaint', job.erase, () => (job.erase = true)),
+    ),
+    node(
+      'div.segmented',
+      { role: 'group', 'aria-label': 'Brush size' },
+      [1, 2, 4].map((size) => choice(`${size} px`, job.brush === size, () => (job.brush = size))),
+    ),
+  );
+}
+
+function hint(job) {
+  const unpainted = job.recut
+    ? 'Pixels left unpainted are taken off the body.'
+    : `Pixels left unpainted stay on ${job.layer.name}.`;
+
+  return `Paint each part with the brush: L and R are as the picture shows them. The dots are where parts turn: drag one to move it. ${unpainted}`;
+}
+
+function actions(job, change) {
+  const guess = () =>
+    change(() => {
+      job.plan.owners = guessOwners(job.source, job.plan.parts);
+      job.plan.parts.forEach((part) => (part.pivot = null));
+    });
+  const count = new Set([...job.plan.owners].filter((owner) => owner >= 0)).size;
+
+  return node(
+    'div.sheet-actions',
+    {},
+    node('button.btn', { onclick: job.close }, 'Cancel'),
+    node(
+      'button.btn',
+      { onclick: guess, title: 'Guess the parts again from the proportions' },
+      'Guess again',
+    ),
+    node(
+      'button.btn.primary',
+      { onclick: () => cut(job), disabled: !count },
+      `Cut into ${count} parts`,
+    ),
+  );
+}
+
+export function openCutSheet(app) {
+  const job = newJob(app);
+
+  if (!job) {
+    toast('Nothing to cut in this frame yet: draw the view, or clean a picture into it, first.');
+
+    return;
+  }
+
+  const view = viewName(app.store.state.project, job.direction);
+  const title = job.recut ? `Edit the cut of ${view}` : `Cut ${view} into parts`;
+  const sheet = openSheet(title, null, { wide: true, focusField: false });
+  const side = node('div.cut-side');
+  const foot = node('div');
+  const render = () => {
+    replace(side, brushControls(job, change), partsList(job, change));
+    replace(foot, node('p.hint', {}, hint(job)), actions(job, change));
+  };
+  const art = cutCanvas(job, render);
+  const change = (edit) => {
+    edit();
+    render();
+    art.redraw();
+  };
+
+  job.close = sheet.close;
+  sheet.body.append(node('div.cut-layout', {}, node('div.cut-art', {}, art.canvas), side), foot);
+  render();
+}

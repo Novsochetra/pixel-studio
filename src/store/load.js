@@ -1,11 +1,14 @@
 import { allLayers } from '../model/project.js';
 import { dataUrlSprite } from '../io/images.js';
 import { keysFor } from './keys.js';
+import { joinCuts, writeCutsOnce } from '../model/body/shared-cuts.js';
 
 // the project without its pixels: layers keep their ids, their PNGs are separate documents
 export function projectStructure(project) {
+  const cutOnce = writeCutsOnce();
+
   return JSON.parse(
-    JSON.stringify(project, (key, value) => (key === 'sprite' ? undefined : value)),
+    JSON.stringify(project, (key, value) => (key === 'sprite' ? undefined : cutOnce(key, value))),
   );
 }
 
@@ -16,7 +19,7 @@ export async function loadProject(backend, keys = keysFor('')) {
     return null;
   }
 
-  const project = JSON.parse(stored.json);
+  const project = joinCuts(JSON.parse(stored.json));
   const layers = [...allLayers(project)].map(({ layer }) => layer);
   const docs = await Promise.all(layers.map((layer) => backend.read(keys.layer(layer.id))));
 

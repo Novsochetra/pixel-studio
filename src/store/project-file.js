@@ -1,12 +1,12 @@
 import { allLayers } from '../model/project.js';
 import { dataUrlSprite, spriteDataUrl } from '../io/images.js';
+import { projectStructure } from './load.js';
+import { joinCuts } from '../model/body/shared-cuts.js';
 
 // A whole project as one JSON text: its structure, with each layer's pixels as a PNG data URL, and
 // its own preview background when it has one.
 export function projectFileText(project, background = null) {
-  const copy = JSON.parse(
-    JSON.stringify(project, (key, value) => (key === 'sprite' ? undefined : value)),
-  );
+  const copy = projectStructure(project);
   const pngs = {};
 
   for (const { layer } of allLayers(project)) {
@@ -41,7 +41,7 @@ export async function readProjectBundle(text) {
       ? file.background
       : null;
 
-  return { project: file.project, background };
+  return { project: joinCuts(file.project), background };
 }
 
 export async function readProjectFile(text) {

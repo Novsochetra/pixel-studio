@@ -12,6 +12,7 @@ import { drawBrush, drawHighlight, drawSelection } from './stage-marks.js';
 import { BRUSH_TOOLS } from './tools-paint.js';
 import { brushPixels } from '../editor/paint.js';
 import { paintAllViews, playsAllViews } from './play-all-views.js';
+import { drawPoseMarks } from './body/pose-marks.js';
 import { frameAt } from '../model/project.js';
 import { compositeFrame } from '../model/composite.js';
 import { applyMapping } from '../palette/palette.js';
@@ -72,6 +73,7 @@ function shownState(app) {
     highlight: null,
     showPins: false,
     cursor: null,
+    tool: state.tool === 'pose' ? null : state.tool,
   };
 }
 
@@ -130,6 +132,10 @@ function paintMarks(context, state, scale) {
   // one pixel needs no ring: the pointer is on it
   if (state.cursor && state.brush.size > 1 && BRUSH_TOOLS.has(state.tool)) {
     drawBrush(context, brushPixels([state.cursor.x, state.cursor.y], state), scale);
+  }
+
+  if (state.tool === 'pose') {
+    drawPoseMarks(context, state, scale);
   }
 }
 

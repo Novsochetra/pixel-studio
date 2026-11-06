@@ -25,3 +25,7 @@ for name in ('side.webp', 'back.webp', 'back2.webp'):
     (out / f'{name}.expected.rgba').write_bytes(pc.to_rgba(colors, opaque).tobytes())
 json.dump(meta, open(out / 'expected.json', 'w'), indent=1)
 print(meta)
+# the example character's cleaned front view, cut into body parts by the body tests
+front = Image.open(Path(__file__).resolve().parents[1] / 'assets' / 'front.png').convert('RGBA')
+(out / 'character-front.rgba').write_bytes(front.tobytes())
+json.dump({'width': front.width, 'height': front.height}, open(out / 'character-front.json', 'w'))

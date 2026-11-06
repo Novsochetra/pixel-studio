@@ -1,6 +1,7 @@
 import { node, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
-import { allArtLayers, commit } from './actions.js';
+import { allArtLayers } from './actions.js';
+import { recolourLayers } from './body/recolour.js';
 import { characterColors } from './character-colours.js';
 import { mappingRows } from './swap/swap-mapping.js';
 import {
@@ -13,7 +14,7 @@ import {
   starterPalettes,
 } from './swap/swap-parts.js';
 import { frameAt } from '../model/project.js';
-import { applyMapping, suggestMapping } from '../palette/palette.js';
+import { suggestMapping } from '../palette/palette.js';
 
 const NO_PALETTE =
   "Add the palette you want to use: paste its hex codes or open a palette file, pick a starter below, or make one from 8 of the art's own colours.";
@@ -27,15 +28,13 @@ function layersFor(state, scope) {
 function apply(job, mapping, scope) {
   const layers = layersFor(job.app.store.state, scope);
 
-  commit(job.app, 'Swap colours', layers, () =>
-    layers.forEach((layer) => {
-      layer.sprite = applyMapping(layer.sprite, mapping);
-    }),
-  );
+  const everywhere = scope !== 'view';
+  const flattened = recolourLayers(job.app, { label: 'Swap colours', layers, mapping, everywhere });
+
   toast(
-    scope === 'view'
-      ? 'Colours swapped in this frame'
-      : 'Colours swapped across the whole character',
+    everywhere
+      ? 'Colours swapped across the whole character'
+      : `Colours swapped in this frame${flattened ? ', its Body now plain pixels' : ''}`,
   );
   job.close();
 }

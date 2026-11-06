@@ -25,9 +25,14 @@ function paste(app) {
   const layer = currentLayer(app.store.state);
   let selection = null;
 
-  commit(app, 'Paste', [layer], () => {
+  const pasted = commit(app, 'Paste', [layer], () => {
     selection = stampPixels(layer.sprite, app.clipboard, 0, 0);
   });
+
+  if (pasted === null) {
+    return;
+  }
+
   app.store.set({ selection, tool: 'select' });
   toast('Pasted where it was copied from. Drag it or use the arrow keys to place it.');
 }

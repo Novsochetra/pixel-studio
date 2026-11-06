@@ -1,8 +1,10 @@
 import { toolsFor } from './tools.js';
-import { flipCurrent, redo, undo } from './actions.js';
+import { flipCurrent } from './actions.js';
+import { redo, undo } from './undo.js';
 import { handleSelectionKey } from './selection-keys.js';
 import { openShortcuts } from './shortcuts.js';
 import { resizeBrush } from '../editor/brush.js';
+import { handlePoseKey } from './body/pose-keys.js';
 
 function typing(event) {
   const tag = event.target.tagName;
@@ -61,7 +63,7 @@ function onKey(app, event) {
   const command = event.metaKey || event.ctrlKey;
   const key = event.key.toLowerCase();
 
-  if (handleSelectionKey(app, event, key, command)) {
+  if (handlePoseKey(app, event, key) || handleSelectionKey(app, event, key, command)) {
     return;
   }
 

@@ -1,6 +1,7 @@
 import { node, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
-import { allArtLayers, commit } from './actions.js';
+import { allArtLayers } from './actions.js';
+import { recolourLayers } from './body/recolour.js';
 import { boardPreview } from './board-canvas.js';
 import { partsEditor } from './parts-editor.js';
 import { keepVersion } from './versions-sheet.js';
@@ -9,7 +10,6 @@ import { choiceControls, chosenName, chosenRamps } from './outfits/outfit-choice
 import { outfitNames } from './outfits/outfit-names.js';
 import { outfitFirstStep } from './outfits/outfit-first-step.js';
 import { kitMapping } from '../palette/kits.js';
-import { applyMapping } from '../palette/palette.js';
 import { gameOf } from '../model/presets.js';
 
 // the whole character in the outfit, kept as a version first so it can come off
@@ -18,11 +18,7 @@ function wear(job, mapping, name) {
 
   keepVersion(app, `Before ${name}`);
   const layers = allArtLayers(app.store.state);
-  commit(app, name, layers, () =>
-    layers.forEach((layer) => {
-      layer.sprite = applyMapping(layer.sprite, mapping);
-    }),
-  );
+  recolourLayers(app, { label: name, layers, mapping, everywhere: true });
   toast(`${name} on the whole character. Undo takes it off.`);
   job.close();
 }
