@@ -57,8 +57,6 @@ export function startRename(app, entry, label) {
   });
 }
 
-// one layer, as an image editor lists it: shown or not, its art, its name; a click picks it to
-// drag, a double-click on the name renames it
 export function layerRow(app, entry, active) {
   const { state } = app.store;
   const shown = matchingLayer(frameAt(state.project, state.at), entry)?.visible ?? true;

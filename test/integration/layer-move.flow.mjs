@@ -87,7 +87,6 @@ await page.keyboard.press('Meta+z');
 await page.waitForTimeout(100);
 check((await pixels()) === moved, 'the arrow key is one undo step');
 
-// clicking a layer in the list is enough to drag it, whatever tool was on
 await page.keyboard.press('v');
 const beforeRowClick = await layerPixels();
 
