@@ -2,7 +2,12 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { newFrame, newLayer } from '../../src/model/project.js';
 import { bounds, getPixel, pack, setPixel, CLEAR } from '../../src/model/sprite.js';
-import { clampShift, shiftFrame } from '../../src/model/frame-shift.js';
+import {
+  clampLayerShift,
+  clampShift,
+  shiftFrame,
+  shiftLayer,
+} from '../../src/model/frame-shift.js';
 
 const RED = pack(255, 0, 0);
 const BLUE = pack(0, 0, 255);
@@ -80,4 +85,44 @@ test('the edge counts the art of all layers together', () => {
 
 test('a picture to trace does not stop a move', () => {
   assert.deepEqual(clampShift(frameWith([19, 19], 'reference'), CANVAS, [5, 5]), [5, 5]);
+});
+
+test('a layer moves alone: the other layers and the pins stay', () => {
+  const frame = frameWith([5, 5]);
+
+  addTopLayer(frame, [6, 7]);
+  frame.marks = [{ name: 'Hip', x: 8, y: 9 }];
+  shiftLayer(frame.layers[1], [2, 1]);
+
+  assert.equal(getPixel(frame.layers[1].sprite, 8, 8), BLUE);
+  assert.equal(getPixel(frame.layers[1].sprite, 6, 7), CLEAR);
+  assert.equal(getPixel(frame.layers[0].sprite, 5, 5), RED);
+  assert.deepEqual(frame.marks, [{ name: 'Hip', x: 8, y: 9 }]);
+});
+
+test('a posed layer takes its pose with it, so its next pose is drawn where it stands', () => {
+  const [layer] = frameWith([5, 5]).layers;
+
+  layer.pose = { x: 1, y: 2 };
+  shiftLayer(layer, [3, 4]);
+
+  assert.deepEqual(layer.pose, { x: 4, y: 6 });
+});
+
+test('a layer stops at the canvas edge by its own art, not the art of other layers', () => {
+  const frame = frameWith([2, 10]);
+
+  addTopLayer(frame, [17, 10]);
+
+  assert.deepEqual(clampLayerShift(frame.layers[0], CANVAS, [50, 0]), [17, 0]);
+  assert.deepEqual(clampLayerShift(frame.layers[1], CANVAS, [50, 0]), [2, 0]);
+  assert.deepEqual(clampLayerShift(frame.layers[1], CANVAS, [-50, 0]), [-17, 0]);
+});
+
+test('a picture to trace and an empty layer are not stopped at the edge', () => {
+  const [picture] = frameWith([19, 19], 'reference').layers;
+  const empty = newLayer(SIZE, SIZE, { name: 'Empty' });
+
+  assert.deepEqual(clampLayerShift(picture, CANVAS, [5, 5]), [5, 5]);
+  assert.deepEqual(clampLayerShift(empty, CANVAS, [50, 50]), [50, 50]);
 });

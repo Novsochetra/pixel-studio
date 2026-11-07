@@ -5,6 +5,7 @@ import { duplicateLayer, layerBelow, mergeDown, placeLayer } from '../model/laye
 import { layerRow, startRename } from './layer-row.js';
 import { addPicture, pictureStrength } from './trace-picture.js';
 import { bindFrameDrag } from './frame-drag.js';
+import { arrowsMoveArt } from './selection-keys.js';
 
 const ONE_LAYER_HINT =
   'Like sheets of glass stacked in every frame: add one for hair or a sword to draw it without touching the rest.';
@@ -101,6 +102,11 @@ function layerBar(app, active) {
 
 // ↑ and ↓ pick the layer above or below, as in an image editor's list
 function onListKey(app, event, stack) {
+  // clicking a layer focuses its row, and the arrows must still move what the tool moves
+  if (arrowsMoveArt(app.store.state)) {
+    return;
+  }
+
   const step = { ArrowUp: 1, ArrowDown: -1 }[event.key];
   const at = stack.findIndex((entry) => entry.key === currentLayer(app.store.state).key);
   const next = stack[at + (step ?? 0)];

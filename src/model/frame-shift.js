@@ -1,18 +1,14 @@
 import { bounds, createSprite, unionBounds } from './sprite.js';
 
-function artBox(frame) {
-  return unionBounds(
-    frame.layers
-      .filter((layer) => layer.kind !== 'reference' && layer.sprite)
-      .map((layer) => bounds(layer.sprite)),
-  );
+// A picture to trace may go off the canvas, as it never ships.
+const staysOnCanvas = (layer) => layer.kind !== 'reference' && layer.sprite;
+
+function artBox(layers) {
+  return unionBounds(layers.filter(staysOnCanvas).map((layer) => bounds(layer.sprite)));
 }
 
-// Art never falls off the canvas, so a move stops at the edge. A picture to trace may go off, as
-// it never ships.
-export function clampShift(frame, { width, height }, [dx, dy]) {
-  const box = artBox(frame);
-
+// Art never falls off the canvas, so a move stops at the edge.
+function clampToCanvas(box, { width, height }, [dx, dy]) {
   if (!box) {
     return [dx, dy];
   }
@@ -21,6 +17,14 @@ export function clampShift(frame, { width, height }, [dx, dy]) {
     Math.max(-box.left, Math.min(width - box.right, dx)),
     Math.max(-box.top, Math.min(height - box.bottom, dy)),
   ];
+}
+
+export function clampShift(frame, canvas, shift) {
+  return clampToCanvas(artBox(frame.layers), canvas, shift);
+}
+
+export function clampLayerShift(layer, canvas, shift) {
+  return clampToCanvas(artBox([layer]), canvas, shift);
 }
 
 function shifted(sprite, [dx, dy]) {
@@ -38,18 +42,19 @@ function shifted(sprite, [dx, dy]) {
   return out;
 }
 
-// every layer and pin of the frame moves together
-export function shiftFrame(frame, [dx, dy]) {
-  for (const layer of frame.layers) {
-    if (layer.sprite) {
-      layer.sprite = shifted(layer.sprite, [dx, dy]);
-    }
-
-    // the Body moves as a whole, so its next pose is drawn where it now stands
-    if (layer.pose) {
-      layer.pose = { ...layer.pose, x: layer.pose.x + dx, y: layer.pose.y + dy };
-    }
+export function shiftLayer(layer, [dx, dy]) {
+  if (layer.sprite) {
+    layer.sprite = shifted(layer.sprite, [dx, dy]);
   }
 
+  // the Body moves as a whole, so its next pose is drawn where it now stands
+  if (layer.pose) {
+    layer.pose = { ...layer.pose, x: layer.pose.x + dx, y: layer.pose.y + dy };
+  }
+}
+
+// every layer and pin of the frame moves together
+export function shiftFrame(frame, [dx, dy]) {
+  frame.layers.forEach((layer) => shiftLayer(layer, [dx, dy]));
   frame.marks = frame.marks?.map((mark) => ({ ...mark, x: mark.x + dx, y: mark.y + dy }));
 }

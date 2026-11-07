@@ -18,6 +18,7 @@ const GROUPS = [
       ['L', 'Lasso: draw round a part to select it, drag inside to move it'],
       ['Shift / Alt + lasso', 'Add to the selection / take away; a click is one pixel'],
       ['P', 'Pin a body part (Alt-click removes)'],
+      ['T', 'Move this layer: drag or arrow keys (Shift: 10 px)'],
       ['V', 'Move the whole frame: drag or arrow keys (Shift: 10 px)'],
       ['O', 'Pose the body parts: drag a part, or its handle to turn it'],
       ['M', 'Symmetry on or off'],

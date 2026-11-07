@@ -8,6 +8,7 @@ import {
 } from '../editor/selection.js';
 import { toast } from './dom.js';
 import { shiftCurrentFrame } from './frame-move.js';
+import { shiftCurrentLayer } from './layer-move.js';
 
 const ARROWS = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] };
 
@@ -84,12 +85,17 @@ const PLAIN_KEYS = {
   '.': { when: () => true, run: (app) => stepFrame(app, 1) },
 };
 
+const TOOL_ARROWS = { moveframe: shiftCurrentFrame, movelayer: shiftCurrentLayer };
+
+export const arrowsMoveArt = (state) => Boolean(state.selection || TOOL_ARROWS[state.tool]);
+
 function arrowKey([dx, dy]) {
   return {
-    when: (state) => state.selection || state.tool === 'moveframe',
+    when: arrowsMoveArt,
     run(app, event) {
       const step = event.shiftKey ? 10 : 1;
-      const move = app.store.state.selection ? nudge : shiftCurrentFrame;
+      const { selection, tool } = app.store.state;
+      const move = selection ? nudge : TOOL_ARROWS[tool];
 
       move(app, [dx * step, dy * step]);
     },

@@ -34,12 +34,15 @@ export function drawOnion(context, state, scale) {
   }
 }
 
+// a drag that names a layer moves only that one; any other moves the whole frame
+function dragOf(state, layer) {
+  const drag = state.frameDrag;
+
+  return drag && (!drag.layer || drag.layer === layer.key) ? drag : { x: 0, y: 0 };
+}
+
 export function drawLayers(context, state, scale) {
   const frame = frameAt(state.project, state.at);
-  const drag = state.frameDrag ?? { x: 0, y: 0 };
-
-  context.save();
-  context.translate(drag.x * scale, drag.y * scale);
 
   for (const layer of frame.layers) {
     if (!layer.visible || !layer.sprite) {
@@ -51,10 +54,13 @@ export function drawLayers(context, state, scale) {
         ? applyMapping(layer.sprite, state.swapPreview)
         : layer.sprite;
     const sprite = layer.kind === 'reference' ? mapped : VIEW_FILTERS[state.viewFilter](mapped);
-    drawSprite(context, sprite, scale, layer.kind === 'reference' ? layer.opacity : 1);
-  }
+    const drag = dragOf(state, layer);
 
-  context.restore();
+    context.save();
+    context.translate(drag.x * scale, drag.y * scale);
+    drawSprite(context, sprite, scale, layer.kind === 'reference' ? layer.opacity : 1);
+    context.restore();
+  }
 }
 
 // while the animation plays, the canvas shows the frame playing, without the editing marks
@@ -88,7 +94,7 @@ function paintArt(context, state, scale) {
   }
 
   // lining a frame up with its neighbours needs them showing
-  if (state.onion || state.tool === 'moveframe') {
+  if (state.onion || state.tool === 'moveframe' || state.tool === 'movelayer') {
     drawOnion(context, state, scale);
   }
 

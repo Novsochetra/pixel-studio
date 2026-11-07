@@ -6,6 +6,7 @@ import { toast } from './dom.js';
 import { fill, replace, shade, stroke } from './tools-paint.js';
 import { lasso, select, wand } from './tools-select.js';
 import { moveFrameDrag } from './frame-move.js';
+import { moveLayerDrag } from './layer-move.js';
 import { kindOf } from '../model/kinds.js';
 import { refusesPaint } from './body/body-lock.js';
 import { poseTool } from './body/pose-tool.js';
@@ -26,6 +27,7 @@ const TOOLS = [
     key: 'l',
   },
   { id: 'pin', label: 'Pin a body part (Alt-click removes it)', key: 'p' },
+  { id: 'movelayer', label: 'Move this layer: drag it, or use the arrow keys', key: 't' },
   { id: 'moveframe', label: 'Move the whole frame: drag it, or use the arrow keys', key: 'v' },
   { id: 'pose', label: 'Pose the body parts: drag a part, or its handle to turn it', key: 'o' },
 ];
@@ -68,6 +70,7 @@ const ON_PRESS = {
   select,
   wand: (app, point, event) => wand(app, point, event.shiftKey),
   pin,
+  movelayer: moveLayerDrag,
   moveframe: moveFrameDrag,
   shade: (app, point, event) => shade(app, point, event.shiftKey),
   pencil: (app, point) => stroke(app, point, app.store.state.color),

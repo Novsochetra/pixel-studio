@@ -76,6 +76,8 @@ const PATHS = {
   pin: 'M12 21s-6-5.6-6-11a6 6 0 0112 0c0 5.4-6 11-6 11zM12 8a2 2 0 100 4 2 2 0 000-4z',
   moveframe:
     'M12 3v18M3 12h18M12 3L9 6M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3',
+  movelayer:
+    'M8 8h8v8H8zM12 2v3M12 2l-2 2M12 2l2 2M12 22v-3M12 22l-2-2M12 22l2-2M2 12h3M2 12l2-2M2 12l2 2M22 12h-3M22 12l-2-2M22 12l-2 2',
   duplicate: 'M9 9h11v11H9zM5 15V4h11',
   'merge-down': 'M6 4h12M12 4v12M8 12l4 4 4-4M5 20h14',
   picture: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 8.5h.01',
