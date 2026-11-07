@@ -1,7 +1,7 @@
 import { node, icon } from './dom.js';
 import { currentAnimation, goTo, restructure } from './actions.js';
 import { renameInPlace } from './rename-field.js';
-import { updateLayer } from '../model/structure.js';
+import { setLayerShown, updateLayer } from '../model/structure.js';
 import { frameAt, matchingLayer } from '../model/project.js';
 import { drawThumbnail } from './thumbnail.js';
 import { isBody } from '../model/body/body-kind.js';
@@ -12,11 +12,12 @@ function changeLayer(app, entry, label, patch) {
   });
 }
 
-function eyeButton(app, entry) {
-  const shown = entry.visible;
+function eyeButton(app, entry, shown) {
   const toggle = (event) => {
     event.stopPropagation();
-    changeLayer(app, entry, shown ? 'Hide layer' : 'Show layer', { visible: !shown });
+    restructure(app, shown ? 'Hide layer' : 'Show layer', (draft) => {
+      setLayerShown(frameAt(draft.project, draft.at), entry.key, !shown);
+    });
   };
 
   return node(
@@ -24,7 +25,9 @@ function eyeButton(app, entry) {
     {
       'aria-pressed': String(shown),
       'aria-label': `${shown ? 'Hide' : 'Show'} ${entry.name}`,
-      title: shown ? 'Shown. Click to hide (a hidden layer stays out of downloads)' : 'Hidden',
+      title: shown
+        ? 'Shown in this frame. Click to hide it here (a hidden layer stays out of downloads)'
+        : 'Hidden in this frame. Click to show it here',
       onclick: toggle,
     },
     icon(shown ? 'eye' : 'eye-off'),
@@ -56,6 +59,8 @@ export function startRename(app, entry, label) {
 // one layer, as an image editor lists it: shown or not, its art, its name; a click draws on it,
 // a double-click on the name renames it
 export function layerRow(app, entry, active) {
+  const { state } = app.store;
+  const shown = matchingLayer(frameAt(state.project, state.at), entry)?.visible ?? true;
   const select = () => goTo(app, { layer: entry.key });
   const label = node(
     'span.layer-name',
@@ -70,12 +75,12 @@ export function layerRow(app, entry, active) {
       tabindex: active ? '0' : '-1',
       'aria-selected': String(active),
       'aria-current': String(active),
-      'data-hidden': String(!entry.visible),
+      'data-hidden': String(!shown),
       'data-key': entry.key,
       onclick: select,
       onkeydown: (event) => event.key === 'F2' && startRename(app, entry, label),
     },
-    eyeButton(app, entry),
+    eyeButton(app, entry, shown),
     thumbnail(app.store.state, entry),
     label,
     entry.kind === 'reference' ? node('span.badge', { title: 'Never downloaded' }, 'Trace') : null,
@@ -86,6 +91,6 @@ export function layerRow(app, entry, active) {
           'Parts',
         )
       : null,
-    entry.visible ? null : node('span.badge', {}, 'Hidden'),
+    shown ? null : node('span.badge', {}, 'Hidden'),
   );
 }

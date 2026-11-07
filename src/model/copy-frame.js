@@ -7,9 +7,12 @@ import { bodyOf, isBody } from './body/body-kind.js';
 // figure on its art instead, where Cut into parts finds it.
 function copyInto(frame, source, { canvas, cut }) {
   for (const layer of frame.layers) {
-    const copy = matchingLayer(source, layer)?.sprite;
+    const match = matchingLayer(source, layer);
 
-    layer.sprite = copy ? cloneSprite(copy) : createSprite(canvas.width, canvas.height);
+    layer.sprite = match?.sprite
+      ? cloneSprite(match.sprite)
+      : createSprite(canvas.width, canvas.height);
+    layer.visible = match?.visible ?? layer.visible;
 
     if (isBody(layer)) {
       delete layer.pose;

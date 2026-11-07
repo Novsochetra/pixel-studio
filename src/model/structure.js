@@ -9,13 +9,7 @@ export function layerStack(animation) {
   const first = framesOf(animation)[0];
 
   return first
-    ? first.layers.map(({ key, name, kind, visible, opacity }) => ({
-        key,
-        name,
-        kind,
-        visible,
-        opacity,
-      }))
+    ? first.layers.map(({ key, name, kind, opacity }) => ({ key, name, kind, opacity }))
     : [];
 }
 
@@ -32,7 +26,7 @@ export function frameLike(animation, canvas, source = null) {
         key: entry.key,
         kind: entry.kind,
       }),
-      visible: entry.visible,
+      visible: from?.visible ?? true,
       opacity: entry.opacity,
       ...(from?.pose ? { pose: from.pose } : {}),
     };
@@ -89,6 +83,15 @@ export function updateLayer(animation, key, patch) {
     if (layer) {
       Object.assign(layer, patch);
     }
+  }
+}
+
+// a layer's name and place are the animation's; whether it shows is each frame's own
+export function setLayerShown(frame, key, visible) {
+  const layer = frame.layers.find((other) => other.key === key);
+
+  if (layer) {
+    layer.visible = visible;
   }
 }
 
