@@ -1,4 +1,4 @@
-import { commitPose, currentLayer } from './actions.js';
+import { commitPose, currentLayer, goTo } from './actions.js';
 import { toast } from './dom.js';
 import { clampLayerShift, shiftLayer } from '../model/frame-shift.js';
 
@@ -23,6 +23,12 @@ function moveLayer(app, layer, shift) {
       shiftLayer(layer, [dx, dy]);
     });
   }
+}
+
+// a selection would keep the arrow keys on its pixels instead of on the layer just picked
+export function pickLayerToMove(app, key) {
+  goTo(app, { layer: key });
+  app.store.set({ tool: 'movelayer', selection: null });
 }
 
 export function shiftCurrentLayer(app, shift) {

@@ -1,5 +1,6 @@
 import { node, icon } from './dom.js';
-import { currentAnimation, goTo, restructure } from './actions.js';
+import { currentAnimation, restructure } from './actions.js';
+import { pickLayerToMove } from './layer-move.js';
 import { renameInPlace } from './rename-field.js';
 import { setLayerShown, updateLayer } from '../model/structure.js';
 import { frameAt, matchingLayer } from '../model/project.js';
@@ -56,12 +57,12 @@ export function startRename(app, entry, label) {
   });
 }
 
-// one layer, as an image editor lists it: shown or not, its art, its name; a click draws on it,
-// a double-click on the name renames it
+// one layer, as an image editor lists it: shown or not, its art, its name; a click picks it to
+// drag, a double-click on the name renames it
 export function layerRow(app, entry, active) {
   const { state } = app.store;
   const shown = matchingLayer(frameAt(state.project, state.at), entry)?.visible ?? true;
-  const select = () => goTo(app, { layer: entry.key });
+  const select = () => pickLayerToMove(app, entry.key);
   const label = node(
     'span.layer-name',
     { title: 'Double-click to rename', ondblclick: () => startRename(app, entry, label) },

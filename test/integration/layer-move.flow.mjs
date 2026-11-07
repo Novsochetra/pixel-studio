@@ -87,6 +87,29 @@ await page.keyboard.press('Meta+z');
 await page.waitForTimeout(100);
 check((await pixels()) === moved, 'the arrow key is one undo step');
 
+// clicking a layer in the list is enough to drag it, whatever tool was on
+await page.keyboard.press('v');
+const beforeRowClick = await layerPixels();
+
+await page.locator('.layer-row', { hasText: 'Hair' }).click();
+check(
+  (await page.getByRole('button', { name: /Move this layer/ }).getAttribute('aria-pressed')) ===
+    'true',
+  'clicking a layer picks the tool that moves it',
+);
+await drag([45, 30], [50, 36]);
+await page.screenshot({ path: `${shots}/layer-move-row.png` });
+const afterRowClick = await layerPixels();
+
+check(afterRowClick.hair !== beforeRowClick.hair, 'so a drag then moves that layer');
+check(afterRowClick.body === beforeRowClick.body, 'and not the other layers');
+
+await page.keyboard.press('s');
+await drag([100, 100], [120, 120]);
+check(await page.locator('.selection-bar').isVisible(), 'a selection shows its bar');
+await page.locator('.layer-row', { hasText: 'Hair' }).click();
+check(await page.locator('.selection-bar').isHidden(), 'clicking a layer lets go of a selection');
+
 await eye('Hide', 'Hair');
 const hidden = await pixels();
 
