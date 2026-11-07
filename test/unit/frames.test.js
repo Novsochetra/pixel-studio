@@ -4,13 +4,17 @@ import { newProject } from '../../src/model/new-project.js';
 import { getPixel, pack, setPixel } from '../../src/model/sprite.js';
 import {
   addFrame,
-  evenFrames,
+  addFrameAtEnd,
   frameCount,
+  heldFrame,
   moveFrame,
+  reachFrame,
   removeFrame,
+  removeViewFrame,
 } from '../../src/model/frames.js';
+import { copyFrameToViews } from '../../src/model/copy-frame.js';
+import { isFrameHidden, setFrameHidden } from '../../src/model/frame-play.js';
 import { addDirection, removeDirection } from '../../src/model/structure.js';
-import { fillMissingSprites, install } from '../../src/ui/session.js';
 
 const RED = pack(255, 0, 0);
 const counts = (animation) =>
@@ -89,43 +93,110 @@ test('a view switched on later gets every frame the others have', () => {
   assert.equal(animation.directions.west.frames.length, 3);
 });
 
-test("an older project with uneven views is evened out with copies of each short view's last frame", () => {
+test('deleting a frame from one view leaves the other views alone', () => {
   const project = newProject();
   const animation = project.animations[0];
 
-  setPixel(art(animation, 'east', 0), 1, 1, RED);
-  animation.directions.south.frames.push(structuredClone(animation.directions.south.frames[0]));
-  animation.directions.south.frames.push(structuredClone(animation.directions.south.frames[0]));
-  const added = evenFrames(project);
-  assert.deepEqual(counts(animation), [3, 3, 3]);
-  assert.equal(added.length, 4);
-  assert.equal(getPixel(art(animation, 'east', 2), 1, 1), RED);
-  assert.deepEqual(evenFrames(project), [], 'an even project is left alone');
+  addFrame(project, animation, 0);
+  addFrame(project, animation, 1);
+  numbered(animation);
+
+  assert.equal(removeViewFrame(animation, 'south', 1), 1);
+  assert.deepEqual(order(animation, 'south'), [0, 2]);
+  assert.deepEqual(order(animation, 'east'), [0, 1, 2]);
+  assert.equal(frameCount(animation), 3, 'the longest view still sets the count');
+  assert.equal(removeViewFrame(animation, 'south', 1), 0, 'the last place goes back one');
+  assert.equal(removeViewFrame(animation, 'south', 0), 0);
+  assert.deepEqual(order(animation, 'south'), [0], 'a view keeps its last frame');
 });
 
-test('frames added to even out a loaded project are saved, so they never come back empty', () => {
+test('a hidden mark stays with its place when one view loses a frame', () => {
   const project = newProject();
-
-  delete project.id;
   const animation = project.animations[0];
-  animation.directions.south.frames.push(structuredClone(animation.directions.south.frames[0]));
-  fillMissingSprites(project);
-  const added = animation.directions.east.frames[1].layers.map((layer) => layer.id);
-  const app = {
-    store: { state: {}, set() {} },
-    backend: {
-      async read() {
-        return null;
-      },
-      async write() {},
-      async remove() {},
-    },
-    index: { list: [], current: null },
-  };
-  install(app, project, { prefix: '' });
-  added.forEach((id) => assert.ok(app.saver.dirty.has(id)));
-  assert.equal(app.saver.structureDirty, true);
-  app.saver.detach();
+
+  addFrame(project, animation, 0);
+  addFrame(project, animation, 1);
+  setFrameHidden(animation, 2, true);
+  removeViewFrame(animation, 'south', 0);
+
+  assert.equal(isFrameHidden(animation, 1), false, 'the moment before it stays shown');
+  assert.equal(isFrameHidden(animation, 2), true);
+});
+
+test('deleting from every view spares a view down to its last frame', () => {
+  const project = newProject();
+  const animation = project.animations[0];
+
+  addFrame(project, animation, 0);
+  removeViewFrame(animation, 'south', 0);
+  removeFrame(animation, 0);
+
+  assert.deepEqual(counts(animation), [1, 1, 1]);
+});
+
+test('moving a frame leaves no hole in a view too short to have it', () => {
+  const project = newProject();
+  const animation = project.animations[0];
+
+  addFrame(project, animation, 0);
+  addFrame(project, animation, 1);
+  numbered(animation);
+  removeViewFrame(animation, 'south', 2);
+
+  assert.equal(moveFrame(animation, 2, 0), 0);
+  assert.deepEqual(order(animation, 'east'), [2, 0, 1]);
+  assert.deepEqual(order(animation, 'south'), [0, 1]);
+  moveFrame(animation, 0, 2);
+  assert.deepEqual(order(animation, 'south'), [1, 0], 'and past its end lands last');
+});
+
+test('+ lets a short view catch up alone, and adds to every view once it has', () => {
+  const project = newProject();
+  const animation = project.animations[0];
+
+  addFrame(project, animation, 0);
+  removeViewFrame(animation, 'south', 1);
+
+  assert.equal(addFrameAtEnd(project, animation, 'south'), 1);
+  assert.deepEqual(counts(animation), [2, 2, 2]);
+  assert.equal(addFrameAtEnd(project, animation, 'south'), 2);
+  assert.deepEqual(counts(animation), [3, 3, 3]);
+});
+
+test('a short view grows with empty frames to reach a frame asked of it', () => {
+  const project = newProject();
+  const animation = project.animations[0];
+
+  addFrame(project, animation, 0);
+  addFrame(project, animation, 1);
+  removeViewFrame(animation, 'south', 2);
+  removeViewFrame(animation, 'south', 1);
+
+  const frame = reachFrame(project, animation, 'south', 2);
+
+  assert.equal(animation.directions.south.frames.length, 3);
+  assert.equal(frame, animation.directions.south.frames[2]);
+  assert.equal(reachFrame(project, animation, 'south', 0), animation.directions.south.frames[0]);
+  assert.equal(animation.directions.south.frames.length, 3);
+});
+
+test('a frame copied to the other views reaches a view too short to have it', () => {
+  const project = newProject();
+  const animation = project.animations[0];
+
+  addFrame(project, animation, 0);
+  removeViewFrame(animation, 'south', 1);
+  setPixel(art(animation, 'east', 1), 1, 1, RED);
+  copyFrameToViews(project, animation, 'east', 1);
+
+  assert.equal(getPixel(art(animation, 'south', 1), 1, 1), RED);
+});
+
+test('a short view holds its last frame past its end', () => {
+  const frames = ['first', 'last'];
+
+  assert.equal(heldFrame(frames, 1), 'last');
+  assert.equal(heldFrame(frames, 3), 'last');
 });
 
 test('a frame has art when a layer other than a picture to trace has a pixel', async () => {

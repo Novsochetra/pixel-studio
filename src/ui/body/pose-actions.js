@@ -1,7 +1,7 @@
-import { commitPose, currentAnimation, currentFrames } from '../actions.js';
+import { commitPose, currentAnimation, currentFrames, restructure } from '../actions.js';
 import { frameAt } from '../../model/project.js';
 import { bodyOf } from '../../model/body/body-kind.js';
-import { poseBody, rigOf } from '../../model/body/body.js';
+import { poseBody, restoreBody, rigOf } from '../../model/body/body.js';
 import { partPose, restPose } from '../../model/body/rig.js';
 
 // What posing works on: the view's cut, the Body of the frame being edited and its canvas.
@@ -51,7 +51,24 @@ function poseBefore(state) {
   return frames.map(bodyOf).find((body) => body?.pose)?.pose ?? restPose();
 }
 
-export const poseHere = (app) => setPose(app, 'Pose the parts', poseBefore(app.store.state));
+export function poseHere(app) {
+  const { state } = app.store;
+  const { rig, body, canvas } = poseTarget(state);
+  const pose = poseBefore(state);
+
+  if (body) {
+    setPose(app, 'Pose the parts', pose);
+
+    return;
+  }
+
+  restructure(app, 'Pose the parts', (draft) => {
+    const animation = currentAnimation(draft);
+    const restored = restoreBody(draft.project, animation, frameAt(draft.project, draft.at));
+
+    poseBody(restored, { rig, pose, canvas });
+  });
+}
 
 // this frame's Body becomes plain pixels, to touch up by hand
 export function turnIntoPixels(app) {

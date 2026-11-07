@@ -1,7 +1,14 @@
 // Coming back: the first project made on the start screen, and the example once it is edited, open
 // again on the next visit, instead of the start screen with the work saved but unlisted.
 import { openStudio } from './harness.mjs';
-import { createProject, openExample, waitSaved } from './studio.mjs';
+import {
+  createProject,
+  frameAction,
+  openExample,
+  selectFrame,
+  selectView,
+  waitSaved,
+} from './studio.mjs';
 
 const { page, check, finish } = await openStudio();
 // the save waits a moment after the last change, and the status read "Saved" before it
@@ -22,6 +29,18 @@ const canvas = await page.getByLabel('Pixel canvas').boundingBox();
 // a corner, empty, so the pencil's red really changes a pixel
 await page.mouse.click(canvas.x + 12, canvas.y + 12);
 await comesBack('the example, once edited, opens again on the next visit');
+
+await selectView(page, 'Side');
+await page.locator('.grid-row.current .cell-add').click();
+await page.waitForTimeout(200);
+await selectFrame(page, 1);
+await frameAction(page, 'Delete frame 2 from Side');
+await comesBack('the example opens again after one view loses a frame');
+check(
+  (await page.locator('.grid-row[data-direction="east"] .cell').count()) === 1 &&
+    (await page.locator('.grid-row[data-direction="south"] .cell').count()) === 2,
+  'and that view still has the fewer frames',
+);
 
 await page.evaluate(() => indexedDB.deleteDatabase('pixel-clean-studio'));
 await page.reload();

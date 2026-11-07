@@ -1,6 +1,7 @@
 import { compositeFrame } from '../model/composite.js';
 import { flipHorizontal } from '../model/sprite.js';
 import { mirrorsOf } from '../model/directions.js';
+import { heldFrame } from '../model/frames.js';
 
 export const PLAIN_SIZE = { width: 768, height: 432 };
 
@@ -52,7 +53,7 @@ export function cast(project, animation, showMirrored) {
 export function frameSprite(project, animation, member, tick) {
   const frames = animation.directions[member.source].frames;
   const sprite = compositeFrame(
-    frames[tick % frames.length],
+    heldFrame(frames, tick),
     project.canvas.width,
     project.canvas.height,
   );

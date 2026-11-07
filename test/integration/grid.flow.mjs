@@ -70,10 +70,10 @@ await tabMenu(/^Delete Sprint copy/);
 check(!(await tabs()).includes('Sprint copy'), 'and deletes one');
 
 await selectFrame(page, 1);
-await frameAction(page, /^Delete frame 2/);
+await frameAction(page, 'Delete frame 2 from every view');
 check(
   JSON.stringify(await frames()) === '["1","2","3"]',
-  'a frame deleted from its menu goes from every view',
+  'a frame deleted from every view goes from this view too',
 );
 await frameAction(page, 'Duplicate frame');
 check((await frames()).length === 4, 'Duplicate frame adds one');
@@ -166,6 +166,29 @@ check(
   !(await page.locator('.grid-view', { hasText: /^Front side$/ }).count()),
   'and undoes nothing else',
 );
+
+const rowLength = (direction) =>
+  page.locator(`.grid-row[data-direction="${direction}"] .cell:not(.mirror)`).count();
+
+await selectView(page, 'Side');
+await selectFrame(page, 1);
+await frameAction(page, 'Delete frame 2 from Side');
+check((await rowLength('east')) === 5, 'a frame deleted from one view goes from that view');
+check((await rowLength('south')) === 6, 'and the other views keep theirs');
+check(
+  (await page.locator('.grid-number').count()) === 6,
+  'the numbers still cover the longest view',
+);
+await page.screenshot({ path: `${shots}/grid-short-view.png` });
+await page.locator('.cell-add').click();
+await page.waitForTimeout(200);
+check((await rowLength('east')) === 6, '+ lets the short view catch up');
+check((await rowLength('south')) === 6, 'without adding to the others');
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(200);
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(200);
+check((await rowLength('east')) === 6, 'undo brings the deleted frame back');
 
 await page.screenshot({ path: `${shots}/grid.png` });
 const before = await page.locator('.canvas-holder canvas').evaluate((canvas) => canvas.toDataURL());

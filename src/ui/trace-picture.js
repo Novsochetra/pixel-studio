@@ -1,6 +1,7 @@
 import { node, toast } from './dom.js';
-import { currentAnimation, restructure } from './actions.js';
-import { addLayer, layerStack, moveLayer, updateLayer } from '../model/structure.js';
+import { restructure } from './actions.js';
+import { addLayer, updateLayer } from '../model/structure.js';
+import { placeLayer } from '../model/layer-ops.js';
 import { frameAt } from '../model/project.js';
 import { decodeImage } from '../io/images.js';
 import { createSprite } from '../model/sprite.js';
@@ -42,15 +43,14 @@ export function addPicture(app) {
     }
 
     restructure(app, 'Add picture to trace', (draft) => {
-      const animation = currentAnimation(draft);
-      const key = addLayer(draft.project, animation, {
+      const frame = frameAt(draft.project, draft.at);
+      const key = addLayer(draft.project, frame, {
         name: `Trace: ${file.name}`,
         kind: 'reference',
-        above: layerStack(animation)[0]?.key ?? null,
       });
 
-      moveLayer(animation, key, -1);
-      frameAt(draft.project, draft.at).layers.find((layer) => layer.key === key).sprite = picture;
+      updateLayer(frame, key, { sprite: picture });
+      placeLayer(frame, key, 0);
     });
     toast(
       'Picture added under your art, faded; never downloaded. Click it to change how strongly it shows.',
@@ -61,7 +61,9 @@ export function addPicture(app) {
 export function pictureStrength(app, picture) {
   const change = (event) =>
     restructure(app, 'Picture strength', (draft) => {
-      updateLayer(currentAnimation(draft), picture.key, { opacity: Number(event.target.value) });
+      updateLayer(frameAt(draft.project, draft.at), picture.key, {
+        opacity: Number(event.target.value),
+      });
     });
 
   return node(

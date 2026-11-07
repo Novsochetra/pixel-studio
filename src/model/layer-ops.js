@@ -1,7 +1,7 @@
-import { CLEAR, cloneSprite, getPixel, setPixel } from './sprite.js';
+import { CLEAR, getPixel, setPixel } from './sprite.js';
 import { newId } from './project.js';
-import { forgetCuts, framesOf, layerStack } from './structure.js';
-import { BODY_KIND, isBody, withoutPose } from './body/body-kind.js';
+import { copyOfLayer, forgetCutsWithoutBody } from './structure.js';
+import { isBody, withoutPose } from './body/body-kind.js';
 
 const indexIn = (frame, key) => frame.layers.findIndex((layer) => layer.key === key);
 
@@ -18,37 +18,31 @@ export function topLayerAt(frame, [x, y]) {
   );
 }
 
-// a copy of the layer just above it, in every frame, to change without losing the original
-export function duplicateLayer(animation, key) {
-  const copyKey = newId('k');
+// a copy of the layer just above it, to change without losing the original
+export function duplicateLayer(frame, key) {
+  const at = indexIn(frame, key);
+  const layer = frame.layers[at];
+  // a copy of the Body is plain art: the parts draw only the Body itself
+  const original = isBody(layer) ? { ...withoutPose(layer), kind: 'art' } : layer;
+  const copy = { ...copyOfLayer(original), key: newId('k'), name: `${layer.name} copy` };
 
-  for (const frame of framesOf(animation)) {
-    const at = indexIn(frame, key);
-    const layer = frame.layers[at];
-    // a copy of the Body is plain art: the parts draw only the Body itself
-    const original = isBody(layer) ? { ...withoutPose(layer), kind: 'art' } : layer;
-    const copy = {
-      ...original,
-      id: newId('l'),
-      key: copyKey,
-      name: `${layer.name} copy`,
-      sprite: layer.sprite ? cloneSprite(layer.sprite) : null,
-    };
-    frame.layers.splice(at + 1, 0, copy);
-  }
+  frame.layers.splice(at + 1, 0, copy);
 
-  return copyKey;
+  return copy.key;
 }
 
-// the layer below, if the art can go down onto it: a picture to trace never takes art
-export function layerBelow(animation, key) {
-  const stack = layerStack(animation);
-  const below = stack[stack.findIndex((entry) => entry.key === key) - 1];
+// the layer below, if the art can go down onto it: a picture to trace never takes art, and a
+// hidden layer would come back into view or stay out of it, which is not how the two show
+export function layerBelow(frame, key) {
+  const at = indexIn(frame, key);
+  const [below, layer] = [frame.layers[at - 1], frame.layers[at]];
 
   return below &&
     below.kind !== 'reference' &&
-    below.kind !== BODY_KIND &&
-    stack.find((entry) => entry.key === key).kind !== 'reference'
+    !isBody(below) &&
+    layer.kind !== 'reference' &&
+    below.visible &&
+    layer.visible
     ? below
     : null;
 }
@@ -66,39 +60,36 @@ export function paintOver(lower, upper) {
   }
 }
 
-// The layer's art painted onto the layer below in every frame, then the layer gone: two become
-// one, as it shows. Returns the key of the layer that is left, or null when there is none below.
-export function mergeDown(animation, key) {
-  const below = layerBelow(animation, key);
+// The layer's art painted onto the layer below, then the layer gone: two become one, as it shows.
+// Returns the key of the layer that is left, or null when there is none to merge onto.
+export function mergeDown(animation, frame, key) {
+  const below = layerBelow(frame, key);
 
   if (!below) {
     return null;
   }
 
-  const body = layerStack(animation).find((entry) => entry.key === key).kind === BODY_KIND;
+  const at = indexIn(frame, key);
+  const [upper] = frame.layers.splice(at, 1);
 
-  for (const frame of framesOf(animation)) {
-    const at = indexIn(frame, key);
-    const [upper, lower] = [frame.layers[at], frame.layers[at - 1]];
-
-    if (upper.sprite && lower.sprite) {
-      paintOver(lower.sprite, upper.sprite);
-    }
-
-    frame.layers.splice(at, 1);
+  if (upper.sprite && below.sprite) {
+    paintOver(below.sprite, upper.sprite);
   }
 
-  if (body) {
-    forgetCuts(animation);
-  }
+  forgetCutsWithoutBody(animation);
 
   return below.key;
 }
 
-// the layer moved to `to` in the stack (0 is the bottom), in every frame alike
-export function placeLayer(animation, key, to) {
-  for (const frame of framesOf(animation)) {
-    const [layer] = frame.layers.splice(indexIn(frame, key), 1);
-    frame.layers.splice(Math.max(0, Math.min(frame.layers.length, to)), 0, layer);
-  }
+// the layer moved to `to` in the frame's stack (0 is the bottom)
+export function placeLayer(frame, key, to) {
+  const [layer] = frame.layers.splice(indexIn(frame, key), 1);
+
+  frame.layers.splice(Math.max(0, Math.min(frame.layers.length, to)), 0, layer);
+}
+
+export function layerBeside(frame, key) {
+  const at = indexIn(frame, key);
+
+  return frame.layers[at - 1]?.key ?? frame.layers[at + 1]?.key ?? null;
 }

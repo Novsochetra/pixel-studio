@@ -1,10 +1,9 @@
-import { cloneSprite } from './sprite.js';
 import { newId } from './project.js';
 import { compositeFrame } from './composite.js';
 import { addFrame, hasArt } from './frames.js';
 import { kindOf } from './kinds.js';
 import { gameOf } from './presets.js';
-import { addAnimation, uniqueName } from './structure.js';
+import { addAnimation, copyOfLayer, uniqueName } from './structure.js';
 import { bodyKey } from './body/body.js';
 
 // a deep copy whose animation, frames and layers have ids of their own, so both are saved
@@ -13,11 +12,7 @@ function copyFrames(frames) {
     ...frame,
     id: newId('f'),
     marks: structuredClone(frame.marks ?? []),
-    layers: frame.layers.map((layer) => ({
-      ...layer,
-      id: newId('l'),
-      sprite: layer.sprite ? cloneSprite(layer.sprite) : null,
-    })),
+    layers: frame.layers.map(copyOfLayer),
   }));
 }
 

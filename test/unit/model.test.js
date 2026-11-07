@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { newProject } from '../../src/model/new-project.js';
-import { addLayer, layerStack, moveLayer, removeLayer } from '../../src/model/structure.js';
+import { addLayer, removeLayer } from '../../src/model/structure.js';
 import { addFrame } from '../../src/model/frames.js';
 import { compositeFrame } from '../../src/model/composite.js';
 import { drawableDirections } from '../../src/model/directions.js';
@@ -11,36 +11,27 @@ import { buildSheet } from '../../src/export/sheet.js';
 const RED = pack(255, 0, 0);
 const BLUE = pack(0, 0, 255);
 
-test('layers stay in step across every frame of an animation', () => {
+test('a layer is added to, and removed from, its own frame only', () => {
   const project = newProject();
   const animation = project.animations[0];
 
   addFrame(project, animation, 0);
-  const key = addLayer(project, animation, { name: 'Shading' });
-  for (const entry of Object.values(animation.directions)) {
-    for (const frame of entry.frames) {
-      assert.deepEqual(
-        frame.layers.map((layer) => layer.key),
-        layerStack(animation).map((layer) => layer.key),
-      );
-    }
-  }
+  const [frame, next] = animation.directions.south.frames;
+  const key = addLayer(project, frame, { name: 'Shading' });
 
-  moveLayer(animation, key, -1);
-  assert.equal(layerStack(animation)[0].key, key);
-  assert.equal(removeLayer(animation, key), true);
-  assert.equal(
-    removeLayer(animation, layerStack(animation)[0].key),
-    false,
-    'the last art layer stays',
-  );
+  assert.equal(frame.layers.length, 2);
+  assert.equal(next.layers.length, 1, 'the next frame does not get it');
+  assert.equal(animation.directions.east.frames[0].layers.length, 1, 'nor does another view');
+  assert.equal(removeLayer(animation, frame, key), true);
+  assert.equal(frame.layers.length, 1);
+  assert.equal(removeLayer(animation, frame, frame.layers[0].key), false, 'the last art stays');
 });
 
 test('the composite stacks visible art layers and leaves out pictures to trace', () => {
   const project = newProject();
   const animation = project.animations[0];
-  const traceKey = addLayer(project, animation, { name: 'Trace', kind: 'reference' });
   const frame = animation.directions.south.frames[0];
+  const traceKey = addLayer(project, frame, { name: 'Trace', kind: 'reference' });
 
   setPixel(frame.layers[0].sprite, 1, 1, RED);
   setPixel(frame.layers.find((layer) => layer.key === traceKey).sprite, 2, 2, BLUE);

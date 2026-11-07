@@ -82,7 +82,7 @@ function turnDrag(app, piece, start) {
 function cannotPose(target) {
   if (!target.rig) {
     toast('This view is not cut into parts yet: Cut into parts… is in the bar above the canvas.');
-  } else if (!target.body.pose) {
+  } else if (!target.body?.pose) {
     toast('This frame is plain pixels: Pose the parts here is in the bar above the canvas.');
   } else if (!target.body.visible) {
     toast('Body is hidden, so you would not see the pose. Show it in Layers first.');

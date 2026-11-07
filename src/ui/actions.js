@@ -118,11 +118,9 @@ export function settleAt(state) {
   const direction = directions.includes(state.at.direction) ? state.at.direction : directions[0];
   const frames = animation.directions[direction].frames;
   const frame = Math.max(0, Math.min(state.at.frame ?? 0, frames.length - 1));
-  const layer = frames[frame].layers.some((other) => other.key === state.at.layer)
-    ? state.at.layer
-    : null;
 
-  return { animation: animation.id, direction, frame, layer };
+  // a frame without the layer edits its first; the next frame that has it picks it up again
+  return { animation: animation.id, direction, frame, layer: state.at.layer };
 }
 
 // An undoable change to frames, layers or animations: `mutate` returns where to go after it.
@@ -177,7 +175,9 @@ export function replaceDirectionArt(app, { direction, frame }, sprite, label) {
 
 // to another animation, view, frame or layer ({ animation, direction, frame, layer })
 export function goTo(app, place) {
-  goToSettled(app, { ...app.store.state.at, ...place });
+  const { state } = app.store;
+
+  goToSettled(app, settleAt({ ...state, at: { ...state.at, ...place } }));
 }
 
 export const selectDirection = (app, direction) => goTo(app, { direction });

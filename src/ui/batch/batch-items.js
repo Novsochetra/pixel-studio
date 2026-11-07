@@ -1,6 +1,6 @@
 import { node } from '../dom.js';
 import { currentAnimation, restructure } from '../actions.js';
-import { addFrame, frameCount } from '../../model/frames.js';
+import { addFrame, frameCount, reachFrame } from '../../model/frames.js';
 import { referenceOf } from '../../model/reference.js';
 import { isSingleView } from '../../model/kinds.js';
 import { clearPosedBody } from '../../model/body/body.js';
@@ -85,7 +85,7 @@ export function placeAll(app, items) {
     }
 
     items.forEach((item, i) => {
-      const frame = animation.directions[item.direction].frames[indexes[i]];
+      const frame = reachFrame(state.project, animation, item.direction, indexes[i]);
 
       frame.layers.find((layer) => layer.kind === 'art').sprite = item.sprite;
       clearPosedBody(frame, state.project.canvas);

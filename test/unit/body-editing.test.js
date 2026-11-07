@@ -25,10 +25,11 @@ const { bounds, cloneSprite, getPixel, pack, samePixels, setPixel } =
 const { bodyOf, isPosedBody } = await import('../../src/model/body/body-kind.js');
 const { bodyKey, rigOf } = await import('../../src/model/body/body.js');
 const { renderPiece } = await import('../../src/model/body/rig.js');
-const { commit, replaceDirectionArt } = await import('../../src/ui/actions.js');
+const { commit, currentFrames, replaceDirectionArt } = await import('../../src/ui/actions.js');
 const { startFromPrevious } = await import('../../src/ui/frame-actions.js');
 const { recolourLayers } = await import('../../src/ui/body/recolour.js');
-const { setPart } = await import('../../src/ui/body/pose-actions.js');
+const { poseHere, setPart } = await import('../../src/ui/body/pose-actions.js');
+const { removeLayer } = await import('../../src/model/structure.js');
 const { handlePoseKey } = await import('../../src/ui/body/pose-keys.js');
 const { startOnPart } = await import('../../src/ui/body/part-draw.js');
 const { cutCharacter } = await import('./body-helpers.js');
@@ -45,7 +46,7 @@ function editing() {
   const app = {
     store: { state, set: (patch) => Object.assign(state, patch), touch() {} },
     history: new History(findLayer),
-    saver: { markLayers() {}, markStructure() {} },
+    saver: { markLayers() {}, markNewLayers() {}, markStructure() {} },
   };
 
   return { ...made, app, state, body: (frame = 0) => bodyOf(made.front.frames[frame]) };
@@ -143,7 +144,23 @@ test('Start from frame N brings the Body with its pose, and undo takes both back
   assert.ok(samePixels(body(1).sprite, body(0).sprite));
 
   app.history.undo(state.project);
-  assert.equal(body(1).pose, restOfFrame1);
+
+  const { frames } = state.project.animations[0].directions.south;
+
+  assert.equal(bodyOf(frames[1]).pose, restOfFrame1);
+});
+
+test('Pose the parts here brings back a Body deleted from this frame, and undo takes it away', () => {
+  const { app, animation, body, state } = editing();
+
+  removeLayer(animation, currentFrames(state)[0], body().key);
+  poseHere(app);
+
+  const posedAgain = () => bodyOf(state.project.animations[0].directions.south.frames[0]);
+
+  assert.ok(isPosedBody(posedAgain()));
+  app.history.undo(state.project);
+  assert.equal(posedAgain(), null);
 });
 
 test('a picture cleaned into a frame goes onto the art, never onto the Body', () => {

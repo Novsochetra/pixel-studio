@@ -1,38 +1,33 @@
-import { cloneSprite, createSprite } from './sprite.js';
+import { cloneSprite } from './sprite.js';
 import { newAnimation, newFrame, newId, newLayer } from './project.js';
-import { BODY_KIND } from './body/body-kind.js';
+import { BODY_KIND, bodyOf, isBody } from './body/body-kind.js';
 
 export const framesOf = (animation) =>
   Object.values(animation.directions).flatMap((entry) => entry.frames);
 
-export function layerStack(animation) {
-  const first = framesOf(animation)[0];
+export const copyOfLayer = (layer) => ({
+  ...layer,
+  id: newId('l'),
+  sprite: layer.sprite ? cloneSprite(layer.sprite) : null,
+});
 
-  return first
-    ? first.layers.map(({ key, name, kind, opacity }) => ({ key, name, kind, opacity }))
-    : [];
-}
+export const copyOfFrame = (frame, canvas) =>
+  newFrame(canvas.width, canvas.height, frame.layers.map(copyOfLayer));
 
-// a frame shaped like the animation's others: same layers, all empty, or copies of `source`
-export function frameLike(animation, canvas, source = null) {
-  const stack = layerStack(animation);
-  const layers = stack.map((entry) => {
-    const from = source?.layers.find((layer) => layer.key === entry.key);
+// An empty frame has one empty layer of art, and the Body once the animation has one, to pose.
+// They keep the keys of the animation's own, so the layer being edited follows into the new frame.
+export function blankFrame(animation, canvas) {
+  const { width, height } = canvas;
+  const stack = framesOf(animation).flatMap((frame) => frame.layers);
+  const art = stack.find((layer) => layer.kind === 'art');
+  const body = stack.find(isBody);
+  const layers = [newLayer(width, height, { name: art?.name, key: art?.key })];
 
-    return {
-      ...newLayer(canvas.width, canvas.height, {
-        name: entry.name,
-        sprite: from?.sprite ? cloneSprite(from.sprite) : createSprite(canvas.width, canvas.height),
-        key: entry.key,
-        kind: entry.kind,
-      }),
-      visible: from?.visible ?? true,
-      opacity: entry.opacity,
-      ...(from?.pose ? { pose: from.pose } : {}),
-    };
-  });
+  if (body) {
+    layers.push(newLayer(width, height, { name: body.name, key: body.key, kind: BODY_KIND }));
+  }
 
-  return newFrame(canvas.width, canvas.height, layers);
+  return newFrame(width, height, layers);
 }
 
 // a new view has as many frames as the others, since every frame is a moment of all of them
@@ -44,13 +39,11 @@ export function addDirection(project, animation, direction, copyFrom = null) {
   );
 
   const rig = copyFrom ? animation.directions[copyFrom]?.rig : null;
+  const frames = source
+    ? source.map((frame) => copyOfFrame(frame, project.canvas))
+    : Array.from({ length: count }, () => blankFrame(animation, project.canvas));
 
-  animation.directions[direction] = {
-    frames: source
-      ? source.map((frame) => frameLike(animation, project.canvas, frame))
-      : Array.from({ length: count }, () => frameLike(animation, project.canvas)),
-    ...(rig ? { rig } : {}),
-  };
+  animation.directions[direction] = { frames, ...(rig ? { rig } : {}) };
 }
 
 export function removeDirection(animation, direction) {
@@ -59,78 +52,52 @@ export function removeDirection(animation, direction) {
   }
 }
 
-export function addLayer(project, animation, { name, kind = 'art', above = null }) {
-  const key = newId('k');
+export function addLayer(project, frame, { name, kind = 'art', above = null }) {
+  const layer = newLayer(project.canvas.width, project.canvas.height, { name, kind });
+  const at = above
+    ? frame.layers.findIndex((other) => other.key === above) + 1
+    : frame.layers.length;
 
-  for (const frame of framesOf(animation)) {
-    const at = above
-      ? frame.layers.findIndex((layer) => layer.key === above) + 1
-      : frame.layers.length;
-    frame.layers.splice(
-      at,
-      0,
-      newLayer(project.canvas.width, project.canvas.height, { name, key, kind }),
-    );
-  }
+  frame.layers.splice(at, 0, layer);
 
-  return key;
+  return layer.key;
 }
 
-export function updateLayer(animation, key, patch) {
-  for (const frame of framesOf(animation)) {
-    const layer = frame.layers.find((other) => other.key === key);
-
-    if (layer) {
-      Object.assign(layer, patch);
-    }
-  }
-}
-
-// a layer's name and place are the animation's; whether it shows is each frame's own
-export function setLayerShown(frame, key, visible) {
+export function updateLayer(frame, key, patch) {
   const layer = frame.layers.find((other) => other.key === key);
 
   if (layer) {
-    layer.visible = visible;
+    Object.assign(layer, patch);
   }
 }
 
-export function removeLayer(animation, key) {
-  if (
-    layerStack(animation).filter((entry) => entry.kind === 'art').length <= 1 &&
-    layerStack(animation).find((entry) => entry.key === key)?.kind === 'art'
-  ) {
+export const setLayerShown = (frame, key, visible) => updateLayer(frame, key, { visible });
+
+const artCount = (frame) => frame.layers.filter((layer) => layer.kind === 'art').length;
+
+// a picture cleaned into a frame needs a layer of art to land on
+export const canRemoveLayer = (frame, key) =>
+  frame.layers.find((layer) => layer.key === key)?.kind !== 'art' || artCount(frame) > 1;
+
+export function removeLayer(animation, frame, key) {
+  if (!canRemoveLayer(frame, key)) {
     return false;
   }
 
-  const body = layerStack(animation).find((entry) => entry.key === key)?.kind === BODY_KIND;
-
-  for (const frame of framesOf(animation)) {
-    frame.layers = frame.layers.filter((layer) => layer.key !== key);
-  }
-
-  if (body) {
-    forgetCuts(animation);
-  }
+  frame.layers = frame.layers.filter((layer) => layer.key !== key);
+  forgetCutsWithoutBody(animation);
 
   return true;
 }
 
-// once the Body layer is gone, the cuts it was drawn from go too
-export function forgetCuts(animation) {
+// once no frame has a Body, the cuts it was drawn from go too
+export function forgetCutsWithoutBody(animation) {
+  if (framesOf(animation).some(bodyOf)) {
+    return;
+  }
+
   for (const entry of Object.values(animation.directions)) {
     delete entry.rig;
-  }
-}
-
-export function moveLayer(animation, key, step) {
-  for (const frame of framesOf(animation)) {
-    const index = frame.layers.findIndex((layer) => layer.key === key);
-    const to = index + step;
-
-    if (index >= 0 && to >= 0 && to < frame.layers.length) {
-      [frame.layers[index], frame.layers[to]] = [frame.layers[to], frame.layers[index]];
-    }
   }
 }
 

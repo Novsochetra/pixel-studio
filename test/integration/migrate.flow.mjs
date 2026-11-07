@@ -122,17 +122,14 @@ check(
 );
 await selectView(other, 'Side');
 check(
-  JSON.stringify(await frameLabels(other)) === '["1","2","3"]',
-  'a view with fewer frames gets copies of its last one',
+  JSON.stringify(await frameLabels(other)) === '["1"]',
+  'a view with fewer frames keeps the frames it has',
 );
 await waitSaved(other);
 await other.reload();
 await other.waitForSelector('.grid-panel');
 await showAllViews(other);
 await selectView(other, 'Side');
-check(
-  JSON.stringify(await frameLabels(other)) === '["1","2","3"]',
-  'and they are saved with their pixels',
-);
+check(JSON.stringify(await frameLabels(other)) === '["1"]', 'and still does when it opens again');
 
 await finish();

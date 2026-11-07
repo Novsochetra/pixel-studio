@@ -10,22 +10,12 @@ import { folderOf, moveToFolder } from '../store/folders.js';
 import { allLayers, newId } from '../model/project.js';
 import { normalizeProject } from '../model/normalize.js';
 import { createSprite } from '../model/sprite.js';
-import { evenFrames } from '../model/frames.js';
-
-// frames added to even out an older project's views, still to be written
-const evened = new WeakMap();
 
 export function fillMissingSprites(project) {
   normalizeProject(project);
 
   for (const { layer } of allLayers(project)) {
     layer.sprite ??= createSprite(project.canvas.width, project.canvas.height);
-  }
-
-  const added = evenFrames(project);
-
-  if (added.length) {
-    evened.set(project, added);
   }
 
   return project;
@@ -68,13 +58,6 @@ function startSaving(app, project, save, stored) {
 
   if (save === 'on-change') {
     app.saver.saveAllOnFirstChange();
-  }
-
-  // frames given to views that had fewer: otherwise the saved project would name layers that
-  // were never written, and they would come back empty
-  if (evened.has(project) && save === 'nothing') {
-    app.saver.markLayers(evened.get(project));
-    app.saver.markStructure();
   }
 }
 
@@ -122,7 +105,7 @@ export function install(app, project, { prefix, save = 'nothing', keepView = fal
   app.history = new History(app.findLayer);
   startSaving(app, project, save, stored);
   listOpenProject(app.index, project, prefix);
-  const saveStatus = save === 'all' || evened.has(project) ? 'pending' : 'saved';
+  const saveStatus = save === 'all' ? 'pending' : 'saved';
   app.store.set({ ...startingState(project), ...view, saveStatus });
 }
 

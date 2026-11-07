@@ -24,8 +24,9 @@ export function directionLabel(id) {
   return DIRECTIONS.find((direction) => direction.id === id)?.label ?? id;
 }
 
-// A layer is one frame's cel of a named layer; `key` ties the cels of one layer together across
-// frames. A 'reference' layer holds a picture to trace over: shown faded, never exported.
+// A layer belongs to one frame. `key` is kept by its copies in other frames, so the layer being
+// edited stays the same from frame to frame where it can. A 'reference' layer holds a picture to
+// trace over: shown faded, never exported.
 export function newLayer(width, height, options = {}) {
   const kind = options.kind ?? 'art';
 
@@ -95,9 +96,4 @@ function* framesLayers(animation, direction, frames) {
       yield { animation, direction, frameIndex, frame, layer };
     }
   }
-}
-
-// the layer of `frame` that is the same layer as `layer` in another frame or view
-export function matchingLayer(frame, layer) {
-  return frame.layers.find((other) => other.key === layer.key);
 }

@@ -2,7 +2,7 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { History } from '../../src/editor/history.js';
 import { newProject } from '../../src/model/new-project.js';
-import { install } from '../../src/ui/session.js';
+import { fillMissingSprites, install } from '../../src/ui/session.js';
 
 // choosing the reference view was not undoable, so the undo after it undid the step before
 test('choosing the reference view is its own undo step', async () => {
@@ -118,4 +118,41 @@ test('tile art the canvas size, inside a margin, fills the canvas edge to edge',
     tile.opaque.reduce((sum, on) => sum + on, 0),
     256,
   );
+});
+
+// a project opened again gave a view its deleted frames back, as copies of its last frame
+test('a frame deleted from one view stays deleted when the project opens again', async () => {
+  const { addFrame, removeViewFrame } = await import('../../src/model/frames.js');
+  const project = newProject();
+  const animation = project.animations[0];
+
+  addFrame(project, animation, 0);
+  removeViewFrame(animation, 'south', 1);
+  fillMissingSprites(project);
+
+  assert.equal(animation.directions.south.frames.length, 1);
+  assert.equal(animation.directions.east.frames.length, 2);
+});
+
+// going to a view with fewer frames left the place on a frame that view does not have
+test('going to a shorter view lands on a frame it has', async () => {
+  const { goTo } = await import('../../src/ui/actions.js');
+  const { addFrame, removeViewFrame } = await import('../../src/model/frames.js');
+  const project = newProject();
+  const animation = project.animations[0];
+
+  addFrame(project, animation, 0);
+  removeViewFrame(animation, 'south', 1);
+
+  const app = {
+    store: {
+      state: { project, at: { animation: animation.id, direction: 'east', frame: 1, layer: null } },
+      set(change) {
+        Object.assign(this.state, change);
+      },
+    },
+  };
+
+  goTo(app, { direction: 'south' });
+  assert.equal(app.store.state.at.frame, 0);
 });

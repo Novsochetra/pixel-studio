@@ -1,11 +1,13 @@
 import { cloneSprite, createSprite, samePixels } from '../sprite.js';
-import { addLayer, layerStack } from '../structure.js';
+import { framesOf } from '../structure.js';
+import { newId, newLayer } from '../project.js';
 import { recolourArt } from './piece-art.js';
 import { renderBody, restPose } from './rig.js';
 import { BODY_KIND, bodyOf } from './body-kind.js';
 
-export const bodyKey = (animation) =>
-  layerStack(animation).find((entry) => entry.kind === BODY_KIND)?.key ?? null;
+const anyBody = (animation) => framesOf(animation).map(bodyOf).find(Boolean) ?? null;
+
+export const bodyKey = (animation) => anyBody(animation)?.key ?? null;
 
 export function rigOf(animation, direction) {
   return bodyKey(animation) ? (animation.directions[direction]?.rig ?? null) : null;
@@ -44,13 +46,39 @@ function cutAgain(entry, rig, { key, canvas }) {
   return bodies.length;
 }
 
+function putBody(frame, { name, key, canvas, above }) {
+  const at = frame.layers.findIndex((layer) => layer.key === above);
+  const layer = newLayer(canvas.width, canvas.height, { name, key, kind: BODY_KIND });
+
+  frame.layers.splice(at < 0 ? frame.layers.length : at + 1, 0, layer);
+
+  return layer;
+}
+
+export function restoreBody(project, animation, frame) {
+  const { name, key } = anyBody(animation);
+
+  return putBody(frame, { name, key, canvas: project.canvas });
+}
+
+// a cut poses any frame, so each has a Body, even one whose Body was deleted
+function bodyInEveryFrame(project, animation, above) {
+  const { name, key } = anyBody(animation) ?? { name: 'Body', key: newId('k') };
+
+  for (const frame of framesOf(animation)) {
+    if (!bodyOf(frame)) {
+      putBody(frame, { name, key, canvas: project.canvas, above });
+    }
+  }
+
+  return key;
+}
+
 // cut: { direction, frame, layerKey, source, leftover, rig }. The first cut of a view takes the
 // parts off the layer that was cut, in this frame and every frame drawn the same; a new cut of a
 // view redraws the frames posed with the old one. Returns how many frames the Body now draws.
 export function applyCut(project, animation, cut) {
-  const key =
-    bodyKey(animation) ??
-    addLayer(project, animation, { name: 'Body', kind: BODY_KIND, above: cut.layerKey });
+  const key = bodyInEveryFrame(project, animation, cut.layerKey);
   const entry = animation.directions[cut.direction];
   const recut = Boolean(entry.rig);
   const place = { key, canvas: project.canvas };

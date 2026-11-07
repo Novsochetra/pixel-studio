@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { newProject } from '../../src/model/new-project.js';
-import { addLayer } from '../../src/model/structure.js';
+import { addLayer, framesOf } from '../../src/model/structure.js';
 import { addFrame } from '../../src/model/frames.js';
 import { allLayers, newAnimation } from '../../src/model/project.js';
 import { setPin } from '../../src/model/pins.js';
@@ -19,8 +19,12 @@ function drawnHero() {
   run.fps = 12;
   project.animations.push(run);
   addFrame(project, run, 0);
-  addLayer(project, idle, { name: 'Trace', kind: 'reference' });
-  addLayer(project, idle, { name: 'Hair' });
+
+  for (const frame of framesOf(idle)) {
+    addLayer(project, frame, { name: 'Trace', kind: 'reference' });
+    addLayer(project, frame, { name: 'Hair' });
+  }
+
   setPin(idle.directions.south.frames[0], 'Hand', 4, 5);
   project.outfits.push({ id: 'o1', name: 'Away', mapping: {} });
 

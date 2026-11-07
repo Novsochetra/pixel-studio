@@ -6,12 +6,34 @@ import { viewName } from '../../model/kinds.js';
 import {
   copyToOtherViews,
   deleteFrame,
+  deleteViewFrame,
   duplicateFrame,
   imageIntoFrame,
   moveFrameTo,
   startFromPrevious,
   toggleFrameHidden,
 } from '../frame-actions.js';
+
+// a project of one view has one way to delete, so its menu needs no word on which
+function deleteEntries(app, { direction, index, frames, count, viewCount }) {
+  const name = viewName(app.store.state.project, direction);
+  const fromThisView = [
+    viewCount > 1 ? `Delete frame ${index + 1} from ${name}` : `Delete frame ${index + 1}`,
+    () => deleteViewFrame(app, direction, index),
+    {
+      danger: true,
+      disabled: frames.length < 2,
+      title: frames.length < 2 ? 'A view keeps its last frame' : 'The other views keep theirs',
+    },
+  ];
+  const fromEveryView = [
+    `Delete frame ${index + 1} from every view`,
+    () => deleteFrame(app, index),
+    { danger: true, disabled: count < 2 },
+  ];
+
+  return viewCount > 1 ? [fromThisView, fromEveryView] : [fromThisView];
+}
 
 // the selected frame's actions; moving is also a drag, here for the keyboard and for clarity
 export function openCellMenu(app, anchor, direction, index) {
@@ -22,7 +44,6 @@ export function openCellMenu(app, anchor, direction, index) {
   const viewCount = Object.keys(animation.directions).length;
   const previous = index > 0 && hasArt(frames[index - 1]);
 
-  const deleteOptions = { danger: true, disabled: count < 2, title: 'From every view' };
   // entries left out are false; null is a line between groups
   const entries = [
     ['Image into this frame…', () => imageIntoFrame(app, direction, index)],
@@ -39,9 +60,13 @@ export function openCellMenu(app, anchor, direction, index) {
     ],
     null,
     ['Move earlier', () => moveFrameTo(app, index, index - 1), { disabled: index === 0 }],
-    ['Move later', () => moveFrameTo(app, index, index + 1), { disabled: index >= count - 1 }],
+    [
+      'Move later',
+      () => moveFrameTo(app, index, index + 1),
+      { disabled: index >= frames.length - 1 },
+    ],
     null,
-    [`Delete frame ${index + 1}`, () => deleteFrame(app, index), deleteOptions],
+    ...deleteEntries(app, { direction, index, frames, count, viewCount }),
   ];
 
   openMenu(

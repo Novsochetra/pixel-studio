@@ -2,13 +2,20 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { cloneSprite, getPixel, pack, samePixels } from '../../src/model/sprite.js';
 import { addFrame } from '../../src/model/frames.js';
-import { addDirection, layerStack, removeLayer } from '../../src/model/structure.js';
+import { addDirection, framesOf, removeLayer } from '../../src/model/structure.js';
 import { duplicateLayer, layerBelow, mergeDown } from '../../src/model/layer-ops.js';
 import { copyFrameToViews } from '../../src/model/copy-frame.js';
 import { duplicateAnimation, startAnimation } from '../../src/model/animations.js';
 import { shiftFrame } from '../../src/model/frame-shift.js';
-import { applyCut, bodyKey, poseBody, recolourRigs, rigOf } from '../../src/model/body/body.js';
-import { bodyOf, isPosedBody } from '../../src/model/body/body-kind.js';
+import {
+  applyCut,
+  bodyKey,
+  poseBody,
+  recolourRigs,
+  rigOf,
+  restoreBody,
+} from '../../src/model/body/body.js';
+import { bodyOf, isBody, isPosedBody } from '../../src/model/body/body-kind.js';
 import { renderBody, restPose } from '../../src/model/body/rig.js';
 import { History } from '../../src/editor/history.js';
 import { cutCharacter, opaqueCount } from './body-helpers.js';
@@ -20,7 +27,7 @@ test('a cut takes the parts off the art, in every frame drawn the same, onto a p
   const art = (frame) => frame.layers.find((layer) => layer.key === artKey).sprite;
 
   assert.equal(posed, 2);
-  assert.equal(layerStack(animation).filter((entry) => entry.kind === 'rig').length, 1);
+  assert.ok(framesOf(animation).every((frame) => frame.layers.filter(isBody).length === 1));
   assert.equal(opaqueCount(art(front.frames[0])), 0);
   assert.ok(samePixels(bodyOf(front.frames[1]).sprite, source));
   assert.ok(isPosedBody(bodyOf(front.frames[1])));
@@ -52,22 +59,47 @@ test('a duplicated frame keeps its pose, a copied view its cut; a frame copied a
   assert.ok(!isPosedBody(bodyOf(animation.directions.east.frames[0])));
 });
 
-test('the Body cannot be merged onto, its copy is plain art, and removing it forgets the cuts', () => {
-  const { animation } = cutCharacter();
+test('the Body cannot be merged onto, its copy is plain art, and removing every one forgets the cuts', () => {
+  const { animation, front } = cutCharacter();
   const key = bodyKey(animation);
-  const copy = duplicateLayer(animation, key);
+  const frame = front.frames[0];
+  const copy = duplicateLayer(frame, key);
 
-  assert.equal(layerStack(animation).find((entry) => entry.key === copy).kind, 'art');
-  assert.equal(layerBelow(animation, copy), null, 'nothing merges down onto the Body');
-  assert.ok(removeLayer(animation, key));
+  assert.equal(frame.layers.find((layer) => layer.key === copy).kind, 'art');
+  assert.equal(layerBelow(frame, copy), null, 'nothing merges down onto the Body');
+  assert.ok(removeLayer(animation, frame, key));
+
+  for (const other of framesOf(animation)) {
+    removeLayer(animation, other, key);
+  }
+
   assert.equal(rigOf(animation, 'south'), null);
   assert.equal(animation.directions.south.rig, undefined);
+});
+
+test('a frame whose Body was deleted keeps the cut and gets its Body back to pose', () => {
+  const { project, animation, front } = cutCharacter();
+  const frame = front.frames[0];
+  const key = bodyKey(animation);
+
+  removeLayer(animation, frame, key);
+
+  assert.equal(bodyOf(frame), null);
+  assert.equal(rigOf(animation, 'south'), front.rig, 'the other frames still use the cut');
+  assert.ok(bodyOf(front.frames[1]), 'and still have their Body');
+
+  const restored = restoreBody(project, animation, frame);
+
+  assert.equal(restored.key, key);
+  assert.equal(bodyOf(frame), restored);
 });
 
 test('merging the Body down leaves plain pixels and no cut', () => {
   const { animation, front, source } = cutCharacter();
 
-  mergeDown(animation, bodyKey(animation));
+  for (const frame of framesOf(animation)) {
+    mergeDown(animation, frame, bodyKey(animation));
+  }
 
   assert.ok(samePixels(front.frames[0].layers[0].sprite, source));
   assert.equal(animation.directions.south.rig, undefined);

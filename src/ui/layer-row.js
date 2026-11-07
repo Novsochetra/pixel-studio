@@ -1,15 +1,15 @@
 import { node, icon } from './dom.js';
-import { currentAnimation, restructure } from './actions.js';
+import { restructure } from './actions.js';
 import { pickLayerToMove } from './layer-move.js';
 import { renameInPlace } from './rename-field.js';
 import { setLayerShown, updateLayer } from '../model/structure.js';
-import { frameAt, matchingLayer } from '../model/project.js';
+import { frameAt } from '../model/project.js';
 import { drawThumbnail } from './thumbnail.js';
 import { isBody } from '../model/body/body-kind.js';
 
 function changeLayer(app, entry, label, patch) {
   restructure(app, label, (draft) => {
-    updateLayer(currentAnimation(draft), entry.key, patch);
+    updateLayer(frameAt(draft.project, draft.at), entry.key, patch);
   });
 }
 
@@ -36,11 +36,10 @@ function eyeButton(app, entry, shown) {
 }
 
 // what is on the layer in the frame being edited, small, so a layer is known by its art
-function thumbnail(state, entry) {
+function thumbnail(layer) {
   const canvas = node('canvas.layer-thumb', { 'aria-hidden': 'true' });
-  const layer = matchingLayer(frameAt(state.project, state.at), entry);
 
-  if (layer?.sprite) {
+  if (layer.sprite) {
     drawThumbnail(canvas, layer.sprite, 28);
   }
 
@@ -57,15 +56,43 @@ export function startRename(app, entry, label) {
   });
 }
 
+export function renameRow(app, entry) {
+  const label = document.querySelector(`.layer-row[data-key="${entry.key}"] .layer-name`);
+
+  if (label) {
+    startRename(app, entry, label);
+  }
+}
+
+const DOUBLE_CLICK_MS = 400;
+let lastNameClick = { key: null, time: 0 };
+
+// A click redraws the list, so the row is gone before the browser could see a double-click on it.
+function secondClickOnName(entry, event) {
+  if (!event.target.closest('.layer-name')) {
+    return false;
+  }
+
+  const second =
+    lastNameClick.key === entry.key && event.timeStamp - lastNameClick.time < DOUBLE_CLICK_MS;
+
+  lastNameClick = second ? { key: null, time: 0 } : { key: entry.key, time: event.timeStamp };
+
+  return second;
+}
+
 export function layerRow(app, entry, active) {
-  const { state } = app.store;
-  const shown = matchingLayer(frameAt(state.project, state.at), entry)?.visible ?? true;
-  const select = () => pickLayerToMove(app, entry.key);
-  const label = node(
-    'span.layer-name',
-    { title: 'Double-click to rename', ondblclick: () => startRename(app, entry, label) },
-    entry.name,
-  );
+  const shown = entry.visible;
+  const select = (event) => {
+    const rename = secondClickOnName(entry, event);
+
+    pickLayerToMove(app, entry.key);
+
+    if (rename) {
+      renameRow(app, entry);
+    }
+  };
+  const label = node('span.layer-name', { title: 'Double-click to rename' }, entry.name);
 
   return node(
     'div.layer-row',
@@ -80,7 +107,7 @@ export function layerRow(app, entry, active) {
       onkeydown: (event) => event.key === 'F2' && startRename(app, entry, label),
     },
     eyeButton(app, entry, shown),
-    thumbnail(app.store.state, entry),
+    thumbnail(entry),
     label,
     entry.kind === 'reference' ? node('span.badge', { title: 'Never downloaded' }, 'Trace') : null,
     isBody(entry)

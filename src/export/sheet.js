@@ -1,6 +1,6 @@
 import { createSprite, getPixel, setPixel, CLEAR } from '../model/sprite.js';
 import { compositeFrame } from '../model/composite.js';
-import { hasArt } from '../model/frames.js';
+import { hasArt, heldFrame } from '../model/frames.js';
 import { drawnDirections, flippedSides } from '../model/directions.js';
 
 // the drawn views in compass order, then the flipped ones when they are wanted
@@ -92,7 +92,7 @@ function placeRow(sheet, row, place) {
   let clipped = 0;
 
   for (let frameIndex = 0; frameIndex < frames; frameIndex++) {
-    const frame = viewFrames[Math.min(frameIndex, viewFrames.length - 1)];
+    const frame = heldFrame(viewFrames, frameIndex);
     const art = compositeFrame(frame, project.canvas.width, project.canvas.height);
     const cell = { x: frameIndex * frameWidth, y: rowIndex * frameHeight, flip: row.flip };
 

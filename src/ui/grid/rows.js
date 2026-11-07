@@ -1,12 +1,13 @@
 import { icon, node } from '../dom.js';
 import { currentAnimation, selectDirection } from '../actions.js';
 import { bindFrameDrag } from '../frame-drag.js';
-import { moveFrameTo, newFrameAfter } from '../frame-actions.js';
+import { moveFrameTo, newFrameAtEnd } from '../frame-actions.js';
 import { cell } from './cells.js';
 import { mirrorRows, rowArt } from './row-art.js';
 import { openAddViewMenu, openViewMenu } from './view-menu.js';
 import { drawnDirections, missingDirections } from '../../model/directions.js';
 import { referenceOf } from '../../model/reference.js';
+import { frameCount } from '../../model/frames.js';
 import { isFrameHidden } from '../../model/frame-play.js';
 import { isSingleView, viewName } from '../../model/kinds.js';
 
@@ -36,7 +37,7 @@ function label(app, direction) {
 }
 
 // a row of a grid holds cells only, so the button sits in a cell of its own
-function addFrameTile(app, last) {
+function addFrameTile(app, direction, short) {
   return node(
     'div.cell-slot',
     { role: 'gridcell' },
@@ -44,8 +45,8 @@ function addFrameTile(app, last) {
       'button.cell-add',
       {
         'aria-label': 'New frame at the end',
-        title: 'New frame at the end, in every view',
-        onclick: () => newFrameAfter(app, last),
+        title: short ? 'New frame at the end of this view' : 'New frame at the end, in every view',
+        onclick: () => newFrameAtEnd(app, direction),
       },
       icon('plus'),
     ),
@@ -73,7 +74,7 @@ function viewRow(app, direction, playFrame) {
         hidden: isFrameHidden(animation, index),
       }),
     ),
-    current ? addFrameTile(app, frames.length - 1) : null,
+    current ? addFrameTile(app, direction, frames.length < frameCount(animation)) : null,
   );
 
   bindFrameDrag(cells, '.cell', (from, to) => moveFrameTo(app, from, to));
@@ -86,9 +87,12 @@ function viewRow(app, direction, playFrame) {
   );
 }
 
-function numbersRow(state, playFrame) {
+// one number for each column on show: with every view, a short view leaves its columns numbered
+function numbersRow(state, { all, playFrame }) {
   const animation = currentAnimation(state);
-  const count = animation.directions[state.at.direction].frames.length;
+  const count = all
+    ? frameCount(animation)
+    : animation.directions[state.at.direction].frames.length;
   const numbers = Array.from({ length: count }, (_, index) => {
     const marks = [
       index === state.at.frame && '.on',
@@ -125,7 +129,7 @@ export function gridBody(app, { all, playFrame }) {
     node(
       'div.grid-table',
       { role: 'grid', 'aria-label': gridName },
-      numbersRow(state, playFrame),
+      numbersRow(state, { all, playFrame }),
       rows.map((direction) => viewRow(app, direction, playFrame)),
       all ? mirrorRows(state) : null,
     ),
