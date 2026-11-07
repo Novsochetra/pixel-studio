@@ -8,7 +8,7 @@ export function refusesPaint(layers) {
   }
 
   toast(
-    'Body is drawn from its parts: pose them with the Pose tool (O), paint on a layer above, or turn this frame into pixels.',
+    'Body is drawn from its parts: pick a part with the Pose tool (O) to draw on it, paint on a layer above, or turn this frame into pixels.',
   );
 
   return true;

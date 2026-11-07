@@ -3,6 +3,7 @@ import { partPose, pieceById } from '../../model/body/rig.js';
 import { tidyAngle } from '../../model/body/handle.js';
 import { viewName } from '../../model/kinds.js';
 import { openCutSheet } from './cut-sheet.js';
+import { drawsOnPart } from './part-draw.js';
 import { poseHere, poseTarget, resetPose, setPart, turnIntoPixels } from './pose-actions.js';
 
 const STEP = 15;
@@ -13,8 +14,11 @@ const button = (label, onclick, title = label) =>
 const cutButton = (app, label) =>
   node('button.btn.quiet', { onclick: () => openCutSheet(app) }, icon('cut'), label);
 
+// a part picked is on the Body, so the Pencil draws on it whichever layer was being edited
+const onBody = (app) => ({ ...app.store.state.at, layer: poseTarget(app.store.state).body.key });
+
 function partPicker(app, rig, picked) {
-  const pick = (event) => app.store.set({ piece: event.target.value || null });
+  const pick = (event) => app.store.set({ piece: event.target.value || null, at: onBody(app) });
 
   return node(
     'select.input',
@@ -54,6 +58,27 @@ function angleControls(app, piece, pose) {
       '⟳',
     ),
     button('Reset part', () => setPart(app, piece, null), `${piece.name} back as it was cut`),
+    button(
+      'Draw on part',
+      () => app.store.set({ tool: 'pencil', at: onBody(app) }),
+      `Draw what is missing on ${piece.name}: it stays on the part, in every frame`,
+    ),
+  ];
+}
+
+function drawingBar(app, target) {
+  const picked = pieceById(target.rig, app.store.state.piece);
+
+  return [
+    node('span', {}, 'Drawing on'),
+    partPicker(app, target.rig, picked),
+    node(
+      'span.hint',
+      {},
+      picked ? 'It stays on this part, in every frame.' : 'Pick the part to draw on.',
+    ),
+    node('span.pose-gap'),
+    button('Back to posing', () => app.store.set({ tool: 'pose' })),
   ];
 }
 
@@ -87,11 +112,28 @@ function uncutBar(app, state) {
   ];
 }
 
+const showsBar = (state) =>
+  state.mode === 'edit' && !state.selection && (state.tool === 'pose' || drawsOnPart(state));
+
+function barFor(app, state) {
+  const target = poseTarget(state);
+
+  if (state.tool !== 'pose') {
+    return drawingBar(app, target);
+  }
+
+  if (!target.rig) {
+    return uncutBar(app, state);
+  }
+
+  return target.body?.pose ? posedBar(app, target) : plainBar(app, state);
+}
+
 // Above the canvas while the Pose tool is on: what posing can do in this frame.
 export function renderPoseBar(el, app) {
   const { state } = app.store;
 
-  el.hidden = state.mode !== 'edit' || state.tool !== 'pose' || Boolean(state.selection);
+  el.hidden = !showsBar(state);
 
   if (el.hidden) {
     replace(el);
@@ -99,14 +141,9 @@ export function renderPoseBar(el, app) {
     return;
   }
 
-  const target = poseTarget(state);
   const focused = el.contains(document.activeElement) ? document.activeElement.id : '';
 
-  if (!target.rig) {
-    replace(el, uncutBar(app, state));
-  } else {
-    replace(el, target.body?.pose ? posedBar(app, target) : plainBar(app, state));
-  }
+  replace(el, barFor(app, state));
 
   // the part picker or angle being used keeps the keyboard when the bar is drawn again
   if (focused) {

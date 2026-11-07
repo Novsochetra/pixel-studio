@@ -1,20 +1,14 @@
 import { cssVar } from '../draw.js';
 import { drawSelection } from '../stage-marks.js';
-import { createSprite } from '../../model/sprite.js';
-import { decodeArt } from '../../model/body/piece-art.js';
-import { drawPiece } from '../../model/body/place.js';
 import { handleOf } from '../../model/body/handle.js';
-import { pieceById, pieceMatrices, pivotInPose } from '../../model/body/rig.js';
+import { pieceById, pivotInPose, renderPiece } from '../../model/body/rig.js';
 import { handleGap } from './pose-tool.js';
 import { poseTarget } from './pose-actions.js';
 
 // the picked part's pixels, as a selection's cells, for its outline
 function partCells(target, piece) {
   const { width, height } = target.canvas;
-  const alone = createSprite(width, height);
-  const matrix = pieceMatrices(target.rig, target.body.pose).get(piece.id);
-
-  drawPiece(alone, decodeArt(piece.art), matrix);
+  const alone = renderPiece(target.rig, target.body.pose, piece, target.canvas);
   const cells = new Uint8Array(width * height).map((_, i) => alone.pixels[i * 4 + 3]);
 
   return { width, height, cells };
@@ -40,6 +34,16 @@ function drawHandle(context, target, piece, scale) {
   context.stroke();
   context.strokeStyle = cssVar('--ink');
   dot(context, to, { radius: 7, fill: cssVar('--tint') });
+}
+
+// the pivots and the handle would cover the pixels being drawn
+export function drawPartOutline(context, state, scale) {
+  const target = poseTarget(state);
+  const picked = pieceById(target.rig, state.piece);
+
+  if (picked) {
+    drawSelection(context, partCells(target, picked), scale);
+  }
 }
 
 // While posing: every part's pivot, the picked part outlined, and its handle to turn it.

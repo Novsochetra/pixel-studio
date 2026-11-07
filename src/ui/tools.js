@@ -8,7 +8,8 @@ import { lasso, select, wand } from './tools-select.js';
 import { moveFrameDrag } from './frame-move.js';
 import { moveLayerDrag } from './layer-move.js';
 import { kindOf } from '../model/kinds.js';
-import { refusesPaint } from './body/body-lock.js';
+import { isPosedBody } from '../model/body/body-kind.js';
+import { startOnPart } from './body/part-draw.js';
 import { poseTool } from './body/pose-tool.js';
 
 const TOOLS = [
@@ -109,8 +110,8 @@ export function startTool(app, point, event) {
     return hiddenLayer(app);
   }
 
-  if (PAINTING.has(tool) && refusesPaint([currentLayer(app.store.state)])) {
-    return null;
+  if (PAINTING.has(tool) && isPosedBody(currentLayer(app.store.state))) {
+    return startOnPart(app, point);
   }
 
   return ON_PRESS[tool](app, point, event);

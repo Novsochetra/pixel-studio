@@ -116,14 +116,53 @@ await page.waitForTimeout(150);
 check(Number(await page.inputValue('#pose-angle')) === angle + 5, '] turns it 5° more');
 await page.screenshot({ path: `${shots}/body-posed.png` });
 
+const turnedPart = await page.inputValue('#pose-part');
+await page.keyboard.press('Escape');
 await page.keyboard.press('b');
 await page.mouse.click(...(await over([80, 40])));
 await page.waitForTimeout(150);
 check(
-  (await page.locator('.toast').textContent()).includes('drawn from its parts'),
-  'the pencil does not paint on a posed Body, and says why',
+  (await page.locator('.toast').textContent()).includes('pick a part'),
+  'with no part picked the pencil does not paint on a posed Body, and says why',
 );
 await page.keyboard.press('o');
+await page.waitForTimeout(150);
+await page.selectOption('#pose-part', turnedPart);
+await page.waitForTimeout(150);
+await poseBar.getByRole('button', { name: 'Draw on part' }).click();
+await page.waitForTimeout(150);
+check((await poseBar.textContent()).includes('Drawing on'), 'Draw on part takes up the pencil');
+check((await page.inputValue('#pose-part')) === turnedPart, 'for the part picked');
+const undrawn = await picture();
+await drag([50, 95], [30, 0]);
+const drawn = await picture();
+check(drawn !== undrawn, 'the pencil draws on the turned part');
+await page.screenshot({ path: `${shots}/body-draw-on-part.png` });
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(150);
+check((await picture()) === undrawn, 'undo takes the drawing off the part');
+await page.keyboard.press('Meta+Shift+z');
+await page.waitForTimeout(150);
+check((await picture()) === drawn, 'and redo puts it back');
+await poseBar.getByRole('button', { name: 'Back to posing' }).click();
+await page.waitForTimeout(150);
+await poseBar.getByRole('button', { name: 'Reset part' }).click();
+await page.waitForTimeout(150);
+const drawingAtRest = await picture();
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(150);
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(150);
+await poseBar.getByRole('button', { name: 'Reset part' }).click();
+await page.waitForTimeout(150);
+check((await picture()) !== drawingAtRest, 'the drawing goes with the part as it turns back');
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(150);
+await poseBar.getByRole('button', { name: 'Draw on part' }).click();
+await page.waitForTimeout(150);
+await drag([50, 95], [30, 0]);
+await poseBar.getByRole('button', { name: 'Back to posing' }).click();
+await page.waitForTimeout(150);
 await poseBar.getByRole('button', { name: 'Turn into pixels' }).click();
 await page.waitForTimeout(150);
 check((await poseBar.textContent()).includes('plain pixels'), 'a frame can become plain pixels');
@@ -140,13 +179,19 @@ check(
   'a new frame is posed from the frame before',
 );
 
+await page.keyboard.press('Escape');
+await page.getByRole('button', { name: 'Fit' }).click();
+await page.waitForTimeout(200);
+const beforeVisit = await picture();
 await page.waitForSelector('[data-state="saved"]');
 await page.reload();
 await page.waitForSelector('.grid-panel');
 await page.waitForTimeout(500);
 await page.keyboard.press('o');
-await page.waitForTimeout(150);
+await page.getByRole('button', { name: 'Fit' }).click();
+await page.waitForTimeout(200);
 check((await page.locator('#pose-part').count()) === 1, 'the pose is kept for the next visit');
+check((await picture()) === beforeVisit, 'and so is what was drawn on the part');
 
 await poseBar.getByRole('button', { name: 'Edit the cut…' }).click();
 await page.waitForTimeout(300);

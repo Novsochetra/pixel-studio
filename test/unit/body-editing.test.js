@@ -20,15 +20,17 @@ globalThis.document = {
 
 const { History } = await import('../../src/editor/history.js');
 const { allLayers } = await import('../../src/model/project.js');
-const { cloneSprite, getPixel, pack, samePixels, setPixel } =
+const { bounds, cloneSprite, getPixel, pack, samePixels, setPixel } =
   await import('../../src/model/sprite.js');
 const { bodyOf, isPosedBody } = await import('../../src/model/body/body-kind.js');
 const { bodyKey, rigOf } = await import('../../src/model/body/body.js');
+const { renderPiece } = await import('../../src/model/body/rig.js');
 const { commit, replaceDirectionArt } = await import('../../src/ui/actions.js');
 const { startFromPrevious } = await import('../../src/ui/frame-actions.js');
 const { recolourLayers } = await import('../../src/ui/body/recolour.js');
 const { setPart } = await import('../../src/ui/body/pose-actions.js');
 const { handlePoseKey } = await import('../../src/ui/body/pose-keys.js');
+const { startOnPart } = await import('../../src/ui/body/part-draw.js');
 const { cutCharacter } = await import('./body-helpers.js');
 
 const GREEN = pack(0, 255, 0);
@@ -66,6 +68,63 @@ test('painting on a Body drawn from its parts is refused, and says how to pose i
   assert.equal(done, null);
   assert.ok(samePixels(body().sprite, before));
   assert.match(toasts[0], /Body is drawn from its parts/);
+});
+
+test('with no part picked the Pencil says how to draw on a posed Body, and draws nothing', () => {
+  const { app, state, body } = editing();
+
+  state.tool = 'pencil';
+  state.at.layer = body().key;
+  toasts.length = 0;
+
+  assert.equal(startOnPart(app, [5, 5]), null);
+  assert.match(toasts[0], /pick a part/);
+  assert.equal(hasColour(body().sprite, GREEN), false);
+});
+
+test('a line drawn on a part stays on it in every frame posed, and undo takes it back', () => {
+  const { app, state, body, rig, front } = editing();
+  const piece = rig.pieces.at(-1);
+
+  Object.assign(state, { tool: 'pencil', piece: piece.id, color: GREEN, brush: { size: 1 } });
+  state.symmetry = { on: false };
+  state.paintOver = null;
+
+  const drag = startOnPart(app, [5, 5]);
+
+  assert.equal(hasColour(body().sprite, GREEN), true, 'it shows while it is being drawn');
+  drag.move([9, 5]);
+  drag.end();
+
+  assert.notEqual(front.rig, rig, 'the cut changed');
+  assert.equal(getPixel(body(0).sprite, 7, 5), GREEN);
+  assert.equal(getPixel(body(1).sprite, 7, 5), GREEN, 'the other frame posed has it too');
+
+  app.history.undo(state.project);
+
+  assert.equal(front.rig, rig, 'undo puts the cut back');
+  assert.equal(hasColour(body(0).sprite, GREEN), false);
+  assert.equal(hasColour(body(1).sprite, GREEN), false);
+});
+
+test('an eraser takes pixels off the part picked, not off the parts over it', () => {
+  const { app, state, body, rig } = editing();
+  const piece = rig.pieces[0];
+  const overhead = rig.pieces.at(-1);
+  const alone = renderPiece(rig, body().pose, overhead, state.project.canvas);
+  const box = bounds(alone);
+  const point = [box.left + 2, box.top + 2];
+  const shown = getPixel(body().sprite, ...point);
+
+  Object.assign(state, { tool: 'eraser', piece: piece.id, brush: { size: 1 } });
+  state.symmetry = { on: false };
+  state.paintOver = null;
+
+  const drag = startOnPart(app, point);
+
+  drag.end();
+
+  assert.equal(getPixel(body().sprite, ...point), shown);
 });
 
 test('Start from frame N brings the Body with its pose, and undo takes both back', () => {

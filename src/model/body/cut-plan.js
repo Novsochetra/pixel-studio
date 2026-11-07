@@ -23,7 +23,9 @@ export function planFromRig(rig, canvas) {
 
     for (let row = 0; row < sprite.height; row++) {
       for (let column = 0; column < sprite.width; column++) {
-        if (getPixel(sprite, column, row) !== CLEAR) {
+        const inside = x + column >= 0 && x + column < canvas.width;
+
+        if (inside && getPixel(sprite, column, row) !== CLEAR) {
           owners[(y + row) * canvas.width + x + column] = index;
         }
       }

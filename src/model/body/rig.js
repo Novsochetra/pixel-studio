@@ -58,6 +58,14 @@ export function renderBody(rig, pose, { width, height }) {
   return out;
 }
 
+export function renderPiece(rig, pose, piece, { width, height }) {
+  const out = createSprite(width, height);
+
+  drawPiece(out, decodeArt(piece.art), pieceMatrices(rig, pose).get(piece.id));
+
+  return out;
+}
+
 // the part drawn at canvas pixel (x, y), the top one where parts overlap, or null
 export function pieceAt(rig, pose, [x, y]) {
   const matrices = pieceMatrices(rig, pose);

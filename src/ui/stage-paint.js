@@ -12,7 +12,8 @@ import { drawBrush, drawHighlight, drawLoop, drawSelection } from './stage-marks
 import { BRUSH_TOOLS } from './tools-paint.js';
 import { brushPixels } from '../editor/paint.js';
 import { paintAllViews, playsAllViews } from './play-all-views.js';
-import { drawPoseMarks } from './body/pose-marks.js';
+import { drawsOnPart } from './body/part-draw.js';
+import { drawPartOutline, drawPoseMarks } from './body/pose-marks.js';
 import { frameAt } from '../model/project.js';
 import { compositeFrame } from '../model/composite.js';
 import { applyMapping } from '../palette/palette.js';
@@ -79,6 +80,7 @@ function shownState(app) {
     highlight: null,
     showPins: false,
     cursor: null,
+    piece: null,
     tool: state.tool === 'pose' ? null : state.tool,
   };
 }
@@ -150,6 +152,8 @@ function paintMarks(context, state, scale) {
 
   if (state.tool === 'pose') {
     drawPoseMarks(context, state, scale);
+  } else if (drawsOnPart(state)) {
+    drawPartOutline(context, state, scale);
   }
 }
 
