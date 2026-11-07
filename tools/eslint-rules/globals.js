@@ -32,6 +32,7 @@ export const browser = [
   'FileReader',
   'Worker',
   'self',
+  'caches',
   'createImageBitmap',
   'OffscreenCanvas',
   'getComputedStyle',

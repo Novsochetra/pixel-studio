@@ -13,6 +13,7 @@ import { deletePreset, readPresets } from '../store/presets.js';
 import { prefixFor } from '../store/keys.js';
 import { readProjectBundle } from '../store/project-file.js';
 import { allLayers, newId } from '../model/project.js';
+import { setUpApp } from './install-app.js';
 
 // the editor, opened on one project; `save` as install() takes it
 async function startEditor(backend, index, { project, prefix, save, background = null }) {
@@ -106,4 +107,5 @@ async function boot() {
   }
 }
 
+setUpApp();
 boot();

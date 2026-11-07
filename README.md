@@ -39,6 +39,18 @@ npm run serve
 
 Then open http://localhost:8811/wrapped.html. Outside claude.ai the page saves to the browser.
 
+## Install it as an app
+
+It is published at https://novsochetra.github.io/pixel-studio/ by
+`.github/workflows/pages.yml` on each push to `main`; run `npm run check` before pushing, as the
+workflow only builds. To host it elsewhere, serve all of `dist/` on any HTTPS address.
+
+The browser then offers to install the studio (Chrome and Edge also show an **Install** button in
+the toolbar; on an iPhone use Share, then Add to Home Screen). It opens in its own window and works with no network; a new build arrives by itself the
+next time it opens online. Saved work stays in the browser, as before. The icons are in
+`assets/icons/`, the manifest is `src/ui/manifest.webmanifest`, the worker
+`src/worker/service-worker.js`. On claude.ai the page stays a plain page.
+
 ## Check it
 
 ```bash

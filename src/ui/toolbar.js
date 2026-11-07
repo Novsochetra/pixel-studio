@@ -2,6 +2,7 @@ import { node, icon, replace } from './dom.js';
 import { openDownloadMenu } from './downloads.js';
 import { openVersionsSheet } from './versions-sheet.js';
 import { openShortcuts } from './shortcuts.js';
+import { canInstall, installApp } from './install-app.js';
 import { openProjectsSheet } from './projects/projects-sheet.js';
 import { saveText, undoRedo, viewFilter, zoomControls } from './toolbar-parts.js';
 import { gameOf } from '../model/presets.js';
@@ -44,8 +45,22 @@ function projectButton(app) {
   );
 }
 
+function installButton() {
+  return node(
+    'button.btn.quiet',
+    {
+      title: 'Install Pixel Clean: it opens in its own window and works with no network',
+      'aria-label': 'Install app',
+      onclick: installApp,
+    },
+    icon('plus'),
+    node('span.btn-text', {}, 'Install'),
+  );
+}
+
 function endButtons(app) {
   return [
+    canInstall() ? installButton() : null,
     node(
       'button.btn.quiet',
       { title: 'Saved versions', 'aria-label': 'History', onclick: () => openVersionsSheet(app) },

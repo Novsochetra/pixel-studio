@@ -4,10 +4,15 @@
 The artifact host allows scripts only inline or from a few CDNs, so every ES module is wrapped
 in its own function scope and joined in dependency order; imports become reads from the module
 objects. The cleaner's worker is bundled the same way and inlined as a string.
+
+Beside the page go the files that make it an installable app: its manifest, icons and service
+worker. The artifact host ignores them; any other host serves all of dist/.
 """
 import base64
+import hashlib
 import json
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -115,6 +120,22 @@ def data_url(path: Path) -> str:
     return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
 
 
+def write_app_files(out: Path, page: str):
+    manifest = SRC / "ui" / "manifest.webmanifest"
+    icons = sorted((ROOT / "assets" / "icons").glob("*.png"))
+    shutil.copy(manifest, out / manifest.name)
+    (out / "icons").mkdir(exist_ok=True)
+    for icon in icons:
+        shutil.copy(icon, out / "icons" / icon.name)
+    files = ["./", manifest.name] + [f"icons/{icon.name}" for icon in icons]
+    # a new page must change the worker's own bytes, or browsers keep the worker they have
+    version = hashlib.sha256((page + manifest.read_text()).encode()).hexdigest()[:12]
+    (out / "sw.js").write_text(
+        f"globalThis.OFFLINE_CACHE = {json.dumps(f'pixel-clean-{version}')};\n"
+        f"globalThis.OFFLINE_FILES = {json.dumps(files)};\n" + bundle(SRC / "worker" / "service-worker.js")
+    )
+
+
 def main():
     samples = json.loads((ROOT / "build" / "samples.json").read_text())
     sample = {key: data_url(ROOT / value) for key, value in samples.items()}
@@ -133,6 +154,7 @@ def main():
     out = ROOT / "dist" / "index.html"
     out.parent.mkdir(exist_ok=True)
     out.write_text(page)
+    write_app_files(out.parent, page)
     print(f"{out} {len(page) // 1024} KB")
 
 

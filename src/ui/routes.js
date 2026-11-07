@@ -1,6 +1,16 @@
 // which parts of the screen each kind of change redraws
 export const ROUTES = {
-  toolbar: ['mode', 'zoom', 'showGrid', 'saveStatus', 'storage', 'pixels', 'project', 'viewFilter'],
+  toolbar: [
+    'mode',
+    'zoom',
+    'showGrid',
+    'saveStatus',
+    'storage',
+    'pixels',
+    'project',
+    'viewFilter',
+    'installable',
+  ],
   rail: ['tool', 'symmetry', 'mode', 'project'],
   stage: [
     'swapPreview',

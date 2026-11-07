@@ -1,4 +1,5 @@
 import { renderToolbar } from './toolbar.js';
+import { onInstallChange } from './install-app.js';
 import { renderRail } from './rail.js';
 import { fitZoom, mountEditStage } from './edit-stage.js';
 import { mountBoard } from './board.js';
@@ -40,6 +41,8 @@ function followResize(app, drawStage) {
 }
 
 export function mountApp(app) {
+  onInstallChange(() => app.store.touch('installable'));
+
   const stage = document.getElementById('stage');
   const draw = {
     toolbar: () => renderToolbar(document.getElementById('toolbar'), app),
