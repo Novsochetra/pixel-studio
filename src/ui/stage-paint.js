@@ -8,6 +8,7 @@ import {
 } from './draw.js';
 import { currentFrames, directionSprite } from './actions.js';
 import { drawPins } from './pins-draw.js';
+import { drawTurnHandle } from './selection-turn.js';
 import { drawBrush, drawHighlight, drawLoop, drawSelection } from './stage-marks.js';
 import { BRUSH_TOOLS } from './tools-paint.js';
 import { brushPixels } from '../editor/paint.js';
@@ -124,6 +125,7 @@ function paintHelpers(context, state, { scale, ratio }) {
 function paintSelecting(context, state, scale) {
   if (state.selection) {
     drawSelection(context, state.selection, scale);
+    drawTurnHandle(context, state, scale);
   }
 
   if (state.highlight?.length) {

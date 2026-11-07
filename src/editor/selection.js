@@ -113,7 +113,7 @@ export function moveSelected(sprite, selection, dx, dy) {
   return stampPixels(sprite, lifted, dx, dy);
 }
 
-function selectionBox(selection) {
+export function selectionBox(selection) {
   let box = null;
 
   selection.cells.forEach((on, i) => {

@@ -13,7 +13,7 @@ const GROUPS = [
       ['R', 'Replace a colour everywhere'],
       ['D', 'Lighter shade (Shift: darker)'],
       ['[  ]', 'Brush smaller, bigger'],
-      ['S', 'Select and move'],
+      ['S', 'Select and move: a click picks the layer under it'],
       ['W', 'Select a colour (Shift: everywhere)'],
       ['L', 'Lasso: draw round a part to select it, drag inside to move it'],
       ['Shift / Alt + lasso', 'Add to the selection / take away; a click is one pixel'],

@@ -5,6 +5,8 @@ import { currentLayer, restructure } from './actions.js';
 import { toast } from './dom.js';
 import { fill, replace, shade, stroke } from './tools-paint.js';
 import { lasso, select, wand } from './tools-select.js';
+import { onTurnHandle, turnSelectionDrag } from './selection-turn.js';
+import { pickLayerToDrag } from './pick-layer.js';
 import { moveFrameDrag } from './frame-move.js';
 import { moveLayerDrag } from './layer-move.js';
 import { kindOf } from '../model/kinds.js';
@@ -19,7 +21,7 @@ const TOOLS = [
   { id: 'fill', label: 'Fill', key: 'g' },
   { id: 'replace', label: 'Replace colour', key: 'r' },
   { id: 'shade', label: 'Light and dark brush (Shift: darker)', key: 'd' },
-  { id: 'select', label: 'Select and move', key: 's' },
+  { id: 'select', label: 'Select and move: a click picks the layer under it', key: 's' },
   { id: 'wand', label: 'Select a colour (Shift: everywhere)', key: 'w' },
   {
     id: 'lasso',
@@ -66,12 +68,19 @@ export function toolsFor(project) {
 
 const PAINTING = new Set(['pencil', 'eraser', 'fill', 'replace', 'shade']);
 
+const orTurnHandle = (tool) => (app, point, event) =>
+  onTurnHandle(app, point) ? turnSelectionDrag(app, point) : tool(app, point, event);
+
 // the tools a press starts; each returns the drag that follows, or null
 const ON_PRESS = {
-  select,
-  wand: (app, point, event) => wand(app, point, event.shiftKey),
+  select: orTurnHandle(select),
+  wand: orTurnHandle((app, point, event) => wand(app, point, event.shiftKey)),
   pin,
-  movelayer: moveLayerDrag,
+  movelayer(app, point) {
+    pickLayerToDrag(app, point);
+
+    return moveLayerDrag(app, point);
+  },
   moveframe: moveFrameDrag,
   shade: (app, point, event) => shade(app, point, event.shiftKey),
   pencil: (app, point) => stroke(app, point, app.store.state.color),
@@ -79,7 +88,7 @@ const ON_PRESS = {
   fill,
   replace,
   pose: poseTool,
-  lasso,
+  lasso: orTurnHandle(lasso),
 };
 
 function hiddenLayer(app) {

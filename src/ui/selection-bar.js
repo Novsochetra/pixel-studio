@@ -2,6 +2,7 @@ import { node, replace } from './dom.js';
 import { commit, currentLayer } from './actions.js';
 import { clearSelected, liftPixels, transformSelected } from '../editor/selection.js';
 import { keyNames } from './platform-keys.js';
+import { selectionAngle, turnSelectionTo } from './selection-turn.js';
 
 const ACTIONS = [
   ['flip-x', 'Flip ↔', 'Flip the selection left to right'],
@@ -33,6 +34,22 @@ function eraseSelected(app) {
   commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection));
 }
 
+function angleField(app) {
+  return node(
+    'label.pose-angle',
+    { title: 'How far the selection is turned, in degrees: or drag the handle above it' },
+    node('input.input.mono', {
+      id: 'selection-angle',
+      type: 'number',
+      step: '1',
+      'aria-label': 'Selection angle',
+      value: String(selectionAngle(app.store.state)),
+      onchange: (event) => turnSelectionTo(app, Number(event.target.value) || 0),
+    }),
+    '°',
+  );
+}
+
 const button = (title, onclick, label) => node('button.btn.quiet', { title, onclick }, label);
 
 // Shown over the canvas while something is selected: turn, flip, copy, delete, let go.
@@ -45,8 +62,11 @@ export function renderSelectionBar(el, app) {
     return;
   }
 
+  const focused = el.contains(document.activeElement) ? document.activeElement.id : '';
+
   replace(
     el,
+    angleField(app),
     ACTIONS.map(([kind, label, title]) =>
       button(title, () => transform(app, kind, title.split(' the')[0]), label),
     ),
@@ -54,4 +74,9 @@ export function renderSelectionBar(el, app) {
     button('Erase the selected pixels (Delete)', () => eraseSelected(app), 'Delete'),
     button('Let go of the selection (Esc)', () => app.store.set({ selection: null }), 'Done'),
   );
+
+  // typing an angle keeps the keyboard when the bar is drawn again
+  if (focused) {
+    el.querySelector(`#${focused}`)?.focus();
+  }
 }

@@ -10,6 +10,7 @@ import {
 import { currentLayer } from './actions.js';
 import { combineSelections, lassoPiece, lassoSelection } from '../editor/lasso-select.js';
 import { refusesPaint } from './body/body-lock.js';
+import { pickLayerAt } from './pick-layer.js';
 
 // drag the selected pixels: each move redraws them from where the drag began
 export function moveSelection(app, start) {
@@ -60,12 +61,14 @@ export function select(app, start) {
     end() {
       if (!moved) {
         app.store.set({ selection: null });
+        pickLayerAt(app, start);
       }
     },
   };
 }
 
 export function wand(app, [x, y], everywhere) {
+  pickLayerAt(app, [x, y]);
   app.store.set({
     selection: colourSelection(currentLayer(app.store.state).sprite, x, y, everywhere),
   });
@@ -113,6 +116,10 @@ export function lasso(app, start, event) {
         lassoLoop: null,
         selection: combineSelections(app.store.state.selection, piece, mode),
       });
+
+      if (mode === 'new' && loop.length === 1) {
+        pickLayerAt(app, start);
+      }
     },
     cancel() {
       app.store.set({ lassoLoop: null });

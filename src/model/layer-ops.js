@@ -5,6 +5,19 @@ import { BODY_KIND, isBody, withoutPose } from './body/body-kind.js';
 
 const indexIn = (frame, key) => frame.layers.findIndex((layer) => layer.key === key);
 
+// a picture to trace is not art, and a hidden layer cannot be what was clicked
+export function topLayerAt(frame, [x, y]) {
+  return (
+    frame.layers.findLast(
+      (layer) =>
+        layer.visible &&
+        layer.kind !== 'reference' &&
+        layer.sprite &&
+        getPixel(layer.sprite, x, y) !== CLEAR,
+    ) ?? null
+  );
+}
+
 // a copy of the layer just above it, in every frame, to change without losing the original
 export function duplicateLayer(animation, key) {
   const copyKey = newId('k');

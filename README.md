@@ -9,14 +9,15 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
   kind stands: a character matched to its reference view, a tile filling its canvas, an effect
   centred. Later animation frames keep their own pixel size.
 - **Edit**: pencil and eraser from 1 to 8 px, round or square; fill, colour swap, selection (a box, a lasso, or a colour),
-  outlines, guides, layers, pictures to trace.
+  turned to any angle by its handle; a click on the art picks its layer; outlines, guides, layers,
+  pictures to trace.
 - **Animate**: each animation is a grid, views down and frames across, as the sheet will be: drag
   frames to reorder them, play them on the canvas (every view side by side with All views), hide a
   frame from play without deleting it, see the mirrored side, fold the frames away for room.
 - **Body parts**: cut a character's view into parts (head, torso, arms, legs, feet; a first guess
   to correct with a brush or a freehand lasso), then pose them in each frame: drag a part to move it, its handle to
-  turn it (RotSprite keeps turned pixel art clean), the parts that follow it coming along. Frames
-  stay plain pixels for every download; turn one into pixels to touch it up by hand.
+  turn it (RotSprite keeps turned pixel art clean), the parts that follow it coming along. Draw what
+  a turn left missing on the part, and it stays there in every frame. Frames stay plain pixels for every download; turn one into pixels to touch it up by hand.
 - **Preview**: characters in a scene (the pitch for Naga Eleven), tiles laid as a floor, effects and
   icons at 1×, 2× and 4×.
 - **Cast**: Projects (the name, top left) shows every project as a card with its picture, its
