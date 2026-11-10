@@ -132,6 +132,12 @@
   justify-content: center;
 }
 
+/* what stands beside a segmented control in these bars is a button, and looks like one */
+:is(.board-row, .preview-bar) .btn.quiet {
+  background: var(--glass);
+  box-shadow: var(--shadow-glass);
+}
+
 .board-row .segmented {
   flex-wrap: wrap;
   justify-content: center;

@@ -2,11 +2,19 @@
    these sizes win over each part's own. */
 @media (pointer: coarse) {
   .btn {
-    min-height: 40px;
+    --btn-height: 40px;
   }
 
   .btn.icon-only {
     width: 40px;
+  }
+
+  .toolbar .btn {
+    --btn-height: 40px;
+  }
+
+  .toolbar .btn:has(> svg:only-child) {
+    min-width: 40px;
   }
 
   .segmented button {
@@ -14,7 +22,7 @@
   }
 
   .layer-row .btn {
-    min-height: 36px;
+    --btn-height: 36px;
     min-width: 36px;
   }
 
@@ -71,7 +79,7 @@
   }
 
   .btn.chip {
-    min-height: 36px;
+    --btn-height: 36px;
     padding-inline: 12px;
   }
 
@@ -88,6 +96,10 @@
   .map-row .swatch {
     width: 32px;
     height: 32px;
+  }
+
+  .cut-part {
+    grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1.2fr) 44px repeat(3, 36px);
   }
 
   .cut-part .btn {

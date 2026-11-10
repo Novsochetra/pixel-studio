@@ -12,7 +12,7 @@ const DIALOGS = [
   ['Colours', 'Team kits…', null],
   [null, 'History', null],
   [null, 'Keyboard shortcuts', null],
-  [null, 'More', /Saved versions/],
+  [null, 'More', /saved versions/],
   [null, 'Download', /Sprite sheet/],
   [null, 'Download', /Prompt and reference/],
   ['Frames', 'New animation', null],

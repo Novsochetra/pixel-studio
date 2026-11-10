@@ -82,7 +82,7 @@
 }
 
 .toolbar .btn {
-  min-height: 32px;
+  --btn-height: 32px;
 }
 
 .toolbar .btn.quiet:not(.on) {

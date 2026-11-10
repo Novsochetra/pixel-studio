@@ -121,7 +121,7 @@ export function mountPreview(container, app) {
       requestAnimationFrame(loop);
     };
     const play = node(
-      'button.btn',
+      'button.btn.primary',
       { onclick: togglePlay },
       clock.started === null ? 'Play' : 'Pause',
     );

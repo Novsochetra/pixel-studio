@@ -1,13 +1,17 @@
-/* The arcade's buttons: a pill of glass that gives under the press. */
+/* The arcade's buttons: a pill of glass that gives under the press. Its corners are half its
+   height on one line (--btn-height), so a label that wraps makes a round-cornered box, not a
+   lozenge. */
 .btn {
+  --btn-height: 30px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 30px;
+  min-height: var(--btn-height);
   padding: 0 12px;
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: calc(var(--btn-height) / 2);
   background: var(--glass);
   box-shadow: var(--shadow-glass);
   font-weight: 500;
@@ -155,7 +159,7 @@
 
 /* a quick pick: a size or a name, outlined so it reads as a button, marked when it is the one */
 .btn.chip {
-  min-height: 28px;
+  --btn-height: 28px;
   padding: 0 12px;
   border: 1px solid var(--separator);
   background: transparent;

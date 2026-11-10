@@ -23,15 +23,32 @@ function startingView(index) {
   return { place: knownPlace(index, place), sort: readSetting(SORT_KEY, 'recent'), query: '' };
 }
 
+// On a phone the folders are one row that scrolls: the open one may be past its edge. Only the
+// list is scrolled: scrollIntoView moved the window it is in too, and cut off the window's top.
+function keepInSight(place) {
+  const list = place?.closest('.folder-list');
+
+  if (!list) {
+    return;
+  }
+
+  const [item, frame] = [place.getBoundingClientRect(), list.getBoundingClientRect()];
+
+  if (item.left < frame.left || item.right > frame.right) {
+    list.scrollLeft += item.left - frame.left - (frame.width - item.width) / 2;
+  }
+
+  if (item.top < frame.top || item.bottom > frame.bottom) {
+    list.scrollTop += item.top - frame.top - (frame.height - item.height) / 2;
+  }
+}
+
 function drawing(job, { current, browser, body }) {
   const show = () => {
     job.view.place = knownPlace(job.app.index, job.view.place);
     lastPlace = job.view.place;
     replace(browser, folderList(job), projectGrid(job));
-    // on a phone the folders are one row that scrolls: the open one may be past its edge
-    browser
-      .querySelector('.folder-name-field, .place[aria-current="true"]')
-      ?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    keepInSight(browser.querySelector('.folder-name-field, .place[aria-current="true"]'));
 
     const where = body.querySelector('.start-where');
 

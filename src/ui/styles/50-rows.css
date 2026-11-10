@@ -89,7 +89,7 @@
 }
 
 .layer-row .btn {
-  min-height: 26px;
+  --btn-height: 26px;
   min-width: 26px;
   padding: 0 6px;
 }
@@ -241,7 +241,7 @@
 
 .layer-tools .btn.icon-only {
   width: 28px;
-  min-height: 28px;
+  --btn-height: 28px;
 }
 
 .layer-tools.end {

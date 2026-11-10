@@ -63,7 +63,8 @@ h4.start-heading {
   padding: 14px;
   border: 2px solid transparent;
   border-radius: var(--radius-lg);
-  background: var(--chrome);
+  /* a fill, not the chrome: in a window the chrome is the window's own colour */
+  background: var(--fill-quiet);
   color: var(--tint);
   cursor: pointer;
   transition:
@@ -131,15 +132,16 @@ h4.start-heading {
 }
 
 /* the ways in that make nothing new are the arcade's glass pills; Create is its Play */
-.start-more .btn.quiet {
-  min-height: 40px;
+.start-more .btn.quiet,
+.start-section > .btn.quiet {
+  --btn-height: 40px;
   padding-inline: 18px;
   background: var(--glass);
   box-shadow: var(--shadow-glass);
 }
 
 .start-chooser .sheet-actions .btn.primary {
-  min-height: 44px;
+  --btn-height: 44px;
   padding-inline: 28px;
   font-size: 15px;
 }

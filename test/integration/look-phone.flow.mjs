@@ -1,7 +1,7 @@
 // The arcade's sheet on a phone: a window rides up from the bottom edge, and is pulled down by
 // its bar to close it.
 import { openStudio } from './harness.mjs';
-import { openExample } from './studio.mjs';
+import { openExample, openWorkspace } from './studio.mjs';
 
 const { page, context, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
 await openExample(page);
@@ -66,4 +66,29 @@ check(
 await openSheet();
 await page.locator('.sheet-close').tap();
 check((await page.locator('.sheet').count()) === 0, 'its × still closes it with a tap');
+
+// the bar keeps one row and the workspace's name whole, down to the narrowest phone
+await openWorkspace(page, 'Views board');
+const picked = () =>
+  page.locator('.workspace-pick span').evaluate((name) => ({
+    text: name.textContent,
+    whole: name.scrollWidth <= name.clientWidth,
+  }));
+check(
+  (await picked()).text === 'Board' && (await picked()).whole,
+  'the workspace is named in one word, whole',
+);
+await page.setViewportSize({ width: 320, height: 640 });
+await page.waitForTimeout(300);
+check(
+  await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+  'on a 320 px phone the bar still fits the screen',
+);
+check((await picked()).whole, 'and the workspace keeps its name whole');
+
+// a message is as wide as its words, not half the screen
+await openWorkspace(page, 'Edit');
+await page.locator('#rail [aria-label^="Select and move"]').evaluate((button) => button.click());
+const said = await page.locator('.toast').boundingBox();
+check(said.width > 200 && said.height < 80, 'a message spreads across the screen');
 await finish();

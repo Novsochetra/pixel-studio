@@ -4,7 +4,8 @@
   left: 50%;
   translate: -50%;
   z-index: 2;
-  width: min(calc(100% - 24px), 720px);
+  width: max-content;
+  max-width: min(calc(100% - 24px), 860px);
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
@@ -61,6 +62,6 @@
 }
 
 :root[data-layout='compact'] .empty-frame .btn {
-  min-height: 34px;
+  --btn-height: 34px;
   padding-inline: 8px;
 }

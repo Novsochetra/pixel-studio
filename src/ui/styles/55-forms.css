@@ -6,8 +6,9 @@
 
 /* the way to the basic colours reads as a caption until it is pointed at */
 .swatches-toggle {
+  --btn-height: 0px;
+
   justify-self: start;
-  min-height: 0;
   padding: 0;
   background: none;
   box-shadow: none;
@@ -126,6 +127,8 @@ textarea.input {
   border: 1px solid transparent;
   border-radius: 10px;
   background: var(--fill-quiet);
+  /* its own ink: inside a label it would take the label's grey and read as a placeholder */
+  color: var(--label);
   padding: 6px 10px;
   min-width: 0;
   transition:

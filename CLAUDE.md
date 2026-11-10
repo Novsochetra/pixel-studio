@@ -128,8 +128,13 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   own. Silkscreen is kept for the studio's name only.
 - A button is `.btn`, a pill of glass that gives under the press. `.primary` is the one thing a
   view is for, in the page's ink, as the arcade's Play; `.quiet` is bare until pointed at; `.on` is
-  a switch that is on, in the tint. What floats over the art (a menu, a message, the bars over
-  the canvas) is frosted `--material`; a bar in the frame is plain `--chrome`.
+  a switch that is on, in the tint. Its height is `--btn-height` and its corners are half of that,
+  so a label that wraps makes a round-cornered box, not a lozenge: set `--btn-height`, never a
+  `min-height` or a radius. What floats over the art (a menu, a message, the bars over the
+  canvas) is frosted `--material`; a bar in the frame is plain `--chrome`.
+- What says more is behind an edge (the phone's tool strip, the folders) is a strip that stays
+  at that edge (`::after`, `position: sticky`), never a mask on the bar: a mask fades the bar
+  itself into the page.
 - What closes leaves through `leave()` (`src/ui/leave.js`) under an `-out` class
   (`.sheet-out`, `.menu-out`, `.toast-out`), so the page and the flows count it gone at once
   while it plays out: style both with `:is(.sheet, .sheet-out)`.

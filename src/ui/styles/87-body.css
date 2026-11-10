@@ -118,6 +118,8 @@
 }
 
 .cut-swatch {
+  box-sizing: border-box;
+  justify-self: center;
   width: 20px;
   height: 20px;
   padding: 0;

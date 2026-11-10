@@ -15,7 +15,8 @@ const style = (selector, property, pseudo = null) =>
 check((await style('body', 'fontFamily')).startsWith('Inter'), 'the page is set in Inter');
 const undo = await page.getByRole('button', { name: 'Undo' }).boundingBox();
 check(
-  undo.width === undo.height && parseFloat(await style('#toolbar .btn', 'borderRadius')) > 100,
+  undo.width === undo.height &&
+    parseFloat(await style('#toolbar .btn', 'borderRadius')) * 2 === undo.height,
   'a button that is only its picture is a circle of glass',
 );
 check(

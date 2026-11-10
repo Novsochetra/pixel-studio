@@ -74,7 +74,7 @@ export function openShortcuts() {
   sheet.body.append(
     node(
       'div.compare',
-      { style: { gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' } },
+      { style: { gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))' } },
       GROUPS.map(([title, rows]) =>
         node(
           'div',

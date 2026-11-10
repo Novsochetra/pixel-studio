@@ -16,6 +16,7 @@
 
 .status-link {
   border: 0;
+  border-radius: 4px;
   padding: 0;
   background: none;
   color: inherit;
@@ -83,11 +84,19 @@
   width: min(920px, 100%);
 }
 
+/* the title and the way out stay in sight while a long window scrolls under them */
 .sheet-head {
+  position: sticky;
+  top: -24px;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin: -24px -24px -4px;
+  padding: 20px 20px 12px 24px;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background: var(--sheet);
 }
 
 /* a window's own title: headings inside it keep the page's type */
@@ -97,9 +106,10 @@
 }
 
 .btn.sheet-close {
+  --btn-height: 32px;
+
   flex: none;
   width: 32px;
-  height: 32px;
   padding: 0;
   background: var(--fill-quiet);
   color: var(--label-secondary);
@@ -133,7 +143,7 @@
 
 /* what a window is for is said by a button a thumb cannot miss */
 .sheet-actions .btn {
-  min-height: 36px;
+  --btn-height: 36px;
   padding-inline: 16px;
 }
 
@@ -183,7 +193,7 @@
 }
 
 .anchor-grid .btn {
-  min-height: 36px;
+  --btn-height: 36px;
   padding: 0;
   border-radius: 10px;
 }
@@ -235,6 +245,7 @@
 .map-row .swatch {
   width: 22px;
   height: 22px;
+  border-radius: 6px;
 }
 
 .target-picker {
@@ -258,6 +269,7 @@
 .target-picker .swatch {
   width: 20px;
   height: 20px;
+  border-radius: 6px;
 }
 
 /* above the windows, as a project's ⋯ in Projects opens one from inside its window */
@@ -307,13 +319,17 @@
 }
 
 @media (hover: hover) {
-  .menu button:hover {
+  .menu button:not(:disabled):hover {
     background: var(--tint);
     color: var(--on-tint);
   }
 }
 
-.menu button:is(:active, :focus-visible) {
+.menu button:disabled {
+  cursor: default;
+}
+
+.menu button:not(:disabled):is(:active, :focus-visible) {
   outline: 0;
   background: var(--tint);
   color: var(--on-tint);
@@ -329,9 +345,12 @@
   --toast-from: 0 12px;
 
   position: fixed;
-  left: 50%;
+  /* centred by its margins: from left: 50% it could only be half the screen wide */
+  left: 16px;
+  right: 16px;
   bottom: calc(40px + env(safe-area-inset-bottom, 0px));
-  translate: -50%;
+  width: fit-content;
+  margin-inline: auto;
   background: var(--material);
   -webkit-backdrop-filter: var(--blur-glass);
   backdrop-filter: var(--blur-glass);
@@ -340,7 +359,6 @@
   padding: 9px 18px;
   font-weight: 500;
   z-index: 30;
-  max-width: calc(100% - 32px);
   box-sizing: border-box;
   animation: toast-in var(--duration-fade) var(--ease-spring);
 }

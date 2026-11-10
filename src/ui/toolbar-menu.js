@@ -19,6 +19,9 @@ export const modesFor = (project) =>
     ['game', gameOf(project).background === 'pitch' ? 'On the pitch' : 'Preview'],
   ].filter(Boolean);
 
+// a phone's bar has room for one word of the workspace's name
+const SHORT_NAMES = { 'Views board': 'Board', 'On the pitch': 'Pitch' };
+
 const workspaceEntries = (app) =>
   modesFor(app.store.state.project).map(([id, label]) => [
     label,
@@ -57,7 +60,7 @@ export function workspaceButton(app) {
       'aria-haspopup': 'menu',
       onclick: (event) => openMenu(event.currentTarget, workspaceEntries(app), { align: 'right' }),
     },
-    node('span', {}, label),
+    node('span', {}, SHORT_NAMES[label] ?? label),
     icon('chevron-down'),
   );
 }
@@ -71,7 +74,7 @@ function moreEntries(app) {
     state.mode !== 'game' ? filterEntries(app) : [],
     [
       ['Canvas size…', () => openCanvasSizeSheet(app)],
-      ['Saved versions…', () => openVersionsSheet(app)],
+      ['History: saved versions…', () => openVersionsSheet(app)],
       hasKeyboard() ? ['Keyboard shortcuts', () => openShortcuts()] : null,
       canInstall() ? ['Install app', () => installApp()] : null,
     ].filter(Boolean),

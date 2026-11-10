@@ -123,4 +123,7 @@ setUpApp();
 watchLayout();
 watchPressesFromStart();
 watchSegmented();
+// Safari on an iPhone shows a button's :active look, its give under the finger, only on a page
+// that listens for touches
+document.addEventListener('touchstart', () => {}, { passive: true });
 boot();
