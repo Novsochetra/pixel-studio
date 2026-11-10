@@ -74,7 +74,7 @@
 
 .grid-tab[aria-selected='true'] {
   color: var(--label);
-  background: var(--chrome-raised);
+  background: var(--segment-on);
   box-shadow: var(--lift);
 }
 
@@ -143,6 +143,8 @@
   z-index: 1;
   display: flex;
   flex: none;
+  /* as tall as its row, so frames scrolled under it do not show above and below the name */
+  align-self: stretch;
   align-items: center;
   gap: 4px;
   width: 128px;

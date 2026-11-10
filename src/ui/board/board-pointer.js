@@ -1,14 +1,16 @@
-import { changeStructure, selectDirection } from '../actions.js';
+import { selectDirection } from '../actions.js';
 import { boardPoint } from '../board-canvas.js';
+import { changeMarkup, markupOf } from './board-marks.js';
 
 function addNote(app, point) {
-  app.store.state.project.markup.notes.push({
-    direction: point.direction,
-    x: point.x,
-    y: point.y,
-    text: app.noteText || 'Fix this',
-  });
-  changeStructure(app, 'markup');
+  changeMarkup(app, 'Note', (markup) =>
+    markup.notes.push({
+      direction: point.direction,
+      x: point.x,
+      y: point.y,
+      text: app.noteText || 'Fix this',
+    }),
+  );
 }
 
 // A click on the board opens that view, draws a mark or adds a note, as the board is set to.
@@ -16,8 +18,6 @@ function addNote(app, point) {
 function press(app, canvas, point, event) {
   const { state } = app.store;
   const mode = state.markupMode ?? 'edit';
-
-  state.project.markup ??= { strokes: [], notes: [] };
 
   if (mode === 'edit') {
     selectDirection(app, point.direction);
@@ -34,13 +34,18 @@ function press(app, canvas, point, event) {
 
   canvas.setPointerCapture(event.pointerId);
   const stroke = { direction: point.direction, points: [[point.x, point.y]] };
-  state.project.markup.strokes.push(stroke);
 
-  return stroke;
+  return { stroke, before: markupOf(state.project) };
+}
+
+// the mark being drawn shows as it grows, and is one undo step when the pointer lets go
+function showMark(app, { stroke, before }) {
+  app.store.state.project.markup = { ...before, strokes: [...before.strokes, stroke] };
+  app.store.touch('markup');
 }
 
 export function bindBoardPointer(app, canvas, scale) {
-  let stroke = null;
+  let drawing = null;
   const pointOf = (event) => boardPoint(app.store.state, scale, canvas, event);
 
   canvas.addEventListener('pointerdown', (event) => {
@@ -48,22 +53,25 @@ export function bindBoardPointer(app, canvas, scale) {
 
     // a press off the art (a second finger on a gap) leaves the mark being drawn alone
     if (point) {
-      stroke = press(app, canvas, point, event);
+      drawing = press(app, canvas, point, event);
     }
   });
   canvas.addEventListener('pointermove', (event) => {
-    const point = stroke && pointOf(event);
+    const point = drawing && pointOf(event);
 
     // a mark stays on the view it started on
-    if (point && point.direction === stroke.direction) {
-      stroke.points.push([point.x, point.y]);
-      app.store.touch('markup');
+    if (point && point.direction === drawing.stroke.direction) {
+      drawing.stroke.points.push([point.x, point.y]);
+      showMark(app, drawing);
     }
   });
   canvas.addEventListener('pointerup', () => {
-    if (stroke) {
-      stroke = null;
-      changeStructure(app, 'markup');
+    if (drawing) {
+      const { stroke, before } = drawing;
+
+      drawing = null;
+      app.store.state.project.markup = before;
+      changeMarkup(app, 'Mark', (markup) => markup.strokes.push(stroke));
     }
   });
 }

@@ -46,6 +46,9 @@ export async function runClean(job, options) {
   const { state } = job.app.store;
   const ref = referenceSprite(state);
 
+  // what was cleaned before is not what is being asked for now
+  job.result = null;
+  job.accept.disabled = true;
   replace(job.slot, node('p.report', {}, 'Cleaning… this takes a second or two.'));
   // an empty reference has nothing to match
   const alone = job.alone || !artHeight(ref);

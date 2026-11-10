@@ -10,6 +10,15 @@ import { viewName } from '../model/kinds.js';
 
 const NOT_AN_IMAGE = 'This file is not an image the browser can open. Try PNG, WebP or JPEG.';
 
+// what is typed is checked first: a height or grid that cannot be says so, and nothing is cleaned
+function cleanAgain(job, fields) {
+  try {
+    runClean(job, fields.read());
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
 // where a cleaned image goes: "Side" alone while there is one frame, "Side, frame 2" after
 function placeName(state, direction, frame) {
   const frames = currentAnimation(state).directions[direction]?.frames.length ?? 1;
@@ -47,7 +56,7 @@ function sheetBody(job, file, fields) {
   });
   const again = node(
     'button.btn',
-    { onclick: () => job.image && runClean(job, fields.read()) },
+    { onclick: () => job.image && cleanAgain(job, fields) },
     'Clean again',
   );
 

@@ -52,9 +52,17 @@
   flex: 1;
 }
 
+/* a long workspace name gives way before Download leaves the screen */
 :root[data-layout='compact'] .workspace-pick {
+  flex: 0 1 auto;
+  min-width: 0;
   gap: 2px;
   padding: 0 6px 0 10px;
+}
+
+:root[data-layout='compact'] .workspace-pick span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 :root[data-layout='compact'] .workspace-pick svg {
@@ -130,7 +138,7 @@
   margin: 4px;
 }
 
-:root[data-layout='compact'] .stage-inner {
+:root[data-layout='compact'] .stage-inner:not(.edit) {
   padding: 16px;
 }
 
@@ -182,17 +190,22 @@
 }
 
 :root[data-layout='compact'] .grid-tabs-bar {
-  flex: 1 0 calc(100% - 56px);
-  max-width: calc(100% - 56px);
+  order: -3;
+  flex: 1 0 calc(100% - 156px);
+  max-width: calc(100% - 156px);
+}
+
+:root[data-layout='compact'] .grid-fps {
+  order: -2;
+}
+
+:root[data-layout='compact'] .grid-fps .input {
+  width: 48px;
 }
 
 :root[data-layout='compact'] .grid-play {
   order: -1;
   width: 44px;
-}
-
-:root[data-layout='compact'] .grid-tabs-bar {
-  order: -2;
 }
 
 /* a line of advice costs a phone a third of its panel */
@@ -356,52 +369,42 @@
   }
 }
 
-@media (max-width: 1240px) {
+@media (max-width: 1320px) {
   .btn-text {
     display: none;
   }
 }
 
-/* fingers need bigger targets than a pointer, and have no keys to learn */
-@media (pointer: coarse) {
-  .btn {
-    min-height: 40px;
-  }
-
-  .segmented button {
-    padding: 8px 12px;
-  }
-
-  .layer-row .btn {
-    min-height: 36px;
-  }
-
-  .input,
-  select.input {
-    min-height: 40px;
-  }
-
-  .cell-more {
-    width: 28px;
-    height: 28px;
-  }
-
-  .btn.icon-only {
-    width: 40px;
-  }
-
-  .grid-view-more,
-  .tab-more {
-    width: 36px;
-    height: 36px;
-  }
-
-  .grid-view {
-    min-height: 36px;
-  }
-
-  .rail .btn[data-key]::after {
+/* a narrow desktop window keeps the toolbar on one row: the studio's name and Download's word go */
+@media (max-width: 1000px) {
+  :root[data-layout='medium'] .wordmark-brand,
+  :root[data-layout='medium'] .toolbar-download .btn-label {
     display: none;
+  }
+
+  :root[data-layout='medium'] .wordmark small {
+    font: 600 13px/1.3 var(--font-ui);
+    color: var(--label);
+  }
+
+  :root[data-layout='medium'] .toolbar {
+    gap: 6px 8px;
+  }
+}
+
+/* A short window has no room for the tools in one column: they stand two across, as image
+   editors do, so none waits unseen below the fold. */
+@media (max-height: 860px) {
+  :root:not([data-layout='compact']) .rail {
+    display: grid;
+    grid-template-columns: repeat(2, 40px);
+    align-content: start;
+  }
+
+  :root:not([data-layout='compact']) .rail hr {
+    grid-column: 1 / -1;
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 

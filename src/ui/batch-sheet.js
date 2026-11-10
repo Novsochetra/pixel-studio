@@ -8,6 +8,7 @@ import { cleanImage } from '../io/cleaner.js';
 import { decodeImage } from '../io/images.js';
 import { referenceOf } from '../model/reference.js';
 import { placementOf, viewName } from '../model/kinds.js';
+import { bounds } from '../model/sprite.js';
 
 // characters are matched to the reference, later frames keeping their own pixel size; anything
 // else is cleaned on its own and placed as its kind stands
@@ -18,6 +19,21 @@ function cleanOptions(project, item) {
 
   return { keepScale: item.placement !== '0' };
 }
+
+// With no reference drawn yet, the batch's own image of the reference view is cleaned first, and
+// the others are matched to it; otherwise each would come out at its own size.
+function referenceFirst(state, items) {
+  const own = items.find((item) => item.direction === referenceOf(state.project));
+
+  if (bounds(referenceSprite(state)) || !own) {
+    return items;
+  }
+
+  return [own, ...items.filter((item) => item !== own)];
+}
+
+const becomesReference = (state, item, ref) =>
+  !bounds(ref) && Boolean(item.sprite) && item.direction === referenceOf(state.project);
 
 function statusText(report) {
   const scaled = report.scaled ? `, scaled ${report.scaled.fy.toFixed(2)}×` : '';
@@ -30,7 +46,10 @@ async function cleanOne(state, item, ref) {
     const result = await cleanImage(
       await decodeImage(item.file),
       { width: ref.width, height: ref.height, data: ref.pixels },
-      cleanOptions(state.project, item),
+      // an empty reference has nothing to match: the image is cleaned alone, as its kind stands
+      bounds(ref)
+        ? cleanOptions(state.project, item)
+        : { alone: true, ...placementOf(state.project) },
     );
 
     item.sprite = {
@@ -75,12 +94,13 @@ export function openBatchSheet(app, files) {
       items.map((item) => batchRow(item, state.project, animation)),
     );
   const run = async () => {
-    const ref = referenceSprite(state);
+    let ref = referenceSprite(state);
 
-    for (const item of items) {
+    for (const item of referenceFirst(state, items)) {
       item.status = node('span.hint', {}, 'Cleaning…');
       draw();
       await cleanOne(state, item, ref);
+      ref = becomesReference(state, item, ref) ? item.sprite : ref;
       draw();
     }
 

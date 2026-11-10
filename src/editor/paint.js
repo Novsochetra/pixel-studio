@@ -93,6 +93,11 @@ function fillFrom(sprite, start, { target, color, changed }) {
 export function floodFill(sprite, [x, y], color, options = {}) {
   const changed = [];
 
+  // a fill that would change nothing has nothing to stop it: every pixel still matches at each step
+  if (!Number.isInteger(color)) {
+    return changed;
+  }
+
   for (const [sx, sy] of mirrored(x, y, options.symmetry)) {
     const target = getPixel(sprite, sx, sy);
 

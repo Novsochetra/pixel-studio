@@ -77,6 +77,11 @@ export function removeViewFrame(animation, direction, index) {
     return index;
   }
 
+  // with one view a moment is its frame: the mark goes with the drawing
+  if (Object.keys(animation.directions).length === 1) {
+    return removeFrame(animation, index);
+  }
+
   const hidden = frames.map((frame) => frame.hidden);
 
   frames.splice(index, 1);

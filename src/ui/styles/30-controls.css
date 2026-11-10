@@ -65,8 +65,9 @@
   background: var(--fill-quiet);
 }
 
+/* its own colour: on dark chrome the raised white of a light theme would be darker than the track */
 .segmented button[aria-pressed='true'] {
-  background: var(--chrome-raised);
+  background: var(--segment-on);
   box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
 }
 

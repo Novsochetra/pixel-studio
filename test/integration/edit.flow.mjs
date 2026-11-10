@@ -94,6 +94,11 @@ check(await page.locator('.selection-bar').isHidden(), 'Done lets go of it');
 await page.keyboard.press('Meta+z');
 await page.keyboard.press('Meta+z');
 await page.keyboard.press('Meta+z');
+check(
+  await page.locator('.selection-bar').isVisible(),
+  'undoing what moved the selection brings it back with the pixels',
+);
+await page.keyboard.press('Escape');
 
 const unselected = await pixels();
 await page.keyboard.press('s');

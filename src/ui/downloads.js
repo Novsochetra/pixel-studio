@@ -1,4 +1,5 @@
 import { toast } from './dom.js';
+import { fileSlug } from './file-name.js';
 import { openMenu } from './menu.js';
 import { directionSprite, directionsInUse } from './actions.js';
 import { canvasToBlob, checkerPainter, spritePng } from '../io/images.js';
@@ -12,11 +13,7 @@ import { chooseFile } from './choose-file.js';
 import { openExportSheet } from './export-sheet.js';
 import { openChatgptSheet } from './prompt/prompt-sheet.js';
 
-const slug = (text) =>
-  text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+const slug = (text) => fileSlug(text, 'project');
 
 function names(state, direction) {
   return `${slug(state.project.name)}-${slug(directionLabel(direction))}`;

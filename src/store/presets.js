@@ -23,9 +23,12 @@ async function changePresets(backend, change) {
   await backend.write(PRESETS, { list: change(list) });
 }
 
+const sameLabel = (first, second) => Boolean(first.label) && first.label === second.label;
+
 export function savePreset(backend, preset) {
+  // one preset to a name: saved again, it takes the place of the one before
   return changePresets(backend, (list) => [
-    ...list.filter((entry) => entry.id !== preset.id),
+    ...list.filter((entry) => entry.id !== preset.id && !sameLabel(entry, preset)),
     preset,
   ]);
 }

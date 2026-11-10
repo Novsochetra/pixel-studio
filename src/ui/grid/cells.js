@@ -1,5 +1,5 @@
 import { icon, node } from '../dom.js';
-import { goTo } from '../actions.js';
+import { currentAnimation, goTo } from '../actions.js';
 import { drawThumbnail } from '../thumbnail.js';
 import { openCellMenu } from './cell-menu.js';
 import { moveFrameTo, toggleFrameHidden } from '../frame-actions.js';
@@ -28,7 +28,17 @@ function cellAfterKey(event, { direction, index }) {
   return next ? { direction: next.dataset.direction, index } : null;
 }
 
+const viewFrames = (app, direction) =>
+  currentAnimation(app.store.state).directions[direction]?.frames ?? [];
+
 const MOVES_FOCUS = new Set([...Object.keys(ACROSS), ...Object.keys(DOWN), 'Home', 'End']);
+
+// as the menu's Move earlier and Move later: a short view's last frame has nowhere to go
+function moveWithin(app, { direction, index }, step) {
+  if (viewFrames(app, direction)[index + step]) {
+    moveFrameTo(app, index, index + step);
+  }
+}
 
 function onCellKey(app, event, place) {
   const { direction, index, selected } = place;
@@ -37,7 +47,7 @@ function onCellKey(app, event, place) {
   if (event.altKey && step) {
     event.preventDefault();
     event.stopPropagation();
-    moveFrameTo(app, index, index + step);
+    moveWithin(app, place, step);
   } else if (MOVES_FOCUS.has(event.key) && !event.metaKey && !event.ctrlKey) {
     event.preventDefault();
     event.stopPropagation();

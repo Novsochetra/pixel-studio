@@ -3,10 +3,10 @@ import { currentAnimation, restructure } from '../actions.js';
 import { chooseFiles } from '../choose-file.js';
 import { openBatchSheet } from '../batch-sheet.js';
 import { animationTabs } from './tabs.js';
+import { pinControls } from './pin-controls.js';
 import { setGridAll, setGridOpen } from './all-views.js';
 import { togglePlayback } from './playback.js';
-import { PIN_NAMES } from '../../model/pins.js';
-import { isSingleView, kindOf } from '../../model/kinds.js';
+import { isSingleView } from '../../model/kinds.js';
 import { wholeNumber } from '../../model/numbers.js';
 
 function toggle(app, { key, iconName, label, title }) {
@@ -78,36 +78,6 @@ function fpsField(app) {
   );
 }
 
-function pinControls(app) {
-  const { state } = app.store;
-
-  if (kindOf(state.project).place !== 'feet') {
-    return null;
-  }
-
-  return [
-    toggle(app, {
-      key: 'showPins',
-      iconName: 'pin',
-      label: 'Pins',
-      title: 'Pins mark the head, hands, hips and feet in each frame (tool P)',
-    }),
-    state.tool === 'pin'
-      ? node(
-          'select.input',
-          {
-            id: 'pin-name',
-            'aria-label': 'Pin to place',
-            onchange: (event) => app.store.set({ pinName: event.target.value }),
-          },
-          PIN_NAMES.map((name) =>
-            node('option', { value: name, selected: state.pinName === name }, name),
-          ),
-        )
-      : null,
-  ];
-}
-
 // many views and animations make a tall panel: folded, only this bar stays, and the canvas fills
 // the room
 function foldButton(app) {
@@ -150,7 +120,7 @@ export function gridBar(app, { playing, onPlay }) {
       label: 'Onion skin',
       title: 'Show the frames before and after, faded',
     }),
-    pinControls(app),
+    pinControls(app, toggle),
     fpsField(app),
     node(
       'button.btn.primary.grid-play',

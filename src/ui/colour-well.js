@@ -1,5 +1,6 @@
-import { node } from './dom.js';
+import { node, toast } from './dom.js';
 import { fromHex, toHex } from '../model/sprite.js';
+import { FIRST_PENCIL_COLOUR } from '../art/editor-colours.js';
 
 // what the colour in hand is to the art, said under its hex code
 const noteFor = (color, colors) =>
@@ -17,7 +18,10 @@ function hexField(app) {
     onchange: (event) => {
       const color = fromHex(event.target.value);
 
-      if (color !== null) {
+      if (color === null) {
+        event.target.value = toHex(state.color);
+        toast(`That is not a colour code: six letters and digits, like ${FIRST_PENCIL_COLOUR}.`);
+      } else {
         app.store.set({ color });
       }
     },

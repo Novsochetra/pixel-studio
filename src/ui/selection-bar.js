@@ -1,6 +1,7 @@
 import { node, replace } from './dom.js';
-import { commit, currentLayer } from './actions.js';
-import { clearSelected, liftPixels, transformSelected } from '../editor/selection.js';
+import { commit, commitSelected, currentLayer } from './actions.js';
+import { liftPixels, transformSelected } from '../editor/selection.js';
+import { eraseSelection } from '../editor/floating.js';
 import { keyNames } from './platform-keys.js';
 import { selectionAngle, turnSelectionTo } from './selection-turn.js';
 
@@ -15,7 +16,7 @@ function transform(app, kind, label) {
   const layer = currentLayer(app.store.state);
   let selection = app.store.state.selection;
 
-  commit(app, label, [layer], () => {
+  commitSelected(app, label, [layer], () => {
     selection = transformSelected(layer.sprite, selection, kind);
   });
   app.store.set({ selection });
@@ -31,7 +32,7 @@ function eraseSelected(app) {
   const { state } = app.store;
   const layer = currentLayer(state);
 
-  commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection));
+  commit(app, 'Delete', [layer], () => eraseSelection(layer.sprite, state.selection));
 }
 
 function angleField(app) {
@@ -62,7 +63,17 @@ export function renderSelectionBar(el, app) {
     return;
   }
 
-  const focused = el.contains(document.activeElement) ? document.activeElement.id : '';
+  const angle = el.querySelector('#selection-angle');
+
+  // Already showing: only the angle is brought up to date. Drawn again, the button being
+  // clicked as the angle field lost focus would be gone before the click landed.
+  if (angle) {
+    if (document.activeElement !== angle) {
+      angle.value = String(selectionAngle(app.store.state));
+    }
+
+    return;
+  }
 
   replace(
     el,
@@ -74,9 +85,4 @@ export function renderSelectionBar(el, app) {
     button('Erase the selected pixels (Delete)', () => eraseSelected(app), 'Delete'),
     button('Let go of the selection (Esc)', () => app.store.set({ selection: null }), 'Done'),
   );
-
-  // typing an angle keeps the keyboard when the bar is drawn again
-  if (focused) {
-    el.querySelector(`#${focused}`)?.focus();
-  }
 }

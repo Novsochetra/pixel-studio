@@ -132,7 +132,11 @@ export function renderOutlinePanel(el, app) {
   const detected = outlineColour(directionSprite(state, state.at.direction));
 
   state.outline ??= { colour: null, everywhere: false };
-  const colour = state.outline.colour ?? detected;
+  // a colour picked before stays only while the art still has it: the field lists the art's own
+  const picked = characterColors(state).includes(state.outline.colour)
+    ? state.outline.colour
+    : null;
+  const colour = picked ?? detected;
 
   replace(
     el,

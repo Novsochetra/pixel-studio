@@ -19,18 +19,20 @@ function tabMenu(app, anchor, tabButton, animation) {
       'Duplicate',
       () =>
         restructure(app, `Duplicate ${animation.name}`, (draft) => ({
-          animation: duplicateAnimation(draft.project, currentAnimation(draft)).id,
+          animation: duplicateAnimation(draft.project, animation).id,
         })),
     ],
     null,
     [
       `Delete ${animation.name}`,
       () =>
-        restructure(app, `Delete ${animation.name}`, (draft) => ({
-          animation: removeAnimation(draft.project, animation.id).id,
-          frame: 0,
-          layer: null,
-        })),
+        restructure(app, `Delete ${animation.name}`, (draft) => {
+          const open = currentAnimation(draft) === animation;
+          const next = removeAnimation(draft.project, animation.id);
+
+          // deleting a tab that is not open leaves the open one open
+          return open ? { animation: next.id, frame: 0, layer: null } : null;
+        }),
       { danger: true, disabled: project.animations.length < 2, title: `Keep at least one ${item}` },
     ],
   ]);

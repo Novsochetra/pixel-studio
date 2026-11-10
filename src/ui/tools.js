@@ -96,12 +96,32 @@ const ON_PRESS = {
   lasso: orTurnHandle(lasso),
 };
 
-function hiddenLayer(app) {
-  const layer = currentLayer(app.store.state);
+// Why a tool that puts pixels down cannot draw on the layer in hand, said to the person; null
+// when it can. What is drawn on a picture to trace never reaches a download: work lost unseen.
+function cannotPaint(tool, layer) {
+  if (!layer.visible) {
+    return `${layer.name} is hidden, so you would not see what you draw. Show it in Layers first.`;
+  }
 
-  toast(`${layer.name} is hidden, so you would not see what you draw. Show it in Layers first.`);
+  if (layer.kind === 'reference' && tool !== 'eraser') {
+    return `${layer.name} is a picture to trace, so it is not drawn on. Pick a layer of art in Layers.`;
+  }
 
   return null;
+}
+
+function startPainting(app, point, event) {
+  const { tool } = app.store.state;
+  const layer = currentLayer(app.store.state);
+  const refused = cannotPaint(tool, layer);
+
+  if (refused) {
+    toast(refused);
+
+    return null;
+  }
+
+  return isPosedBody(layer) ? startOnPart(app, point) : ON_PRESS[tool](app, point, event);
 }
 
 export function startTool(app, point, event) {
@@ -120,13 +140,5 @@ export function startTool(app, point, event) {
     return pick(app, point);
   }
 
-  if (PAINTING.has(tool) && !currentLayer(app.store.state).visible) {
-    return hiddenLayer(app);
-  }
-
-  if (PAINTING.has(tool) && isPosedBody(currentLayer(app.store.state))) {
-    return startOnPart(app, point);
-  }
-
-  return ON_PRESS[tool](app, point, event);
+  return PAINTING.has(tool) ? startPainting(app, point, event) : ON_PRESS[tool](app, point, event);
 }

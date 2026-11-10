@@ -93,7 +93,8 @@ export function drawGuide(context, guide, { width, scale, label = true }) {
   context.lineTo(width, lineY);
   context.stroke();
 
-  if (label) {
+  // drawn small, the art has no room beside it for words: they would lie over it
+  if (label && scale >= 3) {
     context.setLineDash([]);
     context.font = '700 10px Silkscreen, ui-monospace, monospace';
     context.fillStyle = cssVar('--guide');
@@ -117,8 +118,22 @@ export function drawMirrorLine(context, axisSum, { height, scale }) {
   context.restore();
 }
 
+// An iPhone draws nothing on a canvas of more than about 16 million pixels, and other browsers
+// have limits of their own: a big canvas zoomed far in is drawn with fewer screen pixels to each
+// art pixel instead, which a pixel's hard edges do not show.
+const MOST_PIXELS = 16_000_000;
+const LONGEST_SIDE = 8192;
+
+function pixelRatio(width, height) {
+  return Math.min(
+    window.devicePixelRatio || 1,
+    Math.sqrt(MOST_PIXELS / (width * height)),
+    LONGEST_SIDE / Math.max(width, height),
+  );
+}
+
 export function sizeCanvas(canvas, width, height) {
-  const ratio = window.devicePixelRatio || 1;
+  const ratio = pixelRatio(width, height);
 
   canvas.width = Math.round(width * ratio);
   canvas.height = Math.round(height * ratio);

@@ -6,7 +6,7 @@ import { createSprite, getPixel, pack, setPixel, CLEAR } from '../../src/model/s
 import { buildSheet } from '../../src/export/sheet.js';
 import { NAGA_ELEVEN } from '../../src/model/presets.js';
 import { fittedFrame } from '../../src/export/anchor.js';
-import { changedLayers, snapshotAnimations } from '../../src/editor/history.js';
+import { changedLayers, snapshotAnimations } from '../../src/editor/snapshots.js';
 import { Stroke } from '../../src/editor/stroke.js';
 
 const GAME_FRAME = NAGA_ELEVEN.game.frame;

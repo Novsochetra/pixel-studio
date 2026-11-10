@@ -36,6 +36,8 @@ export function renameFolder(index, id, name) {
 // a folder only groups projects, so its projects outlive it
 export function removeFolder(index, id) {
   index.folders = foldersOf(index).filter((folder) => folder.id !== id);
+  // so the next save of the list does not take it back from what another tab stored
+  index.deleted = new Set([...(index.deleted ?? []), id]);
 
   for (const entry of index.list) {
     if (entry.folder === id) {

@@ -4,6 +4,7 @@
   --bg: #000000;
   --chrome: #1c1c1e;
   --chrome-raised: #2c2c2e;
+  --segment-on: #636366;
   --well: #242426;
   --stage: #2a2a2d;
   --checker-a: #3a3a3e;
@@ -40,6 +41,7 @@
     --bg: #f2f2f7;
     --chrome: #f6f6f8;
     --chrome-raised: #ffffff;
+    --segment-on: #ffffff;
     --well: #e9e9ee;
     --stage: #d6d6db;
     --checker-a: #c9c9cf;
@@ -68,6 +70,7 @@
   --bg: #f2f2f7;
   --chrome: #f6f6f8;
   --chrome-raised: #ffffff;
+  --segment-on: #ffffff;
   --well: #e9e9ee;
   --stage: #d6d6db;
   --checker-a: #c9c9cf;

@@ -17,6 +17,12 @@
   border: 1px solid var(--separator);
   box-shadow: var(--shadow);
   font-size: 13px;
+  /* the card lies over the canvas's first rows: a press on it, off its buttons, draws there */
+  pointer-events: none;
+}
+
+.empty-frame .btn {
+  pointer-events: auto;
 }
 
 /* Over the canvas on a phone too, at its foot: a card in the canvas's own column pushed the
@@ -39,6 +45,12 @@
 :root[data-layout='compact'] .empty-frame > div {
   flex: 1 0 100%;
   text-align: center;
+}
+
+@media (max-height: 700px) {
+  :root[data-layout='compact'] .empty-frame > div {
+    display: none;
+  }
 }
 
 :root[data-layout='compact'] .empty-frame .btn {

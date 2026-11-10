@@ -1,5 +1,6 @@
 import { node, toast } from '../dom.js';
 import { changeStructure } from '../actions.js';
+import { afterPress } from '../after-press.js';
 import { addProject } from '../session.js';
 import { saveProject } from '../downloads.js';
 import { openCanvasSizeSheet } from '../canvas-size-sheet.js';
@@ -97,9 +98,14 @@ function renameField({ app, redraw }) {
     id: 'current-project-name',
     'aria-label': 'Project name',
     onchange: (event) => {
-      project.name = event.target.value.trim() || project.name;
-      changeStructure(app, 'project');
-      redraw();
+      const name = event.target.value.trim() || project.name;
+
+      // drawn again only once the click that took the focus has landed on what it was for
+      afterPress(() => {
+        project.name = name;
+        changeStructure(app, 'project');
+        redraw();
+      });
     },
   });
 }

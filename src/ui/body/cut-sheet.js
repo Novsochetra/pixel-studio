@@ -116,7 +116,9 @@ function actions(job, change) {
       job.plan.owners = guessOwners(job.source, job.plan.parts);
       job.plan.parts.forEach((part) => (part.pivot = null));
     });
-  const count = new Set([...job.plan.owners].filter((owner) => owner >= 0)).size;
+  // parts with pixels painted for them: a part removed takes its pixels out of the count
+  const painted = [...job.plan.owners].filter((owner) => owner >= 0 && job.plan.parts[owner]);
+  const count = new Set(painted).size;
 
   return node(
     'div.sheet-actions',
@@ -130,7 +132,7 @@ function actions(job, change) {
     node(
       'button.btn.primary',
       { onclick: () => cut(job), disabled: !count },
-      `Cut into ${count} parts`,
+      `Cut into ${count} ${count === 1 ? 'part' : 'parts'}`,
     ),
   );
 }

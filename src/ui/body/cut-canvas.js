@@ -100,6 +100,11 @@ function pivotUnder(job, [x, y]) {
 function brushAlong(job, from, to) {
   const index = job.erase ? -1 : job.selected;
 
+  // with every part removed there is none to paint: the pixels would be cut off into nothing
+  if (!job.erase && !job.plan.parts[job.selected]) {
+    return;
+  }
+
   for (const [x, y] of linePoints(...from, ...to)) {
     paintOwners(job.plan, { source: job.source, point: [x, y], size: job.brush, index });
   }

@@ -6,8 +6,16 @@ import { openShortcuts } from './shortcuts.js';
 import { resizeBrush } from '../editor/brush.js';
 import { handlePoseKey } from './body/pose-keys.js';
 
+// inputs that take no text: after one is used, the tool keys and undo still work
+const NOT_TYPED_IN = new Set(['range', 'checkbox', 'radio', 'color', 'button', 'file']);
+const MOVES_A_SLIDER = /^(Arrow|Home|End|Page)/;
+
 function typing(event) {
-  const tag = event.target.tagName;
+  const { tagName: tag, type } = event.target;
+
+  if (tag === 'INPUT' && NOT_TYPED_IN.has(type)) {
+    return type === 'range' && MOVES_A_SLIDER.test(event.key);
+  }
 
   return (
     tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || event.target.isContentEditable
@@ -63,7 +71,10 @@ function onKey(app, event) {
   const command = event.metaKey || event.ctrlKey;
   const key = event.key.toLowerCase();
 
-  if (handlePoseKey(app, event, key) || handleSelectionKey(app, event, key, command)) {
+  // the keys that act on the art are for the workspace that shows it being edited
+  const editing = app.store.state.mode === 'edit';
+
+  if (editing && (handlePoseKey(app, event, key) || handleSelectionKey(app, event, key, command))) {
     return;
   }
 
@@ -75,9 +86,13 @@ function onKey(app, event) {
   }
 }
 
-// space pans only from the page itself: on a focused button it still presses the button
+// Space pans from the page itself, and from anywhere while the pointer is over the canvas: a
+// project opens with the keyboard on the tool in hand, where Space alone would press that button.
 function startPanning(app, event) {
-  const fromPage = event.target === document.body || event.target.tagName === 'CANVAS';
+  const fromPage =
+    event.target === document.body ||
+    event.target.tagName === 'CANVAS' ||
+    (Boolean(app.store.state.cursor) && !typing(event));
 
   if (event.key !== ' ' || !fromPage) {
     return false;
@@ -91,12 +106,14 @@ function startPanning(app, event) {
 }
 
 export function bindKeyboard(app) {
-  document.addEventListener('keyup', (event) => {
-    if (event.key === ' ') {
-      app.spaceHeld = false;
-      document.body.classList.remove('panning');
-    }
-  });
+  const stopPanning = () => {
+    app.spaceHeld = false;
+    document.body.classList.remove('panning');
+  };
+
+  document.addEventListener('keyup', (event) => event.key === ' ' && stopPanning());
+  // Space let go while another window had the keys never says so here
+  window.addEventListener('blur', stopPanning);
   document.addEventListener('keydown', (event) => {
     if (startPanning(app, event) || typing(event) || modalOpen()) {
       return;

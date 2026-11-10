@@ -1,60 +1,5 @@
 import { cloneSprite, samePixels } from '../model/sprite.js';
-
-function snapshotFrame(frame) {
-  return {
-    ...frame,
-    marks: frame.marks?.map((mark) => ({ ...mark })),
-    layers: frame.layers.map((layer) => ({
-      ...layer,
-      sprite: layer.sprite && cloneSprite(layer.sprite),
-    })),
-  };
-}
-
-// A copy of every animation, pixels included, so a frame, layer or animation change can be undone.
-export function snapshotAnimations(animations) {
-  return animations.map((animation) => ({
-    ...animation,
-    directions: Object.fromEntries(
-      Object.entries(animation.directions).map(([direction, entry]) => [
-        direction,
-        { ...entry, frames: entry.frames.map(snapshotFrame) },
-      ]),
-    ),
-  }));
-}
-
-function layerPixels(animations) {
-  const frames = animations.flatMap((animation) =>
-    Object.values(animation.directions).flatMap((entry) => entry.frames),
-  );
-
-  return new Map(
-    frames.flatMap((frame) => frame.layers.map((layer) => [layer.id, layer.sprite?.pixels])),
-  );
-}
-
-// ids of layers whose pixels differ between two sets of animations, or that only one has
-export function changedLayers(before, after) {
-  const first = layerPixels(before);
-  const second = layerPixels(after);
-  const ids = [];
-
-  for (const [id, pixels] of second) {
-    const old = first.get(id);
-
-    if (
-      !old ||
-      !pixels ||
-      old.length !== pixels.length ||
-      old.some((value, i) => value !== pixels[i])
-    ) {
-      ids.push(id);
-    }
-  }
-
-  return ids;
-}
+import { sameAnimations, snapshotAnimations } from './snapshots.js';
 
 function layerChange({ layer, before, poseBefore }) {
   return {
@@ -117,8 +62,17 @@ export class History {
     return true;
   }
 
+  // returns whether anything changed: a frame moved onto itself is no step to undo
   recordStructure(label, before, project) {
-    this.push({ label, kind: 'structure', before, after: snapshotAnimations(project.animations) });
+    const after = snapshotAnimations(project.animations);
+
+    if (sameAnimations(before, after)) {
+      return false;
+    }
+
+    this.push({ label, kind: 'structure', before, after });
+
+    return true;
   }
 
   // one of the project's own settings (which view is the reference), before and after
@@ -134,7 +88,7 @@ export class History {
     }
 
     if (step.kind === 'setting') {
-      project[step.key] = step[side];
+      project[step.key] = structuredClone(step[side]);
 
       return;
     }
@@ -179,6 +133,15 @@ export class History {
 
   get canRedo() {
     return this.undone.length > 0;
+  }
+
+  // the step just recorded moved the selection too: undo puts it back where it was
+  keepSelection(before) {
+    const step = this.done.at(-1);
+
+    if (step) {
+      step.selection = { before };
+    }
   }
 
   get nextUndo() {

@@ -9,5 +9,13 @@ export function keptSelection(selection, { from, to, canvas }) {
   const sameDrawing = from.animation === to.animation && from.direction === to.direction;
   const fits = selection.width === canvas.width && selection.height === canvas.height;
 
-  return sameDrawing && fits ? selection : null;
+  if (!sameDrawing || !fits) {
+    return null;
+  }
+
+  // what a pasted piece remembers lying under it belongs to the frame and layer it was pasted on
+  const samePlace = from.frame === to.frame && from.layer === to.layer;
+  const area = { width: selection.width, height: selection.height, cells: selection.cells };
+
+  return samePlace || !selection.floating ? selection : area;
 }

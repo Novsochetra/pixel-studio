@@ -74,7 +74,8 @@
   gap: 12px;
 }
 
-.sheet h3 {
+/* a window's own title: headings inside it keep the page's type */
+.sheet-head h3 {
   margin: 0;
   font: 700 16px/1.2 var(--font-pixel);
 }
@@ -88,6 +89,7 @@
 
 .sheet .segmented {
   flex-wrap: wrap;
+  justify-self: start;
   max-width: 100%;
   box-sizing: border-box;
 }

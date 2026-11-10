@@ -5,12 +5,9 @@ import { directionLabel, newId } from '../model/project.js';
 import { spritePng } from '../io/images.js';
 import { zipFiles } from '../io/zip.js';
 import { saveFile } from './save-file.js';
+import { fileSlug } from './file-name.js';
 
-export const slug = (text) =>
-  text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+export const slug = (text) => fileSlug(text, 'outfit');
 
 export async function downloadOutfit(state, mapping, name) {
   const files = [];

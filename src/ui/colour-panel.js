@@ -46,5 +46,14 @@ export function renderColourPanel(el, app) {
 }
 
 export function renderDrawingPanel(el, app) {
-  replace(el, drawingSettings(app, characterColors(app.store.state)));
+  const { state } = app.store;
+  const colors = characterColors(state);
+
+  // "Paint only over" a colour the art no longer has would stop every stroke, while its menu,
+  // made of the art's colours, read "Any pixel"
+  if (state.paintOver !== null && !colors.includes(state.paintOver)) {
+    state.paintOver = null;
+  }
+
+  replace(el, drawingSettings(app, colors));
 }

@@ -13,6 +13,7 @@ import { showQuickStart } from './quick-start.js';
 import { currentLayer } from './actions.js';
 import { renderDock } from './dock.js';
 import { onLayoutChange } from './layout.js';
+import { saveOnLeaving } from './save-on-leaving.js';
 
 const WORKSPACES = { edit: mountEditStage, board: mountBoard, game: mountPreview };
 
@@ -84,6 +85,7 @@ export function mountApp(app) {
 
   app.fitCanvas();
   bindKeyboard(app);
+  saveOnLeaving(app);
   bindDrop(stage, app);
   showQuickStart(document.body, app.store.state.project);
   window.addEventListener('resize', () => followResize(app, draw.stage));

@@ -1,11 +1,6 @@
-import { commit, currentFrames, currentLayer, selectFrame } from './actions.js';
-import {
-  clearSelected,
-  liftPixels,
-  moveSelected,
-  rectSelection,
-  stampPixels,
-} from '../editor/selection.js';
+import { commit, commitSelected, currentFrames, currentLayer, selectFrame } from './actions.js';
+import { liftPixels, moveSelected, rectSelection } from '../editor/selection.js';
+import { eraseSelection, floatPiece, moveFloating, shiftOnCanvas } from '../editor/floating.js';
 import { toast } from './dom.js';
 import { shiftCurrentFrame } from './frame-move.js';
 import { shiftCurrentLayer } from './layer-move.js';
@@ -16,25 +11,38 @@ function nudge(app, [dx, dy]) {
   const layer = currentLayer(app.store.state);
   let selection = app.store.state.selection;
 
-  commit(app, 'Move', [layer], () => {
-    selection = moveSelected(layer.sprite, selection, dx, dy);
+  commitSelected(app, 'Move', [layer], () => {
+    selection = selection.floating
+      ? moveFloating(layer.sprite, selection, dx, dy)
+      : moveSelected(
+          layer.sprite,
+          selection,
+          ...shiftOnCanvas(liftPixels(layer.sprite, selection), layer.sprite, [dx, dy]),
+        );
   });
   app.store.set({ selection });
 }
 
-function paste(app) {
+// the copied pixels as a piece floating over the art, to drag or nudge into place
+export function paste(app) {
   const layer = currentLayer(app.store.state);
   let selection = null;
 
-  const pasted = commit(app, 'Paste', [layer], () => {
-    selection = stampPixels(layer.sprite, app.clipboard, 0, 0);
+  if (!app.clipboard?.length) {
+    toast('Nothing copied yet: select some pixels and Copy them first.');
+
+    return;
+  }
+
+  const pasted = commitSelected(app, 'Paste', [layer], () => {
+    selection = floatPiece(layer.sprite, app.clipboard);
   });
 
   if (pasted === null) {
     return;
   }
 
-  app.store.set({ selection, tool: 'select' });
+  app.store.set({ selection, tool: 'select', mode: 'edit' });
   toast('Pasted where it was copied from. Drag it or use the arrow keys to place it.');
 }
 
@@ -52,7 +60,7 @@ function copy(app, cut) {
   app.clipboard = liftPixels(layer.sprite, state.selection);
 
   if (cut) {
-    commit(app, 'Cut', [layer], () => clearSelected(layer.sprite, state.selection));
+    commit(app, 'Cut', [layer], () => eraseSelection(layer.sprite, state.selection));
   }
 }
 
@@ -60,7 +68,7 @@ function eraseSelected(app) {
   const { state } = app.store;
   const layer = currentLayer(state);
 
-  commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection));
+  commit(app, 'Delete', [layer], () => eraseSelection(layer.sprite, state.selection));
 }
 
 function stepFrame(app, step) {

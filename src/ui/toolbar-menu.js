@@ -6,6 +6,7 @@ import { openShortcuts } from './shortcuts.js';
 import { canInstall, installApp } from './install-app.js';
 import { FILTERS } from './toolbar-parts.js';
 import { hasKeyboard } from './platform-keys.js';
+import { paste } from './selection-keys.js';
 import { gameOf } from '../model/presets.js';
 import { isSingleView } from '../model/kinds.js';
 
@@ -29,6 +30,8 @@ function canvasEntries(app) {
   const { showGrid } = app.store.state;
 
   return [
+    // with no keyboard this is the only way to paste; Copy is on the selection's own bar
+    ['Paste', () => paste(app), { disabled: !app.clipboard?.length }],
     ['Fit the canvas', () => app.fitCanvas()],
     ['Pixel grid', () => app.store.set({ showGrid: !showGrid }), { checked: showGrid }],
   ];

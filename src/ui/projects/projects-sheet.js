@@ -28,6 +28,10 @@ function drawing(job, { current, browser, body }) {
     job.view.place = knownPlace(job.app.index, job.view.place);
     lastPlace = job.view.place;
     replace(browser, folderList(job), projectGrid(job));
+    // on a phone the folders are one row that scrolls: the open one may be past its edge
+    browser
+      .querySelector('.folder-name-field, .place[aria-current="true"]')
+      ?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 
     const where = body.querySelector('.start-where');
 

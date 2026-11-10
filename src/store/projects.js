@@ -92,7 +92,30 @@ export async function saveProjectList(backend, index) {
     index.folders = read.folders;
   }
 
+  await joinOtherVisits(backend, index);
   await writeIndex(backend, index);
+}
+
+// Projects and folders another tab made since this one read the list are not this tab's to drop:
+// they join its list before it is written. Those this tab deleted itself stay gone.
+async function joinOtherVisits(backend, index) {
+  const stored = await backend.read(INDEX).catch(() => null);
+  const gone = index.deleted ?? new Set();
+  const ours = new Set(index.list.map((entry) => entry.id));
+
+  index.list.push(
+    ...(stored?.list ?? []).filter((entry) => !ours.has(entry.id) && !gone.has(entry.id)),
+  );
+  mergeFolders(
+    index,
+    (stored?.folders ?? []).filter((folder) => !gone.has(folder.id)),
+  );
+}
+
+// a project or folder taken out of the list in this visit, so a later save does not bring it back
+export function forget(index, id) {
+  index.deleted ??= new Set();
+  index.deleted.add(id);
 }
 
 // every document of one project: its layers, structure, background, picture and versions

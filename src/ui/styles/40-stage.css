@@ -37,6 +37,8 @@
 }
 
 .stage-inner.edit {
+  /* little air round the canvas: the room goes to the art, which fits at whole zooms only */
+  padding: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -48,6 +50,14 @@
   box-shadow:
     0 0 0 1px var(--separator),
     0 10px 30px rgb(0 0 0 / 14%);
+}
+
+/* A window tall enough keeps a band above the canvas for the bar of a selection or a pose, so the
+   bar never lies over the art's first rows; a short one gives that room to the art. */
+@media (min-height: 800px) {
+  :root:not([data-layout='compact']) .stage-inner.edit {
+    padding-top: 56px;
+  }
 }
 
 /* floats over the canvas, so the canvas never moves when it shows */
@@ -118,8 +128,19 @@
   justify-content: center;
 }
 
-.board-canvas {
+.board-row .segmented {
+  flex-wrap: wrap;
+  justify-content: center;
   max-width: 100%;
-  height: auto;
+}
+
+/* a board wider than the screen scrolls sideways: squeezed to fit, its pixels would blur */
+.board-holder {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.board-canvas {
+  display: block;
   touch-action: none;
 }

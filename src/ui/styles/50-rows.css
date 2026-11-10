@@ -29,6 +29,22 @@
   max-width: 100%;
 }
 
+/* the name takes the row; the button beside it keeps to one line */
+.version-save {
+  display: flex;
+  gap: 6px;
+}
+
+.version-save .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.version-save .btn {
+  flex: none;
+  white-space: nowrap;
+}
+
 .version-row {
   display: flex;
   justify-content: space-between;
@@ -80,7 +96,7 @@
   grid-area: inspector;
   background: var(--chrome);
   border-left: 1px solid var(--separator);
-  overflow-y: auto;
+  overflow: hidden auto;
   min-width: 0;
 }
 
@@ -201,6 +217,7 @@
 
 .layer-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
   padding-top: 8px;

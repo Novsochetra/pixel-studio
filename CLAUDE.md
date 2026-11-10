@@ -119,6 +119,21 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   or a shortcut. One finger on the canvas waits a moment before its tool acts
   (`touch-intent.js`), as it may be the first of a pinch.
 
+## Fields, drags and undo
+
+- A field says it has changed as it loses focus, in the middle of the press that took the focus.
+  When that change draws a list or a window again, it goes through `afterPress`
+  (`src/ui/after-press.js`): the redraw waits for the press's click and the click is passed on to
+  the control now in its place. Redrawn at once, the button pressed is gone before its click.
+- What a drag on the canvas returns has `cancel()` when its work can be taken back, as a second
+  finger makes the drag a pinch; without one it is ended and kept as a step. Undo and redo wait
+  while a drag is under way.
+- A step that moves the selection with the pixels (a move, a turn, a paste) is made with
+  `commitSelected`, so undo puts the selection back too. A change that changes nothing records no
+  step (`History.recordStructure` says whether it did).
+- What is typed is checked where it is read: a number is kept to what can be (`wholeNumber`), and
+  a message to a person never carries an exception's own words.
+
 ## Testing
 
 - Unit tests are not enough. Each change needs the right mix of:

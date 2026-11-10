@@ -64,6 +64,12 @@ export function replace(app, [x, y]) {
   const from = getPixel(layer.sprite, x, y);
   let count = 0;
 
+  if (from === CLEAR) {
+    toast('Click the colour to replace: there is none on a clear pixel.');
+
+    return null;
+  }
+
   commit(app, 'Replace colour', [layer], () => {
     count = replaceColor(layer.sprite, from, state.color);
   });
@@ -101,6 +107,10 @@ export function shade(app, point, darker) {
 
   return {
     move: step,
+    cancel() {
+      layer.sprite.pixels.set(before.pixels);
+      app.store.touch('stroke');
+    },
     end() {
       if (app.history.record(darker ? 'Darken' : 'Lighten', [{ layer, before }])) {
         app.saver.markLayers([layer.id]);

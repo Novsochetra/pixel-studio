@@ -51,5 +51,6 @@ export function startingState(project) {
     lassoLoop: null,
     highlight: null,
     saveStatus: 'saved',
+    outline: { colour: null, everywhere: false },
   };
 }

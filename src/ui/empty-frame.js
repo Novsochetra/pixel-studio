@@ -39,8 +39,13 @@ export function renderEmptyFrame(el, app) {
   const { state } = app.store;
 
   // the Pose tool's own bar says what an empty frame can do
+  // and a selection's bar stands in the same place: the card waits until the selection is let go
   el.hidden =
-    state.mode !== 'edit' || state.tool === 'pose' || Boolean(app.playback) || !isEmptyFrame(state);
+    state.mode !== 'edit' ||
+    state.tool === 'pose' ||
+    Boolean(state.selection) ||
+    Boolean(app.playback) ||
+    !isEmptyFrame(state);
 
   if (el.hidden) {
     return;

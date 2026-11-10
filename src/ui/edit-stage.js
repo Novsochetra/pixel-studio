@@ -51,10 +51,13 @@ const showsInGrid = (patch) => {
 // the zoom at which the canvas fits the part of the stage above the frames
 export function fitZoom(stage, sprite) {
   const area = stage.querySelector('.edit-scroll') ?? stage;
-  const margin = area.clientWidth < 600 ? 32 : 64;
+  // the stage's own padding, which the stylesheet sets by the room there is
+  const padding = getComputedStyle(area.querySelector('.stage-inner') ?? area);
+  const across = parseFloat(padding.paddingLeft) + parseFloat(padding.paddingRight);
+  const down = parseFloat(padding.paddingTop) + parseFloat(padding.paddingBottom);
   const room = Math.min(
-    (area.clientWidth - margin) / sprite.width,
-    (area.clientHeight - margin) / sprite.height,
+    (area.clientWidth - across) / sprite.width,
+    (area.clientHeight - down) / sprite.height,
   );
 
   return Math.max(1, Math.min(24, Math.floor(room)));

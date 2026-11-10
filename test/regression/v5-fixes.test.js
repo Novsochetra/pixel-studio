@@ -11,7 +11,8 @@ import { normalizeProject } from '../../src/model/normalize.js';
 import { projectStructure } from '../../src/store/load.js';
 import { projectFileText, readProjectBundle } from '../../src/store/project-file.js';
 import { readIndex } from '../../src/store/projects.js';
-import { History, snapshotAnimations } from '../../src/editor/history.js';
+import { History } from '../../src/editor/history.js';
+import { snapshotAnimations } from '../../src/editor/snapshots.js';
 import { firstProject } from '../../src/ui/boot-project.js';
 
 const RED = pack(255, 0, 0);

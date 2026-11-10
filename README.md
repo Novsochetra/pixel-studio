@@ -14,6 +14,8 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
   layers, pictures to trace. Colours: the art's own, basic ones to start a blank canvas with, any
   palette you add, and a picker on the colour in hand. Canvas size (in Projects, or the size in the
   status bar) grows or shrinks every view and frame at once, the art kept where you anchor it.
+  Copy and paste make a copy that floats over the art until it is placed (Paste is in the More menu
+  where there is no keyboard); undo brings a moved selection back with its pixels.
 - **Animate**: each animation is a grid, views down and frames across, as the sheet will be: drag
   frames to reorder them, play them on the canvas (every view side by side with All views), hide a
   frame from play without deleting it, see the mirrored side, fold the frames away for room.

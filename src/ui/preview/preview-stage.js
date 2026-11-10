@@ -1,5 +1,5 @@
 import { node, replace } from '../dom.js';
-import { currentAnimation } from '../actions.js';
+import { currentAnimation, goTo } from '../actions.js';
 import { backgroundOf } from '../preview-background.js';
 import { cast } from '../preview-scene.js';
 import { drawScene } from './scene-draw.js';
@@ -15,8 +15,8 @@ const zoomOf = (state, mode) => state.game.zoom ?? (mode === 'tiled' ? 4 : 1);
 
 function animationPicker(app) {
   const { state } = app.store;
-  const choose = (event) =>
-    app.store.set({ at: { ...state.at, animation: event.target.value, frame: 0, layer: null } });
+  // through goTo: the animation picked may lack the view being edited
+  const choose = (event) => goTo(app, { animation: event.target.value, frame: 0, layer: null });
 
   return node(
     'select.input',

@@ -5,7 +5,7 @@ import { History } from '../editor/history.js';
 import { Saver } from '../store/saver.js';
 import { loadProject } from '../store/load.js';
 import { keysFor, prefixFor } from '../store/keys.js';
-import { deleteProjectData, saveProjectList, upsertEntry } from '../store/projects.js';
+import { deleteProjectData, forget, saveProjectList, upsertEntry } from '../store/projects.js';
 import { folderOf, moveToFolder } from '../store/folders.js';
 import { allLayers, newId } from '../model/project.js';
 import { normalizeProject } from '../model/normalize.js';
@@ -165,6 +165,7 @@ export async function deleteProject(app, id) {
 
   await deleteProjectData(app.backend, entry.prefix);
   app.index.list = app.index.list.filter((listed) => listed.id !== id);
+  forget(app.index, id);
   await saveProjectList(app.backend, app.index);
 }
 

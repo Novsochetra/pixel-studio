@@ -1,4 +1,4 @@
-import { commit, currentLayer } from './actions.js';
+import { commitSelected, currentLayer } from './actions.js';
 import { cssVar } from './draw.js';
 import { refusesPaint } from './body/body-lock.js';
 import { applyTurn, liveTurn, startTurn, turnHandle } from '../editor/selection-turn.js';
@@ -61,6 +61,7 @@ export function turnSelectionDrag(app, start) {
     },
     end() {
       if (app.history.record('Turn', [{ layer, before }])) {
+        app.history.keepSelection(startSelection);
         app.saver.markLayers([layer.id]);
         app.store.touch('pixels');
       }
@@ -75,7 +76,7 @@ export function turnSelectionTo(app, angle) {
   let selection = state.selection;
 
   if (turn) {
-    commit(app, 'Turn', [layer], () => {
+    commitSelected(app, 'Turn', [layer], () => {
       selection = applyTurn(layer.sprite, turn, tidyAngle(angle));
     });
     app.store.set({ selection });

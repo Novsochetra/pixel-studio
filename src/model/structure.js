@@ -11,8 +11,11 @@ export const copyOfLayer = (layer) => ({
   sprite: layer.sprite ? cloneSprite(layer.sprite) : null,
 });
 
-export const copyOfFrame = (frame, canvas) =>
-  newFrame(canvas.width, canvas.height, frame.layers.map(copyOfLayer));
+// a copy to change: its layers and its pins, shown in play whether or not the first is
+export const copyOfFrame = (frame, canvas) => ({
+  ...newFrame(canvas.width, canvas.height, frame.layers.map(copyOfLayer)),
+  marks: structuredClone(frame.marks ?? []),
+});
 
 // An empty frame has one empty layer of art, and the Body once the animation has one, to pose.
 // They keep the keys of the animation's own, so the layer being edited follows into the new frame.

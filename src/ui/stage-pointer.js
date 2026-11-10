@@ -15,16 +15,26 @@ export function pixelAt(canvas, event, scale) {
   ];
 }
 
+// Two fingers pan and pinch; a third joins them, and is not a tool.
+function fingersSession(app, { canvas, stage, touches, session }) {
+  if (touches.size > 2) {
+    return session;
+  }
+
+  // A second finger: what the first one started was the start of a pan, not a stroke. A tool
+  // that cannot take its work back keeps it, as one undo step, saved like any other.
+  session?.cancel ? session.cancel() : session?.end?.();
+
+  return twoFingerSession(app, stage, canvas, touches);
+}
+
 // What a press starts: a two-finger pan and pinch, a pan (middle button, or space held), or the
 // current tool. Returns the session that follows the pointer, or null.
 function pressSession(app, view, event) {
   const { canvas, stage, touches, session } = view;
 
-  if (touches.size === 2) {
-    // a second finger: what the first one started was the start of a pan, not a stroke
-    session?.cancel?.();
-
-    return twoFingerSession(app, stage, canvas, touches);
+  if (touches.size > 1) {
+    return fingersSession(app, view);
   }
 
   if (event.button === 1 || (event.button === 0 && app.spaceHeld)) {
@@ -56,6 +66,7 @@ function press(app, view, event) {
   const start = () => {
     view.intent = null;
     view.session = pressSession(app, view, event);
+    app.dragging = Boolean(view.session);
   };
 
   view.intent?.drop();
@@ -68,7 +79,7 @@ function press(app, view, event) {
   }
 }
 
-function release(view, event) {
+function release(app, view, event) {
   // a finger lifted before its tool began was a tap: the tool acts where it landed. One the
   // browser took away (a system gesture) was never meant for the art.
   if (event.type === 'pointercancel') {
@@ -83,6 +94,7 @@ function release(view, event) {
   if (view.touches.size !== 1) {
     view.session?.end?.();
     view.session = null;
+    app.dragging = false;
   }
 }
 
@@ -90,11 +102,12 @@ export function bindPointer(canvas, app, stage) {
   const view = { canvas, stage, touches: new Map(), session: null, intent: null };
   const place = (event) =>
     view.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
-  const finish = (event) => release(view, event);
+  const finish = (event) => release(app, view, event);
 
   canvas.addEventListener('pointerdown', (event) => {
-    // every view side by side has no one frame under the pointer to draw on: a press stops play
-    if (playsAllViews(app)) {
+    // The canvas shows the frame playing, not the one selected, and every view side by side has
+    // no one frame under the pointer: a press stops play, and the next one draws.
+    if (app.playback) {
       stopPlayback(app);
       app.store.touch('at');
 

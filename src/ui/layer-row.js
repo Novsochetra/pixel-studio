@@ -7,9 +7,10 @@ import { frameAt } from '../model/project.js';
 import { drawThumbnail } from './thumbnail.js';
 import { isBody } from '../model/body/body-kind.js';
 
-function changeLayer(app, entry, label, patch) {
+// `at` is where the layer was when the change began: a rename is kept after a click elsewhere
+function changeLayer(app, { entry, at = app.store.state.at }, label, patch) {
   restructure(app, label, (draft) => {
-    updateLayer(frameAt(draft.project, draft.at), entry.key, patch);
+    updateLayer(frameAt(draft.project, at), entry.key, patch);
   });
 }
 
@@ -47,12 +48,14 @@ function thumbnail(layer) {
 }
 
 export function startRename(app, entry, label) {
+  const { at } = app.store.state;
+
   renameInPlace(label, {
     value: entry.name,
     label: 'Layer name',
     className: 'layer-rename',
     onDone: (name) =>
-      name ? changeLayer(app, entry, 'Rename layer', { name }) : app.store.touch('layers'),
+      name ? changeLayer(app, { entry, at }, 'Rename layer', { name }) : app.store.touch('layers'),
   });
 }
 

@@ -1,5 +1,6 @@
 import { node } from '../dom.js';
-import { changeStructure, directionsInUse } from '../actions.js';
+import { directionsInUse } from '../actions.js';
+import { changeMarkup } from './board-marks.js';
 import { guideChips } from '../guide-chips.js';
 import { viewName } from '../../model/kinds.js';
 
@@ -53,10 +54,11 @@ function overlayControls(app) {
 function markControls(app, note) {
   const { state } = app.store;
   const mode = state.markupMode ?? 'edit';
-  const clearMarks = () => {
-    state.project.markup = { strokes: [], notes: [] };
-    changeStructure(app, 'markup');
-  };
+  const clearMarks = () =>
+    changeMarkup(app, 'Clear marks', (markup) => {
+      markup.strokes = [];
+      markup.notes = [];
+    });
 
   return node(
     'div.group.board-row',

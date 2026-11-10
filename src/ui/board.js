@@ -28,7 +28,7 @@ function noteField(app) {
 
 // Every view side by side, to compare them, mark what to fix and leave notes.
 export function mountBoard(container, app) {
-  const holder = node('div');
+  const holder = node('div.board-holder');
   const inner = node('div.stage-inner.board');
   const note = noteField(app);
   const shown = { canvas: null, scale: 0 };
@@ -52,7 +52,11 @@ export function mountBoard(container, app) {
         replace(holder, next);
       }
 
-      shown.canvas.style.cursor = (state.markupMode ?? 'edit') === 'edit' ? 'pointer' : 'crosshair';
+      const opens = (state.markupMode ?? 'edit') === 'edit';
+
+      shown.canvas.style.cursor = opens ? 'pointer' : 'crosshair';
+      // a finger scrolls a wide board sideways, except while it is drawing a mark on it
+      shown.canvas.style.touchAction = opens ? 'pan-x' : 'none';
       replace(inner, boardControls(app, note), holder, guideSummary(state));
     },
   };

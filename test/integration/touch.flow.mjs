@@ -139,4 +139,56 @@ check(
   'the Colours panel has basic colours and the picker',
 );
 await page.screenshot({ path: `${shots}/touch-colours.png` });
+// the panel shut again, so the whole canvas is in reach
+await page.locator('.dock-tab', { hasText: 'Colours' }).tap();
+await page.waitForTimeout(300);
+
+// with no keyboard there was no way to paste at all; pasting then dragging moved the original
+await tool(/^Select and move/);
+await stroke([1, 1], [13, 13]);
+// pressed as the other flows press: this browser makes no click of the first tap that follows
+// the hand-made touches of a stroke
+await page.locator('.selection-bar').getByRole('button', { name: 'Copy' }).click();
+await page.locator('.selection-bar').getByRole('button', { name: 'Done' }).click();
+await page.getByRole('button', { name: 'More', exact: true }).tap();
+await page.waitForTimeout(200);
+await page.getByRole('menuitem', { name: 'Paste' }).tap();
+await page.waitForTimeout(200);
+await stroke([5, 5], [5, 20]);
+
+// a second finger during the drag of a selection left it moved, unsaved and not undoable
+const settled = (await painted()).join();
+const [fromX, fromY] = await at(5, 20);
+
+await touch('touchStart', [[fromX, fromY]]);
+await touch('touchMove', [[fromX + 30, fromY]]);
+await touch('touchMove', [[fromX + 60, fromY]]);
+await touch('touchStart', [
+  [fromX + 60, fromY],
+  [fromX + 60, fromY + 80],
+]);
+await touch('touchEnd', []);
+await page.waitForTimeout(300);
+check((await painted()).join() === settled, 'a second finger takes a selection’s drag back');
+await page.locator('.selection-bar').getByRole('button', { name: 'Done' }).tap();
+await page.waitForTimeout(200);
+// counted with the selection let go, as its outline is drawn on the canvas too
+check((await painted()).length === 11 + 30 + 11, 'Paste, in the More menu, makes a copy to drag');
+
+// the tap that ended a rename was lost: the tab tapped did not open
+await openDock(page, 'Frames');
+await page.locator('.grid-tab-add').tap();
+await page.fill('#new-animation-name', 'Run');
+await page.locator('.sheet .btn.primary').tap();
+await page.waitForTimeout(300);
+await page.locator('.tab-more').tap();
+await page.getByRole('menuitem', { name: 'Rename' }).tap();
+await page.locator('.tab-rename').fill('Dash');
+await page.locator('.grid-tab', { hasText: 'Coin' }).tap();
+await page.waitForTimeout(900);
+check(
+  (await page.locator('.grid-tab').allTextContents()).join() === 'Coin,Dash' &&
+    (await page.locator('.grid-tab[aria-selected="true"]').textContent()) === 'Coin',
+  'a tap on another tab keeps the name typed and opens that tab, in one tap',
+);
 await finish();

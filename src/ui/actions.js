@@ -1,7 +1,7 @@
 import { cloneSprite, flipHorizontal } from '../model/sprite.js';
 import { allLayers, frameAt, layerAt } from '../model/project.js';
 import { compositeFrame } from '../model/composite.js';
-import { changedLayers, snapshotAnimations } from '../editor/history.js';
+import { changedLayers, snapshotAnimations } from '../editor/snapshots.js';
 import { referenceOf } from '../model/reference.js';
 import { refusesPaint } from './body/body-lock.js';
 import { keptSelection } from '../editor/selection-kept.js';
@@ -83,6 +83,19 @@ export function commit(app, label, layers, mutate) {
   return commitPose(app, { label, layers }, mutate);
 }
 
+// as commit, for a change that moves the selection with the pixels (a move, a turn, a paste):
+// undo then puts the selection back too, so it never marks where the pixels used to be
+export function commitSelected(app, label, layers, mutate) {
+  const before = app.store.state.selection;
+  const changed = commit(app, label, layers, mutate);
+
+  if (changed) {
+    app.history.keepSelection(before);
+  }
+
+  return changed;
+}
+
 // as commit, where a Body's pose may change with its pixels; rigs are cuts that change too
 // ({ animation, direction, before, after }), set by `mutate`
 export function commitPose(app, { label, layers, rigs = [] }, mutate) {
@@ -155,6 +168,8 @@ export function flipCurrent(app) {
   commit(app, 'Flip', [layer], () => {
     layer.sprite = flipHorizontal(layer.sprite);
   });
+  // the pixels it marked are on the other side now
+  app.store.set({ selection: null });
 }
 
 // a cleaned image into one frame of a view ({ direction, frame }): onto the layer being edited,

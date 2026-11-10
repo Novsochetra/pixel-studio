@@ -35,6 +35,15 @@ export function duplicateAnimation(project, animation, name = `${animation.name}
   return copy;
 }
 
+// a frame to start a new animation from: its art and pose, shown in play, with no pins yet
+function freshCopy(frame) {
+  const [copy] = copyFrames([frame]);
+
+  delete copy.hidden;
+
+  return { ...copy, marks: [] };
+}
+
 // a body cut into parts stays in parts: every frame is a copy of the first, Body and all
 function copyFirstFrames(animation, from) {
   animation.directions = Object.fromEntries(
@@ -43,7 +52,7 @@ function copyFirstFrames(animation, from) {
 
       return [
         direction,
-        { ...source, frames: entry.frames.flatMap(() => copyFrames([source.frames[0]])) },
+        { ...source, frames: entry.frames.map(() => freshCopy(source.frames[0])) },
       ];
     }),
   );

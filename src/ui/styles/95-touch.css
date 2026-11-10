@@ -1,0 +1,110 @@
+/* Fingers: bigger targets than a pointer needs, and no keys to learn. Last of the stylesheets, so
+   these sizes win over each part's own. */
+@media (pointer: coarse) {
+  .btn {
+    min-height: 40px;
+  }
+
+  .btn.icon-only {
+    width: 40px;
+  }
+
+  .segmented button {
+    padding: 8px 12px;
+  }
+
+  .layer-row .btn {
+    min-height: 36px;
+    min-width: 36px;
+  }
+
+  .input,
+  select.input {
+    box-sizing: border-box;
+    min-height: 40px;
+  }
+
+  /* the dots stay small in the frame's corner: the room round them takes the tap too */
+  .cell-more {
+    width: 26px;
+    height: 26px;
+  }
+
+  .cell-more::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+  }
+
+  .tab-more,
+  .grid-tab-add,
+  .icon-toggle,
+  .grid-view-more {
+    width: 40px;
+    height: 40px;
+  }
+
+  .grid-view {
+    min-height: 40px;
+  }
+
+  .grid-tab {
+    min-height: 36px;
+  }
+
+  .swatches {
+    grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+    gap: 6px;
+  }
+
+  .btn.chip {
+    min-height: 36px;
+    padding-inline: 12px;
+  }
+
+  .btn.folders-new,
+  .place {
+    min-height: 40px;
+  }
+
+  .target-picker {
+    gap: 6px;
+  }
+
+  .target-picker .swatch,
+  .map-row .swatch {
+    width: 32px;
+    height: 32px;
+  }
+
+  .cut-part .btn {
+    min-width: 36px;
+  }
+
+  .cut-swatch {
+    width: 28px;
+    height: 28px;
+  }
+
+  .guide-row .btn {
+    min-width: 40px;
+  }
+
+  /* a line of text with a box to tick, or a line that opens: tall enough to land on */
+  label:has(> input[type='checkbox']:not(.switch)),
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+  }
+
+  summary {
+    display: list-item;
+    padding-block: 8px;
+  }
+
+  .rail .btn[data-key]::after {
+    display: none;
+  }
+}

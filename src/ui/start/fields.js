@@ -6,6 +6,9 @@ import { numberInput } from '../number-input.js';
 
 const SIZES = [16, 24, 32, 48, 64, 96, 128, 160];
 
+const sizeOr = (text, usual) =>
+  wholeNumber(Number(text) > 0 ? text : '', { min: 8, max: 512, fallback: usual });
+
 function field(label, control) {
   return node('label.field', {}, node('span', {}, label), control);
 }
@@ -56,6 +59,7 @@ export function projectFields() {
   const { name, width, height, scale, directions } = controls();
   const directionsField = field('Directions', directions);
   const sizes = sizeButtons(width, height);
+  let usual = { width: 64, height: 64 };
   const el = node(
     'div.start-fields',
     {},
@@ -74,6 +78,7 @@ export function projectFields() {
   return {
     el,
     fill(preset) {
+      usual = preset.canvas;
       name.placeholder = defaultName(preset);
       width.value = String(preset.canvas.width);
       height.value = String(preset.canvas.height);
@@ -84,8 +89,9 @@ export function projectFields() {
     },
     read: () => ({
       name: name.value.trim() || name.placeholder,
-      width: wholeNumber(width.value, { min: 8, max: 512 }),
-      height: wholeNumber(height.value, { min: 8, max: 512 }),
+      // a field left empty, or 0, takes the size the kind picked comes with
+      width: sizeOr(width.value, usual.width),
+      height: sizeOr(height.value, usual.height),
       scale: wholeNumber(scale.value, { min: 1, max: 32 }),
       directionSet: directions.value,
     }),

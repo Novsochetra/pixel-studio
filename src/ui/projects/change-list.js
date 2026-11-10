@@ -7,9 +7,12 @@ export function changeList({ app, redraw }, change) {
   const made = change(app.index);
 
   redraw();
-  saveProjectList(app.backend, app.index).catch((error) =>
-    toast(`Your folders could not be saved just now: ${error.message}`),
-  );
+  // The open project first: an example nobody has edited is not written yet, and a list that
+  // names it would point at nothing after a reload.
+  app.saver
+    .flushNow()
+    .then(() => saveProjectList(app.backend, app.index))
+    .catch((error) => toast(`Your folders could not be saved just now: ${error.message}`));
 
   return made;
 }

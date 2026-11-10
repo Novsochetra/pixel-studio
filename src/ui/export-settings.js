@@ -32,13 +32,20 @@ export function characterHeight(state) {
 }
 
 // a typed 0, a cleared field or a negative number would make an image that cannot exist
+// twice the largest canvas: a frame of 100000 would ask for an image no browser can make, and
+// the setting is kept with the project
+const LARGEST_FRAME = 1024;
+
+const within = (value, least) =>
+  Math.min(LARGEST_FRAME, Math.max(least, Math.round(value) || least));
+
 export function sane(settings) {
   return {
     ...settings,
-    frameWidth: Math.max(1, Math.round(settings.frameWidth) || 1),
-    frameHeight: Math.max(1, Math.round(settings.frameHeight) || 1),
-    anchorX: Math.max(0, Math.round(settings.anchorX) || 0),
-    anchorY: Math.max(0, Math.round(settings.anchorY) || 0),
+    frameWidth: within(settings.frameWidth, 1),
+    frameHeight: within(settings.frameHeight, 1),
+    anchorX: within(settings.anchorX, 0),
+    anchorY: within(settings.anchorY, 0),
   };
 }
 

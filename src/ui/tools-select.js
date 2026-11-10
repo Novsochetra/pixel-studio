@@ -8,6 +8,7 @@ import {
   stampPixels,
 } from '../editor/selection.js';
 import { currentLayer } from './actions.js';
+import { moveFloating, shiftOnCanvas } from '../editor/floating.js';
 import { combineSelections, lassoPiece, lassoSelection } from '../editor/lasso-select.js';
 import { refusesPaint } from './body/body-lock.js';
 import { pickLayerAt } from './pick-layer.js';
@@ -23,16 +24,30 @@ export function moveSelection(app, start) {
   const before = cloneSprite(layer.sprite);
   const lifted = liftPixels(before, app.store.state.selection);
   const startMask = app.store.state.selection;
+  const place = (shift) => {
+    layer.sprite.pixels.set(before.pixels);
+
+    if (startMask.floating) {
+      return moveFloating(layer.sprite, startMask, ...shift);
+    }
+
+    clearSelected(layer.sprite, startMask);
+
+    return stampPixels(layer.sprite, lifted, ...shiftOnCanvas(lifted, layer.sprite, shift));
+  };
 
   return {
     move([x, y]) {
+      app.store.set({ selection: place([x - start[0], y - start[1]]) });
+    },
+    // a second finger makes the drag a pinch: the pixels go back where they were
+    cancel() {
       layer.sprite.pixels.set(before.pixels);
-      clearSelected(layer.sprite, startMask);
-      const selection = stampPixels(layer.sprite, lifted, x - start[0], y - start[1]);
-      app.store.set({ selection });
+      app.store.set({ selection: startMask });
     },
     end() {
       if (app.history.record('Move', [{ layer, before }])) {
+        app.history.keepSelection(startMask);
         app.saver.markLayers([layer.id]);
         app.store.touch('pixels');
       }

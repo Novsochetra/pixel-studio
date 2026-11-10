@@ -107,7 +107,8 @@ export function drawingSettings(app, colors) {
   const lock = (on) =>
     app.store.set({
       paletteLock: on,
-      color: on && !colors.includes(state.color) ? colors[0] : state.color,
+      // art with no colours yet has none to lock to: the colour in hand stays
+      color: on && colors.length && !colors.includes(state.color) ? colors[0] : state.color,
     });
 
   return [

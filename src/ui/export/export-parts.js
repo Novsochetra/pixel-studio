@@ -1,5 +1,6 @@
 import { node, toast } from '../dom.js';
 import { drawChecker } from '../draw.js';
+import { afterPress } from '../after-press.js';
 import { saveFrames, saveGamePack, saveGifs, saveSheetsWithJson } from '../export-files.js';
 
 export function numberField(label, value, id, onChange) {
@@ -12,7 +13,7 @@ export function numberField(label, value, id, onChange) {
       type: 'number',
       min: '1',
       value: String(value),
-      onchange: (event) => onChange(Number(event.target.value)),
+      onchange: (event) => afterPress(() => onChange(Number(event.target.value))),
     }),
   );
 }

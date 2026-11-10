@@ -113,6 +113,12 @@ export function moveSelected(sprite, selection, dx, dy) {
   return stampPixels(sprite, lifted, dx, dy);
 }
 
+// Half a pixel goes up for a box wider than tall and down for one taller than wide: a box whose
+// sides differ by an odd number has no middle pixel to turn about, and rounding the same way at
+// every turn walked it a pixel across the canvas each time.
+const snap = (value, box) =>
+  box.right - box.left >= box.bottom - box.top ? Math.floor(value + 0.5) : Math.ceil(value - 0.5);
+
 export function selectionBox(selection) {
   let box = null;
 
@@ -138,13 +144,13 @@ const TRANSFORMS = {
     const cx = (box.left + box.right) / 2;
     const cy = (box.top + box.bottom) / 2;
 
-    return [Math.round(cx - (y - cy)), Math.round(cy + (x - cx))];
+    return [snap(cx - (y - cy), box), snap(cy + (x - cx), box)];
   },
   'rotate-ccw': (x, y, box) => {
     const cx = (box.left + box.right) / 2;
     const cy = (box.top + box.bottom) / 2;
 
-    return [Math.round(cx + (y - cy)), Math.round(cy - (x - cx))];
+    return [snap(cx + (y - cy), box), snap(cy - (x - cx), box)];
   },
 };
 
