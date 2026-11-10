@@ -14,10 +14,17 @@ import { prefixFor } from '../store/keys.js';
 import { readProjectBundle } from '../store/project-file.js';
 import { allLayers, newId } from '../model/project.js';
 import { setUpApp } from './install-app.js';
+import { layoutSize, watchLayout } from './layout.js';
 
 // the editor, opened on one project; `save` as install() takes it
 async function startEditor(backend, index, { project, prefix, save, background = null }) {
-  const store = createStore({ ...startingState(project), storage: backend.kind });
+  // the window's size and the panel open on a phone belong to the window, not to a project
+  const store = createStore({
+    ...startingState(project),
+    storage: backend.kind,
+    layout: layoutSize(),
+    panel: null,
+  });
   const app = { store, backend, index };
 
   app.findLayer = (id) =>
@@ -108,4 +115,5 @@ async function boot() {
 }
 
 setUpApp();
+watchLayout();
 boot();

@@ -5,17 +5,7 @@ import { openShortcuts } from './shortcuts.js';
 import { canInstall, installApp } from './install-app.js';
 import { openProjectsSheet } from './projects/projects-sheet.js';
 import { saveText, undoRedo, viewFilter, zoomControls } from './toolbar-parts.js';
-import { gameOf } from '../model/presets.js';
-import { isSingleView } from '../model/kinds.js';
-
-// the board compares views, so only kinds with several have one; the preview is the pitch for a
-// game played on one
-const modesFor = (project) =>
-  [
-    ['edit', 'Edit'],
-    isSingleView(project) ? null : ['board', 'Views board'],
-    ['game', gameOf(project).background === 'pitch' ? 'On the pitch' : 'Preview'],
-  ].filter(Boolean);
+import { modesFor, moreButton, workspaceButton } from './toolbar-menu.js';
 
 function workspaces(app) {
   const { state } = app.store;
@@ -40,7 +30,7 @@ function projectButton(app) {
       title: 'Projects: switch, start a new one, line them up',
       onclick: () => openProjectsSheet(app),
     },
-    'PIXEL CLEAN',
+    node('span.wordmark-brand', {}, 'PIXEL CLEAN'),
     node('small', {}, `${app.store.state.project.name} ▾`),
   );
 }
@@ -58,49 +48,58 @@ function installButton() {
   );
 }
 
-function endButtons(app) {
-  return [
-    canInstall() ? installButton() : null,
-    node(
-      'button.btn.quiet',
-      { title: 'Saved versions', 'aria-label': 'History', onclick: () => openVersionsSheet(app) },
-      icon('history'),
-      node('span.btn-text', {}, 'History'),
-    ),
-    node(
-      'button.btn.quiet',
-      {
-        title: 'Keyboard shortcuts (?)',
-        'aria-label': 'Keyboard shortcuts',
-        onclick: openShortcuts,
-      },
-      '?',
-    ),
-    node(
-      'button.btn.primary',
-      { onclick: (event) => openDownloadMenu(app, event.currentTarget) },
-      icon('download'),
-      'Download',
-    ),
-  ];
+const wideButtons = (app) => [
+  canInstall() ? installButton() : null,
+  node(
+    'button.btn.quiet',
+    { title: 'Saved versions', 'aria-label': 'History', onclick: () => openVersionsSheet(app) },
+    icon('history'),
+    node('span.btn-text', {}, 'History'),
+  ),
+  node(
+    'button.btn.quiet',
+    {
+      title: 'Keyboard shortcuts (?)',
+      'aria-label': 'Keyboard shortcuts',
+      onclick: openShortcuts,
+    },
+    '?',
+  ),
+];
+
+function downloadButton(app) {
+  return node(
+    'button.btn.primary.toolbar-download',
+    {
+      'aria-label': 'Download',
+      title: 'Download: sprite sheets, PNGs, GIFs, the project file',
+      onclick: (event) => openDownloadMenu(app, event.currentTarget),
+    },
+    icon('download'),
+    node('span.btn-label', {}, 'Download'),
+  );
 }
 
+// a narrower window keeps one row: what does not fit waits in the More menu
 export function renderToolbar(el, app) {
   const { state } = app.store;
+  const { layout } = state;
 
   replace(
     el,
     projectButton(app),
     undoRedo(app),
-    workspaces(app),
-    state.mode === 'edit' ? zoomControls(app) : null,
-    state.mode !== 'game' ? viewFilter(app) : null,
+    layout !== 'compact' ? workspaces(app) : null,
+    layout !== 'compact' && state.mode === 'edit' ? zoomControls(app) : null,
+    layout === 'wide' && state.mode !== 'game' ? viewFilter(app) : null,
     node('div.spacer'),
     node(
       'span.save-status',
       { 'data-state': state.saveStatus, title: saveText(state) },
       saveText(state),
     ),
-    endButtons(app),
+    layout === 'compact' ? workspaceButton(app) : null,
+    layout === 'wide' ? wideButtons(app) : moreButton(app),
+    downloadButton(app),
   );
 }

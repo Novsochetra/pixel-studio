@@ -1,0 +1,45 @@
+/* The dock: on a phone, the tabs that open the frames and the inspector's panels. */
+.dock {
+  grid-area: dock;
+  display: flex;
+  gap: 2px;
+  padding: 3px max(6px, env(safe-area-inset-left, 0px)) calc(3px + env(safe-area-inset-bottom, 0px))
+    max(6px, env(safe-area-inset-right, 0px));
+  background: var(--chrome);
+  border-top: 1px solid var(--separator);
+}
+
+.dock-tab {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--label-muted);
+  font-size: 11px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.dock-tab[aria-pressed='true'] {
+  background: var(--tint-quiet);
+  color: var(--tint);
+}
+
+.dock-tab svg,
+.dock-swatch {
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+}
+
+.dock-swatch {
+  border-radius: 6px;
+  border: 1px solid rgb(127 127 127 / 45%);
+}

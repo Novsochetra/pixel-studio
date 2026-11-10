@@ -86,6 +86,22 @@ function mirrorField(app) {
   );
 }
 
+// settings that are one switch each, named by the state they turn on
+const SWITCHES = [
+  {
+    key: 'cleanLines',
+    id: 'clean-lines',
+    label: 'Clean lines',
+    hint: 'Removes doubled corners while you draw with a 1 px brush',
+  },
+  {
+    key: 'shapeFilled',
+    id: 'shape-filled',
+    label: 'Filled shapes',
+    hint: 'Rectangles and ellipses are drawn solid, not as outlines',
+  },
+];
+
 export function drawingSettings(app, colors) {
   const { state } = app.store;
   const lock = (on) =>
@@ -97,14 +113,8 @@ export function drawingSettings(app, colors) {
   return [
     node('h2', { tabindex: '0' }, 'Drawing'),
     brushField(app),
-    toggle(
-      {
-        id: 'clean-lines',
-        label: 'Clean lines',
-        hint: 'Removes doubled corners while you draw with a 1 px brush',
-      },
-      state.cleanLines,
-      (on) => app.store.set({ cleanLines: on }),
+    SWITCHES.map((item) =>
+      toggle(item, state[item.key], (on) => app.store.set({ [item.key]: on })),
     ),
     toggle(
       { id: 'palette-lock', label: 'Palette lock', hint: "Draw only with the art's colours" },

@@ -1,18 +1,21 @@
 // Every button in every workspace, panel and dialog clicked in turn, for each kind of project: the
 // page must never throw. Shared by the desktop and phone runs.
-import { createProject, openExample } from './studio.mjs';
+import { createProject, isCompact, openExample, openWorkspace } from './studio.mjs';
 
 const SKIP = /Delete|Clear marks|Go back|Wear it|Apply to|Use them all|Use for|Forget|Remove/;
 // the workspace buttons are left alone, so each workspace's own panels are clicked through
-const TOOLBAR_SKIP = /Download|History|^\?$|PIXEL|^Edit$|Views board|On the pitch|^Preview$/;
+const TOOLBAR_SKIP =
+  /Download|History|^\?$|PIXEL|^Edit$|Views board|On the pitch|^Preview$|^More$|^Workspace/;
+// [panel of the dock that holds the opener on a phone, the opener, the item of its menu]
 const DIALOGS = [
-  ['Swap colours…', null],
-  ['Team kits…', null],
-  ['History', null],
-  ['Keyboard shortcuts', null],
-  ['Download', /Sprite sheet/],
-  ['Download', /Prompt and reference/],
-  ['New animation', null],
+  ['Colours', 'Swap colours…', null],
+  ['Colours', 'Team kits…', null],
+  [null, 'History', null],
+  [null, 'Keyboard shortcuts', null],
+  [null, 'More', /Saved versions/],
+  [null, 'Download', /Sprite sheet/],
+  [null, 'Download', /Prompt and reference/],
+  ['Frames', 'New animation', null],
 ];
 
 async function closeAll(page) {
@@ -57,45 +60,79 @@ async function clickAll(run, scope, skip = SKIP) {
   }
 }
 
+async function workspaceNames(page) {
+  if (!(await isCompact(page))) {
+    return page.locator('#toolbar .segmented[aria-label="Workspace"] button').allTextContents();
+  }
+
+  await page.getByRole('button', { name: /^Workspace/ }).click();
+  const names = await page.getByRole('menuitemcheckbox').allTextContents();
+  await page.keyboard.press('Escape');
+
+  // the open workspace's item carries its tick
+  return names.map((name) => name.replace('✓', '').trim());
+}
+
+// a phone shows the panels one at a time, from the dock: each is opened and clicked through
+async function everyPanel(run) {
+  const { page } = run;
+  const tabs = await page.locator('.dock-tab').allTextContents();
+
+  for (const tab of tabs) {
+    await page.locator('.dock-tab', { hasText: tab }).click();
+    await page.waitForTimeout(150);
+    await clickAll(run, '#stage');
+    await clickAll(run, '#inspector');
+  }
+}
+
 async function everyWorkspace(run) {
   const { page } = run;
-  const modes = await page
-    .locator('#toolbar .segmented[aria-label="Workspace"] button')
-    .allTextContents();
 
   await page
     .locator('.section[data-collapsed="true"] > h2')
     .evaluateAll((titles) => titles.forEach((title) => title.click()));
 
-  for (const mode of modes) {
-    await page.getByRole('button', { name: mode, exact: true }).click();
-    await page.waitForTimeout(250);
+  for (const mode of await workspaceNames(page)) {
+    await openWorkspace(page, mode);
 
     for (const scope of ['#toolbar', '#rail', '#stage', '#inspector']) {
       await clickAll(run, scope, scope === '#toolbar' ? TOOLBAR_SKIP : SKIP);
     }
+
+    await everyPanel(run);
   }
 
-  await page.getByRole('button', { name: 'Edit', exact: true }).click();
+  await openWorkspace(page, 'Edit');
+}
+
+async function openDialog(page, [panel, opener, item]) {
+  if (panel) {
+    await page
+      .locator('.dock-tab[aria-pressed="false"]', { hasText: panel })
+      .click({ timeout: 1000 })
+      .catch(() => {});
+  }
+
+  await page
+    .getByRole('button', { name: opener, exact: opener === 'More' })
+    .first()
+    .click({ timeout: 2000 })
+    .catch(() => {});
+
+  if (item) {
+    await page
+      .getByRole('menuitem', { name: item })
+      .click({ timeout: 2000 })
+      .catch(() => {});
+  }
 }
 
 async function everyDialog(run) {
   const { page } = run;
 
-  for (const [opener, item] of DIALOGS) {
-    await page
-      .getByRole('button', { name: opener })
-      .first()
-      .click({ timeout: 2000 })
-      .catch(() => {});
-
-    if (item) {
-      await page
-        .getByRole('menuitem', { name: item })
-        .click({ timeout: 2000 })
-        .catch(() => {});
-    }
-
+  for (const dialog of DIALOGS) {
+    await openDialog(page, dialog);
     await page.waitForTimeout(250);
     await clickAll(
       run,

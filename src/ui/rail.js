@@ -1,6 +1,15 @@
-import { node, icon, replace } from './dom.js';
+import { node, icon, replace, toast } from './dom.js';
 import { toolsFor } from './tools.js';
 import { flipCurrent } from './actions.js';
+
+// a finger has no pointer to hover for a tool's name: picking the tool says what it does
+function pickTool(app, tool) {
+  app.store.set({ tool: tool.id, mode: 'edit' });
+
+  if (app.store.state.layout === 'compact') {
+    toast(tool.label);
+  }
+}
 
 export function renderRail(el, app) {
   const { state } = app.store;
@@ -12,7 +21,7 @@ export function renderRail(el, app) {
         'data-key': tool.key.toUpperCase(),
         'aria-label': tool.label,
         'aria-pressed': String(state.tool === tool.id),
-        onclick: () => app.store.set({ tool: tool.id, mode: 'edit' }),
+        onclick: () => pickTool(app, tool),
       },
       icon(tool.id),
     ),

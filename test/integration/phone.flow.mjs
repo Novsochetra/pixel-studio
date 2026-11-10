@@ -1,7 +1,8 @@
-// On a phone: nothing scrolls sideways, the frames stay usable, a finger swipe scrolls the frames
-// while press-and-hold drags one, and every button still works.
+// On a phone: the editor fills the screen and only the canvas scrolls, the frames and panels open
+// from the dock, a finger swipe scrolls the frames while press-and-hold drags one, and every
+// button still works.
 import { openStudio } from './harness.mjs';
-import { frameLabels, openExample } from './studio.mjs';
+import { frameLabels, openDock, openExample, openWorkspace } from './studio.mjs';
 import { monkey } from './monkey.mjs';
 
 const studio = await openStudio({ device: 'Pixel 7' });
@@ -10,6 +11,34 @@ const overflow = () => page.evaluate(() => document.documentElement.scrollWidth 
 check((await overflow()) <= 0, 'the start screen fits the phone');
 await openExample(page);
 check((await overflow()) <= 0, 'the editor fits the phone');
+const screen = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+check(
+  (await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)) <= 0,
+  'the editor is as tall as the screen: the page itself never scrolls',
+);
+const shut = await page.locator('.edit-scroll').boundingBox();
+check(shut.height > screen.height * 0.6, 'with every panel shut, the canvas keeps the screen');
+await page.screenshot({ path: `${shots}/phone-canvas.png` });
+check(!(await page.locator('.grid-panel').isVisible()), 'the frames wait in the dock');
+await openDock(page, 'Colours');
+check(
+  (await page.locator('.section[data-name="colours"]').isVisible()) &&
+    !(await page.locator('.section[data-name="layers"]').isVisible()),
+  'a dock tab opens its panel alone',
+);
+await page.screenshot({ path: `${shots}/phone-colours.png` });
+await openDock(page, 'Frames');
+check(
+  (await page.locator('.grid-panel').isVisible()) &&
+    !(await page.locator('.section[data-name="colours"]').isVisible()),
+  'another tab takes its place',
+);
+const dock = await page.locator('#dock').boundingBox();
+check(
+  Math.abs(dock.y + dock.height - screen.height) < 2 &&
+    (await page.locator('.edit-scroll').boundingBox()).height > 150,
+  'the dock stays at the foot of the screen, the canvas above the open panel',
+);
 await page.locator('.cell-add').click();
 await page.locator('.cell-add').click();
 await page.waitForTimeout(300);
@@ -21,15 +50,13 @@ check(
   'the download menu stays on the screen',
 );
 await page.keyboard.press('Escape');
-await page.getByRole('button', { name: 'Views board', exact: true }).click();
-await page.waitForTimeout(300);
+await openWorkspace(page, 'Views board');
 const controls = await page.locator('.board-controls').boundingBox();
 check(
   controls.x >= 0 && controls.x + controls.width <= (await page.evaluate(() => innerWidth)),
   'the board controls wrap within the screen',
 );
-await page.getByRole('button', { name: 'Edit', exact: true }).click();
-await page.waitForTimeout(300);
+await openWorkspace(page, 'Edit');
 check(
   (await page.locator('.grid-row.current .cell').count()) === 3,
   'back in Edit, the frames show again',

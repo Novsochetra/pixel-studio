@@ -77,6 +77,7 @@ const VIEW = [
   'symmetry',
   'showPins',
   'pinName',
+  'shapeFilled',
 ];
 
 function viewKept(state, project) {

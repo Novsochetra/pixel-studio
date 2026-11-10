@@ -39,6 +39,7 @@ const GRID_KEYS = [
   'onion',
   'showPins',
   'pinName',
+  'layout',
 ];
 
 const showsInGrid = (patch) => {

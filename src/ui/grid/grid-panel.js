@@ -55,7 +55,9 @@ export function mountGridPanel(app, { isShown, onPlayFrame }) {
   const render = () =>
     !el.querySelector('.tab-rename') &&
     keepFocus(el, () => {
-      const { gridAll, gridOpen } = app.store.state;
+      const { gridAll, layout } = app.store.state;
+      // a phone opens and shuts the whole panel from the dock, so it is never folded there
+      const gridOpen = app.store.state.gridOpen || layout === 'compact';
       shownPlaying = isPlaying(app);
       const onPlay = () => togglePlayback(app, { isShown, onFrame });
       el.classList.toggle('folded', !gridOpen);

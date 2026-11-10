@@ -4,6 +4,7 @@ import { removePinNear, setPin } from '../model/pins.js';
 import { currentLayer, restructure } from './actions.js';
 import { toast } from './dom.js';
 import { fill, replace, shade, stroke } from './tools-paint.js';
+import { shape } from './tools-shape.js';
 import { lasso, select, wand } from './tools-select.js';
 import { onTurnHandle, turnSelectionDrag } from './selection-turn.js';
 import { pickLayerToDrag } from './pick-layer.js';
@@ -19,6 +20,9 @@ const TOOLS = [
   { id: 'eraser', label: 'Eraser', key: 'e' },
   { id: 'picker', label: 'Colour picker', key: 'i' },
   { id: 'fill', label: 'Fill', key: 'g' },
+  { id: 'line', label: 'Line: drag from end to end (Shift: straight or diagonal)', key: 'n' },
+  { id: 'rect', label: 'Rectangle: drag corner to corner (Shift: a square)', key: 'u' },
+  { id: 'ellipse', label: 'Ellipse: drag corner to corner (Shift: a circle)', key: 'c' },
   { id: 'replace', label: 'Replace colour', key: 'r' },
   { id: 'shade', label: 'Light and dark brush (Shift: darker)', key: 'd' },
   { id: 'select', label: 'Select and move: a click picks the layer under it', key: 's' },
@@ -66,7 +70,16 @@ export function toolsFor(project) {
   return TOOLS.filter((tool) => !STANDING_ONLY.has(tool.id) || kindOf(project).place === 'feet');
 }
 
-const PAINTING = new Set(['pencil', 'eraser', 'fill', 'replace', 'shade']);
+const PAINTING = new Set([
+  'pencil',
+  'eraser',
+  'fill',
+  'replace',
+  'shade',
+  'line',
+  'rect',
+  'ellipse',
+]);
 
 const orTurnHandle = (tool) => (app, point, event) =>
   onTurnHandle(app, point) ? turnSelectionDrag(app, point) : tool(app, point, event);
@@ -87,6 +100,9 @@ const ON_PRESS = {
   eraser: (app, point) => stroke(app, point, CLEAR),
   fill,
   replace,
+  line: (app, point) => shape(app, 'line', point),
+  rect: (app, point) => shape(app, 'rect', point),
+  ellipse: (app, point) => shape(app, 'ellipse', point),
   pose: poseTool,
   lasso: orTurnHandle(lasso),
 };

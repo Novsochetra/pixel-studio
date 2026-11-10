@@ -56,7 +56,7 @@ export function zoomControls(app) {
   );
 }
 
-const FILTERS = [
+export const FILTERS = [
   ['colour', 'Colour', 'The art as it is'],
   ['silhouette', 'Silhouette', 'One flat shape: does the pose read?'],
   ['grey', 'Grey', 'Light and dark only: is there enough contrast?'],

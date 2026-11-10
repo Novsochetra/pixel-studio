@@ -19,13 +19,11 @@
   font-size: 13px;
 }
 
-/* a phone's canvas is small, so the card sits above it instead of covering the top of the art */
-@media (max-width: 700px) {
-  .empty-frame {
-    position: static;
-    transform: none;
-    /* the stage is as wide as a zoomed canvas: the card wraps to the screen instead */
-    contain: inline-size;
-    width: min(100%, calc(100vw - 32px));
-  }
+/* Over the canvas on a phone too, at its foot: a card in the canvas's own column pushed the
+   canvas down, and let it jump up under the finger at the first pixel drawn. */
+:root[data-layout='compact'] .empty-frame {
+  top: auto;
+  bottom: 10px;
+  gap: 6px 8px;
+  padding: 8px 10px;
 }

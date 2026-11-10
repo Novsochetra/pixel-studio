@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 
 export async function openExample(page) {
   await page.getByRole('button', { name: 'Try the example character' }).click();
-  await page.waitForSelector('.grid-panel');
+  await page.waitForSelector('.grid-panel', { state: 'attached' });
   await page.waitForTimeout(400);
 }
 
@@ -26,8 +26,33 @@ export async function createProject(page, { kind = 'Character', name, width, hei
   }
 
   await page.getByRole('button', { name: 'Create', exact: true }).click();
-  await page.waitForSelector('.grid-panel');
+  await page.waitForSelector('.grid-panel', { state: 'attached' });
   await page.waitForTimeout(400);
+}
+
+export const isCompact = (page) =>
+  page.evaluate(() => document.documentElement.dataset.layout === 'compact');
+
+// on a phone the frames and the inspector's panels open from the dock; a wide window has no dock
+export async function openDock(page, name) {
+  const tab = page.locator('.dock-tab', { hasText: name });
+
+  if ((await tab.count()) && (await tab.getAttribute('aria-pressed')) !== 'true') {
+    await tab.click();
+    await page.waitForTimeout(200);
+  }
+}
+
+// Edit, Views board or the preview: buttons in a wide toolbar, one button's menu on a phone
+export async function openWorkspace(page, name) {
+  if (await isCompact(page)) {
+    await page.getByRole('button', { name: /^Workspace/ }).click();
+    await page.getByRole('menuitemcheckbox', { name, exact: true }).click();
+  } else {
+    await page.getByRole('button', { name, exact: true }).click();
+  }
+
+  await page.waitForTimeout(300);
 }
 
 export async function showAllViews(page) {

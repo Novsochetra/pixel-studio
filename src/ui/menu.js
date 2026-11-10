@@ -29,11 +29,13 @@ function position(menu, anchor, align) {
 
 function item(entry, close, onError) {
   const [label, action, options = {}] = entry;
+  const choice = options.checked !== undefined;
 
   return node(
     `button${options.danger ? '.danger' : ''}`,
     {
-      role: 'menuitem',
+      role: choice ? 'menuitemcheckbox' : 'menuitem',
+      'aria-checked': choice ? String(options.checked) : null,
       disabled: Boolean(options.disabled),
       title: options.title,
       onclick: () => {
@@ -42,6 +44,8 @@ function item(entry, close, onError) {
       },
     },
     label,
+    // aria-checked says it to a screen reader: the mark itself stays out of the item's name
+    options.checked ? node('span', { 'aria-hidden': 'true' }, '✓') : null,
   );
 }
 

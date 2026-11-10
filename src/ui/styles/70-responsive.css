@@ -1,108 +1,303 @@
-@media (max-width: 860px) {
-  .app {
+/* A phone or a small tablet: the app fills the screen and only the canvas scrolls. The frames and
+   the inspector's panels open from the dock, one at a time, between the canvas and the tools. */
+:root[data-layout='compact'] body {
+  font-size: 15px;
+}
+
+:root[data-layout='compact'] .app {
+  grid-template:
+    'bar' auto 'stage' minmax(0, 1fr) 'inspector' auto
+    'rail' auto 'dock' auto / minmax(0, 1fr);
+}
+
+:root[data-layout='compact'] .statusbar {
+  display: none;
+}
+
+:root[data-layout='compact'] .toolbar {
+  flex-wrap: nowrap;
+  gap: 2px;
+  padding-block: max(4px, env(safe-area-inset-top, 0px)) 4px;
+  padding-inline: max(6px, env(safe-area-inset-left, 0px)) max(8px, env(safe-area-inset-right, 0px));
+}
+
+:root[data-layout='compact'] .toolbar > * {
+  flex: none;
+}
+
+:root[data-layout='compact'] .toolbar .spacer {
+  flex: 1;
+}
+
+:root[data-layout='compact'] .workspace-pick {
+  gap: 2px;
+  padding: 0 6px 0 10px;
+}
+
+:root[data-layout='compact'] .workspace-pick svg {
+  width: 14px;
+  height: 14px;
+}
+
+:root[data-layout='compact'] .toolbar .btn {
+  min-width: 40px;
+  min-height: 40px;
+}
+
+:root[data-layout='compact'] .toolbar .btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* the project's name is the way into Projects; the studio's own name gives it the room */
+:root[data-layout='compact'] .wordmark-brand,
+:root[data-layout='compact'] .toolbar-download .btn-label {
+  display: none;
+}
+
+:root[data-layout='compact'] .wordmark {
+  flex: 0 1 auto;
+  min-width: 48px;
+  min-height: 40px;
+  margin-right: 0;
+}
+
+:root[data-layout='compact'] .wordmark small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 600 15px/1.3 var(--font-ui);
+  color: var(--label);
+}
+
+:root[data-layout='compact'] .save-status {
+  margin-inline: 6px;
+}
+
+:root[data-layout='compact'] .rail {
+  flex-direction: row;
+  gap: 2px;
+  overflow: auto hidden;
+  scrollbar-width: none;
+  border-right: 0;
+  border-top: 1px solid var(--separator);
+  padding: 4px 28px 4px max(6px, env(safe-area-inset-left, 0px));
+  /* the fade says the tools go on past the edge */
+  mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+}
+
+:root[data-layout='compact'] .rail .btn {
+  width: 44px;
+  height: 44px;
+}
+
+:root[data-layout='compact'] .rail .btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+:root[data-layout='compact'] .rail hr {
+  border-top: 0;
+  border-left: 1px solid var(--separator);
+  margin: 4px;
+}
+
+:root[data-layout='compact'] .stage-inner {
+  padding: 16px;
+}
+
+:root[data-layout='compact'] .stage-inner.preview {
+  width: 100%;
+}
+
+:root[data-layout='compact'] .inspector {
+  max-height: min(44vh, 380px);
+  border-left: 0;
+  border-top: 1px solid var(--separator);
+  overscroll-behavior: contain;
+}
+
+:root[data-layout='compact'] .app:is([data-panel=''], [data-panel='frames']) .inspector,
+:root[data-layout='compact'] .app:not([data-panel='frames']) .grid-panel,
+:root[data-layout='compact'] .app[data-panel='colours'] .section:not([data-name='colours']),
+:root[data-layout='compact'] .app[data-panel='brush'] .section:not([data-name='drawing']),
+:root[data-layout='compact'] .app[data-panel='layers'] .section:not([data-name='layers']),
+:root[data-layout='compact'] .app[data-panel='outline'] .section:not([data-name='outline']),
+:root[data-layout='compact'] .app[data-panel='guides'] .section:not([data-name='guides']),
+:root[data-layout='compact'] .grid-fold {
+  display: none;
+}
+
+:root[data-layout='compact'] .section {
+  padding-inline: max(16px, env(safe-area-inset-left, 0px))
+    max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* the dock opens and shuts a panel, so its title folds nothing here */
+:root[data-layout='compact'] .section > h2 {
+  cursor: default;
+}
+
+:root[data-layout='compact'] .section > h2::before {
+  display: none;
+}
+
+:root[data-layout='compact'] .grid-panel {
+  max-height: min(44vh, 380px);
+  padding-inline: max(12px, env(safe-area-inset-left, 0px))
+    max(12px, env(safe-area-inset-right, 0px));
+}
+
+/* the tabs and Play keep the first row; what is set once sits on the row under them */
+:root[data-layout='compact'] .grid-bar .spacer {
+  display: none;
+}
+
+:root[data-layout='compact'] .grid-tabs-bar {
+  flex: 1 0 calc(100% - 56px);
+  max-width: calc(100% - 56px);
+}
+
+:root[data-layout='compact'] .grid-play {
+  order: -1;
+  width: 44px;
+}
+
+:root[data-layout='compact'] .grid-tabs-bar {
+  order: -2;
+}
+
+/* a line of advice costs a phone a third of its panel */
+:root[data-layout='compact'] .section > p.hint {
+  display: none;
+}
+
+:root[data-layout='compact'] .batch-row {
+  grid-template-columns: 56px minmax(0, 1fr) 72px;
+}
+
+:root[data-layout='compact'] .batch-row img {
+  width: 56px;
+  height: 56px;
+}
+
+:root[data-layout='compact'] .batch-row canvas {
+  width: 72px;
+  height: 72px;
+}
+
+:root[data-layout='compact'] .map-row {
+  grid-template-columns: 22px minmax(0, 1fr) 16px;
+}
+
+:root[data-layout='compact'] .map-row .target-picker {
+  grid-column: 1 / -1;
+  justify-content: flex-start;
+}
+
+:root[data-layout='compact'] .map-row > span:nth-child(3) {
+  display: none;
+}
+
+/* a window comes up from the bottom edge, as wide as the screen, within the thumb's reach */
+:root[data-layout='compact'] .sheet-backdrop {
+  place-items: end stretch;
+  padding: max(28px, env(safe-area-inset-top, 0px)) 0 0;
+}
+
+:root[data-layout='compact'] .sheet {
+  width: 100%;
+  border-width: 1px 0 0;
+  border-radius: 18px 18px 0 0;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+}
+
+:root[data-layout='compact'] .sheet-head {
+  position: sticky;
+  top: -20px;
+  z-index: 2;
+  margin: -20px -20px -8px;
+  padding: 10px 10px 6px 20px;
+  background: var(--chrome);
+}
+
+:root[data-layout='compact'] .sheet-close {
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+}
+
+/* at the canvas's foot, by the thumb, clear of the messages that show at the top */
+:root[data-layout='compact'] .selection-bar,
+:root[data-layout='compact'] .pose-bar {
+  top: auto;
+  bottom: 10px;
+}
+
+:root[data-layout='compact'] .menu button {
+  padding: 11px 12px;
+}
+
+/* at the top, clear of the tools and the dock under the thumb */
+:root[data-layout='compact'] .toast {
+  top: calc(56px + env(safe-area-inset-top, 0px));
+  bottom: auto;
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+/* a phone on its side: the canvas keeps the height, the tools and the panels stand at its sides */
+@media (orientation: landscape) and (max-height: 520px) {
+  :root[data-layout='compact'] .app {
     grid-template:
-      'bar' auto 'rail' auto 'stage' minmax(360px, 70vh)
-      'inspector' auto 'status' auto / minmax(0, 1fr);
-    height: auto;
-    min-height: 100%;
+      'bar bar bar bar' auto 'rail stage inspector dock' minmax(0, 1fr)
+      / auto minmax(0, 1fr) auto auto;
   }
 
-  .stage-inner {
-    padding: 16px;
+  :root[data-layout='compact'] .rail {
+    flex-direction: column;
+    overflow: hidden auto;
+    border-top: 0;
+    border-right: 1px solid var(--separator);
+    padding: 4px 4px 28px max(4px, env(safe-area-inset-left, 0px));
+    mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent);
   }
 
-  body {
-    overflow: auto;
+  :root[data-layout='compact'] .rail hr {
+    border-left: 0;
+    border-top: 1px solid var(--separator);
   }
 
-  .rail {
-    overflow-x: auto;
-    flex-direction: row;
-    border-right: 0;
-    border-bottom: 1px solid var(--separator);
-    padding-inline: max(16px, env(safe-area-inset-left, 0px))
-      max(16px, env(safe-area-inset-right, 0px));
-  }
-
-  .rail hr {
+  :root[data-layout='compact'] .dock {
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 60px;
+    overflow: hidden auto;
+    scrollbar-width: none;
     border-top: 0;
     border-left: 1px solid var(--separator);
-    margin: 2px 4px;
+    padding: 4px max(4px, env(safe-area-inset-right, 0px)) 4px 4px;
   }
 
-  .inspector {
-    border-left: 0;
-    overflow: visible;
-  }
-
-  .section {
-    padding-inline: max(16px, env(safe-area-inset-left, 0px))
-      max(16px, env(safe-area-inset-right, 0px));
-  }
-
-  .status-help {
-    display: none;
-  }
-
-  .batch-row {
-    grid-template-columns: 56px minmax(0, 1fr) 72px;
-  }
-
-  .batch-row img {
-    width: 56px;
-    height: 56px;
-  }
-
-  .batch-row canvas {
-    width: 72px;
-    height: 72px;
-  }
-
-  .map-row {
-    grid-template-columns: 22px minmax(0, 1fr) 16px;
-  }
-
-  .map-row .target-picker {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
-  }
-
-  .map-row > span:nth-child(3) {
-    display: none;
-  }
-
-  /* one row that scrolls sideways, Download first, instead of four rows over the canvas */
-  .toolbar {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-right: 32px;
-    mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
-  }
-
-  .toolbar > * {
+  :root[data-layout='compact'] .dock-tab {
     flex: none;
   }
 
-  .toolbar .spacer {
-    display: none;
+  :root[data-layout='compact'] .inspector,
+  :root[data-layout='compact'] .grid-panel {
+    width: min(300px, 44vw);
+    max-height: none;
+    border-top: 0;
+    border-left: 1px solid var(--separator);
+    box-sizing: border-box;
   }
 
-  .toolbar .wordmark {
-    order: -2;
+  :root[data-layout='compact'] .edit-layout {
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr) auto;
   }
 
-  .toolbar .btn.primary {
-    order: -1;
-  }
-
-  /* the fade says the tools go on past the edge */
-  .rail {
-    padding-right: 32px;
-    mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
-  }
-
-  .stage-inner.preview {
-    width: 100%;
+  :root[data-layout='compact'] .grid-panel {
+    align-content: start;
+    overflow: hidden auto;
   }
 }
 
@@ -137,7 +332,7 @@
   }
 }
 
-/* fingers need bigger targets than a pointer */
+/* fingers need bigger targets than a pointer, and have no keys to learn */
 @media (pointer: coarse) {
   .btn {
     min-height: 40px;
@@ -173,6 +368,10 @@
 
   .grid-view {
     min-height: 36px;
+  }
+
+  .rail .btn[data-key]::after {
+    display: none;
   }
 }
 

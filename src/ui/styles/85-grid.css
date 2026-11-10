@@ -357,11 +357,6 @@
 }
 
 @media (max-width: 700px) {
-  .grid-panel {
-    max-height: 50vh;
-    padding: 8px;
-  }
-
   .grid-label {
     width: 88px;
   }

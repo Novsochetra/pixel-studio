@@ -10,8 +10,10 @@ export const ROUTES = {
     'project',
     'viewFilter',
     'installable',
+    'layout',
   ],
-  rail: ['tool', 'symmetry', 'mode', 'project'],
+  rail: ['tool', 'symmetry', 'mode', 'project', 'layout'],
+  dock: ['panel', 'layout', 'mode', 'color', 'colourPick', 'project'],
   stage: [
     'swapPreview',
     'background',
@@ -49,6 +51,7 @@ export const ROUTES = {
     'animations',
     'gridAll',
     'gridOpen',
+    'layout',
   ],
   layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations'],
   colours: [
@@ -67,6 +70,7 @@ export const ROUTES = {
   ],
   drawing: [
     'brush',
+    'shapeFilled',
     'color',
     'paintOver',
     'paletteLock',

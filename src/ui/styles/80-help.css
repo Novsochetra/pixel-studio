@@ -14,15 +14,12 @@
   z-index: 5;
 }
 
-/* after the rule above, which it changes: on a phone the card sits at the bottom, its own height */
-@media (max-width: 860px) {
-  .quick-start {
-    top: auto;
-    left: 16px;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    max-height: calc(100% - 32px);
-    overflow: auto;
-  }
+/* after the rule above, which it changes: on a phone the card sits over the canvas, its own height */
+:root[data-layout='compact'] .quick-start {
+  top: calc(60px + env(safe-area-inset-top, 0px));
+  left: 16px;
+  max-height: calc(100% - 200px);
+  overflow: auto;
 }
 
 .quick-start h3,
@@ -55,7 +52,7 @@ kbd {
   justify-self: start;
 }
 
-.section[data-collapsed='true'] > :not(h2) {
+:root:not([data-layout='compact']) .section[data-collapsed='true'] > :not(h2) {
   display: none;
 }
 
@@ -86,9 +83,7 @@ kbd {
 }
 
 /* while the first-visit card shows, the empty-frame card waits at the bottom, out from under it */
-@media (min-width: 701px) {
-  body:has(.quick-start) .empty-frame {
-    top: auto;
-    bottom: 12px;
-  }
+body:has(.quick-start) .empty-frame {
+  top: auto;
+  bottom: 12px;
 }

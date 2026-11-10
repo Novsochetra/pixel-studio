@@ -11,6 +11,8 @@ import { bindKeyboard } from './keyboard.js';
 import { bindDrop } from './drop.js';
 import { showQuickStart } from './quick-start.js';
 import { currentLayer } from './actions.js';
+import { renderDock } from './dock.js';
+import { onLayoutChange } from './layout.js';
 
 const WORKSPACES = { edit: mountEditStage, board: mountBoard, game: mountPreview };
 
@@ -42,6 +44,7 @@ function followResize(app, drawStage) {
 
 export function mountApp(app) {
   onInstallChange(() => app.store.touch('installable'));
+  onLayoutChange((layout) => app.store.set({ layout }));
 
   const stage = document.getElementById('stage');
   const draw = {
@@ -49,6 +52,7 @@ export function mountApp(app) {
     rail: () => renderRail(document.getElementById('rail'), app),
     stage: stageDrawer(stage, app),
     status: () => renderStatus(document.getElementById('statusbar'), app),
+    dock: () => renderDock(document.getElementById('dock'), app),
     ...mountInspector(app),
   };
 

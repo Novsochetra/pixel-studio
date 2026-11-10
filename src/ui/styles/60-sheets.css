@@ -202,12 +202,20 @@
 }
 
 .menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   border: 0;
   background: transparent;
   text-align: left;
   padding: 7px 10px;
   border-radius: var(--radius-sm);
   cursor: pointer;
+}
+
+.menu [aria-hidden] {
+  font-weight: 600;
 }
 
 .menu button:hover {

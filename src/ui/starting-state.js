@@ -5,6 +5,16 @@ import { referenceOf } from '../model/reference.js';
 import { FIRST_PENCIL_COLOUR } from '../art/editor-colours.js';
 import { FIRST_BRUSH } from '../editor/brush.js';
 
+// what the tools start as
+const DRAWING = {
+  tool: 'pencil',
+  brush: FIRST_BRUSH,
+  paintOver: null,
+  paletteLock: false,
+  cleanLines: true,
+  shapeFilled: false,
+};
+
 // the editor's state when a project opens
 export function startingState(project) {
   const animation = project.animations[0];
@@ -19,12 +29,8 @@ export function startingState(project) {
       at: { animation: animation.id, direction: referenceOf(project), frame: 0, layer: null },
     }),
     mode: 'edit',
-    tool: 'pencil',
+    ...DRAWING,
     color: fromHex(FIRST_PENCIL_COLOUR),
-    brush: FIRST_BRUSH,
-    paintOver: null,
-    paletteLock: false,
-    cleanLines: true,
     symmetry: { on: false, axisSum: box ? box.left + box.right - 1 : project.canvas.width - 1 },
     zoom: 4,
     showGrid: true,

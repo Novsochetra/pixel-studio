@@ -10,6 +10,7 @@ const GROUPS = [
       ['E', 'Eraser'],
       ['I or Alt-click', 'Pick a colour'],
       ['G', 'Fill'],
+      ['N  U  C', 'Line, rectangle, ellipse (Shift: straight, square, circle)'],
       ['R', 'Replace a colour everywhere'],
       ['D', 'Lighter shade (Shift: darker)'],
       ['[  ]', 'Brush smaller, bigger'],
