@@ -140,13 +140,19 @@ export function settleAt(state) {
 export function restructure(app, label, mutate) {
   const { state } = app.store;
   const before = snapshotAnimations(state.project.animations);
+  const from = { ...state.at };
   const at = mutate(state) ?? state.at;
+  const changed = app.history.recordStructure(label, before, state.project);
 
-  app.history.recordStructure(label, before, state.project);
   app.saver.markLayers(changedLayers(before, state.project.animations));
   app.saver.markNewLayers(state.project);
   app.saver.markStructure();
   goToSettled(app, settleAt({ ...state, at: { ...state.at, ...at } }));
+
+  if (changed) {
+    app.history.keepPlace(from, { ...app.store.state.at });
+  }
+
   app.store.touch('animations');
 }
 

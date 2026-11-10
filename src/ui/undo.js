@@ -2,21 +2,30 @@ import { changedLayers } from '../editor/snapshots.js';
 import { goToSettled, settleAt } from './actions.js';
 import { toast } from './dom.js';
 
+// frames, layers or animations put back, or made again
+function afterStructure(app, step, back) {
+  // either side may hold layers the other lacks, so compare both ways
+  app.saver.markLayers([
+    ...changedLayers(step.before, step.after),
+    ...changedLayers(step.after, step.before),
+  ]);
+  app.saver.markNewLayers(app.store.state.project);
+  app.saver.markStructure();
+  // back to the frame, layer and animation the step was made from, or on to where it led:
+  // the art came back, but the editor stayed on whatever was next to it
+  const place = step.place?.[back ? 'before' : 'after'] ?? app.store.state.at;
+
+  goToSettled(app, settleAt({ ...app.store.state, at: place }));
+  app.store.touch('animations');
+}
+
 function afterHistory(app, step, back) {
   if (!step) {
     return;
   }
 
   if (step.kind === 'structure') {
-    // either side may hold layers the other lacks, so compare both ways
-    app.saver.markLayers([
-      ...changedLayers(step.before, step.after),
-      ...changedLayers(step.after, step.before),
-    ]);
-    app.saver.markNewLayers(app.store.state.project);
-    app.saver.markStructure();
-    goToSettled(app, settleAt(app.store.state));
-    app.store.touch('animations');
+    afterStructure(app, step, back);
 
     return;
   }

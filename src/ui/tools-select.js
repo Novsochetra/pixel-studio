@@ -96,20 +96,22 @@ export function wand(app, [x, y], everywhere) {
   return null;
 }
 
-const lassoMode = (event) => {
+// Shift adds and Alt takes away; with neither held, what the selection's bar is set to (Add,
+// Take away), as fingers have no keys to hold
+export function lassoModeFor(event, set = 'new') {
   if (event.shiftKey) {
     return 'add';
   }
 
-  return event.altKey ? 'remove' : 'new';
-};
+  return event.altKey ? 'remove' : set;
+}
 
 // A loop drawn round a part selects it; with Shift it adds to the selection, with Alt it takes
 // away, and a click with either is the one pixel under it. A drag that starts on a selected pixel
 // moves the selection, as a box selection's does. The loop shows while it is drawn.
 export function lasso(app, start, event) {
-  const { selection, project } = app.store.state;
-  const mode = lassoMode(event);
+  const { selection, project, lassoMode } = app.store.state;
+  const mode = lassoModeFor(event, selection ? lassoMode : 'new');
 
   if (mode === 'new' && isSelected(selection, ...start)) {
     return moveSelection(app, start);

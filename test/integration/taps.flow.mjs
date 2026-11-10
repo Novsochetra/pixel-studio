@@ -16,6 +16,7 @@ const tapPixel = async (x, y) => {
   await page.waitForTimeout(350);
 };
 const tool = (name) => page.locator('#rail').getByRole('button', { name }).tap();
+const said = () => page.locator('.toast').textContent();
 
 check(
   await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
@@ -76,7 +77,25 @@ check(
   bar.y > art.y + (11 * art.width) / 32 && bar.height < 60,
   'the selection’s bar is one row, clear of the pixels selected',
 );
+// what Shift does to this tool is a button on the bar, as fingers have no Shift
+await page.locator('.selection-bar').getByRole('button', { name: 'Everywhere' }).tap();
+await page.waitForTimeout(250);
+check(
+  await page.locator('.selection-bar').isVisible(),
+  'Everywhere, on the bar, takes every pixel of the colour',
+);
 await page.locator('.selection-bar').getByRole('button', { name: 'Done' }).tap();
+await tool(/^Lasso/);
+check(
+  (await said()).includes('Add and Take away are on its bar'),
+  'the Lasso says where adding and taking away are',
+);
+await page.locator('.dock-tab', { hasText: 'Brush' }).tap();
+await page.waitForTimeout(500);
+await page.locator('#shape-even').tap();
+check(await page.locator('#shape-even').isChecked(), 'Even shapes stands in for Shift on shapes');
+await page.locator('.dock-tab', { hasText: 'Brush' }).tap();
+await page.waitForTimeout(400);
 await tool('Pencil');
 
 await page.getByRole('button', { name: 'More', exact: true }).tap();

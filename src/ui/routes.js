@@ -52,8 +52,9 @@ export const ROUTES = {
     'gridAll',
     'gridOpen',
     'layout',
+    'lassoMode',
   ],
-  layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations'],
+  layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations', 'layout'],
   colours: [
     'color',
     'basicColours',
@@ -73,6 +74,8 @@ export const ROUTES = {
   drawing: [
     'brush',
     'shapeFilled',
+    'shapeEven',
+    'shadeDarker',
     'color',
     'paintOver',
     'paletteLock',

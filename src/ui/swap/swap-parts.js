@@ -41,6 +41,38 @@ export function paletteChooser(job) {
   );
 }
 
+// The palette picked, with the way to take it off the project: a palette added by mistake, or
+// tried and not wanted, stayed on the list for good.
+export function paletteRow(job) {
+  const { app } = job;
+  const remove = () => {
+    const { project } = app.store.state;
+    const before = structuredClone(project.palettes);
+
+    project.palettes = project.palettes.filter((palette) => palette.id !== job.paletteId);
+    app.history.recordSetting(
+      'Remove palette',
+      'palettes',
+      before,
+      structuredClone(project.palettes),
+    );
+    job.paletteId = project.palettes.at(-1)?.id ?? null;
+    changeStructure(app, 'palettes');
+    job.draw();
+  };
+
+  return node(
+    'div.group',
+    { style: { gap: '6px' } },
+    paletteChooser(job),
+    node(
+      'button.btn.quiet',
+      { title: 'Take this palette off the project (undo brings it back)', onclick: remove },
+      'Remove',
+    ),
+  );
+}
+
 export function addPalette(job) {
   return paletteForm((added) => {
     job.app.store.state.project.palettes.push(added);

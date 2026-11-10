@@ -135,6 +135,16 @@ export class History {
     return this.undone.length > 0;
   }
 
+  // the step just recorded moved the editor to another frame, layer or animation: undo goes back
+  // to where it was made from, and redo to where it led
+  keepPlace(before, after) {
+    const step = this.done.at(-1);
+
+    if (step) {
+      step.place = { before, after };
+    }
+  }
+
   // the step just recorded moved the selection too: undo puts it back where it was
   keepSelection(before) {
     const step = this.done.at(-1);

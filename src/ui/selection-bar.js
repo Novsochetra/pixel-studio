@@ -4,6 +4,7 @@ import { liftPixels, selectionBox, transformSelected } from '../editor/selection
 import { eraseSelection } from '../editor/floating.js';
 import { hasKeyboard, keyNames } from './platform-keys.js';
 import { selectionAngle, turnSelectionTo } from './selection-turn.js';
+import { modeControls, syncModes } from './selection-modes.js';
 
 const ACTIONS = [
   ['flip-x', 'Flip ↔', 'Flip the selection left to right'],
@@ -83,6 +84,8 @@ export function renderSelectionBar(el, app) {
   el.hidden = !app.store.state.selection;
 
   if (el.hidden) {
+    // with the selection let go, the next loop starts a new one
+    app.store.state.lassoMode = 'new';
     replace(el);
 
     return;
@@ -99,6 +102,8 @@ export function renderSelectionBar(el, app) {
       angle.value = String(selectionAngle(app.store.state));
     }
 
+    syncModes(el, app);
+
     return;
   }
 
@@ -110,10 +115,12 @@ export function renderSelectionBar(el, app) {
     ),
     button(keyNames('Copy (⌘C); paste in any frame with ⌘V'), () => copySelected(app), 'Copy'),
     button('Erase the selected pixels (Delete)', () => eraseSelected(app), 'Delete'),
+    modeControls(app),
     node(
       'button.btn.primary.selection-done',
       { title: 'Let go of the selection (Esc)', onclick: () => app.store.set({ selection: null }) },
       'Done',
     ),
   );
+  syncModes(el, app);
 }

@@ -2,6 +2,7 @@ import { selectDirection } from '../actions.js';
 import { boardPoint } from '../board-canvas.js';
 import { changeMarkup, markupOf } from './board-marks.js';
 import { toast } from '../dom.js';
+import { markAt } from '../../views/markup.js';
 
 function addNote(app, point) {
   changeMarkup(app, 'Note', (markup) =>
@@ -14,6 +15,19 @@ function addNote(app, point) {
   );
 }
 
+// one mark or note, the one pressed: Clear marks and undo were the only ways to take one away
+function rubOut(app, point) {
+  const found = markAt(markupOf(app.store.state.project), point);
+
+  if (found) {
+    changeMarkup(app, found.kind === 'notes' ? 'Rub out note' : 'Rub out mark', (markup) =>
+      markup[found.kind].splice(found.index, 1),
+    );
+  } else {
+    toast('Press a mark, or the point a note is pinned at, to rub it out.');
+  }
+}
+
 // A click on the board opens that view, draws a mark or adds a note, as the board is set to.
 // Returns the mark being drawn, if any.
 function press(app, canvas, point, event) {
@@ -23,6 +37,12 @@ function press(app, canvas, point, event) {
   if (mode === 'edit') {
     selectDirection(app, point.direction);
     app.store.set({ mode: 'edit' });
+
+    return null;
+  }
+
+  if (mode === 'rub') {
+    rubOut(app, point);
 
     return null;
   }

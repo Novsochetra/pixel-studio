@@ -98,6 +98,12 @@ h4.start-heading {
   background: var(--tint-quiet);
 }
 
+/* pressed once: it waits for the press that means it */
+.start-forget.armed {
+  background: var(--bad);
+  color: var(--on-tint);
+}
+
 .start-forget {
   position: absolute;
   top: 4px;

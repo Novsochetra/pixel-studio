@@ -52,7 +52,7 @@ const ON_PRESS = {
     return moveLayerDrag(app, point);
   },
   moveframe: moveFrameDrag,
-  shade: (app, point, event) => shade(app, point, event.shiftKey),
+  shade: (app, point, event) => shade(app, point, event.shiftKey || app.store.state.shadeDarker),
   pencil: (app, point) => stroke(app, point, app.store.state.color),
   eraser: (app, point) => stroke(app, point, CLEAR),
   fill,

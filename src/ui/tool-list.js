@@ -17,19 +17,19 @@ const TOOLS = [
     id: 'line',
     label: 'Line: drag from end to end (Shift: straight or diagonal)',
     key: 'n',
-    touch: 'Line: drag from end to end',
+    touch: 'Line: drag from end to end. Even shapes, in Brush, keeps it straight',
   },
   {
     id: 'rect',
     label: 'Rectangle: drag corner to corner (Shift: a square)',
     key: 'u',
-    touch: 'Rectangle: drag corner to corner',
+    touch: 'Rectangle: drag corner to corner. Even shapes, in Brush, makes squares',
   },
   {
     id: 'ellipse',
     label: 'Ellipse: drag corner to corner (Shift: a circle)',
     key: 'c',
-    touch: 'Ellipse: drag corner to corner',
+    touch: 'Ellipse: drag corner to corner. Even shapes, in Brush, makes circles',
   },
   {
     id: 'replace',
@@ -41,7 +41,8 @@ const TOOLS = [
     id: 'shade',
     label: 'Light and dark brush (Shift: darker)',
     key: 'd',
-    touch: 'Light brush: each colour it passes goes a shade lighter',
+    touch:
+      'Light and dark brush: each colour it passes goes a shade lighter, or darker with Darker shades in Brush',
   },
   {
     id: 'select',
@@ -53,14 +54,15 @@ const TOOLS = [
     id: 'wand',
     label: 'Select a colour (Shift: everywhere)',
     key: 'w',
-    touch: 'Select a colour: tap it',
+    touch: 'Select a colour: tap it. Everywhere, on its bar, takes every pixel of it',
   },
   {
     id: 'lasso',
     label:
       'Lasso: draw round a part to select it, drag inside to move it (Shift: add, Alt: take away)',
     key: 'l',
-    touch: 'Lasso: draw round a part to select it, drag inside to move it',
+    touch:
+      'Lasso: draw round a part to select it, drag inside to move it. Add and Take away are on its bar',
   },
   {
     id: 'pin',

@@ -35,7 +35,8 @@ export function shape(app, kind, start) {
   draw(start, false);
 
   return {
-    move: (point, event) => draw(point, event.shiftKey),
+    // Shift, or the switch that stands in for it where there is no Shift
+    move: (point, event) => draw(point, event.shiftKey || app.store.state.shapeEven),
     cancel() {
       layer.sprite.pixels.set(before.pixels);
       app.store.touch('stroke');

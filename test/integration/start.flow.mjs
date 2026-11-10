@@ -109,6 +109,12 @@ check(
   'a project saved as a preset is offered for new projects',
 );
 await page.getByRole('button', { name: 'Forget the Striker preset' }).click();
+check(
+  (await page.getByRole('radio', { name: /^Striker/ }).count()) === 1 &&
+    (await page.locator('.toast').textContent()).startsWith('Forget the Striker preset?'),
+  'forgetting a preset, which cannot be undone, asks first',
+);
+await page.getByRole('button', { name: 'Forget the Striker preset' }).click();
 await page.waitForTimeout(300);
 check(!(await page.getByRole('radio', { name: /^Striker/ }).count()), 'and it can be forgotten');
 await page.getByRole('button', { name: 'Try the example character' }).last().click();

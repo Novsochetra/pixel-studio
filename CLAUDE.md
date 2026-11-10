@@ -116,7 +116,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   it, never in the canvas's own column: a card that pushed the canvas down let it jump under the
   finger at the first pixel drawn (`touch.flow.mjs`).
 - A finger has no pointer to hover and no keys: a control's meaning cannot live only in a tooltip
-  or a shortcut. One finger on the canvas waits a moment before its tool acts
+  or a shortcut. What Shift or Alt does to a tool has a control too (Even shapes and Darker shades
+  in Drawing; Add, Take away and Everywhere on the selection's bar), and what a tool says when it
+  is picked is worded for the hands that picked it (`touch` in `tool-list.js`, `forHands`). One finger on the canvas waits a moment before its tool acts
   (`touch-intent.js`), as it may be the first of a pinch.
 
 ## The look
@@ -157,6 +159,15 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - A step that moves the selection with the pixels (a move, a turn, a paste) is made with
   `commitSelected`, so undo puts the selection back too. A change that changes nothing records no
   step (`History.recordStructure` says whether it did).
+- A step that moves the editor to another frame, layer or animation remembers both places
+  (`restructure` does it): undo goes back to where it was made from, redo to where it led. A
+  change to the project's own settings (guides, the board's marks, palettes) is a step too
+  (`recordSetting`).
+- What undo cannot bring back (a project, a folder, a saved version, a preset) asks before it
+  goes; what undo can bring back does not ask.
+- The view a project is left on (view, frame, tool, colour) is kept for the next visit
+  (`view-kept.js`): something new in the state that is how the editor is showing things joins
+  `VIEW` there.
 - What is typed is checked where it is read: a number is kept to what can be (`wholeNumber`), and
   a message to a person never carries an exception's own words.
 

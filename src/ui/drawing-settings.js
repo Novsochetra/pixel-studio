@@ -112,6 +112,18 @@ const SWITCHES = [
     label: 'Filled shapes',
     hint: 'Rectangles and ellipses are drawn solid, not as outlines',
   },
+  {
+    key: 'shapeEven',
+    id: 'shape-even',
+    label: 'Even shapes',
+    hint: 'Squares, circles and straight or diagonal lines, as holding Shift draws them',
+  },
+  {
+    key: 'shadeDarker',
+    id: 'shade-darker',
+    label: 'Darker shades',
+    hint: 'The light and dark brush darkens, as holding Shift makes it',
+  },
 ];
 
 export function drawingSettings(app, colors) {

@@ -13,6 +13,10 @@ const DRAWING = {
   paletteLock: false,
   cleanLines: true,
   shapeFilled: false,
+  // what holding Shift does, for hands with no Shift to hold
+  shapeEven: false,
+  shadeDarker: false,
+  lassoMode: 'new',
 };
 
 // the editor's state when a project opens

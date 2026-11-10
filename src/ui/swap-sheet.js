@@ -7,7 +7,7 @@ import { mappingRows } from './swap/swap-mapping.js';
 import { swapSaid } from './swap/swap-said.js';
 import {
   addPalette,
-  paletteChooser,
+  paletteRow,
   previewFigure,
   previewToggle,
   reduceButton,
@@ -71,7 +71,7 @@ function mappingHeader(job, palette, changed) {
   return node(
     'div.compare',
     {},
-    node('label.field', {}, node('span', {}, 'Change to this palette'), paletteChooser(job)),
+    node('div.field', {}, node('span', {}, 'Change to this palette'), paletteRow(job)),
     node(
       'div.field',
       {},

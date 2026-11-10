@@ -58,6 +58,11 @@ check(
 await page.keyboard.press('Meta+z');
 await page.waitForTimeout(200);
 check((await page.locator('.cell.hidden-frame').count()) === 1, 'and undo hides it again');
+check(
+  (await page.locator('.cell.selected').getAttribute('aria-label')).includes('frame 1'),
+  'and goes back to the frame it was shown from',
+);
+await selectFrame(page, 1);
 
 await showAllViews(page);
 const single = await canvasWidth();

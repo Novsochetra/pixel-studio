@@ -30,6 +30,47 @@ check(
   'and undo brings it back',
 );
 
+// undoing a new frame took the frame away but left the editor wherever it had settled, and redo
+// brought the frame back without going to it
+const onFrame = () =>
+  page
+    .locator('.grid-row.current .cell')
+    .evaluateAll((cells) => cells.findIndex((cell) => cell.classList.contains('selected')));
+await page.locator('.grid-row.current .cell-add').click();
+await page.waitForTimeout(250);
+check((await onFrame()) === 1, 'a new frame is the one in hand');
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(250);
+check((await onFrame()) === 0, 'undo goes back to the frame it was made from');
+await page.keyboard.press('Meta+Shift+z');
+await page.waitForTimeout(250);
+check((await onFrame()) === 1, 'and redo goes to the frame again');
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(250);
+
+// a palette added to the project could never be taken off it
+await page.getByRole('button', { name: 'Swap colours…' }).click();
+await page.locator('.sheet .btn.chip').first().click();
+const palettes = () => page.locator('#swap-palette option').count();
+const offered = await palettes();
+await page.getByRole('button', { name: 'Remove', exact: true }).click();
+check((await palettes()) === offered - 1, 'a palette can be taken off the project');
+await page.keyboard.press('Escape');
+
+// one mark on the Views board could not be taken away: only all of them, or the last
+await openWorkspace(page, 'Views board');
+await page.getByRole('button', { name: 'Draws a mark' }).click();
+const board = await page.locator('.board-canvas').boundingBox();
+await page.mouse.move(board.x + 60, board.y + 80);
+await page.mouse.down();
+await page.mouse.move(board.x + 90, board.y + 100, { steps: 4 });
+await page.mouse.up();
+await page.getByRole('button', { name: 'Rubs one out' }).click();
+await page.mouse.click(board.x + 75, board.y + 90);
+await page.keyboard.press('Meta+z');
+check((await said()) === 'Undone: Rub out mark', 'a press on a mark rubs that one out');
+await openWorkspace(page, 'Edit');
+
 // the window's first field was in a part folded shut: the focus stayed on the button behind,
 // and Enter opened the window a second time
 await page.getByRole('button', { name: 'Team kits…' }).focus();

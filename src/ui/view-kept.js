@@ -23,6 +23,8 @@ export const VIEW = [
   'showPins',
   'pinName',
   'shapeFilled',
+  'shapeEven',
+  'shadeDarker',
   'paletteLock',
   'paintOver',
   'cleanLines',

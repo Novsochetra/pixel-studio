@@ -16,9 +16,9 @@ const CLEAN = {
 };
 
 const FIX = {
-  keys: keyNames('touch up pixels with the pencil (B) and eraser (E). ⌘Z undoes anything.'),
+  keys: keyNames('touch up pixels with the pencil (B) and eraser (E). ⌘Z undoes your steps.'),
   fingers:
-    'draw with one finger, pinch with two to zoom and move. The arrows at the top undo anything.',
+    'draw with one finger, pinch with two to zoom and move. The arrows at the top undo your steps.',
 };
 
 const steps = (project, hands) => [

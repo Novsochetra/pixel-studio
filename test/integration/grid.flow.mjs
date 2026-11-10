@@ -103,8 +103,10 @@ check((await frames())[0] === '1 · empty', 'dragging the last frame to the fron
 await page.keyboard.press('Meta+z');
 await page.waitForTimeout(300);
 check((await frames())[5] === '6 · empty', 'undo puts it back');
-
-await selectFrame(page, 5);
+check(
+  (await page.locator('.cell.selected').getAttribute('aria-label')).includes('frame 6'),
+  'and goes back to the frame that was dragged',
+);
 await page.locator('.grid-row.current .cell.selected').focus();
 await page.keyboard.press('Alt+ArrowLeft');
 await page.waitForTimeout(250);

@@ -9,9 +9,19 @@ function forgetButton(choice, onDelete) {
     {
       'aria-label': `Forget the ${choice.label} preset`,
       title: 'Forget this preset',
+      // A preset forgotten cannot be brought back: the first press asks, the second forgets, as
+      // deleting a folder or a version asks.
       onclick: (event) => {
+        const button = event.currentTarget;
+
         event.stopPropagation();
-        onDelete(choice.preset);
+
+        if (button.classList.contains('armed')) {
+          onDelete(choice.preset);
+        } else {
+          button.classList.add('armed');
+          toast(`Forget the ${choice.label} preset? Press its × again.`);
+        }
       },
     },
     icon('close'),

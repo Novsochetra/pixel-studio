@@ -9,6 +9,7 @@ const CLICKS = [
   ['edit', 'Opens the view'],
   ['pen', 'Draws a mark'],
   ['note', 'Adds a note'],
+  ['rub', 'Rubs one out'],
 ];
 
 function overlayControls(app) {
