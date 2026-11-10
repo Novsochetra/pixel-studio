@@ -1,7 +1,7 @@
 // A phone used by taps alone, with the touches every browser's driver can make: this flow runs on
 // Safari's engine too (STUDIO_BROWSER=webkit), where the finger drags of touch.flow.mjs cannot.
 import { openStudio } from './harness.mjs';
-import { createProject, paintedPixels, status } from './studio.mjs';
+import { createProject, openDock, paintedPixels, status } from './studio.mjs';
 
 const { page, check, finish, shots } = await openStudio({ device: 'iPhone 13' });
 await createProject(page, { kind: 'Icon', name: 'Gem', width: 32 });
@@ -144,4 +144,24 @@ await page.getByRole('button', { name: 'Symmetry' }).tap();
 check((await said()) === 'Symmetry off', 'and that it is off');
 await tapPixel(15, 15);
 check((await status(page)).includes('sprite 12×12'), 'and the canvas takes taps again');
+
+// each new frame put the frames back at their start: the frame made, and the + for the next,
+// were off the screen's edge
+await openDock(page, 'Frames');
+
+for (let i = 0; i < 6; i++) {
+  await page.locator('.grid-row.current .cell-add').tap();
+  await page.waitForTimeout(250);
+}
+
+const ends = await page.evaluate(() =>
+  ['.grid-row.current .cell.selected', '.grid-row.current .cell-add'].map(
+    (part) => document.querySelector(part).getBoundingClientRect().right,
+  ),
+);
+check(
+  ends.every((right) => right <= screen.width),
+  'the frame just made and the + after it are in sight',
+);
+await page.screenshot({ path: `${shots}/taps-frames.png` });
 await finish();

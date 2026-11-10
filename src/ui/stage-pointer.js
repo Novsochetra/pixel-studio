@@ -4,6 +4,7 @@ import { panSession, twoFingerSession } from './navigate.js';
 import { stopPlayback } from './grid/playback.js';
 import { playsAllViews } from './play-all-views.js';
 import { touchIntent } from './touch-intent.js';
+import { bindBeside } from './stage-beside.js';
 import { getPixel, toHex } from '../model/sprite.js';
 
 export function pixelAt(canvas, event, scale) {
@@ -98,9 +99,11 @@ function release(app, view, event) {
     view.session = null;
     app.dragging = false;
 
-    // what the drag selected stands where it will stay: its bar takes the other end of the canvas
+    // What the drag selected stands where it will stay: its bar takes the other end of the
+    // canvas. Add and Take away were for that one loop: left on, the next drag inside the
+    // selection drew another loop where it was meant to move it.
     if (ended && app.store.state.selection) {
-      app.store.touch('lassoMode');
+      app.store.set({ lassoMode: 'new' });
     }
   }
 }
@@ -121,6 +124,7 @@ export function bindPointer(canvas, app, stage) {
   const finish = (event) => release(app, view, event);
 
   ownTouches(canvas);
+  bindBeside(view, { place, press: (event) => press(app, view, event), finish });
   canvas.addEventListener('pointerdown', (event) => {
     // a name still being typed (a new layer's) is done once the canvas is drawn on: on a phone
     // its keyboard would stay up over the art

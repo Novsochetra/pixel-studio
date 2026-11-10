@@ -35,7 +35,13 @@ function askDelete(job, project, card) {
   card.draggable = false;
   replace(
     card,
-    node('p.card-ask', {}, `Delete ${project.name} for good?`),
+    node(
+      'p.card-ask',
+      {},
+      project.isOpen
+        ? `Delete ${project.name} for good? Another project opens in its place.`
+        : `Delete ${project.name} for good?`,
+    ),
     node(
       'div.card-answers',
       {},
@@ -67,7 +73,7 @@ function moreButton(job, project, card) {
     'button.btn.quiet.icon-only.card-more',
     {
       'aria-label': `More for ${project.name}`,
-      title: project.isOpen ? 'Move to a folder' : 'Open, move to a folder, delete',
+      title: project.isOpen ? 'Move to a folder, delete' : 'Open, move to a folder, delete',
       onclick: more,
     },
     icon('more'),

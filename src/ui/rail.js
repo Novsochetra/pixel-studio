@@ -65,8 +65,11 @@ function viewButtons(app) {
     node(
       'button.btn.quiet',
       {
-        title: 'Flip this layer left to right, in this frame',
-        'aria-label': 'Flip view',
+        title: forHands(
+          'Flip this layer left to right, in this frame (Shift F)',
+          'Flip this layer left to right, in this frame',
+        ),
+        'aria-label': 'Flip layer',
         onclick: () => flipView(app),
       },
       icon('flip'),

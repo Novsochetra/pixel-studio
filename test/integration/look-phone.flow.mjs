@@ -130,7 +130,18 @@ await openDock(page, 'Brush');
 
 // a scene zoomed past the screen scrolls; its controls stay where they can be reached
 await openWorkspace(page, 'On the pitch');
+await page.waitForTimeout(600);
+// the scene is wider than a phone: it opened on its corner, the art being previewed out of sight
+const middle = () =>
+  page.locator('.stage canvas').evaluate((scene) => {
+    const box = scene.getBoundingClientRect();
+
+    return (box.left + box.width / 2) / window.innerWidth;
+  });
+check(Math.abs((await middle()) - 0.5) < 0.1, 'the scene opens on the art being previewed');
 await page.getByRole('button', { name: '3×' }).tap();
+await page.waitForTimeout(300);
+check(Math.abs((await middle()) - 0.5) < 0.1, 'and stays on it when zoomed in');
 await page.locator('#stage').evaluate((stage) => stage.scrollTo(300, 0));
 await page.waitForTimeout(400);
 const play = await page.getByRole('button', { name: 'Play', exact: true }).boundingBox();
@@ -166,6 +177,25 @@ check(narrow.first >= 0, 'and the first choice of a row too wide for it is in re
 check(narrow.spill <= 0, 'with nothing off the screen’s edge');
 await page.screenshot({ path: `${shots}/look-phone-narrow.png` });
 await page.setViewportSize({ width: 412, height: 839 });
+
+// which part a tap pins was chosen in the frames' bar alone, shut on a phone: every tap moved
+// the head
+await openWorkspace(page, 'Edit');
+await page.locator('#rail [aria-label^="Pin a body part"]').evaluate((button) => button.click());
+check(
+  (await page.locator('.pin-bar #pin-name').count()) === 1,
+  'the Pin tool brings the part to pin over the canvas',
+);
+await page.locator('#pin-name').selectOption('Hand');
+const art = await page.getByLabel('Pixel canvas').boundingBox();
+
+await page.touchscreen.tap(art.x + art.width * 0.3, art.y + art.height * 0.3);
+await page.waitForTimeout(500);
+check(
+  await page.locator('.pin-bar').getByRole('button', { name: 'Remove pin' }).isEnabled(),
+  'and the part picked there is the one a tap pins',
+);
+await page.screenshot({ path: `${shots}/look-phone-pin.png` });
 
 // a message is as wide as its words, not half the screen
 await openWorkspace(page, 'Edit');

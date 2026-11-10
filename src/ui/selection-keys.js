@@ -1,6 +1,12 @@
 import { commit, commitSelected, currentFrames, currentLayer, selectFrame } from './actions.js';
 import { liftPixels, moveSelected, rectSelection } from '../editor/selection.js';
-import { eraseSelection, floatPiece, moveFloating, shiftOnCanvas } from '../editor/floating.js';
+import {
+  eraseSelection,
+  floatPiece,
+  moveFloating,
+  pieceOnCanvas,
+  shiftOnCanvas,
+} from '../editor/floating.js';
 import { toast } from './dom.js';
 import { shiftCurrentFrame } from './frame-move.js';
 import { shiftCurrentLayer } from './layer-move.js';
@@ -35,8 +41,9 @@ export function paste(app) {
     return;
   }
 
+  const piece = pieceOnCanvas(app.clipboard, layer.sprite);
   const pasted = commitSelected(app, 'Paste', [layer], () => {
-    selection = floatPiece(layer.sprite, app.clipboard);
+    selection = floatPiece(layer.sprite, piece);
   });
 
   if (pasted === null) {
@@ -44,10 +51,13 @@ export function paste(app) {
   }
 
   app.store.set({ selection, tool: 'select', mode: 'edit' });
+  const where =
+    piece === app.clipboard ? 'where it was copied from' : 'in the middle of the canvas';
+
   toast(
     forHands(
-      'Pasted where it was copied from. Drag it or use the arrow keys to place it.',
-      'Pasted where it was copied from. Drag it to place it.',
+      `Pasted ${where}. Drag it or use the arrow keys to place it.`,
+      `Pasted ${where}. Drag it to place it.`,
     ),
   );
 }

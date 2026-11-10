@@ -27,7 +27,7 @@ export function asepriteJson(result, settings, animation, imageName) {
     const from = rowIndex * result.frames;
 
     for (let frameIndex = 0; frameIndex < result.frames; frameIndex++) {
-      frames[`${result.name} ${row.direction} ${frameIndex}`] = {
+      frames[`${viewFileName(result, row.direction, ' ')} ${frameIndex}`] = {
         frame: { x: frameIndex * cellWidth, y: rowIndex * cellHeight, w: cellWidth, h: cellHeight },
         rotated: false,
         trimmed: false,
@@ -38,7 +38,7 @@ export function asepriteJson(result, settings, animation, imageName) {
     }
 
     frameTags.push({
-      name: `${result.name} ${row.direction}`,
+      name: viewFileName(result, row.direction, ' '),
       from,
       to: from + result.frames - 1,
       direction: 'forward',

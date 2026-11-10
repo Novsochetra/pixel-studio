@@ -9,6 +9,7 @@ import { frameAtTick } from '../../model/frame-play.js';
 import { kindOf, viewName } from '../../model/kinds.js';
 
 const ZOOMS = { scene: [1, 2, 3], tiled: [1, 2, 4], centred: [1] };
+const FEET_ROOM = 24;
 
 // until a zoom is picked: a scene at its own size, tiles big enough to see each pixel
 const zoomOf = (state, mode) => state.game.zoom ?? (mode === 'tiled' ? 4 : 1);
@@ -74,6 +75,19 @@ function viewFrames(state) {
     .frames;
 }
 
+// A scene larger than the window opened on its top left corner, the art being previewed out of
+// sight: the window is scrolled across to the cast, and down only as far as its feet need.
+function showSubject(canvas, subject) {
+  const stage = canvas.closest('.stage');
+  const scene = canvas.getBoundingClientRect();
+  const room = stage.getBoundingClientRect();
+  const scale = scene.width / canvas.width;
+  const feet = scene.top + subject.bottom * scale + FEET_ROOM;
+
+  stage.scrollLeft += scene.left + subject.x * scale - (room.left + room.width / 2);
+  stage.scrollTop += Math.max(0, feet - room.bottom);
+}
+
 function paintPreview(canvas, app, { clock, time }) {
   const { state } = app.store;
   const mode = kindOf(state.project).preview;
@@ -89,8 +103,15 @@ function paintPreview(canvas, app, { clock, time }) {
       ? drawScene(canvas, state, { background: clock.background, clock: { tick, seconds } })
       : flat(canvas, state.project, { frames: viewFrames(state), tick });
   const zoom = zoomOf(state, mode);
+  const shown = `${size.width}×${size.height} at ${zoom}`;
+
   canvas.style.width = `${size.width * zoom}px`;
   canvas.style.maxWidth = zoom === 1 ? '100%' : 'none';
+
+  if (size.subject && clock.shown !== shown) {
+    clock.shown = shown;
+    showSubject(canvas, size.subject);
+  }
 }
 
 // The art where it will be used: in a scene, laid as tiles, or at icon sizes. It plays on its own
@@ -103,7 +124,7 @@ export function mountPreview(container, app) {
   container.replaceChildren(
     node('div.stage-inner.preview', {}, node('div.preview-bar-place', {}, bar), canvas, note),
   );
-  const clock = { started: null, background: null };
+  const clock = { started: null, background: null, shown: null };
 
   const paint = (time) => paintPreview(canvas, app, { clock, time });
   const loop = (time) => {

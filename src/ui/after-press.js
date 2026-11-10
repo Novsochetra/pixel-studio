@@ -26,6 +26,7 @@ function watchPresses() {
 const pressUnderWay = () => pressed || performance.now() - fingerLifted < TAP_MS;
 
 const CONTROL = 'button, a, label, select, input, [role]';
+const TYPED_IN = 'input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea';
 
 const nameOf = (control) => control.getAttribute('aria-label') ?? control.textContent.trim();
 
@@ -40,7 +41,8 @@ function passOn(click) {
   if (old && !old.isConnected && same) {
     click.stopImmediatePropagation();
     click.preventDefault();
-    now.click();
+    // a field pressed is a field to type in: a click on the new one would not put the caret there
+    now.matches(TYPED_IN) ? now.focus() : now.click();
   }
 }
 

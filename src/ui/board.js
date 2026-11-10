@@ -16,7 +16,7 @@ function fittingScale(container, state) {
 
 function noteField(app) {
   return node('input.input', {
-    placeholder: 'Note text, then press the board',
+    placeholder: 'Type a note',
     id: 'note-text',
     // a note is a few words by a mark: longer, it ran across the view beside it
     maxlength: '40',

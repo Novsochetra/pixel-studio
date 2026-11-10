@@ -13,24 +13,28 @@ function addNote(app, point) {
       text: app.noteText.trim(),
     }),
   );
+  // the field is cleared for the next note: left as it was, the next press pinned the same again
+  app.noteText = '';
+  Object.assign(document.getElementById('note-text') ?? {}, { value: '' });
 }
 
 // one mark or note, the one pressed: Clear marks and undo were the only ways to take one away
-function rubOut(app, point) {
-  const found = markAt(markupOf(app.store.state.project), point);
+function rubOut(app, point, scale) {
+  const { project } = app.store.state;
+  const found = markAt(markupOf(project), point, { scale, width: project.canvas.width });
 
   if (found) {
     changeMarkup(app, found.kind === 'notes' ? 'Rub out note' : 'Rub out mark', (markup) =>
       markup[found.kind].splice(found.index, 1),
     );
   } else {
-    toast('Press a mark, or the point a note is pinned at, to rub it out.');
+    toast('Press a mark or a note to rub it out.');
   }
 }
 
 // A click on the board opens that view, draws a mark or adds a note, as the board is set to.
 // Returns the mark being drawn, if any.
-function press(app, canvas, point, event) {
+function press(app, { canvas, scale }, point, event) {
   const { state } = app.store;
   const mode = state.markupMode ?? 'edit';
 
@@ -42,7 +46,7 @@ function press(app, canvas, point, event) {
   }
 
   if (mode === 'rub') {
-    rubOut(app, point);
+    rubOut(app, point, scale);
 
     return null;
   }
@@ -81,7 +85,7 @@ export function bindBoardPointer(app, canvas, scale) {
 
     // a press off the art (a second finger on a gap) leaves the mark being drawn alone
     if (point) {
-      drawing = press(app, canvas, point, event);
+      drawing = press(app, { canvas, scale }, point, event);
     }
   });
   canvas.addEventListener('pointermove', (event) => {

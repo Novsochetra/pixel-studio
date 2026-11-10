@@ -1,16 +1,16 @@
 /* Posing: the bar over the canvas while the Pose tool is on. */
-.pose-bar {
+:is(.pose-bar, .pin-bar) {
   align-items: center;
   gap: 4px;
   padding: 4px 6px;
 }
 
-.pose-bar > span:not(.pose-gap) {
+:is(.pose-bar, .pin-bar) > span:not(.pose-gap) {
   padding-inline: 6px;
   color: var(--label-secondary);
 }
 
-.pose-bar .hint {
+:is(.pose-bar, .pin-bar) .hint {
   margin: 0;
 }
 
@@ -32,13 +32,13 @@
   width: 58px;
 }
 
-.pose-bar select.input {
+:is(.pose-bar, .pin-bar) select.input {
   max-width: 150px;
 }
 
 /* on a phone the bar floats at the canvas's foot (70-responsive.css): standing in the canvas's
    own column it moved the canvas under the finger each time a part was picked */
-:root[data-layout='compact'] .pose-bar {
+:root[data-layout='compact'] :is(.pose-bar, .pin-bar) {
   justify-content: center;
 }
 

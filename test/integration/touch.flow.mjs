@@ -190,4 +190,62 @@ check(
     (await page.locator('.grid-tab[aria-selected="true"]').textContent()) === 'Coin',
   'a tap on another tab keeps the name typed and opens that tab, in one tap',
 );
+
+// two fingers that missed the canvas zoomed the whole page, and its bars left the screen
+const spread = async ([x, y], [alongX, alongY]) => {
+  const apart = (gap) => [
+    [x - alongX * gap, y - alongY * gap],
+    [x + alongX * gap, y + alongY * gap],
+  ];
+
+  await touch('touchStart', [apart(1)[0]]);
+  await touch('touchStart', apart(1));
+
+  for (let i = 1; i <= 8; i++) {
+    await touch('touchMove', apart(1 + i / 8));
+  }
+
+  await touch('touchEnd', []);
+  await page.waitForTimeout(300);
+};
+const toolbar = await page.locator('#toolbar').boundingBox();
+
+await openDock(page, 'Frames');
+await spread([toolbar.x + toolbar.width / 2, toolbar.y + toolbar.height / 2], [40, 0]);
+check(
+  (await page.evaluate(() => window.visualViewport.scale)) === 1,
+  'two fingers spread on the toolbar leave the page as it is',
+);
+
+// one finger above the canvas and one below it are a pinch too
+await page.getByRole('button', { name: 'More', exact: true }).click();
+await page.getByRole('menuitem', { name: 'Fit the canvas' }).click();
+await page.waitForTimeout(200);
+const fitted = await box();
+
+await spread(
+  [fitted.x + fitted.width / 2, fitted.y + fitted.height / 2],
+  [0, fitted.height / 2 + 8],
+);
+check(
+  (await page.evaluate(() => window.visualViewport.scale)) === 1 &&
+    (await zoom()) > fitted.width / 32,
+  'two fingers on the stage beside the canvas zoom the canvas, not the page',
+);
+
+// zoomed in, the selection's bar went off with the canvas, and Done with it
+await tool('Select and move');
+await stroke([14, 14], [18, 18]);
+await pinch(200);
+const done = await page.locator('.selection-done').evaluate((button) => {
+  const place = button.getBoundingClientRect();
+  const hit = document.elementFromPoint(place.left + place.width / 2, place.top + place.height / 2);
+
+  return { left: place.left, right: place.right, top: place.top, hit: hit === button };
+});
+check(
+  done.hit && done.left >= 0 && done.right <= 412 && done.top >= toolbar.y + toolbar.height,
+  'with the canvas zoomed far in, the selection’s Done is still in reach',
+);
+await page.screenshot({ path: `${shots}/touch-zoomed-selection.png` });
 await finish();

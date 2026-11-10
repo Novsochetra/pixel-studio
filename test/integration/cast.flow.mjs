@@ -131,4 +131,20 @@ check(
   (await pictures()).every((row) => row.picture),
   'projects saved before pictures were kept still show theirs',
 );
+
+// the project open now could not be deleted at all: another had to be opened first
+const openName = (await page.locator('.wordmark small').textContent()).replace(' ▾', '').trim();
+const cards = () => page.locator('.project-card').count();
+const had = await cards();
+
+await page.locator('.project-card[aria-current="true"] .card-more').click();
+await page.getByRole('menuitem', { name: 'Delete…' }).click();
+await page.locator('.project-card .btn.danger').click();
+await page.waitForTimeout(1200);
+const nowOpen = (await page.locator('.wordmark small').textContent()).replace(' ▾', '').trim();
+
+check(
+  (await cards()) === had - 1 && nowOpen !== openName,
+  'the open project is deleted like any other, and another opens in its place',
+);
 await finish();

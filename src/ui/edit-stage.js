@@ -7,6 +7,8 @@ import { renderEmptyFrame } from './empty-frame.js';
 import { mountGridPanel } from './grid/grid-panel.js';
 import { stopPlayback } from './grid/playback.js';
 import { renderPoseBar } from './body/pose-bar.js';
+import { renderPinBar } from './grid/pin-controls.js';
+import { placeText } from './status-bar.js';
 
 // The room above the frames changes as the grid grows (All views, a new animation) or the window
 // does: a canvas that was fitted stays fitted, so its feet never hide under the frames.
@@ -67,7 +69,7 @@ export function fitZoom(stage, sprite) {
   return Math.max(1, Math.min(24, Math.floor(room)));
 }
 
-function renderStage(app, { canvas, bar, poseBar, empty, grid }, patch) {
+function renderStage(app, { canvas, bar, poseBar, pinBar, place, empty, grid }, patch) {
   if (Object.keys(patch).some((key) => STOPS_PLAYING.includes(key))) {
     stopPlayback(app);
   }
@@ -81,6 +83,8 @@ function renderStage(app, { canvas, bar, poseBar, empty, grid }, patch) {
 
   renderSelectionBar(bar, app);
   renderPoseBar(poseBar, app);
+  renderPinBar(pinBar, app);
+  place.textContent = placeText(app.store.state);
   renderEmptyFrame(empty, app);
 
   if (showsInGrid(patch)) {
@@ -96,6 +100,9 @@ function overlays() {
   return {
     bar: bar('div.selection-bar', 'Selection'),
     poseBar: bar('div.pose-bar', 'Pose'),
+    pinBar: bar('div.pin-bar', 'Pins'),
+    // a phone has no status bar: with its panels shut, nothing said which frame this is
+    place: node('div.stage-place'),
     empty: node('div.empty-frame', {
       role: 'group',
       'aria-label': 'This frame is empty',
@@ -106,10 +113,11 @@ function overlays() {
 
 export function mountEditStage(container, app) {
   const canvas = node('canvas', { 'aria-label': 'Pixel canvas' });
-  const { bar, poseBar, empty } = overlays();
+  const { bar, poseBar, pinBar, place, empty } = overlays();
   const holder = node('div.canvas-holder', {}, canvas);
-  const inner = node('div.stage-inner.edit', {}, bar, poseBar, empty, holder);
-  const scroller = node('div.edit-scroll', {}, inner);
+  const scroller = node('div.edit-scroll', {}, node('div.stage-inner.edit', {}, holder));
+  // beside the scroller, not in it: zoomed in, what floats went off with the canvas
+  const area = node('div.edit-area', {}, scroller, place, bar, poseBar, pinBar, empty);
   const grid = mountGridPanel(app, {
     isShown: () => canvas.isConnected,
     onPlayFrame: () => {
@@ -118,13 +126,13 @@ export function mountEditStage(container, app) {
     },
   });
 
-  container.replaceChildren(node('div.edit-layout', {}, scroller, grid.el));
+  container.replaceChildren(node('div.edit-layout', {}, area, grid.el));
   bindPointer(canvas, app, scroller);
   bindWheelZoom(scroller, canvas, app);
   keepFitted(app, scroller, canvas);
   grid.render();
 
-  const parts = { canvas, bar, poseBar, empty, grid };
+  const parts = { canvas, bar, poseBar, pinBar, place, empty, grid };
 
   return { render: (patch = {}) => renderStage(app, parts, patch) };
 }

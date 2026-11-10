@@ -5,12 +5,32 @@ import { guideChips } from '../guide-chips.js';
 import { viewName } from '../../model/kinds.js';
 import { slider } from '../slider.js';
 
+// what a press on the board does, and the same in a word: four choices in full are wider than a
+// phone, and the last was out of sight
 const CLICKS = [
-  ['edit', 'Opens the view'],
-  ['pen', 'Draws a mark'],
-  ['note', 'Adds a note'],
-  ['rub', 'Rubs one out'],
+  ['edit', 'Opens the view', 'Open'],
+  ['pen', 'Draws a mark', 'Mark'],
+  ['note', 'Adds a note', 'Note'],
+  ['rub', 'Rubs one out', 'Rub out'],
 ];
+
+function pressChoice(app, [id, label, word]) {
+  const { markupMode = 'edit', layout } = app.store.state;
+  const choose = () => {
+    app.store.set({ markupMode: id });
+
+    // the note is typed first: its field takes the keys, which would pick tools otherwise
+    if (id === 'note') {
+      document.getElementById('note-text')?.focus();
+    }
+  };
+
+  return node(
+    'button',
+    { 'aria-pressed': String(markupMode === id), 'aria-label': label, onclick: choose },
+    layout === 'compact' ? word : label,
+  );
+}
 
 function overlayControls(app) {
   const { state } = app.store;
@@ -67,13 +87,7 @@ function markControls(app, note) {
     node(
       'div.segmented',
       { role: 'group', 'aria-label': 'A press on the board' },
-      CLICKS.map(([id, label]) =>
-        node(
-          'button',
-          { 'aria-pressed': String(mode === id), onclick: () => app.store.set({ markupMode: id }) },
-          label,
-        ),
-      ),
+      CLICKS.map((choice) => pressChoice(app, choice)),
     ),
     mode === 'note' ? note : null,
     node('button.btn.quiet', { onclick: clearMarks }, 'Clear marks'),

@@ -2,7 +2,8 @@ import { cloneSprite } from '../model/sprite.js';
 import { paintPoint } from '../editor/paint.js';
 import { heldTrue, shapePoints } from '../editor/shapes.js';
 import { currentLayer } from './actions.js';
-import { paintOptions } from './tools-paint.js';
+import { paintOptions, paintOverSaid } from './tools-paint.js';
+import { toast } from './dom.js';
 
 const LABELS = { line: 'Line', rect: 'Rectangle', ellipse: 'Ellipse' };
 
@@ -45,6 +46,8 @@ export function shape(app, kind, start) {
       if (app.history.record(LABELS[kind], [{ layer, before }])) {
         app.saver.markLayers([layer.id]);
         app.store.touch('pixels');
+      } else if (state.paintOver !== null && state.paintOver !== state.color) {
+        toast(paintOverSaid(state));
       }
     },
   };

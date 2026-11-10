@@ -3,6 +3,7 @@ import { directionSprite } from './actions.js';
 import { bounds, toHex } from '../model/sprite.js';
 import { brushField } from './brush-settings.js';
 import { slider } from './slider.js';
+import { forHands } from './platform-keys.js';
 
 // What "Paint only over" can be set to: any pixel, or one of the art's colours. The colour it is
 // set to stays in the list when the art no longer has it, and says so: dropped to "Any pixel"
@@ -116,13 +117,15 @@ const SWITCHES = [
     key: 'shapeEven',
     id: 'shape-even',
     label: 'Even shapes',
-    hint: 'Squares, circles and straight or diagonal lines, as holding Shift draws them',
+    hint: 'Squares, circles and straight or diagonal lines',
+    keys: ', as holding Shift draws them',
   },
   {
     key: 'shadeDarker',
     id: 'shade-darker',
     label: 'Darker shades',
-    hint: 'The light and dark brush darkens, as holding Shift makes it',
+    hint: 'The light and dark brush darkens',
+    keys: ', as holding Shift makes it',
   },
 ];
 
@@ -138,8 +141,11 @@ export function drawingSettings(app, colors) {
   return [
     node('h2', { tabindex: '0' }, 'Drawing'),
     brushField(app),
+    // the key a switch stands in for is named only where there are keys
     SWITCHES.map((item) =>
-      toggle(item, state[item.key], (on) => app.store.set({ [item.key]: on })),
+      toggle({ ...item, hint: item.hint + forHands(item.keys ?? '', '') }, state[item.key], (on) =>
+        app.store.set({ [item.key]: on }),
+      ),
     ),
     toggle(
       { id: 'palette-lock', label: 'Palette lock', hint: "Draw only with the art's colours" },

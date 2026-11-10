@@ -112,9 +112,14 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   time from the dock (`dock.js`); the toolbar keeps one row, and what does not fit waits in the
   More menu (`toolbar-menu.js`). Something new in the inspector or the toolbar needs its place
   there too.
-- What shows over the canvas (the selection's bar, the Pose bar, an empty frame's card) floats over
-  it, never in the canvas's own column: a card that pushed the canvas down let it jump under the
-  finger at the first pixel drawn (`touch.flow.mjs`).
+- What shows over the canvas (the selection's bar, the Pose and Pin bars, an empty frame's card,
+  the place being edited) floats over it, never in the canvas's own column: a card that pushed the
+  canvas down let it jump under the finger at the first pixel drawn (`touch.flow.mjs`). It stands
+  on `.edit-area`, beside the scroller and not in it: inside, a canvas zoomed in carried the
+  selection's Done off the screen.
+- Two fingers never zoom the page (`touch-action` on `html`): they zoom the canvas, on the art or
+  on the stage beside it (`stage-beside.js`). A tool that acts at a press (Fill, Replace colour)
+  acts as the pointer lets go (`onRelease`), so the first finger of a pinch fills nothing.
 - A finger has no pointer to hover and no keys: a control's meaning cannot live only in a tooltip
   or a shortcut. What Shift or Alt does to a tool has a control too (Even shapes and Darker shades
   in Drawing; Add, Take away and Everywhere on the selection's bar), and what a tool says when it
@@ -144,6 +149,8 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   entrance is for what is shown once (a window, a menu, a panel opened from the dock). A
   segmented control's thumb slides because `segmented-thumb.js` remembers where the last one
   stood, by the control's `aria-label`: give every `.segmented` one.
+- The tint is for fills and rings; as words or an icon on the page it is `--tint-text`, which
+  can be read on both themes.
 - `90-motion.css` holds the keyframes and turns every transition and animation off for someone
   who asked for less motion; `look.flow.mjs` and `look-phone.flow.mjs` hold the look to this.
 
@@ -168,6 +175,8 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - The view a project is left on (view, frame, tool, colour) is kept for the next visit
   (`view-kept.js`): something new in the state that is how the editor is showing things joins
   `VIEW` there.
+- A download carries the project's name (`fileSlug(project.name)`), and art with one view names
+  no view in its files (`downloadName`, `viewFileName`).
 - What is typed is checked where it is read: a number is kept to what can be (`wholeNumber`), and
   a message to a person never carries an exception's own words.
 

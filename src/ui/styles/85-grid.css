@@ -10,10 +10,20 @@
   height: 100%;
 }
 
-.edit-scroll {
+/* what floats over the canvas stands on this, which does not scroll */
+.edit-area {
   position: relative;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+}
+
+.edit-scroll {
   min-height: 0;
   overflow: auto;
+  /* a finger beside the canvas is half a pinch (stage-beside.js), never a scroll of its own */
+  touch-action: none;
 }
 
 .grid-tab,
@@ -109,9 +119,16 @@
   padding: 0;
 }
 
+/* neither gives way to a strip full of tabs: squeezed, the name being typed could not be read */
 .tab-rename {
+  flex: none;
   width: 130px;
   height: 28px;
+}
+
+.tab-more,
+.grid-tab-add {
+  flex: none;
 }
 
 .grid-fps {
@@ -170,13 +187,17 @@
 }
 
 .grid-view {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--label);
   font-weight: 500;
   text-align: left;
 }
 
 .grid-row.current .grid-view {
-  color: var(--tint);
+  color: var(--tint-text);
 }
 
 .grid-label small {
@@ -188,7 +209,10 @@
   font-size: 11px;
 }
 
+/* the view's name gives way to its ⋯, not the ⋯ to the name: beside the star of the reference
+   view it was squeezed to half a finger */
 .grid-view-more {
+  flex: none;
   width: 24px;
   height: 24px;
   opacity: 0.7;
@@ -213,7 +237,7 @@
 }
 
 .grid-number.on {
-  color: var(--tint);
+  color: var(--tint-text);
   font-weight: 600;
 }
 
@@ -269,7 +293,7 @@
 
 .cell-add:hover {
   border-color: var(--tint);
-  color: var(--tint);
+  color: var(--tint-text);
 }
 
 /* the frame in hand wears the arcade's ring */
@@ -360,7 +384,7 @@
 }
 
 .cell-hidden:hover {
-  color: var(--tint);
+  color: var(--tint-text);
 }
 
 .grid-number.hidden-frame {

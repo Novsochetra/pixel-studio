@@ -1,5 +1,6 @@
 import { toolsFor } from './tool-list.js';
-import { flipCurrent } from './actions.js';
+import { currentFrames, flipCurrent } from './actions.js';
+import { moveFrameTo } from './frame-actions.js';
 import { redo, undo } from './undo.js';
 import { handleSelectionKey } from './selection-keys.js';
 import { openShortcuts } from './shortcuts.js';
@@ -46,7 +47,32 @@ const PLAIN_KEYS = {
   ']': (app) => app.store.set({ brush: resizeBrush(app.store.state.brush, 1) }),
 };
 
+const MOVES_FRAME = { arrowleft: -1, arrowright: 1 };
+
+// Alt and an arrow move the frame being edited earlier or later, wherever the keyboard is: it
+// worked only with a frame of the grid in focus, and did nothing after a stroke on the canvas
+function moveFrameKey(app, event, key) {
+  const step = event.altKey && MOVES_FRAME[key];
+  const { frame } = app.store.state.at;
+
+  if (!step) {
+    return false;
+  }
+
+  event.preventDefault();
+
+  if (currentFrames(app.store.state)[frame + step]) {
+    moveFrameTo(app, frame, frame + step);
+  }
+
+  return true;
+}
+
 function plainKey(app, event, key) {
+  if (moveFrameKey(app, event, key)) {
+    return;
+  }
+
   if (key === 'f' && event.shiftKey) {
     flipCurrent(app);
 

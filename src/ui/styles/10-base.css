@@ -3,6 +3,12 @@ body {
   height: 100%;
 }
 
+/* Two fingers never zoom the page: its bars left the screen, with no way back but a pinch. They
+   zoom the canvas (navigate.js); what scrolls still scrolls under one. */
+html {
+  touch-action: pan-x pan-y;
+}
+
 [hidden] {
   display: none !important;
 }

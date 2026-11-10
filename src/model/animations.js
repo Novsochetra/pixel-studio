@@ -113,3 +113,19 @@ export function posesToStartFrom(project, open) {
     Object.values(animation.directions).some(({ frames }) => hasArt(frames[0])),
   );
 }
+
+// one place earlier (-1) or later (1) in the project's order, which is the order of its tabs and
+// its sheets; false at either end, where there is nowhere to go
+export function moveAnimation(project, animation, step) {
+  const from = project.animations.indexOf(animation);
+  const to = from + step;
+
+  if (from < 0 || to < 0 || to >= project.animations.length) {
+    return false;
+  }
+
+  project.animations.splice(from, 1);
+  project.animations.splice(to, 0, animation);
+
+  return true;
+}

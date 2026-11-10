@@ -15,6 +15,21 @@ export function floatPiece(sprite, piece) {
   return { ...stampPixels(sprite, piece, 0, 0), floating: { piece, under } };
 }
 
+// A piece copied from a larger canvas may lie outside this one, where it could not be seen or
+// dragged: it is put in the middle. One that is inside, even in part of it, stays where it was.
+export function pieceOnCanvas(piece, { width, height }) {
+  if (piece.some((pixel) => inside({ width, height }, pixel))) {
+    return piece;
+  }
+
+  const [xs, ys] = [piece.map(({ x }) => x), piece.map(({ y }) => y)];
+  const [left, top] = [Math.min(...xs), Math.min(...ys)];
+  const dx = Math.floor((width - (Math.max(...xs) - left + 1)) / 2) - left;
+  const dy = Math.floor((height - (Math.max(...ys) - top + 1)) / 2) - top;
+
+  return piece.map((pixel) => ({ ...pixel, x: pixel.x + dx, y: pixel.y + dy }));
+}
+
 export function moveFloating(sprite, selection, dx, dy) {
   const { piece, under } = selection.floating;
 

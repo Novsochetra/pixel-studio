@@ -86,6 +86,16 @@ check(
   (await page.getByLabel('How strongly the picture shows').count()) === 1,
   'a picture to trace joins the layers, marked, with how strongly it shows',
 );
+// an image dropped on a frame in the grid went into the view being edited, whichever it was
+await selectView(page, 'Front');
+await dropImage(page, side, 'side.webp', '.grid-row[data-direction="east"] .cell');
+await page.waitForTimeout(300);
+check(
+  (await page.getByRole('button', { name: /^Use for Side/ }).count()) === 1,
+  'an image dropped on a frame of another view is cleaned into that view',
+);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
 await page.locator('.cell-add').click();
 await page.waitForTimeout(200);
 await dropImage(page, side, 'side.webp');

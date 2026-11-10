@@ -1,6 +1,7 @@
 import { changedLayers } from '../editor/snapshots.js';
 import { goToSettled, settleAt } from './actions.js';
 import { toast } from './dom.js';
+import { allLayers, frameAt } from '../model/project.js';
 
 // frames, layers or animations put back, or made again
 function afterStructure(app, step, back) {
@@ -17,6 +18,38 @@ function afterStructure(app, step, back) {
 
   goToSettled(app, settleAt({ ...app.store.state, at: place }));
   app.store.touch('animations');
+}
+
+// A step drawn in another frame or view is put back or made again there, out of sight: the
+// editor goes to it. A step that reached the frame being edited too is seen where it is.
+function showChanged(app, step) {
+  const { state } = app.store;
+  const changed = new Set(step.changes.map(({ id }) => id));
+  const inSight = frameAt(state.project, state.at).layers.some((layer) => changed.has(layer.id));
+  const found = inSight
+    ? null
+    : [...allLayers(state.project)].find(({ layer }) => changed.has(layer.id));
+
+  if (found) {
+    const at = {
+      animation: found.animation.id,
+      direction: found.direction,
+      frame: found.frameIndex,
+      layer: found.layer.key,
+    };
+
+    goToSettled(app, settleAt({ ...state, at }));
+  }
+}
+
+// a step that moved the selection: back with the pixels on undo, and on redo to where it stood
+// when the step was undone
+function moveSelection(app, step, back) {
+  if (back) {
+    step.selection.after = app.store.state.selection;
+  }
+
+  app.store.set({ selection: step.selection[back ? 'before' : 'after'] ?? null });
 }
 
 function afterHistory(app, step, back) {
@@ -38,11 +71,10 @@ function afterHistory(app, step, back) {
   }
 
   app.saver.markLayers(step.changes.map(({ id }) => id));
+  showChanged(app, step);
 
-  // a step that moved the selection: back with the pixels on undo; on redo it is let go, as
-  // where it went is not kept
   if (step.selection) {
-    app.store.set({ selection: back ? step.selection.before : null });
+    moveSelection(app, step, back);
   }
 
   if (step.rigs.length || step.changes.some(({ poses }) => poses.before !== poses.after)) {

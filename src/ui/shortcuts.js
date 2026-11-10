@@ -24,7 +24,7 @@ const GROUPS = [
       ['V', 'Move the whole frame: drag or arrow keys (Shift: 10 px)'],
       ['O', 'Pose the body parts: drag a part, or its handle to turn it'],
       ['M', 'Symmetry on or off'],
-      ['Shift F', 'Flip the view'],
+      ['Shift F', 'Flip this layer left to right'],
     ],
   ],
   [

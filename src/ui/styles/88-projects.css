@@ -130,7 +130,7 @@
 
 .place[aria-current='true'] {
   background: var(--tint-quiet);
-  color: var(--tint);
+  color: var(--tint-text);
 }
 
 .place.drop-target {
@@ -146,7 +146,7 @@
 }
 
 .place[aria-current='true'] svg {
-  color: var(--tint);
+  color: var(--tint-text);
 }
 
 .place-name {
@@ -183,7 +183,7 @@
   box-shadow: none;
   font-size: 12px;
   font-weight: 400;
-  color: var(--tint);
+  color: var(--tint-text);
 }
 
 .folders-none {

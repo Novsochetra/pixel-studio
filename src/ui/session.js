@@ -35,8 +35,8 @@ async function saveBeforeLeaving(app) {
   }
 }
 
-// A saver for `project`. save: 'nothing' (just loaded), 'on-change' (an example, written once
-// edited) or 'all' (new). stored: the layers already written, when a version replaces the project.
+// A saver for `project`. save: 'nothing' (just loaded) or 'all' (new). stored: the layers already
+// written, when a version replaces the project.
 function startSaving(app, project, save, stored) {
   app.saver?.detach();
   // the picture last written is not known yet: the first save writes it
@@ -57,10 +57,6 @@ function startSaving(app, project, save, stored) {
   }
 
   app.saver.remember(project);
-
-  if (save === 'on-change') {
-    app.saver.saveAllOnFirstChange();
-  }
 }
 
 // how the editor was showing things, kept when a version of the same project takes its place

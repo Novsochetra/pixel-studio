@@ -18,7 +18,8 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
   where there is no keyboard); undo brings a moved selection back with its pixels.
 - **Animate**: each animation is a grid, views down and frames across, as the sheet will be: drag
   frames to reorder them, play them on the canvas (every view side by side with All views), hide a
-  frame from play without deleting it, see the mirrored side, fold the frames away for room.
+  frame from play without deleting it, see the mirrored side, fold the frames away for room. A
+  tab's menu moves its animation left or right; an image dropped on a frame is cleaned into it.
 - **Body parts**: cut a character's view into parts (head, torso, arms, legs, feet; a first guess
   to correct with a brush or a freehand lasso), then pose them in each frame: drag a part to move it, its handle to
   turn it (RotSprite keeps turned pixel art clean), the parts that follow it coming along. Draw what

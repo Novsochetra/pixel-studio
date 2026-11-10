@@ -38,7 +38,7 @@
 
 .dock-tab[aria-pressed='true'] {
   background: var(--tint-quiet);
-  color: var(--tint);
+  color: var(--tint-text);
 }
 
 .dock-tab svg,

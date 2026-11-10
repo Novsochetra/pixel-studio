@@ -76,8 +76,9 @@ function startScreenHandlers(backend, index, closeScreen) {
     async onExample() {
       const sample = fillMissingSprites(await sampleProject());
 
-      // the example is only written once it is edited
-      open({ project: sample, prefix: prefixFor(sample.id), save: 'on-change' });
+      // Written as it opens, like a project made here: the bar said Saved and Projects listed
+      // it, yet a page loaded again before the first change had nothing to show for it.
+      open({ project: sample, prefix: prefixFor(sample.id), save: 'all' });
     },
     async onOpenFile(file) {
       try {

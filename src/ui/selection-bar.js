@@ -56,6 +56,14 @@ function angleField(app) {
         turnSelectionTo(app, Number(event.target.value) || 0);
         event.target.value = String(selectionAngle(app.store.state));
       },
+      // Enter and Esc give the keys back to the editor: left in the field, undo and the tools'
+      // keys were typed into it, and Esc let nothing go
+      onkeydown: (event) => {
+        if (event.key === 'Enter' || event.key === 'Escape') {
+          event.stopPropagation();
+          event.target.blur();
+        }
+      },
     }),
     '°',
   );

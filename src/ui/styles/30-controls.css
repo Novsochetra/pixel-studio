@@ -174,5 +174,5 @@
 
 /* a way into more, worded as a link so it does not compete with the section's own button */
 .btn.link {
-  color: var(--tint);
+  color: var(--tint-text);
 }

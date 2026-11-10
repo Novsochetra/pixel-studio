@@ -65,7 +65,7 @@ h4.start-heading {
   border-radius: var(--radius-lg);
   /* a fill, not the chrome: in a window the chrome is the window's own colour */
   background: var(--fill-quiet);
-  color: var(--tint);
+  color: var(--tint-text);
   cursor: pointer;
   transition:
     scale var(--duration-press) var(--ease-spring),

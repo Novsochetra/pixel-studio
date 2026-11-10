@@ -18,7 +18,7 @@ function modeButton(app, [mode, label, title, keys]) {
       title: forHands(title + keys, title),
       'data-mode': mode,
       'aria-pressed': 'false',
-      // pressed again, the next loop starts a new selection, as it does with neither on
+      // for the next loop only; pressed again before it, that loop starts a new selection
       onclick: () =>
         app.store.set({ lassoMode: app.store.state.lassoMode === mode ? 'new' : mode }),
     },

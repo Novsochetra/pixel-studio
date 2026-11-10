@@ -6,10 +6,18 @@ import { encodeGif } from '../io/gif.js';
 import { spritePng } from '../io/images.js';
 import { zipFiles } from '../io/zip.js';
 import { saveFile } from './save-file.js';
+import { fileSlug } from './file-name.js';
+import { saidWarning } from './export/export-summary.js';
 
 const encoder = new TextEncoder();
-const warningsOf = (results) =>
-  results.flatMap((result) => result.warnings.map((warning) => `${result.name}: ${warning}`));
+// a download says whose it is: sprite-sheets.zip from two projects were told apart by nothing
+const named = (state) => fileSlug(state.project.name, 'project');
+
+const warningsOf = (results, project) =>
+  results.flatMap((result) =>
+    result.warnings.map((warning) => `${result.name}: ${saidWarning(project, result, warning)}`),
+  );
+
 const pngBytes = async (sprite, scale = 1) =>
   new Uint8Array(await (await spritePng(sprite, scale)).arrayBuffer());
 
@@ -68,9 +76,9 @@ export async function saveSheetsWithJson(state, settings) {
     });
   }
 
-  await saveFile('sprite-sheets.zip', zipFiles(files));
+  await saveFile(`${named(state)}-sprite-sheets.zip`, zipFiles(files));
 
-  return warningsOf(results);
+  return warningsOf(results, state.project);
 }
 
 export async function saveFrames(state, settings) {
@@ -85,9 +93,9 @@ export async function saveFrames(state, settings) {
     }
   }
 
-  await saveFile('frames.zip', zipFiles(files));
+  await saveFile(`${named(state)}-frames.zip`, zipFiles(files));
 
-  return warningsOf(results);
+  return warningsOf(results, state.project);
 }
 
 // one looping GIF per animation and direction, big enough to watch
@@ -112,7 +120,7 @@ export async function saveGifs(state, settings) {
     }
   }
 
-  await saveFile('animations-gif.zip', zipFiles(files));
+  await saveFile(`${named(state)}-animations-gif.zip`, zipFiles(files));
 
-  return warningsOf(results);
+  return warningsOf(results, state.project);
 }

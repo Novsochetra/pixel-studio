@@ -55,22 +55,7 @@ export class Saver {
     }
   }
 
-  // A fresh project is only written once its owner changes something; then all of it is.
-  saveAllOnFirstChange() {
-    this.unsaved = true;
-  }
-
   schedule() {
-    if (this.unsaved && this.project) {
-      this.unsaved = false;
-
-      for (const { layer } of allLayers(this.project)) {
-        this.dirty.add(layer.id);
-      }
-
-      this.structureDirty = true;
-    }
-
     this.onStatus('pending');
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
@@ -83,13 +68,8 @@ export class Saver {
     this.project = project;
   }
 
-  // write whatever is waiting now, before switching to another project; a sample that was
-  // never edited is written too, so it is still in the list afterwards
+  // write whatever is waiting now, before switching to another project
   async flushNow() {
-    if (this.unsaved && this.project) {
-      this.markEverything(this.project);
-    }
-
     // after a failed save nothing is scheduled, but its changes are still waiting
     if (this.timer === null && !this.dirty.size && !this.structureDirty) {
       return this.running;

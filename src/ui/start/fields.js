@@ -7,11 +7,11 @@ import { CANVAS_LIMITS } from '../../model/canvas-size.js';
 
 const SIZES = [16, 24, 32, 48, 64, 96, 128, 160];
 
-const sizeOr = (text, usual) =>
-  wholeNumber(Number(text) > 0 ? text : '', { ...CANVAS_LIMITS, fallback: usual });
+const sizeOr = (text, usual) => wholeNumber(text.trim(), { ...CANVAS_LIMITS, fallback: usual });
 
-// empty, or 0, takes the size the kind comes with; anything else is a size a canvas can have
-const sizeCanBe = (text) => !(Number(text) > 0) || isWholeBetween(text, CANVAS_LIMITS);
+// Empty takes the size the kind comes with; anything typed is a size a canvas can have. 0 and
+// −5 were quietly made that size too, where 5 was refused: now each is told the same.
+const sizeCanBe = (text) => !text.trim() || isWholeBetween(text, CANVAS_LIMITS);
 
 function field(label, control) {
   return node('label.field', {}, node('span', {}, label), control);
@@ -104,7 +104,7 @@ export function projectFields() {
     problem: () => sizeProblem([width, height]),
     read: () => ({
       name: name.value.trim() || name.placeholder,
-      // a field left empty, or 0, takes the size the kind picked comes with
+      // a field left empty takes the size the kind picked comes with
       width: sizeOr(width.value, usual.width),
       height: sizeOr(height.value, usual.height),
       scale: wholeNumber(scale.value, { min: 1, max: 32 }),

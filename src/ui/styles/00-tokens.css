@@ -21,8 +21,10 @@
   --separator: rgb(84 84 88 / 60%);
   --label: #ffffff;
   --label-secondary: rgb(235 235 245 / 72%);
-  --label-muted: #8e8e93;
+  --label-muted: #a1a1a8;
   --tint: #0a84ff;
+  /* the tint as words and icons on the page: the tint itself is for fills, and too dim to read */
+  --tint-text: #5eb0ff;
   --on-tint: #ffffff;
   --tint-quiet: rgb(10 132 255 / 22%);
   --fill-quiet: rgb(118 118 128 / 24%);
@@ -86,6 +88,7 @@
     --label-secondary: rgb(60 60 67 / 85%);
     --label-muted: #6d6d72;
     --tint: #007aff;
+    --tint-text: #005fcc;
     --tint-quiet: rgb(0 122 255 / 14%);
     --fill-quiet: rgb(118 118 128 / 14%);
     --ok: #248a3d;
@@ -123,6 +126,7 @@
   --label-secondary: rgb(60 60 67 / 85%);
   --label-muted: #6d6d72;
   --tint: #007aff;
+  --tint-text: #005fcc;
   --tint-quiet: rgb(0 122 255 / 14%);
   --fill-quiet: rgb(118 118 128 / 14%);
   --ok: #248a3d;

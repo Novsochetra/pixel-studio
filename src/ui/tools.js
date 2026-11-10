@@ -3,7 +3,7 @@ import { frameAt } from '../model/project.js';
 import { removePinNear, setPin } from '../model/pins.js';
 import { currentLayer, restructure } from './actions.js';
 import { toast } from './dom.js';
-import { PAINTING, fill, replace, shade, stroke } from './tools-paint.js';
+import { PAINTING, fill, onRelease, replace, shade, stroke } from './tools-paint.js';
 import { shape } from './tools-shape.js';
 import { lasso, select, wand } from './tools-select.js';
 import { onTurnHandle, turnSelectionDrag } from './selection-turn.js';
@@ -55,8 +55,8 @@ const ON_PRESS = {
   shade: (app, point, event) => shade(app, point, event.shiftKey || app.store.state.shadeDarker),
   pencil: (app, point) => stroke(app, point, app.store.state.color),
   eraser: (app, point) => stroke(app, point, CLEAR),
-  fill,
-  replace,
+  fill: onRelease(fill),
+  replace: onRelease(replace),
   line: (app, point) => shape(app, 'line', point),
   rect: (app, point) => shape(app, 'rect', point),
   ellipse: (app, point) => shape(app, 'ellipse', point),

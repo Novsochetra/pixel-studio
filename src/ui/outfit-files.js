@@ -23,7 +23,7 @@ export async function downloadOutfit(state, mapping, name) {
     }
   }
 
-  await saveFile(`${slug(name)}.zip`, zipFiles(files));
+  await saveFile(`${fileSlug(state.project.name, 'project')}-${slug(name)}.zip`, zipFiles(files));
 }
 
 // the outfit as a palette and mapping, to use later from Swap colours

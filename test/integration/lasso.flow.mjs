@@ -131,4 +131,25 @@ await page.mouse.click(...(await over([10, 10])));
 await page.waitForTimeout(150);
 check(await bar.isHidden(), 'a click away lets go');
 
+// Add stayed on after its loop: the next drag inside the selection drew a loop, and moved nothing
+const add = bar.getByRole('button', { name: 'Add', exact: true });
+
+await stroke(roundTheFist);
+await add.click();
+await stroke([
+  [70, 80],
+  [84, 79],
+  [85, 96],
+  [72, 97],
+  [70, 88],
+]);
+check((await add.getAttribute('aria-pressed')) === 'false', 'Add is for the next loop alone');
+const added = await picture();
+
+await stroke([
+  [58, 88],
+  [58, 70],
+]);
+check((await picture()) !== added, 'and the drag after it moves what is selected');
+
 await finish();

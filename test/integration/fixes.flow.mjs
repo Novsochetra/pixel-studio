@@ -61,10 +61,10 @@ const count = async (hex) => {
 const tool = (name) => page.locator('#rail').getByRole('button', { name }).click();
 const RED = '#df2321';
 
-// an empty or 0 size on the start screen made an 8×8 canvas
+// an empty size on the start screen made an 8×8 canvas (a 0 is refused: start.flow.mjs)
 await page.getByRole('radio', { name: /^Icon/ }).click();
 await page.fill('#project-width', '');
-await page.fill('#project-height', '0');
+await page.fill('#project-height', '');
 await page.getByRole('button', { name: 'Create', exact: true }).click();
 await page.waitForSelector('.grid-panel');
 await page.waitForTimeout(300);
@@ -190,6 +190,20 @@ const sheet = await download(page, () =>
 check(
   Boolean(sheet) && (await page.inputValue('#frame-width')) === '1024',
   'a frame width typed just before Download is used at once, and kept to a size that can be',
+);
+
+// a width typed, then the height's field pressed and typed in: the height typed went nowhere,
+// as the window was drawn again under the press
+await page.fill('#frame-width', '64');
+await page.locator('#frame-height').click();
+await page.keyboard.press('ControlOrMeta+a');
+await page.keyboard.type('100');
+await page.keyboard.press('Tab');
+await page.waitForTimeout(300);
+check(
+  (await page.inputValue('#frame-width')) === '64' &&
+    (await page.inputValue('#frame-height')) === '100',
+  'a second size field takes what is typed in it right after the first',
 );
 await page.keyboard.press('Escape');
 

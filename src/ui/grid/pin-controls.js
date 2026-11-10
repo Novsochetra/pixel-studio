@@ -1,4 +1,4 @@
-import { node } from '../dom.js';
+import { node, replace } from '../dom.js';
 import { restructure } from '../actions.js';
 import { PIN_NAMES, pinsOf, removePin } from '../../model/pins.js';
 import { frameAt } from '../../model/project.js';
@@ -56,6 +56,27 @@ export function pinControls(app, toggle) {
       title: 'Pins mark the head, hands, hips and feet in each frame (tool P)',
       said: 'they mark the head, hands, hips and feet in each frame. Place them with the Pin tool',
     }),
-    state.tool === 'pin' ? [pinNames(app), removeButton(app)] : null,
+    // on a phone the frames are shut while the art is pinned: the two float over the canvas
+    state.tool === 'pin' && state.layout !== 'compact' ? [pinNames(app), removeButton(app)] : null,
   ];
+}
+
+// Over the canvas on a phone, while the Pin tool is in hand: which part a tap pins, and the way
+// to take that pin off. In the frames' bar alone, every tap moved the head and nothing said why.
+export function renderPinBar(el, app) {
+  const { state } = app.store;
+  const placed = pinsOf(frameAt(state.project, state.at)).some(
+    (mark) => mark.name === state.pinName,
+  );
+  const shown = `${state.pinName} ${placed}`;
+
+  el.hidden = state.tool !== 'pin' || state.layout !== 'compact';
+
+  if (el.hidden) {
+    el.dataset.shown = '';
+    replace(el);
+  } else if (el.dataset.shown !== shown) {
+    el.dataset.shown = shown;
+    replace(el, node('span', {}, 'Pin the'), pinNames(app), removeButton(app));
+  }
 }

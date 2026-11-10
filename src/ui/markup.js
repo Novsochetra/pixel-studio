@@ -13,6 +13,38 @@ export function marksFor(project, direction) {
   };
 }
 
+// a note's words in lines no wider than its view: on one line, a long note ran off the view's edge
+function noteLines(context, text, room) {
+  const lines = [];
+
+  for (const word of text.split(' ')) {
+    const longer = lines.length ? `${lines.at(-1)} ${word}` : word;
+
+    if (lines.length && context.measureText(longer).width <= room) {
+      lines[lines.length - 1] = longer;
+    } else {
+      lines.push(word);
+    }
+  }
+
+  return lines;
+}
+
+function drawNote(context, note, { scale, panelWidth, colour }) {
+  const lines = noteLines(context, note.text, panelWidth - 10);
+  const width = Math.max(...lines.map((line) => context.measureText(line).width)) + 10;
+  const line = Math.max(16, scale * 4.4);
+  const height = line * lines.length;
+  // a note near the right edge opens to the left, so it stays on its own view
+  const x = Math.max(0, Math.min(note.x * scale, panelWidth - width));
+  const y = Math.max(height, note.y * scale);
+
+  context.fillStyle = colour;
+  context.fillRect(x, y - height, Math.min(width, panelWidth), height);
+  context.fillStyle = NOTE_TEXT;
+  lines.forEach((words, i) => context.fillText(words, x + 5, y - height + line * (i + 0.72)));
+}
+
 // the marks and notes on one view's panel of the board, at its scale
 export function drawMarks(context, project, direction, scale) {
   const panelWidth = project.canvas.width * scale;
@@ -36,20 +68,7 @@ export function drawMarks(context, project, direction, scale) {
   }
 
   context.font = `700 ${Math.max(11, Math.round(scale * 3.2))}px Silkscreen, ui-monospace, monospace`;
-
-  for (const note of notes) {
-    const width = context.measureText(note.text).width + 10;
-    const height = Math.max(16, scale * 4.4);
-
-    // a note near the right edge opens to the left, so it stays on its own view
-    const x = Math.max(0, Math.min(note.x * scale, panelWidth - width));
-    const y = Math.max(height, note.y * scale);
-    context.fillStyle = colour;
-    context.fillRect(x, y - height, width, height);
-    context.fillStyle = NOTE_TEXT;
-    context.fillText(note.text, x + 5, y - height * 0.28);
-  }
-
+  notes.forEach((note) => drawNote(context, note, { scale, panelWidth, colour }));
   context.restore();
 }
 

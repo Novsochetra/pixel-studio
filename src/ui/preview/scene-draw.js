@@ -87,5 +87,6 @@ export function drawScene(canvas, state, { background, clock }) {
     stand({ source: runner, flip: false }, x);
   }
 
-  return { width, height };
+  // the cast stands about the middle of the scene, feet on the ground line
+  return { width, height, subject: { x: width / 2, bottom: groundY } };
 }

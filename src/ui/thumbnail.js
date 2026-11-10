@@ -29,7 +29,9 @@ export function drawThumbnail(
   const wide = box.right - box.left;
   const tall = box.bottom - box.top;
   const scale = size / Math.max(wide, tall);
-  context.imageSmoothingEnabled = false;
+  // art larger than the picture is drawn smaller: pixel for pixel, a thin line fell between
+  // the pixels kept and the frame looked empty
+  context.imageSmoothingEnabled = scale < 1;
 
   if (flip) {
     context.translate(size, 0);

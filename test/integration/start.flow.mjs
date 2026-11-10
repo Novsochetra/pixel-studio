@@ -48,6 +48,20 @@ await openProjects();
 await createProject(page, { kind: 'Effect', name: 'Spark' });
 check((await status(page)).includes('48×48 canvas'), 'an effect starts on a 48 by 48 canvas');
 
+// a width of 0 quietly made a project of the usual size, where 5 was refused
+await openProjects();
+await page.getByRole('radio', { name: /^Icon/ }).click();
+await page.fill('#project-width', '0');
+await page.getByRole('button', { name: 'Create', exact: true }).click();
+await page.waitForTimeout(300);
+check(
+  (await page.locator('.toast').textContent()).includes('from 8 to 512') &&
+    (await status(page)).includes('48×48 canvas'),
+  'a width of 0 is refused and said, as any size no canvas can have',
+);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+
 await openProjects();
 await createProject(page, { kind: 'Character', name: 'Runner', width: 32, directions: 'side' });
 await showAllViews(page);

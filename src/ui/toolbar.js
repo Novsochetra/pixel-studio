@@ -85,6 +85,8 @@ export function renderToolbar(el, app) {
   const { state } = app.store;
   const { layout } = state;
 
+  // the browser's tab says whose work it holds
+  document.title = `${state.project.name} · Pixel Clean Studio`;
   replace(
     el,
     projectButton(app),

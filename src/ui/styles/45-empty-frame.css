@@ -62,6 +62,6 @@
 }
 
 :root[data-layout='compact'] .empty-frame .btn {
-  --btn-height: 34px;
+  --btn-height: 40px;
   padding-inline: 8px;
 }

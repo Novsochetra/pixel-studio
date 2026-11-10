@@ -68,7 +68,7 @@ const TOOLS = [
     id: 'pin',
     label: 'Pin a body part (Alt-click removes it)',
     key: 'p',
-    touch: 'Pin a body part: tap where it is',
+    touch: 'Pin a body part: pick the part on the bar over the canvas, then tap where it is',
   },
   {
     id: 'movelayer',

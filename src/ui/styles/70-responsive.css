@@ -240,6 +240,15 @@
   order: -2;
 }
 
+/* a tablet held upright has the width for one row: the tabs take what the rest leaves */
+@media (min-width: 700px) {
+  :root[data-layout='compact'] .grid-tabs-bar {
+    flex: 0 1 auto;
+    max-width: 40%;
+    margin-right: auto;
+  }
+}
+
 :root[data-layout='compact'] .grid-fps .input {
   width: 48px;
 }
@@ -341,7 +350,7 @@
 
 /* at the canvas's foot, by the thumb, clear of the messages that show at the top */
 :root[data-layout='compact'] .selection-bar,
-:root[data-layout='compact'] .pose-bar {
+:root[data-layout='compact'] :is(.pose-bar, .pin-bar) {
   --rise-from: -50% 10px;
 
   top: auto;
@@ -351,7 +360,7 @@
 
 /* A bar over the canvas is one row that scrolls: wrapped to two or three, it lay over half the
    canvas. */
-:root[data-layout='compact'] :is(.selection-bar, .pose-bar) {
+:root[data-layout='compact'] :is(.selection-bar, .pose-bar, .pin-bar) {
   --rise-from: 0 10px;
 
   left: 8px;
@@ -365,11 +374,11 @@
   scrollbar-width: none;
 }
 
-:root[data-layout='compact'] :is(.selection-bar, .pose-bar)::-webkit-scrollbar {
+:root[data-layout='compact'] :is(.selection-bar, .pose-bar, .pin-bar)::-webkit-scrollbar {
   display: none;
 }
 
-:root[data-layout='compact'] :is(.selection-bar, .pose-bar) > * {
+:root[data-layout='compact'] :is(.selection-bar, .pose-bar, .pin-bar) > * {
   flex: none;
 }
 
@@ -429,6 +438,15 @@
   bottom: auto;
   border-radius: var(--radius-card);
   text-align: center;
+}
+
+/* over a window, a message keeps off its title and its × at the top and off its buttons at the
+   foot: it shows above the buttons */
+:root[data-layout='compact']:has(.sheet-backdrop) :is(.toast, .toast-out) {
+  --toast-from: 0 12px;
+
+  top: auto;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
 }
 
 /* with the selection's bar at the top of the canvas, a message shows under it */

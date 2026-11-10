@@ -21,7 +21,7 @@ export function paintOptions(state, color = state.color) {
   };
 }
 
-const paintOverSaid = (state) =>
+export const paintOverSaid = (state) =>
   `Paint only over is set to ${toHex(state.paintOver)}, so only that colour changes. Set it to "Any pixel" to paint the rest.`;
 
 export function stroke(app, point, color) {
@@ -66,6 +66,10 @@ function keptByPaintOver(state, sprite, [x, y]) {
 
   return true;
 }
+
+// Fill and Replace colour act as the pointer lets go: a press that turns out to be the first
+// finger of a pinch is taken back with nothing filled.
+export const onRelease = (act) => (app, point) => ({ end: () => act(app, point), cancel() {} });
 
 export function fill(app, [x, y]) {
   const layer = currentLayer(app.store.state);

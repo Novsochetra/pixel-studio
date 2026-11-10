@@ -95,7 +95,8 @@ export async function frameAction(page, name) {
   await page.waitForTimeout(250);
 }
 
-export async function dropImage(page, path, name = 'picture.webp') {
+// onto: what the image is dropped on, the stage unless a frame in the grid is named
+export async function dropImage(page, path, name = 'picture.webp', onto = '#stage') {
   const transfer = await page.evaluateHandle(
     ([bytes, fileName]) => {
       const data = new DataTransfer();
@@ -107,7 +108,7 @@ export async function dropImage(page, path, name = 'picture.webp') {
     [[...readFileSync(path)], name],
   );
 
-  await page.dispatchEvent('#stage', 'drop', { dataTransfer: transfer });
+  await page.dispatchEvent(onto, 'drop', { dataTransfer: transfer });
 }
 
 export async function cleanReport(page) {

@@ -6,6 +6,9 @@ import { newProject } from '../../src/model/new-project.js';
 import { addFrame } from '../../src/model/frames.js';
 import { pack } from '../../src/model/sprite.js';
 import { menuPlace } from '../../src/ui/menu.js';
+import { moveAnimation, startAnimation } from '../../src/model/animations.js';
+import { zipFiles } from '../../src/io/zip.js';
+import { pieceOnCanvas } from '../../src/editor/floating.js';
 import { markAt } from '../../src/views/markup.js';
 import { lassoModeFor } from '../../src/ui/tools-select.js';
 import { fittedView } from '../../src/ui/view-kept.js';
@@ -130,4 +133,75 @@ test('the files of art with one view name no view', () => {
     frameFiles(result, settings).map((file) => file.path),
     [`${result.name}/01.png`],
   );
+});
+
+// a mark could be rubbed out only at the points the pointer had reported, a note only at its pin
+test('a mark is found anywhere along its line, and a note on its label', () => {
+  const markup = {
+    strokes: [
+      {
+        direction: 'south',
+        points: [
+          [10, 10],
+          [110, 90],
+        ],
+      },
+    ],
+    notes: [{ direction: 'south', x: 40, y: 120, text: 'arm too thin' }],
+  };
+  const view = { scale: 4, width: 160 };
+
+  assert.deepEqual(markAt(markup, { direction: 'south', x: 60, y: 51 }, view), {
+    kind: 'strokes',
+    index: 0,
+  });
+  assert.deepEqual(markAt(markup, { direction: 'south', x: 62, y: 117 }, view), {
+    kind: 'notes',
+    index: 0,
+  });
+  assert.equal(markAt(markup, { direction: 'south', x: 60, y: 20 }, view), null);
+});
+
+// pixels copied from a larger canvas were pasted where they came from: outside the smaller one
+test('a piece copied from outside this canvas is pasted in its middle', () => {
+  const far = [
+    { x: 100, y: 60, color: RED },
+    { x: 103, y: 61, color: RED },
+  ];
+  const near = [{ x: 3, y: 4, color: RED }];
+
+  assert.deepEqual(
+    pieceOnCanvas(far, { width: 32, height: 32 }).map(({ x, y }) => [x, y]),
+    [
+      [14, 15],
+      [17, 16],
+    ],
+  );
+  assert.equal(pieceOnCanvas(near, { width: 32, height: 32 }), near);
+});
+
+// every file in a zip was dated month 0, day 0 of 1980: no date at all
+test('the files in a zip carry the day they were made', async () => {
+  const zip = zipFiles(
+    [{ name: 'a.txt', data: new Uint8Array([1]) }],
+    new Date(2026, 10, 10, 9, 30),
+  );
+  const view = new DataView(await zip.arrayBuffer());
+  const date = view.getUint16(12, true);
+
+  assert.deepEqual([(date >> 9) + 1980, (date >> 5) & 15, date & 31], [2026, 11, 10]);
+  assert.equal(view.getUint16(10, true) >> 11, 9);
+});
+
+// animations could not be put in another order: their tabs, and their sheets, stayed as made
+test('an animation moves one place along, and stops at either end', () => {
+  const project = newProject({ name: 'Hero' });
+  const [idle] = project.animations;
+  const walk = startAnimation(project, idle, { name: 'Walk' });
+  const names = () => project.animations.map((animation) => animation.name);
+
+  assert.equal(moveAnimation(project, walk, -1), true);
+  assert.deepEqual(names(), ['Walk', idle.name]);
+  assert.equal(moveAnimation(project, walk, -1), false);
+  assert.deepEqual(names(), ['Walk', idle.name]);
 });

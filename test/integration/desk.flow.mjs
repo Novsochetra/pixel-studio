@@ -152,4 +152,35 @@ check(
     (await page.getByRole('button', { name: 'Eraser' }).getAttribute('aria-pressed')) === 'true',
   'a page loaded again opens on the view and the tool it was left on',
 );
+
+// a stroke undone from another view went back out of sight: the message said Undone, the canvas
+// showed nothing change
+const editing = () => page.locator('.grid-row.current .grid-view').textContent();
+const art = await page.getByLabel('Pixel canvas').boundingBox();
+
+await page.keyboard.press('b');
+await page.mouse.click(art.x + 10, art.y + 10);
+await selectView(page, 'Front');
+await page.keyboard.press('ControlOrMeta+z');
+await page.waitForTimeout(300);
+check((await editing()) === 'Back', 'undo goes to the view its stroke was drawn in');
+await selectView(page, 'Side');
+await page.keyboard.press('ControlOrMeta+Shift+z');
+await page.waitForTimeout(300);
+check((await editing()) === 'Back', 'and redo draws it again there, in sight');
+
+// a selection flipped, undone and redone was let go by the redo
+await page.keyboard.press('s');
+await page.mouse.move(art.x + art.width * 0.4, art.y + art.height * 0.3);
+await page.mouse.down();
+await page.mouse.move(art.x + art.width * 0.6, art.y + art.height * 0.5, { steps: 4 });
+await page.mouse.up();
+await page.getByRole('button', { name: 'Flip ↔' }).click();
+await page.keyboard.press('ControlOrMeta+z');
+await page.keyboard.press('ControlOrMeta+Shift+z');
+await page.waitForTimeout(300);
+check(
+  await page.locator('.selection-bar').isVisible(),
+  'a selection’s step redone keeps the selection',
+);
 await finish();

@@ -2,6 +2,7 @@ import { node, replace } from '../dom.js';
 import { gridBar } from './grid-bar.js';
 import { gridBody } from './rows.js';
 import { isPlaying, togglePlayback } from './playback.js';
+import { gridPlace, keepGridPlace } from './grid-place.js';
 
 const FOCUS_FOLLOWS = { '.cell': '.cell.selected', '.grid-tab': '.grid-tab[aria-selected="true"]' };
 
@@ -42,6 +43,7 @@ function showOpenTab(el) {
 export function mountGridPanel(app, { isShown, onPlayFrame }) {
   const el = node('section.grid-panel', { 'aria-label': 'Animation' });
   let shownPlaying = false;
+  let shownAt = '';
   const onFrame = () => {
     onPlayFrame();
 
@@ -55,7 +57,9 @@ export function mountGridPanel(app, { isShown, onPlayFrame }) {
   const render = () =>
     !el.querySelector('.tab-rename') &&
     keepFocus(el, () => {
-      const { gridAll, layout } = app.store.state;
+      const { gridAll, layout, at } = app.store.state;
+      const place = gridPlace(el);
+      const editing = [at.animation, at.direction, at.frame].join();
       // a phone opens and shuts the whole panel from the dock, so it is never folded there
       const gridOpen = app.store.state.gridOpen || layout === 'compact';
       shownPlaying = isPlaying(app);
@@ -67,6 +71,8 @@ export function mountGridPanel(app, { isShown, onPlayFrame }) {
         gridOpen ? gridBody(app, { all: gridAll, playFrame: app.playback?.frame ?? null }) : null,
       );
       showOpenTab(el);
+      keepGridPlace(el, place, editing !== shownAt);
+      shownAt = editing;
     });
 
   return { el, render };

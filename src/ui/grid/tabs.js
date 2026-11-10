@@ -3,11 +3,30 @@ import { currentAnimation, goTo, restructure } from '../actions.js';
 import { openMenu } from '../menu.js';
 import { removeAnimation } from '../../model/structure.js';
 import { rename } from './tab-rename.js';
-import { duplicateAnimation } from '../../model/animations.js';
+import { duplicateAnimation, moveAnimation } from '../../model/animations.js';
 import { kindOf } from '../../model/kinds.js';
 import { openNewAnimationSheet } from './new-animation-sheet.js';
 
 const openAnimation = (app, id) => goTo(app, { animation: id, layer: null });
+
+// the order of the tabs is the order the sheets are made in
+function moveItems(app, animation) {
+  const { animations } = app.store.state.project;
+  const at = animations.indexOf(animation);
+  const move = (step) => () =>
+    restructure(app, `Move ${animation.name}`, (draft) => {
+      moveAnimation(
+        draft.project,
+        draft.project.animations.find((other) => other.id === animation.id),
+        step,
+      );
+    });
+
+  return [
+    ['Move left', move(-1), { disabled: at === 0 }],
+    ['Move right', move(1), { disabled: at === animations.length - 1 }],
+  ];
+}
 
 function tabMenu(app, anchor, tabButton, animation) {
   const { project } = app.store.state;
@@ -22,6 +41,7 @@ function tabMenu(app, anchor, tabButton, animation) {
           animation: duplicateAnimation(draft.project, animation).id,
         })),
     ],
+    ...moveItems(app, animation),
     null,
     [
       `Delete ${animation.name}`,
@@ -101,7 +121,7 @@ export function animationTabs(app) {
       'button.btn.quiet.tab-more',
       {
         'aria-label': `More for ${current.name}`,
-        title: `Rename, duplicate or delete ${current.name}`,
+        title: `Rename, duplicate, move or delete ${current.name}`,
         onclick: (event) => tabMenu(app, event.currentTarget, open, current),
       },
       icon('more'),

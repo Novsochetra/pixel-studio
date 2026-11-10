@@ -4,18 +4,20 @@ import { viewName } from '../../model/kinds.js';
 
 const count = (number, word) => `${number} ${word}${number === 1 ? '' : 's'}`;
 
+// the sheet's warnings name a view as the game's data does (south): to a person it is said as
+// the studio says it everywhere else (Front, or Icon)
+export const saidWarning = (project, result, warning) =>
+  result.rows.reduce(
+    (text, row) =>
+      text.replace(new RegExp(`^${row.direction}\\b`), viewName(project, row.direction)),
+    warning,
+  );
+
 // what the sheet will be, and what is wrong with it, under its picture
 export function summary(result, animation, state) {
   const { project } = state;
   const rows = result.rows.map((row) => viewName(project, row.direction)).join(', ');
-  // the sheet's warnings name a view as the game's data does (south): here it is said as the
-  // studio says it everywhere else (Front, or Icon)
-  const said = (warning) =>
-    result.rows.reduce(
-      (text, row) =>
-        text.replace(new RegExp(`^${row.direction}\\b`), viewName(project, row.direction)),
-      warning,
-    );
+  const said = (warning) => saidWarning(project, result, warning);
   const outside = result.warnings.some((warning) => warning.includes('outside'));
 
   return [

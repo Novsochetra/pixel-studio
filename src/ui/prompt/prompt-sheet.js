@@ -3,6 +3,7 @@ import { openSheet } from '../sheet.js';
 import { artSprite, currentAnimation, directionsInUse, referenceSprite } from '../actions.js';
 import { boardCanvas, boardPreview } from '../board-canvas.js';
 import { saveFile } from '../save-file.js';
+import { fileSlug } from '../file-name.js';
 import { hasMarks } from '../markup.js';
 import { promptText } from './prompt-text.js';
 import { poseField } from './prompt-pose.js';
@@ -11,7 +12,7 @@ import { bounds } from '../../model/sprite.js';
 import { drawableDirections } from '../../model/directions.js';
 import { referenceOf } from '../../model/reference.js';
 import { isSingleView, viewName } from '../../model/kinds.js';
-import { keyNames } from '../platform-keys.js';
+import { forHands, keyNames } from '../platform-keys.js';
 
 // a character asks for another view or the next frame; anything else for the next frame or another
 // of its kind in the same style
@@ -91,7 +92,11 @@ function draw(slot, state, ask, { close, redraw }) {
     promptText(state, ask.direction, ask.task, ask.pose),
   );
   const marks = hasMarks(state.project) ? ', with your marks' : '';
-  const download = async () => saveFile('reference-sheet.png', await canvasToBlob(board));
+  const download = async () =>
+    saveFile(
+      `${fileSlug(state.project.name, 'project')}-reference-sheet.png`,
+      await canvasToBlob(board),
+    );
 
   replace(
     slot,
@@ -104,7 +109,7 @@ function draw(slot, state, ask, { close, redraw }) {
     node(
       'p.hint',
       {},
-      `Attach the reference sheet (${board.width}×${board.height}, ${scale}× pixels${marks}) and paste the prompt. Then bring the AI's answer back to be cleaned: drop it on the canvas, or use Image into this frame.`,
+      `Attach the reference sheet (${board.width}×${board.height}, ${scale}× pixels${marks}) and paste the prompt. Then bring the AI's answer back to be cleaned: ${forHands('drop it on the canvas, or use', 'use')} Image into this frame.`,
     ),
     ask.task === 'frame' ? poseField(state, ask, box) : null,
     box,

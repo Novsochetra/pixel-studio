@@ -43,7 +43,8 @@ async function restore(app, entry, close) {
 
 async function download(app, entry) {
   const text = await versionText(app.backend, entry, app.keys);
-  const name = `${fileSlug(entry.name, 'version')}.json`;
+  const { project } = app.store.state;
+  const name = `${fileSlug(project.name, 'project')}-${fileSlug(entry.name, 'version')}.json`;
 
   await saveFile(name, new Blob([text], { type: 'application/json' }));
 }
@@ -91,14 +92,18 @@ function row(app, entry, { redraw, close }) {
 const NONE_YET =
   'No versions yet. One is kept before every cleaning, kit or restore, and whenever you save one here.';
 
-export function openVersionsSheet(app) {
-  const sheet = openSheet('History');
-  const list = node('div.view-list');
-  const name = node('input.input', {
+const nameField = (onEnter) =>
+  node('input.input', {
     placeholder: 'Name this version',
     id: 'version-name',
     'aria-label': 'Version name',
+    onkeydown: (event) => event.key === 'Enter' && onEnter(),
   });
+
+export function openVersionsSheet(app) {
+  const sheet = openSheet('History');
+  const list = node('div.view-list');
+  const name = nameField(() => save());
   const where =
     app.backend.kind === 'none'
       ? 'Versions last until you close this page here.'

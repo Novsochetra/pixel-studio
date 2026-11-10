@@ -132,10 +132,13 @@ export function icon(name) {
 
 let toastTimer = null;
 
+// a message stays for as long as it takes to read: three seconds was not enough for two lines
+export const readingTime = (text) => Math.min(8000, Math.max(3200, 1500 + text.length * 55));
+
 export function toast(message) {
   document.querySelector('.toast')?.remove();
   const el = node('div.toast', { role: 'status' }, message);
   document.body.append(el);
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => leave(el, 'toast-out'), 3200);
+  toastTimer = setTimeout(() => leave(el, 'toast-out'), readingTime(String(message)));
 }
