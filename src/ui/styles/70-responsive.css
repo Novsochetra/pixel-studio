@@ -280,10 +280,20 @@
 :root[data-layout='compact'] .compare:has(> .map-table) > figure {
   order: -1;
   position: sticky;
-  top: 44px;
-  z-index: 1;
-  padding-bottom: 6px;
+  /* under the window's title, which stays at the top too: its own top edge goes a little under
+     the title, so nothing shows between the two */
+  top: 48px;
+  z-index: 2;
+  /* as wide as the window, its sides too, and a hair lower: the ring round a picked swatch
+     that scrolled under it showed beside it */
+  margin-inline: -20px;
+  padding: 4px 20px 6px;
   background: var(--sheet);
+  box-shadow: 0 1px 0 var(--sheet);
+}
+
+:root[data-layout='compact'] .compare:has(> .map-table) > figure canvas {
+  background: none;
 }
 
 /* the place being edited would show through the selection's bar when the bar is over it */

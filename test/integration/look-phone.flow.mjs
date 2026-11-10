@@ -205,6 +205,40 @@ check(
 );
 await page.screenshot({ path: `${shots}/look-phone-pin.png` });
 
+// the colours of a swap are a long list on a phone: the picture of what a pick does stays in
+// sight above them, under the window's title and not behind it
+await openDock(page, 'Colours');
+await page.getByRole('button', { name: 'Swap colours…' }).tap();
+await page.waitForTimeout(500);
+await page
+  .locator('.sheet')
+  .getByRole('group', { name: 'Starter palettes' })
+  .getByRole('button')
+  .first()
+  .tap();
+await page.waitForTimeout(400);
+await page.locator('.sheet').evaluate((swap) => swap.scrollTo(0, 900));
+await page.waitForTimeout(300);
+const pinned = await page.evaluate(() => {
+  const picture = document.querySelector('.sheet figure canvas').getBoundingClientRect();
+  const head = document.querySelector('.sheet-head').getBoundingClientRect();
+  const swap = document.querySelector('.sheet');
+
+  return {
+    under: picture.top - head.bottom,
+    inSight: picture.bottom < window.innerHeight / 2,
+    spill: swap.scrollWidth - swap.clientWidth,
+  };
+});
+check(
+  pinned.under >= 0 && pinned.inSight && pinned.spill <= 0,
+  'the swap’s picture stays under the title while its colours scroll',
+);
+await page.screenshot({ path: `${shots}/look-phone-swap.png` });
+await page.keyboard.press('Escape');
+await page.waitForTimeout(400);
+await openDock(page, 'Colours');
+
 // a message is as wide as its words, not half the screen
 await openWorkspace(page, 'Edit');
 await page.locator('#rail [aria-label^="Select and move"]').evaluate((button) => button.click());
