@@ -10,7 +10,7 @@ import {
   waitSaved,
 } from './studio.mjs';
 
-const { page, check, finish } = await openStudio();
+const { page, check, finish, url } = await openStudio();
 // the save waits a moment after the last change, and the status read "Saved" before it
 const comesBack = async (what) => {
   await page.waitForTimeout(1500);
@@ -42,8 +42,19 @@ check(
   'and that view still has the fewer frames',
 );
 
-await page.evaluate(() => indexedDB.deleteDatabase('pixel-clean-studio'));
-await page.reload();
+// Deleted from a page that does not hold the saved work open, and waited for: Safari drops a
+// delete still waiting on the page that asked for it when that page loads again.
+await page.goto(new URL('manifest.webmanifest', url).href);
+await page.evaluate(
+  () =>
+    new Promise((resolve, reject) => {
+      const request = indexedDB.deleteDatabase('pixel-clean-studio');
+
+      request.onsuccess = resolve;
+      request.onerror = reject;
+    }),
+);
+await page.goto(url);
 await page.waitForSelector('.start-screen');
 await createProject(page, { kind: 'Tiles', name: 'Floor' });
 await comesBack('the first project made on the start screen opens again on the next visit');

@@ -1,7 +1,22 @@
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
-const { chromium, devices } = createRequire(`${process.cwd()}/`)('playwright');
+const playwright = createRequire(`${process.cwd()}/`)('playwright');
+const { devices } = playwright;
+// Chromium unless told otherwise: STUDIO_BROWSER=webkit runs a flow on Safari's engine
+const engineName = process.env.STUDIO_BROWSER ?? 'chromium';
+const engine = playwright[engineName];
+
+// Finger drags and pinches are sent through Chromium's own tools, which no other browser has:
+// on another, what needs them is left out, and said to be.
+export const onChromium = engineName === 'chromium';
+
+export function needsChromium(what) {
+  if (!onChromium) {
+    console.log(`RESULT 0 checks, left out on ${engineName}: ${what} need Chromium's tools`);
+    process.exit(0);
+  }
+}
 
 // The page on a fresh browser profile, with its errors collected and a list of checks that fail
 // the flow. args: [url, images, shots].
@@ -13,7 +28,7 @@ export async function openStudio({
   const [url, images, shots] = process.argv.slice(2);
 
   mkdirSync(shots, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await engine.launch();
   const options = device ? { ...devices[device] } : { viewport, deviceScaleFactor: 1 };
   const context = await browser.newContext({ ...options, acceptDownloads: true });
   const page = await context.newPage();

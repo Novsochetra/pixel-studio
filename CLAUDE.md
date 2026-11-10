@@ -168,6 +168,10 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   - **integration** flows (`test/integration/*.flow.mjs`): the built page in a browser, each flow
     stating what must be true with `check()`; `run.mjs` runs them all, the monkey clicks everything,
   - **regression** tests (`test/regression/`): one test per fixed bug, saying what went wrong.
+- The flows run in Chromium, and on Safari's engine with `STUDIO_BROWSER=webkit` (see the README):
+  a flow that needs Chromium's own tools (a finger's drag, a pinch) says it is left out there
+  (`needsChromium`, `onChromium` in `harness.mjs`), so keep what a phone does by taps in a flow
+  both can run (`taps.flow.mjs`).
 - Fixing a bug: first write a test that reproduces it and fails, then fix it, then keep the test.
 - Verify your work: run `npm run check`, and look at UI changes in a browser (the flows save
   screenshots in `shots/`).

@@ -360,6 +360,8 @@
   font-weight: 500;
   z-index: 30;
   box-sizing: border-box;
+  /* it only says something: a finger drawing where it lies draws through it */
+  pointer-events: none;
   animation: toast-in var(--duration-fade) var(--ease-spring);
 }
 

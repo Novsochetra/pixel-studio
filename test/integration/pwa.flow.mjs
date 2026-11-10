@@ -1,6 +1,6 @@
 // The studio as an app: its manifest and icons, the service worker, opening with no network with
 // the saved work there, the Install button, and a host where service workers are not allowed.
-import { openStudio } from './harness.mjs';
+import { onChromium, openStudio } from './harness.mjs';
 import { openExample } from './studio.mjs';
 
 const { browser, context, page, check, finish, url, shots } = await openStudio();
@@ -32,14 +32,17 @@ await page.evaluate(() => navigator.serviceWorker.ready);
 await page.waitForFunction(() => navigator.serviceWorker.controller);
 check(true, 'the service worker takes the page');
 
-const browserTools = await context.newCDPSession(page);
-const { installabilityErrors } = await browserTools.send('Page.getInstallabilityErrors');
-// the test's browser profile is a private window, where nothing can be installed
-const blocking = installabilityErrors.filter(({ errorId }) => errorId !== 'in-incognito');
-check(
-  blocking.length === 0,
-  `the browser finds nothing that stops an install (${blocking.map(({ errorId }) => errorId)})`,
-);
+// only Chromium says what stops an install
+if (onChromium) {
+  const browserTools = await context.newCDPSession(page);
+  const { installabilityErrors } = await browserTools.send('Page.getInstallabilityErrors');
+  // the test's browser profile is a private window, where nothing can be installed
+  const blocking = installabilityErrors.filter(({ errorId }) => errorId !== 'in-incognito');
+  check(
+    blocking.length === 0,
+    `the browser finds nothing that stops an install (${blocking.map(({ errorId }) => errorId)})`,
+  );
+}
 
 await openExample(page);
 await page.keyboard.press('b');
@@ -51,16 +54,20 @@ await page.reload();
 await page.waitForSelector('.grid-panel');
 await page.waitForTimeout(400);
 
-await context.setOffline(true);
-await page.reload();
-await page.waitForSelector('.grid-panel');
-await page.waitForTimeout(400);
-check(true, 'with no network the app still opens');
-check((await picture()) === saved, 'and the saved work is there');
-await page.goto(base);
-await page.waitForSelector('.grid-panel');
-check(true, 'from its start address too');
-await context.setOffline(false);
+// Playwright's WebKit refuses a page loaded with the network off before the worker can answer,
+// so opening with no network is tried in Chromium only
+if (onChromium) {
+  await context.setOffline(true);
+  await page.reload();
+  await page.waitForSelector('.grid-panel');
+  await page.waitForTimeout(400);
+  check(true, 'with no network the app still opens');
+  check((await picture()) === saved, 'and the saved work is there');
+  await page.goto(base);
+  await page.waitForSelector('.grid-panel');
+  check(true, 'from its start address too');
+  await context.setOffline(false);
+}
 
 const install = page.getByRole('button', { name: 'Install app' });
 check((await install.count()) === 0, 'there is no Install button until the browser allows it');

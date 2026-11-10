@@ -167,3 +167,29 @@ export async function openPanel(page, name) {
     await section.locator('h2').click({ position: { x: 4, y: 6 } });
   }
 }
+
+// the art pixels of a square canvas that are not clear, as "x,y", read from the middle of each
+export const paintedPixels = (canvas, size) =>
+  canvas.evaluate((element, across) => {
+    const scale = element.width / across;
+    const pen = element.getContext('2d');
+    const found = [];
+
+    for (let y = 0; y < across; y++) {
+      for (let x = 0; x < across; x++) {
+        const [red, green, blue] = pen.getImageData(
+          Math.floor((x + 0.5) * scale),
+          Math.floor((y + 0.5) * scale),
+          1,
+          1,
+        ).data;
+
+        // the checkerboard behind clear pixels is grey: red, green and blue nearly the same
+        if (Math.abs(red - green) > 40 || Math.abs(green - blue) > 40) {
+          found.push(`${x},${y}`);
+        }
+      }
+    }
+
+    return found;
+  }, size);

@@ -1,7 +1,9 @@
 // Drawing with fingers on a phone: a stroke lands where the finger goes, a tap acts once, and two
 // fingers pan and pinch without the tool in hand touching the art.
-import { openStudio } from './harness.mjs';
+import { needsChromium, openStudio } from './harness.mjs';
 import { createProject, openDock } from './studio.mjs';
+
+needsChromium('finger strokes and pinches');
 
 const { page, context, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
 await createProject(page, { kind: 'Icon', name: 'Gem', width: 32 });

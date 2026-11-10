@@ -79,8 +79,9 @@ const controlsIn = (nodes) =>
 
 export function watchSegmented() {
   // its size changes when its panel opens, the window turns or the type arrives
+  // a frame later: a thumb moved while the sizes are being told makes Safari report a loop
   const sizes = new ResizeObserver((entries) =>
-    entries.forEach((entry) => keepThumb(entry.target)),
+    requestAnimationFrame(() => entries.forEach((entry) => keepThumb(entry.target))),
   );
   const changes = new MutationObserver((records) => {
     for (const record of records) {

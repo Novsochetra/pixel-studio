@@ -11,13 +11,17 @@ import { renderPoseBar } from './body/pose-bar.js';
 // The room above the frames changes as the grid grows (All views, a new animation) or the window
 // does: a canvas that was fitted stays fitted, so its feet never hide under the frames.
 function keepFitted(app, scroller, canvas) {
-  const observer = new ResizeObserver(() => {
-    if (!canvas.isConnected) {
-      observer.disconnect();
-    } else if (app.store.state.zoom === app.fittedZoom) {
+  const refit = () => {
+    if (canvas.isConnected && app.store.state.zoom === app.fittedZoom) {
       app.fitCanvas?.();
     }
-  });
+  };
+  // fitted a frame later: a canvas resized while the sizes are being told is a loop to Safari,
+  // which reports it as an error of the page
+  const observer = new ResizeObserver(() =>
+    canvas.isConnected ? requestAnimationFrame(refit) : observer.disconnect(),
+  );
+
   observer.observe(scroller);
 }
 

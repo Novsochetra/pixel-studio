@@ -142,6 +142,35 @@ textarea.input {
   box-shadow: 0 0 0 3px var(--tint-quiet);
 }
 
+/* A menu drawn the studio's way, with its own mark: each browser draws its own otherwise, and
+   Safari's is a bordered box of another colour. The mark is two triangles that meet. */
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 30px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--label-secondary) 50%),
+    linear-gradient(135deg, var(--label-secondary) 50%, transparent 50%);
+  background-position:
+    right 16px top 50%,
+    right 11px top 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  text-overflow: ellipsis;
+}
+
+/* the arrows a browser adds inside a number field: the arrow keys still step it */
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .mono {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

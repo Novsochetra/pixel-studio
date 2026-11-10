@@ -87,6 +87,18 @@ npm run check
 That runs ESLint and Prettier, the unit and regression tests, the build, and every browser flow
 (`test/integration/`), which save screenshots in `shots/`. `npm test` runs only the fast tests.
 
+The flows run in Chromium. To run them on Safari's engine too, install Playwright's WebKit once
+(`npx playwright install --with-deps webkit`) and set the browser:
+
+```bash
+STUDIO_BROWSER=webkit npm run check
+```
+
+Finger strokes, pinches and pulls are sent through Chromium's own tools, so `touch.flow.mjs` and
+the few checks like it are left out there and say so; `taps.flow.mjs` covers a phone used by taps
+on both. This is WebKit on the machine that runs the checks, not Safari on an iPhone: try a
+change to the phone's layout on a real one before calling it done.
+
 ## Layout
 
 - `src/clean/`: the cleaner, a pixel-exact port of `tools/pixel_clean.py`, run in a worker

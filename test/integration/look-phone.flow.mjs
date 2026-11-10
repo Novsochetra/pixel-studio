@@ -1,11 +1,11 @@
 // The arcade's sheet on a phone: a window rides up from the bottom edge, and is pulled down by
 // its bar to close it.
-import { openStudio } from './harness.mjs';
+import { onChromium, openStudio } from './harness.mjs';
 import { openDock, openExample, openWorkspace } from './studio.mjs';
 
 const { page, context, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
 await openExample(page);
-const cdp = await context.newCDPSession(page);
+const cdp = onChromium ? await context.newCDPSession(page) : null;
 const touch = (type, points) =>
   cdp.send('Input.dispatchTouchEvent', {
     type,
@@ -47,23 +47,27 @@ const grabber = await page.evaluate(() => {
 check(grabber.width === '36px' && grabber.height === '5px', 'with the grabber on its bar');
 await page.screenshot({ path: `${shots}/look-phone-sheet.png` });
 
-await pullDown(40);
-await page.waitForTimeout(400);
-const settled = await page.locator('.sheet').boundingBox();
-check(
-  (await page.locator('.sheet').count()) === 1 && Math.abs(settled.y - sheet.y) < 1,
-  'pulled down a little and let go, it springs back',
-);
+// pulled by a finger sent through Chromium's own tools: another browser leaves this part out
+if (cdp) {
+  await pullDown(40);
+  await page.waitForTimeout(400);
+  const settled = await page.locator('.sheet').boundingBox();
+  check(
+    (await page.locator('.sheet').count()) === 1 && Math.abs(settled.y - sheet.y) < 1,
+    'pulled down a little and let go, it springs back',
+  );
 
-await pullDown(sheet.height * 0.6);
-check((await page.locator('.sheet').count()) === 0, 'pulled down far, it closes');
-await page.waitForTimeout(700);
-check(
-  (await page.locator('.sheet-out, .sheet-backdrop-out').count()) === 0,
-  'and is taken away once it has slid off',
-);
+  await pullDown(sheet.height * 0.6);
+  check((await page.locator('.sheet').count()) === 0, 'pulled down far, it closes');
+  await page.waitForTimeout(700);
+  check(
+    (await page.locator('.sheet-out, .sheet-backdrop-out').count()) === 0,
+    'and is taken away once it has slid off',
+  );
 
-await openSheet();
+  await openSheet();
+}
+
 await page.locator('.sheet-close').tap();
 check((await page.locator('.sheet').count()) === 0, 'its × still closes it with a tap');
 

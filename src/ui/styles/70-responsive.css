@@ -52,18 +52,11 @@
   flex: 1;
 }
 
-/* the workspace is named in one word and keeps it whole while it can: the project's name gives
-   way long before it does */
+/* The workspace is named in one word and keeps it whole: the project's name gives way instead.
+   It does not shrink at all: Safari took a pixel from it and cut "Pitch" to "Pit…". */
 :root[data-layout='compact'] .workspace-pick {
-  flex: 0 1 auto;
-  min-width: 0;
   gap: 2px;
   padding: 0 8px 0 12px;
-}
-
-:root[data-layout='compact'] .workspace-pick span {
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* the narrowest phones: the bar's buttons draw in a little so its words stay whole */
@@ -86,8 +79,16 @@
     display: none;
   }
 
+  /* here even one word may have to give way, once the project's name has */
   :root[data-layout='compact'] .workspace-pick {
+    flex: 0 1 auto;
+    min-width: 0;
     padding-inline: 10px;
+  }
+
+  :root[data-layout='compact'] .workspace-pick span {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
