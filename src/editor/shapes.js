@@ -5,7 +5,8 @@ export function heldTrue(kind, [x0, y0], [x1, y1]) {
   const dx = x1 - x0;
   const dy = y1 - y0;
   const reach = Math.max(Math.abs(dx), Math.abs(dy));
-  const diagonal = [x0 + Math.sign(dx) * reach, y0 + Math.sign(dy) * reach];
+  // a drag along one row or column still grows a square, down and to the right
+  const diagonal = [x0 + (Math.sign(dx) || 1) * reach, y0 + (Math.sign(dy) || 1) * reach];
 
   if (kind !== 'line') {
     return diagonal;
@@ -52,7 +53,8 @@ function ellipseRows({ left, top, right, bottom }) {
     const half = radiusX * Math.sqrt(Math.max(0, 1 - up * up));
     const reach = Math.max(0.5, half);
 
-    rows.push([y, Math.round(centreX - reach), Math.round(centreX + reach) - 1]);
+    // rounded the same way on both sides, so the oval is the same left and right
+    rows.push([y, Math.ceil(centreX - reach - 0.5), Math.floor(centreX + reach - 0.5)]);
   }
 
   return rows;

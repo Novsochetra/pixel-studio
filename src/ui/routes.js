@@ -12,7 +12,7 @@ export const ROUTES = {
     'installable',
     'layout',
   ],
-  rail: ['tool', 'symmetry', 'mode', 'project', 'layout'],
+  rail: ['tool', 'symmetry', 'mode', 'project', 'layout', 'colourPick'],
   dock: ['panel', 'layout', 'mode', 'color', 'colourPick', 'project'],
   stage: [
     'swapPreview',
@@ -57,6 +57,7 @@ export const ROUTES = {
   colours: [
     'color',
     'basicColours',
+    'palettes',
     'paintOver',
     'paletteLock',
     'cleanLines',

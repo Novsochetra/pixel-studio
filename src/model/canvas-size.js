@@ -75,6 +75,22 @@ function placeFrame(frame, rig, place) {
   frame.marks = frame.marks?.map((mark) => ({ ...mark, x: mark.x + dx, y: mark.y + dy }));
 }
 
+// the marks and notes drawn on the Views board are in art pixels, so they move with the art
+function movedMarkup(markup, [dx, dy]) {
+  if (!markup) {
+    return markup;
+  }
+
+  return {
+    ...markup,
+    strokes: markup.strokes.map((stroke) => ({
+      ...stroke,
+      points: stroke.points.map(([x, y]) => [x + dx, y + dy]),
+    })),
+    notes: markup.notes.map((note) => ({ ...note, x: note.x + dx, y: note.y + dy })),
+  };
+}
+
 // A copy of the project on a canvas of another size: every layer, pin and guide line moves with
 // the art, which stays put at the anchor. The project given is left as it was.
 export function withCanvasSize(project, size, anchor) {
@@ -95,6 +111,7 @@ export function withCanvasSize(project, size, anchor) {
   }
 
   next.canvas = canvas;
+  next.markup = movedMarkup(next.markup, shift);
   next.guides = (next.guides ?? []).map((guide) => ({ ...guide, row: guide.row + shift[1] }));
 
   return next;

@@ -65,6 +65,25 @@ test('the smallest shapes are still drawn', () => {
   assert.deepEqual(drawn('ellipse', [0, 3]), ['#', '#', '#', '#']);
 });
 
+// rounding both sides up left a tall, 2-pixel-wide oval with one pixel at its top and bottom
+test('an ellipse is the same left and right, however thin', () => {
+  for (const to of [
+    [1, 9],
+    [2, 11],
+    [6, 3],
+    [11, 4],
+  ]) {
+    for (const row of drawn('ellipse', to)) {
+      assert.equal(row, [...row].reverse().join(''), `${to}: ${row}`);
+    }
+  }
+});
+
+test('held true, a drag along one row or column still makes a square', () => {
+  assert.deepEqual(heldTrue('rect', [2, 2], [9, 2]), [9, 9]);
+  assert.deepEqual(heldTrue('ellipse', [2, 2], [2, 7]), [7, 7]);
+});
+
 test('held true, a line snaps to flat, upright or diagonal and a box to a square', () => {
   assert.deepEqual(heldTrue('line', [0, 0], [10, 2]), [10, 0]);
   assert.deepEqual(heldTrue('line', [0, 0], [1, 9]), [0, 9]);

@@ -59,11 +59,14 @@ export function renderRail(el, app) {
 
   replace(el, tools, node('hr'), viewButtons(app));
 
-  // a tool picked from elsewhere (a layer's row, a key) may be past the edge of a phone's strip
-  if (state.layout === 'compact') {
+  // A tool picked from elsewhere (a layer's row, a key) may be past the edge of a phone's strip.
+  // Only a change of tool moves the strip: Symmetry, at its far end, stays under the finger.
+  if (state.layout === 'compact' && el.dataset.tool !== state.tool) {
     el.querySelector('[aria-pressed="true"]')?.scrollIntoView({
       block: 'nearest',
-      inline: 'nearest',
+      inline: 'center',
     });
   }
+
+  el.dataset.tool = state.tool;
 }

@@ -6,9 +6,11 @@ import { paintOptions } from './tools-paint.js';
 
 const LABELS = { line: 'Line', rect: 'Rectangle', ellipse: 'Ellipse' };
 
+const isFilled = (state, kind) => state.shapeFilled && kind !== 'line';
+
 // the inside of a filled shape is laid a pixel at a time: the brush only thickens an outline
-const optionsFor = (state) =>
-  state.shapeFilled
+const optionsFor = (state, kind) =>
+  isFilled(state, kind)
     ? { ...paintOptions(state), brush: { size: 1, shape: 'square' } }
     : paintOptions(state);
 
@@ -23,8 +25,8 @@ export function shape(app, kind, start) {
 
     layer.sprite.pixels.set(before.pixels);
 
-    for (const point of shapePoints(kind, start, to, { filled: state.shapeFilled })) {
-      paintPoint(layer.sprite, point, state.color, optionsFor(state));
+    for (const point of shapePoints(kind, start, to, { filled: isFilled(state, kind) })) {
+      paintPoint(layer.sprite, point, state.color, optionsFor(state, kind));
     }
 
     app.store.touch('stroke');

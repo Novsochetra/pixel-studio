@@ -1,4 +1,5 @@
 import { node } from '../dom.js';
+import { changeStructure } from '../actions.js';
 import { boardPreview } from '../board-canvas.js';
 import { paletteForm } from '../palette-form.js';
 import { makeReducedPalette } from './swap-mapping.js';
@@ -44,7 +45,7 @@ export function addPalette(job) {
   return paletteForm((added) => {
     job.app.store.state.project.palettes.push(added);
     job.paletteId = added.id;
-    job.app.saver.markStructure();
+    changeStructure(job.app, 'palettes');
     job.draw();
   });
 }
@@ -55,7 +56,7 @@ export function starterPalettes(job) {
     const palette = paletteFromHexCodes(starter.name, starter.colors);
     job.app.store.state.project.palettes.push(palette);
     job.paletteId = palette.id;
-    job.app.saver.markStructure();
+    changeStructure(job.app, 'palettes');
     job.draw();
   };
 

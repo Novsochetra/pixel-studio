@@ -112,6 +112,24 @@ check(
 check(/3 colours|2 colours/.test(await status(page)), 'the status bar counts the colours drawn');
 await page.screenshot({ path: `${shots}/draw-shapes.png` });
 
+await page.getByRole('button', { name: 'Swap colours…' }).click();
+await page.getByRole('button', { name: 'Ice', exact: true }).click();
+await page.keyboard.press('Escape');
+check(
+  (await page.getByRole('group', { name: 'Ice' }).getByRole('button').count()) === 8,
+  'a palette added to the project shows in Colours at once, to draw with',
+);
+
+await page.getByRole('button', { name: /canvas$/ }).click();
+await page.fill('#canvas-width', '');
+await page.getByRole('button', { name: 'Change the size' }).click();
+await page.waitForTimeout(300);
+check(
+  (await status(page)).includes('32×32 canvas') && (await pixels('#3d7fe0')).length === 8,
+  'a size field left empty keeps the size the canvas has',
+);
+
+await page.locator('#palette-lock').check();
 await page.getByRole('button', { name: /canvas$/ }).click();
 await page.fill('#canvas-width', '48');
 await page.fill('#canvas-height', '40');
@@ -126,6 +144,10 @@ const moved = await pixels('#3d7fe0');
 check(
   moved.length === 8 && moved.includes('18,10') && moved.includes('25,10'),
   'a bigger canvas keeps the art, moved with the corner it is kept at',
+);
+check(
+  await page.locator('#palette-lock').isChecked(),
+  'the drawing settings are as they were: Palette lock is still on',
 );
 check(/^Saved/.test(await waitSaved(page)), 'the resized project is saved');
 await page.getByRole('button', { name: 'History' }).click();

@@ -23,12 +23,21 @@ const ANCHORS = [
 const firstAnchor = (project) =>
   ANCHORS.find(({ label }) => label === (kindOf(project).place === 'feet' ? 'Bottom' : 'Centre'));
 
+// Resolves to whether the canvas changed. Cut-off art cannot be undone, so with no version kept
+// the canvas is left as it is.
 async function resize(app, { size, anchor }) {
   const { project } = app.store.state;
   const [across] = canvasShift(project.canvas, size, anchor);
+  const kept = await keepVersion(app, `Before the canvas became ${size.width}×${size.height}`);
 
-  await keepVersion(app, `Before the canvas became ${size.width}×${size.height}`);
-  await restoreProject(app, withCanvasSize(project, size, anchor));
+  if (!kept) {
+    toast('The project as it is could not be kept in History, so the canvas was left alone.');
+
+    return false;
+  }
+
+  // read again: the save before it may have waited, and the project is whatever is open now
+  await restoreProject(app, withCanvasSize(app.store.state.project, size, anchor));
 
   // the mirror line is counted from the canvas's left edge, which may have moved
   const { symmetry } = app.store.state;
@@ -36,6 +45,8 @@ async function resize(app, { size, anchor }) {
   app.store.set({ symmetry: { ...symmetry, axisSum: symmetry.axisSum + 2 * across } });
   app.fitCanvas();
   toast(`The canvas is now ${size.width}×${size.height}. The one before is kept in History.`);
+
+  return true;
 }
 
 function sizeField(label, id, value) {
@@ -62,9 +73,10 @@ function anchorGrid(job, draw) {
   );
 }
 
-const sizeOf = ({ width, height }) => ({
-  width: wholeNumber(width.input.value, { ...CANVAS_LIMITS, fallback: CANVAS_LIMITS.min }),
-  height: wholeNumber(height.input.value, { ...CANVAS_LIMITS, fallback: CANVAS_LIMITS.min }),
+// a field left empty keeps the size the canvas has
+const sizeOf = ({ width, height }, canvas) => ({
+  width: wholeNumber(width.input.value, { ...CANVAS_LIMITS, fallback: canvas.width }),
+  height: wholeNumber(height.input.value, { ...CANVAS_LIMITS, fallback: canvas.height }),
 });
 
 // Grow or shrink the canvas of the whole project: every view, frame and layer, the art kept where
@@ -79,14 +91,19 @@ export function openCanvasSizeSheet(app) {
   const job = { anchor: firstAnchor(app.store.state.project) };
   const anchors = node('div');
   const draw = () => replace(anchors, anchorGrid(job, draw));
-  const apply = () => {
-    const size = sizeOf(fields);
-
-    sheet.close();
+  // The window stays over the canvas until the change is done: a stroke drawn meanwhile would
+  // land on the project being replaced.
+  const apply = async (event) => {
+    const size = sizeOf(fields, canvas);
+    const button = event.currentTarget;
 
     if (size.width !== canvas.width || size.height !== canvas.height) {
-      resize(app, { size, anchor: job.anchor }).catch((error) => toast(error.message));
+      button.disabled = true;
+      button.textContent = 'Changing the size…';
+      await resize(app, { size, anchor: job.anchor }).catch((error) => toast(error.message));
     }
+
+    sheet.close();
   };
 
   draw();

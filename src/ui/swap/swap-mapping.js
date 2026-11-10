@@ -1,4 +1,5 @@
 import { node, toast } from '../dom.js';
+import { changeStructure } from '../actions.js';
 import { characterColors, characterCounts } from '../character-colours.js';
 import { newId } from '../../model/project.js';
 import { toHex } from '../../model/sprite.js';
@@ -61,7 +62,7 @@ export function makeReducedPalette(app, size) {
     colors: reducePalette(characterCounts(state), size),
   };
   state.project.palettes.push(palette);
-  app.saver.markStructure();
+  changeStructure(app, 'palettes');
 
   return palette;
 }

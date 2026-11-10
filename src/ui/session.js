@@ -78,6 +78,9 @@ const VIEW = [
   'showPins',
   'pinName',
   'shapeFilled',
+  'paletteLock',
+  'paintOver',
+  'cleanLines',
 ];
 
 function viewKept(state, project) {
