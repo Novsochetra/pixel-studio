@@ -1,6 +1,6 @@
 // Drawing with fingers on a phone: a stroke lands where the finger goes, a tap acts once, and two
 // fingers pan and pinch without the tool in hand touching the art.
-import { fingers, openStudio } from './harness.mjs';
+import { fingers, onChromium as scrolls, openStudio } from './harness.mjs';
 import { createProject, openDock } from './studio.mjs';
 
 const { page, context, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
@@ -248,4 +248,31 @@ check(
   'with the canvas zoomed far in, the selection’s Done is still in reach',
 );
 await page.screenshot({ path: `${shots}/touch-zoomed-selection.png` });
+
+// a swipe that began on a frame's picture did not scroll the frames: the picture is a canvas,
+// and every canvas of the stage kept its touches to itself
+await page.locator('.selection-done').tap();
+
+for (let i = 0; i < 6; i++) {
+  await page.locator('.grid-row.current .cell-add').tap();
+  await page.waitForTimeout(200);
+}
+
+const scrolled = () => page.locator('.grid-scroll').evaluate((frames) => frames.scrollLeft);
+const picture = await page.locator('.grid-row.current .cell canvas').nth(4).boundingBox();
+const [swipeX, swipeY] = [picture.x + picture.width / 2, picture.y + picture.height / 2];
+const before = await scrolled();
+
+await touch('touchStart', [[swipeX, swipeY]]);
+
+for (let i = 1; i <= 6; i++) {
+  await touch('touchMove', [[swipeX + i * 25, swipeY]]);
+}
+
+await touch('touchEnd', []);
+await page.waitForTimeout(500);
+check(
+  !scrolls || (await scrolled()) < before,
+  'a swipe that begins on a frame’s picture scrolls the frames',
+);
 await finish();

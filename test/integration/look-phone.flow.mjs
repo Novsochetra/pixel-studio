@@ -139,6 +139,14 @@ const middle = () =>
     return (box.left + box.width / 2) / window.innerWidth;
   });
 check(Math.abs((await middle()) - 0.5) < 0.1, 'the scene opens on the art being previewed');
+// its first look was framed before the pitch's own picture came, on another ground line
+const down = () => page.locator('#stage').evaluate((stage) => stage.scrollTop);
+const opened = await down();
+
+await page.getByRole('button', { name: '2×' }).tap();
+await page.getByRole('button', { name: '1×' }).tap();
+await page.waitForTimeout(300);
+check((await down()) === opened, 'framed for the scene as it is, feet and all, from the first');
 await page.getByRole('button', { name: '3×' }).tap();
 await page.waitForTimeout(300);
 check(Math.abs((await middle()) - 0.5) < 0.1, 'and stays on it when zoomed in');

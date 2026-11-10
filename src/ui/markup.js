@@ -64,6 +64,12 @@ export function drawMarks(context, project, direction, scale) {
         ? context.lineTo((x + 0.5) * scale, (y + 0.5) * scale)
         : context.moveTo((x + 0.5) * scale, (y + 0.5) * scale),
     );
+
+    // a press with no drag is a mark of one point: a dot, where nothing at all was drawn
+    if (stroke.points.length === 1) {
+      context.lineTo(...stroke.points[0].map((value) => (value + 0.5) * scale));
+    }
+
     context.stroke();
   }
 

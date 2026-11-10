@@ -3,7 +3,7 @@ import { openSheet } from './sheet.js';
 import { currentAnimation } from './actions.js';
 import { saveFile } from './save-file.js';
 import { presetSettings, presetsFor, sane } from './export-settings.js';
-import { summary } from './export/export-summary.js';
+import { saidWarning, summary } from './export/export-summary.js';
 import {
   formatButtons,
   manifestBlock,
@@ -85,7 +85,7 @@ function drawExport(slot, job) {
     const filename = `${result.name}.png`;
 
     if (await saveFile(filename, await spritePng(result.sheet))) {
-      warn(result.warnings);
+      warn(result.warnings.map((warning) => saidWarning(state.project, result, warning)));
     }
   };
   const pick = (id) =>

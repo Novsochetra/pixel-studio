@@ -430,11 +430,11 @@
   padding: 12px 14px;
 }
 
-/* at the top, clear of the tools and the dock under the thumb */
+/* at the top, clear of the tools and the dock under the thumb, under the place being edited */
 :root[data-layout='compact'] :is(.toast, .toast-out) {
   --toast-from: 0 -12px;
 
-  top: calc(60px + env(safe-area-inset-top, 0px));
+  top: calc(84px + env(safe-area-inset-top, 0px));
   bottom: auto;
   border-radius: var(--radius-card);
   text-align: center;

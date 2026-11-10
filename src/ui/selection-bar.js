@@ -87,6 +87,11 @@ function placeBar(el, app) {
   }
 }
 
+// where the bar is one row that scrolls, whether more of it waits behind Done
+function markMore(el) {
+  el.dataset.more = String(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+}
+
 // Shown over the canvas while something is selected: turn, flip, copy, delete, let go.
 export function renderSelectionBar(el, app) {
   el.hidden = !app.store.state.selection;
@@ -111,6 +116,7 @@ export function renderSelectionBar(el, app) {
     }
 
     syncModes(el, app);
+    markMore(el);
 
     return;
   }
@@ -131,4 +137,6 @@ export function renderSelectionBar(el, app) {
     ),
   );
   syncModes(el, app);
+  el.onscroll = () => markMore(el);
+  markMore(el);
 }

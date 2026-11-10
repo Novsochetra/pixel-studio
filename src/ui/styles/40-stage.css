@@ -19,6 +19,11 @@
 .stage canvas {
   display: block;
   image-rendering: pixelated;
+}
+
+/* The canvas drawn on takes every touch itself. Only that one: a frame's picture below it is a
+   canvas too, and a swipe that began on one did not scroll the frames. */
+.canvas-holder canvas {
   touch-action: none;
 }
 
@@ -113,15 +118,33 @@
   --rise-from: -50% -10px;
 }
 
+/* More of the bar waits behind Done where it is one row that scrolls: a strip at Done's edge
+   says so (selection-bar.js marks the bar while there is more). */
+.selection-bar[data-more='true'] .selection-done::before {
+  content: '›';
+  position: absolute;
+  top: 0;
+  right: 100%;
+  bottom: 0;
+  display: grid;
+  place-items: center end;
+  width: 30px;
+  padding-right: 6px;
+  box-sizing: border-box;
+  background: linear-gradient(to right, transparent, var(--chrome) 60%);
+  color: var(--label-secondary);
+  font-size: 18px;
+  pointer-events: none;
+}
+
 /* A window too short for the band above the canvas: the bar is one row that scrolls, at the end
    of the canvas the selection is not in (selection-bar.js), so it does not lie over the pixels
    it acts on. */
 @media (max-height: 799px) {
-  /* its scrollbar shows: with a mouse, nothing else says there is more behind Done */
   :root:not([data-layout='compact']) .selection-bar {
     flex-wrap: nowrap;
     overflow-x: auto;
-    scrollbar-width: thin;
+    scrollbar-width: none;
   }
 
   :root:not([data-layout='compact']) .selection-bar > * {

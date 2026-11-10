@@ -4,7 +4,8 @@ import { History } from '../../src/editor/history.js';
 import { snapshotAnimations } from '../../src/editor/snapshots.js';
 import { newProject } from '../../src/model/new-project.js';
 import { addFrame } from '../../src/model/frames.js';
-import { pack } from '../../src/model/sprite.js';
+import { createSprite, getPixel, pack, setPixel } from '../../src/model/sprite.js';
+import { shrunk } from '../../src/model/shrink.js';
 import { menuPlace } from '../../src/ui/menu.js';
 import { moveAnimation, startAnimation } from '../../src/model/animations.js';
 import { zipFiles } from '../../src/io/zip.js';
@@ -204,4 +205,21 @@ test('an animation moves one place along, and stops at either end', () => {
   assert.deepEqual(names(), ['Walk', idle.name]);
   assert.equal(moveAnimation(project, walk, -1), false);
   assert.deepEqual(names(), ['Walk', idle.name]);
+});
+
+// a frame's picture is drawn smaller than large art: a thin line fell between the pixels kept
+test('art shrunk for a small picture keeps a line one pixel thin', () => {
+  const sprite = createSprite(160, 160);
+
+  for (let x = 0; x < 160; x++) {
+    setPixel(sprite, x, 80, RED);
+  }
+
+  const small = shrunk(sprite, { left: 0, top: 0, right: 160, bottom: 160 }, 104 / 160);
+  const drawn = Array.from({ length: small.width }, (_, x) =>
+    Array.from({ length: small.height }, (_unused, y) => getPixel(small, x, y)).includes(RED),
+  );
+
+  assert.equal(small.width, 104);
+  assert.equal(drawn.every(Boolean), true, 'the line crosses the whole picture');
 });

@@ -103,7 +103,8 @@ function paintPreview(canvas, app, { clock, time }) {
       ? drawScene(canvas, state, { background: clock.background, clock: { tick, seconds } })
       : flat(canvas, state.project, { frames: viewFrames(state), tick });
   const zoom = zoomOf(state, mode);
-  const shown = `${size.width}×${size.height} at ${zoom}`;
+  // the ground line too: it moves when the scene's own picture arrives, after the first look
+  const shown = `${size.width}×${size.height} at ${zoom} on ${size.subject?.bottom}`;
 
   canvas.style.width = `${size.width * zoom}px`;
   canvas.style.maxWidth = zoom === 1 ? '100%' : 'none';
