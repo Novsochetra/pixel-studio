@@ -28,6 +28,16 @@ for (const { src, sizes } of manifest.icons) {
 }
 
 check((await page.locator('link[rel="manifest"]').count()) === 1, 'the page links the manifest');
+// an iPhone has no install prompt: Add to Home Screen takes this icon and the manifest's name
+const touchIcon = await page.evaluate(async () => {
+  const image = new Image();
+
+  image.src = document.querySelector('link[rel="apple-touch-icon"]')?.href ?? '';
+  await image.decode().catch(() => null);
+
+  return image.naturalWidth;
+});
+check(touchIcon >= 180, 'and gives an iPhone the icon for its home screen');
 await page.evaluate(() => navigator.serviceWorker.ready);
 await page.waitForFunction(() => navigator.serviceWorker.controller);
 check(true, 'the service worker takes the page');
