@@ -1,5 +1,6 @@
 import { node } from './dom.js';
 import { bindWheelZoom } from './navigate.js';
+import { renderLayerTurnBar } from './layer-turn-bar.js';
 import { renderSelectionBar } from './selection-bar.js';
 import { paint } from './stage-paint.js';
 import { bindPointer } from './stage-pointer.js';
@@ -60,7 +61,7 @@ export function fitZoom(stage, sprite) {
   return Math.max(1, Math.min(24, Math.floor(room)));
 }
 
-function renderStage(app, { canvas, bar, poseBar, empty, grid }, patch) {
+function renderStage(app, { canvas, bar, turnBar, poseBar, empty, grid }, patch) {
   if (Object.keys(patch).some((key) => STOPS_PLAYING.includes(key))) {
     stopPlayback(app);
   }
@@ -73,6 +74,7 @@ function renderStage(app, { canvas, bar, poseBar, empty, grid }, patch) {
   }
 
   renderSelectionBar(bar, app);
+  renderLayerTurnBar(turnBar, app);
   renderPoseBar(poseBar, app);
   renderEmptyFrame(empty, app);
 
@@ -81,13 +83,13 @@ function renderStage(app, { canvas, bar, poseBar, empty, grid }, patch) {
   }
 }
 
-// what floats over the canvas: the selection's bar, the Pose tool's bar, an empty frame's card
 function overlays() {
   const bar = (className, label) =>
     node(className, { role: 'toolbar', 'aria-label': label, hidden: true });
 
   return {
     bar: bar('div.selection-bar', 'Selection'),
+    turnBar: bar('div.layer-turn-bar', 'Turn layers'),
     poseBar: bar('div.pose-bar', 'Pose'),
     empty: node('div.empty-frame', {
       role: 'group',
@@ -99,9 +101,9 @@ function overlays() {
 
 export function mountEditStage(container, app) {
   const canvas = node('canvas', { 'aria-label': 'Pixel canvas' });
-  const { bar, poseBar, empty } = overlays();
+  const { bar, turnBar, poseBar, empty } = overlays();
   const holder = node('div.canvas-holder', {}, canvas);
-  const inner = node('div.stage-inner.edit', {}, bar, poseBar, empty, holder);
+  const inner = node('div.stage-inner.edit', {}, bar, turnBar, poseBar, empty, holder);
   const scroller = node('div.edit-scroll', {}, inner);
   const grid = mountGridPanel(app, {
     isShown: () => canvas.isConnected,
@@ -120,7 +122,7 @@ export function mountEditStage(container, app) {
   keepFitted(app, scroller, canvas);
   grid.render();
 
-  const parts = { canvas, bar, poseBar, empty, grid };
+  const parts = { canvas, bar, turnBar, poseBar, empty, grid };
 
   return { render: (patch = {}) => renderStage(app, parts, patch) };
 }

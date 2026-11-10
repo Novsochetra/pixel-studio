@@ -48,6 +48,7 @@ export function select(app, start) {
   }
 
   const { width, height } = state.project.canvas;
+  const hadSelection = Boolean(state.selection);
   let moved = false;
   app.store.set({
     selection: rectSelection({ width, height }, start, start),
@@ -59,9 +60,15 @@ export function select(app, start) {
       app.store.set({ selection: rectSelection({ width, height }, start, [x, y]) });
     },
     end() {
-      if (!moved) {
-        app.store.set({ selection: null });
-        pickLayerAt(app, start);
+      if (moved) {
+        return;
+      }
+
+      app.store.set({ selection: null });
+
+      // a click that only lets go of a selection stays here, ready to draw the next one
+      if (pickLayerAt(app, start) && !hadSelection) {
+        app.store.set({ tool: 'move' });
       }
     },
   };

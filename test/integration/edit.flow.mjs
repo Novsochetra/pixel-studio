@@ -108,22 +108,25 @@ check(await page.locator('.selection-bar').isHidden(), '⌘Esc lets go of it');
 await page.keyboard.press('Meta+z');
 check((await pixels()) === unselected, 'and undo brings the pixels back');
 
+await page.keyboard.press('t');
+check(
+  (await page.getByRole('button', { name: /^Move:/ }).getAttribute('aria-pressed')) === 'true',
+  'T picks the tool that moves',
+);
 await page.keyboard.press('v');
 check(
-  (await page
-    .getByRole('button', { name: /Move the whole frame/ })
-    .getAttribute('aria-pressed')) === 'true',
-  'V picks the tool that moves the whole frame',
+  (await page.getByRole('button', { name: /^Move:/ }).getAttribute('aria-pressed')) === 'true',
+  'V is no tool any more',
 );
 const unmoved = await pixels();
 await page.keyboard.press('ArrowLeft');
-check((await pixels()) !== unmoved, 'an arrow key moves the whole frame');
+check((await pixels()) !== unmoved, 'an arrow key moves the only layer');
 await page.keyboard.press('Meta+z');
 check((await pixels()) === unmoved, 'in one undo step');
 await page.mouse.move(...at(80, 80));
 await page.mouse.down();
 await page.mouse.move(...at(90, 84), { steps: 5 });
-check((await pixels()) !== unmoved, 'a drag shows the frame moving');
+check((await pixels()) !== unmoved, 'a drag shows the layer moving');
 await page.mouse.up();
 await page.keyboard.press('Meta+z');
 check((await pixels()) === unmoved, 'and letting go moves it, one undo step too');

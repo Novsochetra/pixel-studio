@@ -43,6 +43,8 @@ export const ROUTES = {
     'project',
     'onion',
     'frameDrag',
+    'layerTurn',
+    'pickedLayers',
     'selection',
     'frames',
     'layers',
@@ -50,7 +52,7 @@ export const ROUTES = {
     'gridAll',
     'gridOpen',
   ],
-  layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations'],
+  layers: ['at', 'project', 'layers', 'pickedLayers', 'pixels', 'frames', 'animations'],
   colours: [
     'color',
     'paintOver',

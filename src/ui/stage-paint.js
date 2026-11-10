@@ -8,6 +8,7 @@ import {
 } from './draw.js';
 import { currentFrames, directionSprite } from './actions.js';
 import { drawPins } from './pins-draw.js';
+import { drawLayersHandle } from './layer-turn.js';
 import { drawTurnHandle } from './selection-turn.js';
 import { drawBrush, drawHighlight, drawLoop, drawSelection } from './stage-marks.js';
 import { BRUSH_TOOLS } from './tools-paint.js';
@@ -36,11 +37,11 @@ export function drawOnion(context, state, scale) {
   }
 }
 
-// a drag that names a layer moves only that one; any other moves the whole frame
+// a drag that names layers moves only those; any other moves the whole frame
 function dragOf(state, layer) {
   const drag = state.frameDrag;
 
-  return drag && (!drag.layer || drag.layer === layer.key) ? drag : { x: 0, y: 0 };
+  return drag && (!drag.layers || drag.layers.includes(layer.key)) ? drag : { x: 0, y: 0 };
 }
 
 export function drawLayers(context, state, scale) {
@@ -82,7 +83,7 @@ function shownState(app) {
     showPins: false,
     cursor: null,
     piece: null,
-    tool: state.tool === 'pose' ? null : state.tool,
+    tool: state.tool === 'pose' || state.tool === 'move' ? null : state.tool,
   };
 }
 
@@ -97,7 +98,7 @@ function paintArt(context, state, scale) {
   }
 
   // lining a frame up with its neighbours needs them showing
-  if (state.onion || state.tool === 'moveframe' || state.tool === 'movelayer') {
+  if (state.onion || state.tool === 'move') {
     drawOnion(context, state, scale);
   }
 
@@ -126,6 +127,8 @@ function paintSelecting(context, state, scale) {
   if (state.selection) {
     drawSelection(context, state.selection, scale);
     drawTurnHandle(context, state, scale);
+  } else {
+    drawLayersHandle(context, state, scale);
   }
 
   if (state.highlight?.length) {

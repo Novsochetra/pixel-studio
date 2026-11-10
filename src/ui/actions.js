@@ -7,6 +7,7 @@ import { refusesPaint } from './body/body-lock.js';
 import { keptSelection } from '../editor/selection-kept.js';
 import { bodyOf, isBody } from '../model/body/body-kind.js';
 import { clearPosedBody } from '../model/body/body.js';
+import { keptPick } from '../model/layer-pick.js';
 
 export function currentAnimation(state) {
   return (
@@ -146,7 +147,7 @@ export function goToSettled(app, at) {
     canvas: state.project.canvas,
   });
 
-  app.store.set({ at, selection });
+  app.store.set({ at, selection, pickedLayers: keptPick(state.pickedLayers, at.layer) });
 }
 
 export function flipCurrent(app) {

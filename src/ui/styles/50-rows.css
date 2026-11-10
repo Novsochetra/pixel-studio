@@ -55,10 +55,16 @@
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
+  /* Shift-click picks layers, and must not select the words between them */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.layer-row[aria-selected='true'] {
+  background: var(--tint-quiet);
 }
 
 .layer-row[aria-current='true'] {
-  background: var(--tint-quiet);
   border-color: color-mix(in srgb, var(--tint), transparent 50%);
 }
 
@@ -168,6 +174,8 @@
 .layer-rename {
   min-width: 0;
   height: 26px;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .layer-row.dragging {

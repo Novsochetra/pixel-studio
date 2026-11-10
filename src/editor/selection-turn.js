@@ -88,16 +88,9 @@ export function liveTurn(selection, sprite) {
 const inside = (value, size) => Math.max(0.5, Math.min(size - 0.5, value));
 
 // near an edge the handle stays on the canvas, or it could not be reached
-export function turnHandle(selection, sprite, gap) {
-  const turn = liveTurn(selection, sprite);
-  const box = turn?.box ?? selectionBox(selection);
-
-  if (!box) {
-    return null;
-  }
-
+export function handleAround(box, angle, { canvas, gap }) {
   const centre = [(box.left + box.right + 1) / 2, (box.top + box.bottom + 1) / 2];
-  const radians = ((turn?.angle ?? 0) * Math.PI) / 180;
+  const radians = (angle * Math.PI) / 180;
   const edge = (box.bottom - box.top + 1) / 2;
   const along = (reach) => [
     centre[0] + Math.sin(radians) * reach,
@@ -108,6 +101,13 @@ export function turnHandle(selection, sprite, gap) {
   return {
     centre,
     root: along(edge),
-    knob: [inside(knobX, sprite.width), inside(knobY, sprite.height)],
+    knob: [inside(knobX, canvas.width), inside(knobY, canvas.height)],
   };
+}
+
+export function turnHandle(selection, sprite, gap) {
+  const turn = liveTurn(selection, sprite);
+  const box = turn?.box ?? selectionBox(selection);
+
+  return box ? handleAround(box, turn?.angle ?? 0, { canvas: sprite, gap }) : null;
 }

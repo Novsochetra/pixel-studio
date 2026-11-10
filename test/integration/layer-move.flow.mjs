@@ -1,4 +1,5 @@
-// Moving one layer: only that layer moves, only in this frame, by a drag or the arrow keys.
+// Moving one layer: only that layer moves, only in this frame, by a drag or the arrow keys. A drag
+// on empty canvas moves the whole frame.
 import { openStudio } from './harness.mjs';
 import { frameAction, openExample, selectFrame } from './studio.mjs';
 
@@ -55,15 +56,14 @@ await drag([5, 5], [30, 15]);
 
 await page.keyboard.press('t');
 check(
-  (await page.getByRole('button', { name: /Move this layer/ }).getAttribute('aria-pressed')) ===
-    'true',
-  'T picks the tool that moves one layer',
+  (await page.getByRole('button', { name: /^Move:/ }).getAttribute('aria-pressed')) === 'true',
+  'T picks the tool that moves a layer',
 );
 
 const before = await layerPixels();
 const whole = await pixels();
 
-await press([15, 10]);
+await press([5, 5]);
 await page.mouse.move(...at(45, 30), { steps: 8 });
 check((await pixels()) !== whole, 'a drag shows the layer moving');
 await page.screenshot({ path: `${shots}/layer-move-drag.png` });
@@ -87,13 +87,12 @@ await page.keyboard.press('Meta+z');
 await page.waitForTimeout(100);
 check((await pixels()) === moved, 'the arrow key is one undo step');
 
-await page.keyboard.press('v');
+await page.keyboard.press('b');
 const beforeRowClick = await layerPixels();
 
 await page.locator('.layer-row', { hasText: 'Hair' }).click();
 check(
-  (await page.getByRole('button', { name: /Move this layer/ }).getAttribute('aria-pressed')) ===
-    'true',
+  (await page.getByRole('button', { name: /^Move:/ }).getAttribute('aria-pressed')) === 'true',
   'clicking a layer picks the tool that moves it',
 );
 await drag([45, 30], [50, 36]);
@@ -119,6 +118,33 @@ check(
   'and says why',
 );
 await eye('Show', 'Hair');
+
+const frameBefore = await pixels();
+const layersBefore = await layerPixels();
+
+await press([150, 150]);
+await page.mouse.move(...at(145, 146), { steps: 8 });
+check((await pixels()) !== frameBefore, 'a drag on empty canvas shows the whole frame moving');
+await page.screenshot({ path: `${shots}/layer-move-frame.png` });
+await page.mouse.up();
+await page.waitForTimeout(150);
+const frameMoved = await pixels();
+
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(100);
+check((await pixels()) === frameBefore, 'one undo puts the whole frame back');
+await page.keyboard.press('Meta+Shift+z');
+await page.waitForTimeout(100);
+check((await pixels()) === frameMoved, 'one redo moves it again');
+
+const layersAfter = await layerPixels();
+
+check(layersAfter.hair !== layersBefore.hair, 'the drag on empty canvas moves the picked layer');
+check(layersAfter.body !== layersBefore.body, 'and every other layer');
+check(
+  (await page.locator('.layer-row[aria-selected="true"]').textContent()).includes('Hair'),
+  'and the layer being edited stays the same',
+);
 
 await page.locator('.layer-row', { hasText: 'Art' }).click();
 await page.keyboard.press('b');

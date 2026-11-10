@@ -9,6 +9,7 @@ import { onTurnHandle, turnSelectionDrag } from './selection-turn.js';
 import { pickLayerToDrag } from './pick-layer.js';
 import { moveFrameDrag } from './frame-move.js';
 import { moveLayerDrag } from './layer-move.js';
+import { onLayersHandle, turnLayersDrag } from './layer-turn.js';
 import { kindOf } from '../model/kinds.js';
 import { isPosedBody } from '../model/body/body-kind.js';
 import { startOnPart } from './body/part-draw.js';
@@ -21,7 +22,7 @@ const TOOLS = [
   { id: 'fill', label: 'Fill', key: 'g' },
   { id: 'replace', label: 'Replace colour', key: 'r' },
   { id: 'shade', label: 'Light and dark brush (Shift: darker)', key: 'd' },
-  { id: 'select', label: 'Select and move: a click picks the layer under it', key: 's' },
+  { id: 'select', label: 'Select and move: a click on art turns on Move for its layer', key: 's' },
   { id: 'wand', label: 'Select a colour (Shift: everywhere)', key: 'w' },
   {
     id: 'lasso',
@@ -30,8 +31,12 @@ const TOOLS = [
     key: 'l',
   },
   { id: 'pin', label: 'Pin a body part (Alt-click removes it)', key: 'p' },
-  { id: 'movelayer', label: 'Move this layer: drag it, or use the arrow keys', key: 't' },
-  { id: 'moveframe', label: 'Move the whole frame: drag it, or use the arrow keys', key: 'v' },
+  {
+    id: 'move',
+    label:
+      'Move: drag art to move its layer, empty canvas to move the whole frame, the handle to turn. Arrow keys too',
+    key: 't',
+  },
   { id: 'pose', label: 'Pose the body parts: drag a part, or its handle to turn it', key: 'o' },
 ];
 
@@ -71,17 +76,20 @@ const PAINTING = new Set(['pencil', 'eraser', 'fill', 'replace', 'shade']);
 const orTurnHandle = (tool) => (app, point, event) =>
   onTurnHandle(app, point) ? turnSelectionDrag(app, point) : tool(app, point, event);
 
+function moveTool(app, point) {
+  if (onLayersHandle(app, point)) {
+    return turnLayersDrag(app, point);
+  }
+
+  return pickLayerToDrag(app, point) ? moveLayerDrag(app, point) : moveFrameDrag(app, point);
+}
+
 // the tools a press starts; each returns the drag that follows, or null
 const ON_PRESS = {
   select: orTurnHandle(select),
   wand: orTurnHandle((app, point, event) => wand(app, point, event.shiftKey)),
   pin,
-  movelayer(app, point) {
-    pickLayerToDrag(app, point);
-
-    return moveLayerDrag(app, point);
-  },
-  moveframe: moveFrameDrag,
+  move: orTurnHandle(moveTool),
   shade: (app, point, event) => shade(app, point, event.shiftKey),
   pencil: (app, point) => stroke(app, point, app.store.state.color),
   eraser: (app, point) => stroke(app, point, CLEAR),

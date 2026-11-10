@@ -34,17 +34,17 @@ function eraseSelected(app) {
   commit(app, 'Delete', [layer], () => clearSelected(layer.sprite, state.selection));
 }
 
-function angleField(app) {
+export function angleField({ id, name, title, angle, turnTo }) {
   return node(
     'label.pose-angle',
-    { title: 'How far the selection is turned, in degrees: or drag the handle above it' },
+    { title },
     node('input.input.mono', {
-      id: 'selection-angle',
+      id,
       type: 'number',
       step: '1',
-      'aria-label': 'Selection angle',
-      value: String(selectionAngle(app.store.state)),
-      onchange: (event) => turnSelectionTo(app, Number(event.target.value) || 0),
+      'aria-label': name,
+      value: String(angle),
+      onchange: (event) => turnTo(Number(event.target.value) || 0),
     }),
     '°',
   );
@@ -66,7 +66,13 @@ export function renderSelectionBar(el, app) {
 
   replace(
     el,
-    angleField(app),
+    angleField({
+      id: 'selection-angle',
+      name: 'Selection angle',
+      title: 'How far the selection is turned, in degrees: or drag the handle above it',
+      angle: selectionAngle(app.store.state),
+      turnTo: (angle) => turnSelectionTo(app, angle),
+    }),
     ACTIONS.map(([kind, label, title]) =>
       button(title, () => transform(app, kind, title.split(' the')[0]), label),
     ),

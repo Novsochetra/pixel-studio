@@ -5,6 +5,18 @@ import { referenceOf } from '../model/reference.js';
 import { FIRST_PENCIL_COLOUR } from '../art/editor-colours.js';
 import { FIRST_BRUSH } from '../editor/brush.js';
 
+const NOTHING_HELD = {
+  swapPreview: null,
+  cursor: null,
+  frameDrag: null,
+  layerTurn: null,
+  pickedLayers: [],
+  selection: null,
+  piece: null,
+  lassoLoop: null,
+  highlight: null,
+};
+
 // the editor's state when a project opens
 export function startingState(project) {
   const animation = project.animations[0];
@@ -31,19 +43,13 @@ export function startingState(project) {
     showGuides: true,
     overlay: { direction: null, opacity: 0.4 },
     game: { size: 'match', zoom: null, mirrored: false, runAcross: false },
-    swapPreview: null,
-    cursor: null,
     onion: false,
-    frameDrag: null,
     gridAll: readGridAll(),
     gridOpen: readGridOpen(),
     viewFilter: 'colour',
     showPins: false,
     pinName: 'Head',
-    selection: null,
-    piece: null,
-    lassoLoop: null,
-    highlight: null,
+    ...NOTHING_HELD,
     saveStatus: 'saved',
   };
 }

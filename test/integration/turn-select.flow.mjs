@@ -12,6 +12,8 @@ const zoom = box.width / 160;
 const at = (x, y) => [box.x + (x + 0.5) * zoom, box.y + (y + 0.5) * zoom];
 const picture = () => canvas.evaluate((element) => element.toDataURL());
 const onLayer = async (name) => (await status.textContent()).includes(`· ${name}`);
+const toolOn = async (name) =>
+  (await page.getByRole('button', { name }).getAttribute('aria-pressed')) === 'true';
 const click = async (x, y) => {
   await page.mouse.click(...at(x, y));
   await page.waitForTimeout(150);
@@ -44,10 +46,19 @@ check(await onLayer('Hat'), 'the new layer is the one being edited');
 await page.keyboard.press('s');
 await click(80, 60);
 check(await onLayer('Art'), 'a click on the character picks its layer');
+check(await toolOn(/^Move:/), 'and turns on the tool that moves it');
 await click(20, 10);
 check(await onLayer('Hat'), 'a click on what the new layer holds picks that');
 await click(150, 150);
 check(await onLayer('Hat'), 'a click on empty canvas keeps the layer');
+
+await page.keyboard.press('s');
+await click(150, 150);
+check(await toolOn(/^Select and move/), 'a click on empty canvas stays on Select');
+await drag([70, 70], [75, 75]);
+await click(80, 60);
+check(await toolOn(/^Select and move/), 'a click that lets go of a selection stays on Select');
+check(await page.locator('.selection-bar').isHidden(), 'and the selection is gone');
 
 await page.keyboard.press('w');
 await click(80, 60);

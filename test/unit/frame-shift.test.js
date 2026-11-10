@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { newFrame, newLayer } from '../../src/model/project.js';
 import { bounds, getPixel, pack, setPixel, CLEAR } from '../../src/model/sprite.js';
 import {
-  clampLayerShift,
+  clampLayersShift,
   clampShift,
   shiftFrame,
   shiftLayer,
@@ -114,15 +114,24 @@ test('a layer stops at the canvas edge by its own art, not the art of other laye
 
   addTopLayer(frame, [17, 10]);
 
-  assert.deepEqual(clampLayerShift(frame.layers[0], CANVAS, [50, 0]), [17, 0]);
-  assert.deepEqual(clampLayerShift(frame.layers[1], CANVAS, [50, 0]), [2, 0]);
-  assert.deepEqual(clampLayerShift(frame.layers[1], CANVAS, [-50, 0]), [-17, 0]);
+  assert.deepEqual(clampLayersShift([frame.layers[0]], CANVAS, [50, 0]), [17, 0]);
+  assert.deepEqual(clampLayersShift([frame.layers[1]], CANVAS, [50, 0]), [2, 0]);
+  assert.deepEqual(clampLayersShift([frame.layers[1]], CANVAS, [-50, 0]), [-17, 0]);
 });
 
 test('a picture to trace and an empty layer are not stopped at the edge', () => {
   const [picture] = frameWith([19, 19], 'reference').layers;
   const empty = newLayer(SIZE, SIZE, { name: 'Empty' });
 
-  assert.deepEqual(clampLayerShift(picture, CANVAS, [5, 5]), [5, 5]);
-  assert.deepEqual(clampLayerShift(empty, CANVAS, [50, 50]), [50, 50]);
+  assert.deepEqual(clampLayersShift([picture], CANVAS, [5, 5]), [5, 5]);
+  assert.deepEqual(clampLayersShift([empty], CANVAS, [50, 50]), [50, 50]);
+});
+
+test('layers moved together stop at the edge as one, so the gap between them stays', () => {
+  const frame = frameWith([2, 10]);
+
+  addTopLayer(frame, [17, 10]);
+
+  assert.deepEqual(clampLayersShift(frame.layers, CANVAS, [50, 0]), [2, 0]);
+  assert.deepEqual(clampLayersShift(frame.layers, CANVAS, [-50, 0]), [-2, 0]);
 });
