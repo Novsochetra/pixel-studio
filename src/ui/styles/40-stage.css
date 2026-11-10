@@ -52,6 +52,10 @@
     0 10px 30px rgb(0 0 0 / 14%);
 }
 
+.canvas-holder.playing-views {
+  box-shadow: none;
+}
+
 /* A window tall enough keeps a band above the canvas for the bar of a selection or a pose, so the
    bar never lies over the art's first rows; a short one gives that room to the art. */
 @media (min-height: 800px) {

@@ -26,6 +26,12 @@
     min-width: 36px;
   }
 
+  .slider {
+    --knob: 26px;
+
+    height: 32px;
+  }
+
   .input,
   select.input {
     box-sizing: border-box;

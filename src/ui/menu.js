@@ -11,14 +11,28 @@ function run(action, onError) {
   }
 }
 
-// below the anchor, or above it when there is no room below (menus of the frames, at the bottom)
+const EDGE = 8;
+const GAP = 6;
+const LEAST_HEIGHT = 132;
+
+// Below the anchor, or above it when there is no room below (menus of the frames, at the bottom).
+// A menu taller than the room on its side scrolls there: laid over its own button and the bar at
+// the top, it hid where it came from.
+function placeUpOrDown(menu, box) {
+  const roomBelow = window.innerHeight - box.bottom - GAP - EDGE;
+  const roomAbove = box.top - GAP - EDGE;
+  const below = menu.offsetHeight <= roomBelow || roomBelow >= roomAbove;
+  const height = Math.min(menu.offsetHeight, Math.max(LEAST_HEIGHT, below ? roomBelow : roomAbove));
+
+  menu.style.maxHeight = `${height}px`;
+  menu.style.top = `${below ? box.bottom + GAP : Math.max(EDGE, box.top - GAP - height)}px`;
+  menu.dataset.opens = below ? 'down' : 'up';
+}
+
 function position(menu, anchor, align) {
   const box = anchor.getBoundingClientRect();
-  const height = menu.offsetHeight;
-  const below = box.bottom + 6 + height <= window.innerHeight - 8;
 
-  menu.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - height)}px`;
-  menu.dataset.opens = below ? 'down' : 'up';
+  placeUpOrDown(menu, box);
 
   // a right-aligned menu under a button near the left edge (a phone's wrapped toolbar) would run
   // off the screen, so it is held inside it
@@ -82,7 +96,6 @@ const MENU_STYLE = {
   position: 'fixed',
   top: '0',
   maxWidth: 'calc(100vw - 32px)',
-  maxHeight: 'calc(100vh - 16px)',
   overflowY: 'auto',
 };
 

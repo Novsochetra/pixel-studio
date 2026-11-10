@@ -49,7 +49,7 @@ export function batchRow(item, project, animation) {
     node('img', { src: item.url, alt: item.file.name }),
     node(
       'div',
-      { style: { display: 'grid', gap: '6px', minWidth: '0' } },
+      { style: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '6px' } },
       node('div.view-name', {}, item.file.name),
       node(
         'div.group',

@@ -3,6 +3,7 @@ import { directionsInUse } from '../actions.js';
 import { changeMarkup } from './board-marks.js';
 import { guideChips } from '../guide-chips.js';
 import { viewName } from '../../model/kinds.js';
+import { slider } from '../slider.js';
 
 const CLICKS = [
   ['edit', 'Opens the view'],
@@ -38,8 +39,7 @@ function overlayControls(app) {
         views,
       ),
     ),
-    node('input', {
-      type: 'range',
+    slider({
       min: '0.1',
       max: '0.9',
       step: '0.05',

@@ -160,7 +160,12 @@ function paintMarks(context, state, scale) {
 }
 
 export function paint(canvas, app) {
-  if (playsAllViews(app)) {
+  const allPlay = playsAllViews(app);
+
+  // the views that play stand on the stage itself, with no frame round the row of them
+  canvas.parentElement?.classList.toggle('playing-views', allPlay);
+
+  if (allPlay) {
     paintAllViews(canvas, app);
 
     return;

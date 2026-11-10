@@ -5,6 +5,7 @@ import { removeBackground, setBackground } from '../preview-background.js';
 import { mirrorsOf } from '../../model/directions.js';
 import { gameOf } from '../../model/presets.js';
 import { inWords } from '../../model/told.js';
+import { slider } from '../slider.js';
 
 function checkbox(label, checked, onChange) {
   return node(
@@ -33,8 +34,7 @@ function groundSlider(app) {
     'label.group',
     { style: { gap: '4px' }, title: 'Where the feet stand' },
     'Ground',
-    node('input', {
-      type: 'range',
+    slider({
       min: '0.3',
       max: '1',
       step: '0.005',

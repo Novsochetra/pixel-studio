@@ -2,6 +2,7 @@ import { node } from './dom.js';
 import { directionSprite } from './actions.js';
 import { bounds, toHex } from '../model/sprite.js';
 import { brushField } from './brush-settings.js';
+import { slider } from './slider.js';
 
 function paintOverField(app, colors) {
   const { state } = app.store;
@@ -71,8 +72,7 @@ function mirrorField(app) {
     node(
       'div.group',
       {},
-      node('input.input', {
-        type: 'range',
+      slider({
         min: '0',
         max: String(2 * state.project.canvas.width - 2),
         value: String(state.symmetry.axisSum),

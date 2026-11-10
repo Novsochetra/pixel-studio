@@ -2,10 +2,11 @@ import { currentAnimation } from './actions.js';
 import { cssVar, drawChecker, drawSprite, sizeCanvas } from './draw.js';
 import { cast, frameSprite } from './preview-scene.js';
 import { isSingleView, viewName } from '../model/kinds.js';
+import { bounds, unionBounds } from '../model/sprite.js';
+import { CAPTION, GAP, playLayout } from '../views/play-layout.js';
 
-const GAP = 16;
-const CAPTION = 22;
-const MARGIN = 64;
+const AIR = 2;
+const CORNER = 10;
 
 const playedViews = (state) => cast(state.project, currentAnimation(state), true);
 
@@ -21,18 +22,56 @@ export function playsAllViews(app) {
   );
 }
 
-// every view fits side by side above the frames, never drawn bigger than the zoom being edited at
-function sideBySideScale(canvas, { count, width, height }, zoom) {
-  const area = canvas.closest('.edit-scroll');
+// The part of the canvas the art moves in, over every view and frame: the views are drawn cut
+// to it, so they stand close together and a phone has room for them all. One box for all, so
+// nothing shifts between frames.
+function playedBox(project, animation, views) {
+  const { width, height } = project.canvas;
+  const longest = Math.max(...views.map((view) => animation.directions[view.source].frames.length));
+  const boxes = views.flatMap((view) =>
+    Array.from({ length: longest }, (unused, tick) =>
+      bounds(frameSprite(project, animation, view, tick)),
+    ),
+  );
+  const box = unionBounds(boxes) ?? { left: 0, top: 0, right: width, bottom: height };
 
-  if (!area) {
-    return zoom;
+  return {
+    left: Math.max(0, box.left - AIR),
+    top: Math.max(0, box.top - AIR),
+    right: Math.min(width, box.right + AIR),
+    bottom: Math.min(height, box.bottom + AIR),
+  };
+}
+
+// the stage above the frames, less its own padding
+function roomFor(canvas) {
+  const area = canvas.closest('.edit-scroll');
+  const padding = getComputedStyle(area.querySelector('.stage-inner') ?? area);
+
+  return {
+    width: area.clientWidth - parseFloat(padding.paddingLeft) - parseFloat(padding.paddingRight),
+    height: area.clientHeight - parseFloat(padding.paddingTop) - parseFloat(padding.paddingBottom),
+  };
+}
+
+function drawView(context, { sprite, name, box, scale }) {
+  const [width, height] = [(box.right - box.left) * scale, (box.bottom - box.top) * scale];
+
+  context.fillText(name, 0, 14);
+  context.translate(0, CAPTION);
+  context.beginPath();
+
+  // Safari before 16 draws no rounded boxes: there the views keep square corners
+  if (context.roundRect) {
+    context.roundRect(0, 0, width, height, CORNER);
+  } else {
+    context.rect(0, 0, width, height);
   }
 
-  const across = (area.clientWidth - MARGIN - GAP * (count - 1)) / (count * width);
-  const down = (area.clientHeight - MARGIN - CAPTION) / height;
-
-  return Math.max(1, Math.min(zoom, Math.floor(Math.min(across, down))));
+  context.clip();
+  drawChecker(context, { width, height }, scale * 2);
+  context.translate(-box.left * scale, -box.top * scale);
+  drawSprite(context, sprite, scale);
 }
 
 export function paintAllViews(canvas, app) {
@@ -40,20 +79,33 @@ export function paintAllViews(canvas, app) {
   const { project } = state;
   const animation = currentAnimation(state);
   const views = playedViews(state);
-  const { width, height } = project.canvas;
-  const scale = sideBySideScale(canvas, { count: views.length, width, height }, state.zoom);
-  const step = width * scale + GAP;
-  const { context } = sizeCanvas(canvas, step * views.length - GAP, height * scale + CAPTION);
+
+  // found once for a play: the art does not change while it runs
+  app.playback.box ??= playedBox(project, animation, views);
+
+  const { box } = app.playback;
+  const size = { width: box.right - box.left, height: box.bottom - box.top };
+  const { columns, scale } = playLayout(
+    { count: views.length, ...size },
+    roomFor(canvas),
+    state.zoom,
+  );
+  const step = { x: size.width * scale + GAP, y: size.height * scale + CAPTION + GAP };
+  const rows = Math.ceil(views.length / columns);
+  const { context } = sizeCanvas(canvas, step.x * columns - GAP, step.y * rows - GAP);
 
   context.font = `600 12px ${cssVar('--font-ui')}`;
   context.fillStyle = cssVar('--label-secondary');
 
   views.forEach((view, i) => {
-    context.fillText(viewName(project, view.direction), i * step, 14);
     context.save();
-    context.translate(i * step, CAPTION);
-    drawChecker(context, { width: width * scale, height: height * scale }, scale * 2);
-    drawSprite(context, frameSprite(project, animation, view, app.playback.frame), scale);
+    context.translate((i % columns) * step.x, Math.floor(i / columns) * step.y);
+    drawView(context, {
+      sprite: frameSprite(project, animation, view, app.playback.frame),
+      name: viewName(project, view.direction),
+      box,
+      scale,
+    });
     context.restore();
   });
 }

@@ -1,7 +1,7 @@
 // The arcade's sheet on a phone: a window rides up from the bottom edge, and is pulled down by
 // its bar to close it.
 import { openStudio } from './harness.mjs';
-import { openExample, openWorkspace } from './studio.mjs';
+import { openDock, openExample, openWorkspace } from './studio.mjs';
 
 const { page, context, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
 await openExample(page);
@@ -85,6 +85,47 @@ check(
   'on a 320 px phone the bar still fits the screen',
 );
 check((await picked()).whole, 'and the workspace keeps its name whole');
+
+// every view plays in the room above the frames, cut to the art, with nothing to scroll to
+await page.setViewportSize({ width: 412, height: 839 });
+await openWorkspace(page, 'Edit');
+await openDock(page, 'Frames');
+await page.getByRole('button', { name: 'Play' }).click();
+await page.waitForTimeout(400);
+const spill = await page.locator('.edit-scroll').evaluate((area) => ({
+  across: area.scrollWidth - area.clientWidth,
+  down: area.scrollHeight - area.clientHeight,
+}));
+check(spill.across <= 0 && spill.down <= 0, 'all views play within the screen, none off its edge');
+await page.screenshot({ path: `${shots}/look-phone-play.png` });
+await page.getByRole('button', { name: 'Pause' }).click();
+
+// a frame's menu opens on its own side of the frame: it never lies over the frame it is for
+await page.locator('.cell.selected').click();
+const menu = await page.locator('.menu').boundingBox();
+const frame = await page.locator('.cell.selected').boundingBox();
+check(menu.y + menu.height <= frame.y, 'a tall menu stays above the frame it opened from');
+await page.keyboard.press('Escape');
+
+// the studio's own slider, the same in every browser, tinted up to its knob
+await openDock(page, 'Brush');
+const size = await page.locator('#brush-size').evaluate((field) => ({
+  look: getComputedStyle(field).appearance,
+  filled: field.style.getPropertyValue('--filled'),
+}));
+check(size.look === 'none' && size.filled === '0%', 'a slider is drawn the studio’s way');
+await page.locator('#brush-size').evaluate((field) => {
+  field.value = field.max;
+  field.dispatchEvent(new window.Event('input', { bubbles: true }));
+});
+await page.waitForTimeout(200);
+check(
+  (await page
+    .locator('#brush-size')
+    .evaluate((field) => field.style.getPropertyValue('--filled'))) === '100%',
+  'and its track is tinted up to the knob',
+);
+await openDock(page, 'Brush');
 
 // a message is as wide as its words, not half the screen
 await openWorkspace(page, 'Edit');

@@ -235,3 +235,81 @@ textarea.input {
 .chip[data-state='off'] {
   color: var(--warn);
 }
+
+/* A slider (slider.js): a thin track, tinted up to a round white knob, the same in every browser. */
+.slider {
+  --knob: 20px;
+
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 0;
+  height: 24px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    var(--tint) var(--filled, 0%),
+    var(--fill-quiet) var(--filled, 0%)
+  );
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: var(--knob);
+  height: var(--knob);
+  margin-top: calc((6px - var(--knob)) / 2);
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 1px 4px rgb(0 0 0 / 35%),
+    0 0 0 0.5px rgb(0 0 0 / 15%);
+  transition: scale var(--duration-press) var(--ease-spring);
+}
+
+.slider:active::-webkit-slider-thumb {
+  scale: 1.12;
+}
+
+.slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--fill-quiet);
+}
+
+.slider::-moz-range-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--tint);
+}
+
+.slider::-moz-range-thumb {
+  width: var(--knob);
+  height: var(--knob);
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 35%);
+}
+
+.slider:focus-visible {
+  outline: 0;
+}
+
+.slider:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 1px 4px rgb(0 0 0 / 35%),
+    0 0 0 3px var(--tint);
+}
+
+.slider:focus-visible::-moz-range-thumb {
+  box-shadow:
+    0 1px 4px rgb(0 0 0 / 35%),
+    0 0 0 3px var(--tint);
+}

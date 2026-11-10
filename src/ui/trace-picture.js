@@ -6,6 +6,7 @@ import { frameAt } from '../model/project.js';
 import { decodeImage } from '../io/images.js';
 import { createSprite } from '../model/sprite.js';
 import { chooseFile } from './choose-file.js';
+import { slider } from './slider.js';
 
 // a picture fitted inside the canvas, smoothly scaled, standing on its bottom edge
 async function fitPicture(file, { width, height }) {
@@ -53,7 +54,7 @@ export function addPicture(app) {
       placeLayer(frame, key, 0);
     });
     toast(
-      'Picture added under your art, faded; never downloaded. Click it to change how strongly it shows.',
+      'Picture added under your art, faded; never downloaded. Pick it in Layers to change how strongly it shows.',
     );
   });
 }
@@ -70,8 +71,7 @@ export function pictureStrength(app, picture) {
     'label.field',
     { for: 'trace-opacity' },
     node('span', {}, 'How strongly the picture shows'),
-    node('input', {
-      type: 'range',
+    slider({
       id: 'trace-opacity',
       min: '0.1',
       max: '1',

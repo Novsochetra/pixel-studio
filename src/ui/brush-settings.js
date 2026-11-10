@@ -1,5 +1,6 @@
 import { node } from './dom.js';
 import { BRUSH_SIZES } from '../editor/brush.js';
+import { slider } from './slider.js';
 
 const SHAPES = [
   ['round', 'Round'],
@@ -45,8 +46,7 @@ export function brushField(app) {
     node(
       'div.group',
       {},
-      node('input.input', {
-        type: 'range',
+      slider({
         min: String(BRUSH_SIZES.smallest),
         max: String(BRUSH_SIZES.biggest),
         value: String(state.brush.size),
