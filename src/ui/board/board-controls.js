@@ -66,7 +66,7 @@ function markControls(app, note) {
     {},
     node(
       'div.segmented',
-      { role: 'group', 'aria-label': 'A click on the board' },
+      { role: 'group', 'aria-label': 'A press on the board' },
       CLICKS.map(([id, label]) =>
         node(
           'button',

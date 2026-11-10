@@ -194,7 +194,7 @@ await openPanel(page, 'Outline');
 const coloursBefore = await colours();
 await page.getByRole('button', { name: 'Team kits…' }).click();
 await page.selectOption('#outfit-source', 'team:brazil');
-await page.getByRole('button', { name: 'Wear it (whole character)' }).click();
+await page.getByRole('button', { name: 'Wear it (every frame and view)' }).click();
 await page.waitForTimeout(300);
 check((await pixels()) !== plain, 'a team kit recolours the character');
 await page.keyboard.press('Meta+z');

@@ -54,6 +54,7 @@ export function pinControls(app, toggle) {
       iconName: 'pin',
       label: 'Pins',
       title: 'Pins mark the head, hands, hips and feet in each frame (tool P)',
+      said: 'they mark the head, hands, hips and feet in each frame. Place them with the Pin tool',
     }),
     state.tool === 'pin' ? [pinNames(app), removeButton(app)] : null,
   ];

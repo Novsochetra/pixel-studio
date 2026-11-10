@@ -137,3 +137,42 @@
     display: none;
   }
 }
+
+/* The narrowest phones: the bars' buttons draw in a little, so the workspace keeps its word whole
+   and the frames' switches keep to one row. After the sizes above, so these win there. */
+@media (max-width: 359px) {
+  :root[data-layout='compact'] .toolbar {
+    gap: 2px;
+    padding-inline: 6px;
+  }
+
+  :root[data-layout='compact'] .toolbar .group {
+    gap: 2px;
+  }
+
+  :root[data-layout='compact'] .toolbar .btn {
+    --btn-height: 36px;
+
+    min-width: 36px;
+  }
+
+  :root[data-layout='compact'] .workspace-pick {
+    padding-inline: 10px;
+  }
+
+  :root[data-layout='compact'] .workspace-pick svg {
+    display: none;
+  }
+
+  :root[data-layout='compact'] .grid-bar {
+    gap: 4px;
+  }
+
+  :root[data-layout='compact'] .grid-bar .segmented button {
+    padding-inline: 8px;
+  }
+
+  :root[data-layout='compact'] .grid-bar .icon-toggle {
+    width: 34px;
+  }
+}

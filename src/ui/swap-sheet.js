@@ -95,7 +95,7 @@ function applyButtons(job, mapping) {
     node(
       'button.btn.primary',
       { onclick: () => apply(job, mapping, 'all') },
-      'Apply to the whole character',
+      'Apply to every frame and view',
     ),
   );
 }

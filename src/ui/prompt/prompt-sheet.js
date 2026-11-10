@@ -120,7 +120,7 @@ function draw(slot, state, ask, { close, redraw }) {
 
 export function openChatgptSheet(app) {
   const { state } = app.store;
-  const sheet = openSheet('Ask ChatGPT for new art', null, { wide: true });
+  const sheet = openSheet('Prompt and reference for an AI image', null, { wide: true });
   const reference = viewName(state.project, referenceOf(state.project)).toLowerCase();
 
   // the prompt is made of the reference view's numbers, so that view has to be drawn first

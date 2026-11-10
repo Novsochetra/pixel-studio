@@ -5,6 +5,6 @@ export function swapSaid({ changed, flattened, everywhere }) {
   }
 
   return everywhere
-    ? 'Colours swapped across the whole character'
+    ? 'Colours swapped in every frame and view'
     : `Colours swapped in this frame${flattened ? ', its Body now plain pixels' : ''}`;
 }

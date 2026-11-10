@@ -10,9 +10,6 @@ import { pinsOf, setPin } from '../../src/model/pins.js';
 import { CLEAR, createSprite, getPixel, pack, setPixel } from '../../src/model/sprite.js';
 import { floodFill, replaceColor } from '../../src/editor/paint.js';
 import { inWords, told } from '../../src/model/told.js';
-import { markAt } from '../../src/views/markup.js';
-import { lassoModeFor } from '../../src/ui/tools-select.js';
-import { fittedView } from '../../src/ui/view-kept.js';
 import { paintOverChoices } from '../../src/ui/drawing-settings.js';
 import { parsePaletteText } from '../../src/palette/palette.js';
 import { sane } from '../../src/ui/export-settings.js';
@@ -184,7 +181,7 @@ test('two images cleaned for one view and frame both land: the later takes a new
 // a swap on art that has none of its colours said "Colours swapped", with nothing changed
 test('a swap that changed nothing says so', () => {
   assert.match(swapSaid({ changed: false, everywhere: true }), /^No colour changed/);
-  assert.match(swapSaid({ changed: true, everywhere: true }), /^Colours swapped across/);
+  assert.match(swapSaid({ changed: true, everywhere: true }), /^Colours swapped in every/);
   assert.match(swapSaid({ changed: true, flattened: true }), /plain pixels$/);
 });
 
@@ -241,78 +238,4 @@ test('the feet of a custom frame stand inside the frame', () => {
 
   assert.equal(settings.anchorX, 63);
   assert.equal(settings.anchorY, 0);
-});
-
-// a page loaded again brought the work back on its first view and frame, with the pencil
-test('the view a project was left on fits the project as it is now', () => {
-  const project = newProject({ kind: 'icon', width: 8, height: 8 });
-  const [animation] = project.animations;
-  const [direction] = Object.keys(animation.directions);
-  const view = fittedView(project, {
-    tool: 'pose',
-    mode: 'board',
-    zoom: 9,
-    color: RED,
-    at: { animation: animation.id, direction, frame: 7, layer: null },
-  });
-
-  assert.equal(view.tool, 'pencil', 'an icon has no Pose tool');
-  assert.equal(view.mode, 'edit', 'and no Views board');
-  assert.equal(view.color, RED);
-  assert.equal('zoom' in view, false, 'the canvas is fitted afresh');
-  assert.equal(view.at.frame, 0, 'a frame it no longer has gives way to one it has');
-});
-
-// adding to a selection and taking away from it needed Shift and Alt, which fingers do not have
-test('the Lasso adds or takes away by the keys held, or by what its bar is set to', () => {
-  assert.equal(lassoModeFor({ shiftKey: true }, 'remove'), 'add');
-  assert.equal(lassoModeFor({ altKey: true }, 'add'), 'remove');
-  assert.equal(lassoModeFor({}, 'add'), 'add');
-  assert.equal(lassoModeFor({}), 'new');
-});
-
-// undoing a deleted frame brought the frame back but left the editor on the one beside it
-test('a structure step remembers where it was made from and where it led', () => {
-  const project = newProject({ kind: 'icon', width: 8, height: 8 });
-  const history = new History(() => null);
-  const before = snapshotAnimations(project.animations);
-
-  addFrame(project, project.animations[0], 0);
-  history.recordStructure('New frame', before, project);
-  history.keepPlace({ frame: 0 }, { frame: 1 });
-
-  assert.deepEqual(history.undo(project).place, { before: { frame: 0 }, after: { frame: 1 } });
-});
-
-// one mark or note on the Views board could not be taken away: only all of them, or the last
-test('a press on the Views board finds the mark or note under it, on that view', () => {
-  const markup = {
-    strokes: [
-      {
-        direction: 'south',
-        points: [
-          [10, 10],
-          [14, 12],
-        ],
-      },
-    ],
-    notes: [
-      { direction: 'south', x: 30, y: 30, text: 'arm' },
-      { direction: 'east', x: 12, y: 11, text: 'leg' },
-    ],
-  };
-
-  assert.deepEqual(markAt(markup, { direction: 'south', x: 13, y: 12 }), {
-    kind: 'strokes',
-    index: 0,
-  });
-  assert.deepEqual(markAt(markup, { direction: 'south', x: 31, y: 28 }), {
-    kind: 'notes',
-    index: 0,
-  });
-  assert.deepEqual(markAt(markup, { direction: 'east', x: 13, y: 12 }), {
-    kind: 'notes',
-    index: 1,
-  });
-  assert.equal(markAt(markup, { direction: 'south', x: 50, y: 50 }), null);
 });

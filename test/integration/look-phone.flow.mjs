@@ -95,15 +95,17 @@ check(spill.across <= 0 && spill.down <= 0, 'all views play within the screen, n
 await page.screenshot({ path: `${shots}/look-phone-play.png` });
 await page.getByRole('button', { name: 'Pause' }).click();
 
-// a frame's menu opens on its own side of the frame: it never lies over the frame it is for
+// a frame's menu keeps under the bar at the top and inside the window, with every item in it:
+// kept to the room above its frame, its last items were cut off
 await page.locator('.cell.selected').click();
 const menu = await page.locator('.menu').boundingBox();
-const frame = await page.locator('.cell.selected').boundingBox();
 const bar = await page.locator('#toolbar').boundingBox();
+const cut = await page.locator('.menu').evaluate((list) => list.scrollHeight - list.clientHeight);
 check(
-  menu.y + menu.height <= frame.y && menu.y >= bar.y + bar.height,
-  'a tall menu stays between the bar at the top and the frame it opened from',
+  menu.y >= bar.y + bar.height && menu.y + menu.height <= 839,
+  'a tall menu stays between the bar at the top and the foot of the window',
 );
+check(cut <= 0, 'and shows every one of its items');
 await page.keyboard.press('Escape');
 
 // the studio's own slider, the same in every browser, tinted up to its knob
@@ -129,16 +131,41 @@ await openDock(page, 'Brush');
 // a scene zoomed past the screen scrolls; its controls stay where they can be reached
 await openWorkspace(page, 'On the pitch');
 await page.getByRole('button', { name: '3×' }).tap();
+await page.locator('#stage').evaluate((stage) => stage.scrollTo(300, 0));
 await page.waitForTimeout(400);
 const play = await page.getByRole('button', { name: 'Play', exact: true }).boundingBox();
 const zooms = await page.getByRole('group', { name: 'Zoom' }).boundingBox();
 const wide = await page.evaluate(() => innerWidth);
 check(
   play.x >= 0 && play.x + play.width <= wide && zooms.x >= 0 && zooms.x + zooms.width <= wide,
-  'zoomed to 3×, the preview’s controls are still on the screen',
+  'zoomed to 3× and swiped sideways, the preview’s controls are still on the screen',
+);
+check(
+  (await page.locator('.stage canvas').evaluate((scene) => getComputedStyle(scene).touchAction)) !==
+    'none',
+  'and a finger on the scene scrolls it',
 );
 await page.screenshot({ path: `${shots}/look-phone-pitch.png` });
 await page.getByRole('button', { name: '1×' }).tap();
+
+// the narrowest phone: the workspace keeps its word whole, the board's choices start in reach
+await page.setViewportSize({ width: 320, height: 568 });
+await openWorkspace(page, 'Views board');
+const narrow = await page.evaluate(() => {
+  const word = document.querySelector('.workspace-pick span');
+  const [first] = document.querySelectorAll('.board-row .segmented button');
+
+  return {
+    cut: word.scrollWidth - word.clientWidth,
+    first: first.getBoundingClientRect().left,
+    spill: document.documentElement.scrollWidth - window.innerWidth,
+  };
+});
+check(narrow.cut <= 0, 'on the narrowest phone the workspace’s name is whole');
+check(narrow.first >= 0, 'and the first choice of a row too wide for it is in reach');
+check(narrow.spill <= 0, 'with nothing off the screen’s edge');
+await page.screenshot({ path: `${shots}/look-phone-narrow.png` });
+await page.setViewportSize({ width: 412, height: 839 });
 
 // a message is as wide as its words, not half the screen
 await openWorkspace(page, 'Edit');

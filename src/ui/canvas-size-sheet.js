@@ -132,7 +132,12 @@ export function openCanvasSizeSheet(app) {
   const job = { anchor: firstAnchor(app.store.state.project) };
   const anchors = node('div');
   const draw = () => replace(anchors, anchorGrid(job, draw));
-  const apply = (event) => changeSize(app, { fields, job, sheet }, event.currentTarget);
+  const change = node('button.btn.primary', {}, 'Change the size');
+  const apply = () => changeSize(app, { fields, job, sheet }, change);
+  const onEnter = (event) => event.key === 'Enter' && apply();
+
+  change.addEventListener('click', apply);
+  [fields.width, fields.height].forEach(({ input }) => input.addEventListener('keydown', onEnter));
 
   draw();
   sheet.body.append(
@@ -143,11 +148,6 @@ export function openCanvasSizeSheet(app) {
     ),
     node('div.compare.canvas-size-fields', {}, fields.width.field, fields.height.field),
     node('div.field', {}, node('span', {}, 'Keep the art at'), anchors),
-    node(
-      'div.sheet-actions',
-      {},
-      node('button.btn', { onclick: sheet.close }, 'Cancel'),
-      node('button.btn.primary', { onclick: apply }, 'Change the size'),
-    ),
+    node('div.sheet-actions', {}, node('button.btn', { onclick: sheet.close }, 'Cancel'), change),
   );
 }

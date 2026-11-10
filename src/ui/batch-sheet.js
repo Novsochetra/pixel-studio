@@ -152,11 +152,14 @@ function showBatch(app, files, leftOut) {
     toast('Cleaned images placed. A version from just before is in History.');
     sheet.close();
   });
+  // the browser's own append writes a null out as the word: only what is there is appended
   sheet.body.append(
-    node('p.hint', {}, hintText(state)),
-    leftOut ? node('p.hint', {}, leftOutText(leftOut)) : null,
-    list,
-    node('div.sheet-actions', {}, node('button.btn', { onclick: sheet.close }, 'Cancel'), accept),
+    ...[
+      node('p.hint', {}, hintText(state)),
+      leftOut ? node('p.hint', {}, leftOutText(leftOut)) : null,
+      list,
+      node('div.sheet-actions', {}, node('button.btn', { onclick: sheet.close }, 'Cancel'), accept),
+    ].filter(Boolean),
   );
   draw();
   run();

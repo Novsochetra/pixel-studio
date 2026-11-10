@@ -59,11 +59,15 @@ export function asepriteJson(result, settings, animation, imageName) {
   };
 }
 
+// art with one view has no view to name its files by
+export const viewFileName = (result, direction, join) =>
+  result.oneView ? result.name : `${result.name}${join}${direction}`;
+
 // every frame on its own: [{ path, sprite }], as animation/direction/frame.png
 export function frameFiles(result, settings) {
   return result.rows.flatMap((row, rowIndex) =>
     Array.from({ length: result.frames }, (_, frameIndex) => ({
-      path: `${result.name}/${row.direction}/${String(frameIndex + 1).padStart(2, '0')}.png`,
+      path: `${viewFileName(result, row.direction, '/')}/${String(frameIndex + 1).padStart(2, '0')}.png`,
       sprite: sheetCell(result, settings, rowIndex, frameIndex),
     })),
   );

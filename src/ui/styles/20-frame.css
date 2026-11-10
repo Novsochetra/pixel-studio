@@ -66,8 +66,9 @@
 
 .wordmark small {
   display: block;
-  /* a long name is cut short: wrapped, it pushed the bar's buttons onto a second row */
-  max-width: 220px;
+  /* a long name is cut short, and shorter in a narrow window: wrapped, or at its full width, it
+     pushed the bar's buttons onto a second row */
+  max-width: clamp(96px, 14vw, 220px);
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

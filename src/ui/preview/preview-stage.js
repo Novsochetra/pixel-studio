@@ -100,7 +100,9 @@ export function mountPreview(container, app) {
   const bar = node('div.group.preview-bar');
   const note = node('p.hint.preview-note');
 
-  container.replaceChildren(node('div.stage-inner.preview', {}, bar, canvas, note));
+  container.replaceChildren(
+    node('div.stage-inner.preview', {}, node('div.preview-bar-place', {}, bar), canvas, note),
+  );
   const clock = { started: null, background: null };
 
   const paint = (time) => paintPreview(canvas, app, { clock, time });

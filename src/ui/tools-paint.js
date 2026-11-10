@@ -21,9 +21,15 @@ export function paintOptions(state, color = state.color) {
   };
 }
 
+const paintOverSaid = (state) =>
+  `Paint only over is set to ${toHex(state.paintOver)}, so only that colour changes. Set it to "Any pixel" to paint the rest.`;
+
 export function stroke(app, point, color) {
-  const layer = currentLayer(app.store.state);
-  const line = new Stroke(layer.sprite, color, paintOptions(app.store.state, color));
+  const { state } = app.store;
+  const layer = currentLayer(state);
+  // a stroke begun on a colour "Paint only over" keeps, that draws nothing, says why at its end
+  const kept = !canPaint(layer.sprite, ...point, state.paintOver);
+  const line = new Stroke(layer.sprite, color, paintOptions(state, color));
 
   line.add(...point);
   app.store.touch('stroke');
@@ -43,6 +49,8 @@ export function stroke(app, point, color) {
       ) {
         app.saver.markLayers([layer.id]);
         app.store.touch('pixels');
+      } else if (kept) {
+        toast(paintOverSaid(state));
       }
     },
   };
@@ -54,9 +62,7 @@ function keptByPaintOver(state, sprite, [x, y]) {
     return false;
   }
 
-  toast(
-    `Paint only over is set to ${toHex(state.paintOver)}, so only that colour changes. Set it to "Any pixel" to paint the rest.`,
-  );
+  toast(paintOverSaid(state));
 
   return true;
 }

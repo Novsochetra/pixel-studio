@@ -84,6 +84,12 @@ export function select(app, start) {
 }
 
 export function wand(app, [x, y], everywhere) {
+  // a drag that starts on the selection moves it, as with the box and the Lasso: fingers have no
+  // arrow keys to move it with
+  if (!everywhere && isSelected(app.store.state.selection, x, y)) {
+    return moveSelection(app, [x, y]);
+  }
+
   pickLayerAt(app, [x, y]);
   const selection = colourSelection(currentLayer(app.store.state).sprite, x, y, everywhere);
 

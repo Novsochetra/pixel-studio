@@ -2,6 +2,7 @@ import { createSprite, getPixel, setPixel, CLEAR } from '../model/sprite.js';
 import { compositeFrame } from '../model/composite.js';
 import { hasArt, heldFrame } from '../model/frames.js';
 import { drawnDirections, flippedSides } from '../model/directions.js';
+import { isSingleView } from '../model/kinds.js';
 
 // the drawn views in compass order, then the flipped ones when they are wanted
 function sheetRows(project, animation, includeMirrored) {
@@ -147,5 +148,5 @@ export function buildSheet(project, animation, settings) {
     rows: manifestRows(project, rows, settings.includeMirrored, animation),
   };
 
-  return { sheet, rows, frames, warnings, manifest, name: slug };
+  return { sheet, rows, frames, warnings, manifest, name: slug, oneView: isSingleView(project) };
 }

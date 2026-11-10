@@ -119,6 +119,29 @@ check(
 await page.locator('.sheet-close').tap();
 check((await page.locator('.sheet').count()) === 0, 'and its × closes it');
 await page.waitForTimeout(600);
+
+const resizeTo = async (width, press) => {
+  await page.getByRole('button', { name: 'More', exact: true }).tap();
+  await page.getByRole('menuitem', { name: /Canvas size/ }).tap();
+  await page.waitForTimeout(700);
+  await page.fill('#canvas-width', String(width));
+  await press();
+  await page.waitForTimeout(900);
+};
+
+await resizeTo(40, () => page.locator('#canvas-width').press('Enter'));
+check(
+  (await page.locator('.sheet').count()) === 0 && (await status(page)).includes('40×32 canvas'),
+  'Enter in a size’s field changes the size',
+);
+await resizeTo(32, () => page.getByRole('button', { name: 'Change the size' }).tap());
+await page.getByRole('button', { name: 'Symmetry' }).tap();
+check(
+  (await said()).startsWith('Symmetry: draw one half'),
+  'Symmetry says what it does when tapped on',
+);
+await page.getByRole('button', { name: 'Symmetry' }).tap();
+check((await said()) === 'Symmetry off', 'and that it is off');
 await tapPixel(15, 15);
 check((await status(page)).includes('sprite 12×12'), 'and the canvas takes taps again');
 await finish();

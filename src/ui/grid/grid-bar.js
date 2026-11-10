@@ -10,15 +10,16 @@ import { isSingleView } from '../../model/kinds.js';
 import { wholeNumber } from '../../model/numbers.js';
 
 // a finger has no pointer to hover for what a bare picture means: switched, it says
-function switched(app, { key, label, title }, on) {
+function switched(app, { key, label, said }, on) {
   app.store.set({ [key]: on });
 
   if (app.store.state.layout === 'compact') {
-    toast(on ? `${label}: ${title}` : `${label} off`);
+    toast(on ? `${label}: ${said}` : `${label} off`);
   }
 }
 
-function toggle(app, { key, iconName, label, title }) {
+// said: what the switch says when a finger turns it on, where its title names a key
+function toggle(app, { key, iconName, label, title, said = title }) {
   const pressed = Boolean(app.store.state[key]);
 
   return node(
@@ -27,7 +28,7 @@ function toggle(app, { key, iconName, label, title }) {
       'aria-pressed': String(pressed),
       'aria-label': label,
       title,
-      onclick: () => switched(app, { key, label, title }, !pressed),
+      onclick: () => switched(app, { key, label, said }, !pressed),
     },
     icon(iconName),
   );

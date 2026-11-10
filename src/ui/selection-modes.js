@@ -1,4 +1,5 @@
 import { node } from './dom.js';
+import { forHands } from './platform-keys.js';
 import { currentLayer } from './actions.js';
 import { colourSelection } from '../editor/selection.js';
 
@@ -6,15 +7,15 @@ import { colourSelection } from '../editor/selection.js';
 // The Lasso's next loop adds to the selection or takes away from it; Select a colour reaches
 // every pixel of the colour, not only the ones that touch.
 const MODES = [
-  ['add', 'Add', 'The next loop adds to the selection (or hold Shift)'],
-  ['remove', 'Take away', 'The next loop takes away from the selection (or hold Alt)'],
+  ['add', 'Add', 'The next loop adds to the selection', ' (or hold Shift)'],
+  ['remove', 'Take away', 'The next loop takes away from the selection', ' (or hold Alt)'],
 ];
 
-function modeButton(app, [mode, label, title]) {
+function modeButton(app, [mode, label, title, keys]) {
   return node(
     'button.btn.quiet',
     {
-      title,
+      title: forHands(title + keys, title),
       'data-mode': mode,
       'aria-pressed': 'false',
       // pressed again, the next loop starts a new selection, as it does with neither on
@@ -45,7 +46,10 @@ export function modeControls(app) {
     node(
       'button.btn.quiet',
       {
-        title: 'Select every pixel of this colour, wherever it is (or Shift-click)',
+        title: forHands(
+          'Select every pixel of this colour, wherever it is (or Shift-click)',
+          'Select every pixel of this colour, wherever it is',
+        ),
         'data-mode': 'everywhere',
         onclick: () => selectEverywhere(app),
       },

@@ -78,6 +78,21 @@ check(
 await page.screenshot({ path: `${shots}/pitch.png` });
 await page.getByRole('button', { name: 'Pause' }).click();
 
+// a scene zoomed past the window scrolls both ways: its controls went off with it
+await page.getByRole('button', { name: '3×' }).click();
+await page.locator('#stage').evaluate((stage) => stage.scrollTo(300, 300));
+await page.waitForTimeout(200);
+const playButton = await page.getByRole('button', { name: 'Play', exact: true }).boundingBox();
+const stageBox = await page.locator('#stage').boundingBox();
+check(
+  playButton.y >= stageBox.y &&
+    playButton.x >= stageBox.x &&
+    playButton.x + playButton.width <= stageBox.x + stageBox.width,
+  'the preview’s controls stay in the window while the scene scrolls under them',
+);
+await page.screenshot({ path: `${shots}/pitch-zoomed.png` });
+await page.getByRole('button', { name: '1×' }).click();
+
 await newProject('Character', 'Knight');
 await workspace('Preview');
 check(

@@ -22,7 +22,7 @@ function wear(job, mapping, name) {
 
   toast(
     changed
-      ? `${name} on the whole character. Undo takes it off.`
+      ? `${name} on every frame and view. Undo takes it off.`
       : 'Nothing changed: none of the outfit’s colours is in the art.',
   );
   job.close();
@@ -50,7 +50,7 @@ function actions(job, mapping, name) {
     node(
       'button.btn.primary',
       { disabled: nothing, title: why, onclick: () => wear(job, mapping, name) },
-      'Wear it (whole character)',
+      'Wear it (every frame and view)',
     ),
   );
 }

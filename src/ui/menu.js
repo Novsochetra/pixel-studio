@@ -13,7 +13,6 @@ function run(action, onError) {
 
 const EDGE = 8;
 const GAP = 6;
-const LEAST_HEIGHT = 132;
 
 // how high a menu may reach: one opened from the page stops under the bar at the top, which
 // stays in sight; one opened from that bar has the whole window
@@ -23,20 +22,35 @@ function topEdge(anchor) {
   return !bar || bar.contains(anchor) ? EDGE : bar.getBoundingClientRect().bottom + EDGE;
 }
 
-// Below the anchor, or above it when there is no room below (menus of the frames, at the bottom).
-// A menu taller than the room on its side scrolls there: laid over its own button and the bar at
-// the top, it hid where it came from.
-function placeUpOrDown(menu, anchor) {
-  const box = anchor.getBoundingClientRect();
-  const top = topEdge(anchor);
-  const roomBelow = window.innerHeight - box.bottom - GAP - EDGE;
-  const roomAbove = box.top - GAP - top;
-  const below = menu.offsetHeight <= roomBelow || roomBelow >= roomAbove;
-  const height = Math.min(menu.offsetHeight, Math.max(LEAST_HEIGHT, below ? roomBelow : roomAbove));
+// Where a menu of `height` goes by its button: below it, or above when there is no room below
+// (menus of the frames, at the bottom). One that fits on neither side whole takes the room the
+// window has, over its button if it must, and scrolls only when the window itself is too short:
+// kept to one side, its last items were cut off while there was room for them.
+export function menuPlace(height, button, room) {
+  const [below, above] = [button.bottom + GAP, button.top - GAP];
 
-  menu.style.maxHeight = `${height}px`;
-  menu.style.top = `${below ? box.bottom + GAP : Math.max(top, box.top - GAP - height)}px`;
-  menu.dataset.opens = below ? 'down' : 'up';
+  if (height <= room.bottom - below) {
+    return { top: below, height, opens: 'down' };
+  }
+
+  if (height <= above - room.top) {
+    return { top: above - height, height, opens: 'up' };
+  }
+
+  const shown = Math.min(height, room.bottom - room.top);
+
+  return { top: room.bottom - shown, height: shown, opens: 'up' };
+}
+
+function placeUpOrDown(menu, anchor) {
+  const place = menuPlace(menu.offsetHeight, anchor.getBoundingClientRect(), {
+    top: topEdge(anchor),
+    bottom: window.innerHeight - EDGE,
+  });
+
+  menu.style.maxHeight = `${place.height}px`;
+  menu.style.top = `${place.top}px`;
+  menu.dataset.opens = place.opens;
 }
 
 function position(menu, anchor, align) {

@@ -109,6 +109,13 @@
     top: auto;
     bottom: 12px;
   }
+
+  /* Done stays in sight at the row's end, whatever is scrolled under it */
+  :root:not([data-layout='compact']) .selection-done {
+    position: sticky;
+    right: 0;
+    margin-left: auto;
+  }
 }
 
 .stage-inner.preview {
@@ -117,12 +124,16 @@
 }
 
 .preview-bar {
-  /* the stage grows to fit a zoomed scene; its controls wrap instead of widening it */
-  contain: inline-size;
-  width: min(100%, 900px);
   gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-card);
+  background: var(--material);
+  -webkit-backdrop-filter: var(--blur-glass);
+  backdrop-filter: var(--blur-glass);
+  box-shadow: var(--shadow), var(--shadow-glass);
+  pointer-events: auto;
 }
 
 .preview-note {
@@ -131,20 +142,36 @@
   text-align: center;
 }
 
-/* A scene zoomed past the window scrolls sideways; its controls and its note stay in the window,
+/* A scene zoomed past the window scrolls both ways; its controls and its note stay in the window,
    where they can be reached. The preview has the whole window's width: no rail, no inspector. */
-.stage-inner.preview > :is(.preview-bar, .preview-note) {
+.stage-inner.preview > :is(.preview-bar-place, .preview-note) {
   --across: min(100vw - 64px, 900px);
 
   position: sticky;
   left: calc((100vw - var(--across)) / 2);
   justify-self: start;
+  /* the stage grows to fit a zoomed scene; its controls wrap instead of widening it */
+  contain: inline-size;
   width: var(--across);
   box-sizing: border-box;
 }
 
+/* the controls float over the scene scrolled under them: only the bar itself takes a press */
+.stage-inner.preview > .preview-bar-place {
+  top: 12px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
 .stage-inner.preview > .preview-note {
   --across: min(100vw - 64px, 680px);
+}
+
+/* a finger on the scene scrolls it: nothing is drawn here */
+.stage-inner.preview canvas {
+  touch-action: pan-x pan-y;
 }
 
 /* the board fits the stage: on a phone it is drawn smaller, its pixels kept sharp */

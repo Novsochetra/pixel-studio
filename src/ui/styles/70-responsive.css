@@ -59,39 +59,6 @@
   padding: 0 8px 0 12px;
 }
 
-/* the narrowest phones: the bar's buttons draw in a little so its words stay whole */
-@media (max-width: 359px) {
-  :root[data-layout='compact'] .toolbar {
-    gap: 2px;
-  }
-
-  :root[data-layout='compact'] .toolbar .btn {
-    --btn-height: 38px;
-
-    min-width: 38px;
-  }
-
-  :root[data-layout='compact'] .toolbar .group {
-    gap: 2px;
-  }
-
-  :root[data-layout='compact'] .workspace-pick svg {
-    display: none;
-  }
-
-  /* here even one word may have to give way, once the project's name has */
-  :root[data-layout='compact'] .workspace-pick {
-    flex: 0 1 auto;
-    min-width: 0;
-    padding-inline: 10px;
-  }
-
-  :root[data-layout='compact'] .workspace-pick span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
 :root[data-layout='compact'] .workspace-pick svg {
   width: 14px;
   height: 14px;
@@ -121,6 +88,7 @@
 }
 
 :root[data-layout='compact'] .wordmark small {
+  max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   font: 600 15px/1.3 var(--font-ui);
@@ -179,8 +147,22 @@
   padding: 16px;
 }
 
-:root[data-layout='compact'] .stage-inner.preview {
-  width: 100%;
+/* five rows of controls are half a phone's screen: they go up with the scene, and stay across */
+:root[data-layout='compact'] .stage-inner.preview > :is(.preview-bar-place, .preview-note) {
+  --across: calc(100vw - 32px);
+}
+
+:root[data-layout='compact'] .stage-inner.preview > .preview-bar-place {
+  position: sticky;
+  top: auto;
+}
+
+:root[data-layout='compact'] .preview-bar {
+  padding: 0;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
 }
 
 :root[data-layout='compact'] .inspector {
@@ -414,6 +396,8 @@
    track it looked broken */
 :root[data-layout='compact'] .segmented {
   flex-wrap: nowrap;
+  /* from its start: centred, a row wider than the screen put its first choice out of reach */
+  justify-content: flex-start;
   min-width: 0;
   max-width: 100%;
   overflow-x: auto;
@@ -445,6 +429,12 @@
   bottom: auto;
   border-radius: var(--radius-card);
   text-align: center;
+}
+
+/* with the selection's bar at the top of the canvas, a message shows under it */
+:root[data-layout='compact']:has(.selection-bar[data-side='top']:not([hidden]))
+  :is(.toast, .toast-out) {
+  top: calc(124px + env(safe-area-inset-top, 0px));
 }
 
 /* a phone on its side: the canvas keeps the height, the tools and the panels stand at its sides */

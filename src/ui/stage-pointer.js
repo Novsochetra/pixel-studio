@@ -92,9 +92,16 @@ function release(app, view, event) {
   view.touches.delete(event.pointerId);
 
   if (view.touches.size !== 1) {
+    const ended = Boolean(view.session);
+
     view.session?.end?.();
     view.session = null;
     app.dragging = false;
+
+    // what the drag selected stands where it will stay: its bar takes the other end of the canvas
+    if (ended && app.store.state.selection) {
+      app.store.touch('lassoMode');
+    }
   }
 }
 

@@ -167,7 +167,7 @@ await cleanReport(page);
 await page.getByRole('button', { name: 'Use for Object' }).click();
 await page.getByRole('button', { name: 'Outfits…' }).click();
 check(
-  await page.getByRole('button', { name: 'Wear it (whole character)' }).isDisabled(),
+  await page.getByRole('button', { name: 'Wear it (every frame and view)' }).isDisabled(),
   'a new project has no parts yet, so nothing can be worn',
 );
 await page.getByRole('button', { name: "Make parts from the art's colours" }).click();

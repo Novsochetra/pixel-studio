@@ -1,7 +1,7 @@
 import { characterHeight } from './export-settings.js';
 import { buildSheet } from '../export/sheet.js';
 import { gamePack } from '../export/game-pack.js';
-import { asepriteJson, directionFrames, frameFiles } from '../export/formats.js';
+import { asepriteJson, directionFrames, frameFiles, viewFileName } from '../export/formats.js';
 import { encodeGif } from '../io/gif.js';
 import { spritePng } from '../io/images.js';
 import { zipFiles } from '../io/zip.js';
@@ -103,7 +103,7 @@ export async function saveGifs(state, settings) {
 
     for (const { direction, frames } of directionFrames(result, settings)) {
       files.push({
-        name: `${result.name}-${direction}.gif`,
+        name: `${viewFileName(result, direction, '-')}.gif`,
         data: encodeGif(
           frames.map((frame) => upscale(frame, scale)),
           delay,

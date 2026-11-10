@@ -1,10 +1,9 @@
 import { toast } from './dom.js';
-import { fileSlug } from './file-name.js';
+import { downloadName, fileSlug } from './file-name.js';
 import { openMenu } from './menu.js';
 import { directionSprite, directionsInUse } from './actions.js';
 import { canvasToBlob, checkerPainter, spritePng } from '../io/images.js';
 import { zipFiles } from '../io/zip.js';
-import { directionLabel } from '../model/project.js';
 import { saveFile } from './save-file.js';
 import { boardCanvas } from './board-canvas.js';
 import { projectFileText, readProjectBundle } from '../store/project-file.js';
@@ -17,10 +16,6 @@ import { isSingleView, viewName } from '../model/kinds.js';
 
 const slug = (text) => fileSlug(text, 'project');
 
-function names(state, direction) {
-  return `${slug(state.project.name)}-${slug(directionLabel(direction))}`;
-}
-
 async function saveView(app, scale, checker = false) {
   const { state } = app.store;
   const sprite = directionSprite(state, state.at.direction);
@@ -28,7 +23,7 @@ async function saveView(app, scale, checker = false) {
   const blob = await spritePng(sprite, scale, checker ? checkerPainter(scale * 2) : null);
 
   await saveFile(
-    `${names(state, state.at.direction)}-${size}${checker ? '-checker' : ''}.png`,
+    `${downloadName(state.project, state.at.direction)}-${size}${checker ? '-checker' : ''}.png`,
     blob,
   );
 }
@@ -46,13 +41,16 @@ async function saveAllViews(app) {
       const blob = await spritePng(sprite, factor);
 
       files.push({
-        name: `${names(state, direction)}-${suffix}.png`,
+        name: `${downloadName(state.project, direction)}-${suffix}.png`,
         data: new Uint8Array(await blob.arrayBuffer()),
       });
     }
   }
 
-  await saveFile(`${slug(state.project.name)}-views.zip`, zipFiles(files));
+  await saveFile(
+    `${slug(state.project.name)}-${isSingleView(state.project) ? 'sizes' : 'views'}.zip`,
+    zipFiles(files),
+  );
 }
 
 async function saveBoard(app) {
