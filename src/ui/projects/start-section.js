@@ -6,6 +6,7 @@ import { EVERY_PROJECT, NO_FOLDER } from '../../store/browse.js';
 import { moveToFolder } from '../../store/folders.js';
 import { saveProjectList } from '../../store/projects.js';
 import { deletePreset, readPresets } from '../../store/presets.js';
+import { inWords } from '../../model/told.js';
 
 // from every project, a new one stays where addProject put it: in the open project's folder, as
 // the next character of a game goes
@@ -29,13 +30,15 @@ export async function startSection(job) {
   const opened = (project) =>
     addProject(app, project)
       .then(() => placeNew(job, project))
-      .then(job.close, (error) => toast(error.message));
+      .then(job.close, (error) =>
+        toast(inWords(error, 'The project could not be created. Try again in a moment.')),
+      );
   const chooser = newProjectChooser({
     presets: await readPresets(app.backend),
     onCreate: opened,
     onDeletePreset: (preset) =>
-      deletePreset(app.backend, preset.id).catch((error) =>
-        toast(`The preset could not be forgotten: ${error.message}`),
+      deletePreset(app.backend, preset.id).catch(() =>
+        toast('The preset could not be forgotten. Try again in a moment.'),
       ),
   });
 

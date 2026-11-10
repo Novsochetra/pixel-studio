@@ -94,6 +94,14 @@ check(
 await openProjects();
 check((await page.locator('.project-card').count()) === 4, 'every project made is listed');
 await page.getByRole('button', { name: 'Save as a preset' }).click();
+await page.waitForTimeout(400);
+check(
+  (await page
+    .locator('.sheet')
+    .getByRole('radio', { name: /^Striker/ })
+    .count()) === 1,
+  'a project saved as a preset shows at once in the window still open',
+);
 await page.keyboard.press('Escape');
 await openProjects();
 check(

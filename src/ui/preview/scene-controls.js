@@ -4,13 +4,15 @@ import { chooseFile } from '../choose-file.js';
 import { removeBackground, setBackground } from '../preview-background.js';
 import { mirrorsOf } from '../../model/directions.js';
 import { gameOf } from '../../model/presets.js';
+import { inWords } from '../../model/told.js';
 
 function checkbox(label, checked, onChange) {
   return node(
-    'label.group',
-    { style: { gap: '4px' } },
-    node('input', {
+    'label.group.switch-label',
+    {},
+    node('input.switch', {
       type: 'checkbox',
+      role: 'switch',
       checked,
       onchange: (event) => onChange(event.target.checked),
     }),
@@ -49,7 +51,7 @@ function backgroundButtons(app) {
   const pick = () =>
     chooseFile((file) =>
       setBackground(app, file).catch((error) =>
-        toast(`That picture could not be used: ${error.message}`),
+        toast(inWords(error, 'That picture could not be used. Try a PNG, WebP or JPEG.')),
       ),
     );
 

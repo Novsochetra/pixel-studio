@@ -5,6 +5,7 @@ import { cleanImage } from '../../io/cleaner.js';
 import { referenceOf } from '../../model/reference.js';
 import { placementOf, viewName } from '../../model/kinds.js';
 import { artHeight, reportText } from './import-report.js';
+import { inWords } from '../../model/told.js';
 
 const FAILED =
   'Use a PNG or WebP of one subject on a flat background (an AI image’s magenta works best).';
@@ -65,7 +66,11 @@ export async function runClean(job, options) {
   } catch (error) {
     replace(
       job.slot,
-      node('p.report', {}, `This image could not be cleaned (${error.message}). ${FAILED}`),
+      node(
+        'p.report',
+        {},
+        `This image could not be cleaned (${inWords(error, 'it could not be read')}). ${FAILED}`,
+      ),
     );
   }
 }

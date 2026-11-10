@@ -1,4 +1,5 @@
 import { node } from '../dom.js';
+import { told } from '../../model/told.js';
 
 function sizeChoice(keepScale) {
   return node(
@@ -22,7 +23,7 @@ function heightAsked(text) {
   const height = Math.round(Number(text));
 
   if (!(height >= 8 && height <= TALLEST)) {
-    throw new Error(`Height is a number of art pixels from 8 to ${TALLEST}, or empty for Auto.`);
+    throw told(`Height is a number of art pixels from 8 to ${TALLEST}, or empty for Auto.`);
   }
 
   return height;
@@ -36,12 +37,16 @@ function gridAsked(text) {
   }
 
   if (!sizes || [sizes[1], sizes[4] ?? sizes[1]].some((size) => !(size >= 1 && size <= 64))) {
-    throw new Error('Grid size is one art pixel in picture pixels, like 7.18x9.19, from 1 to 64.');
+    throw told('Grid size is one art pixel in picture pixels, like 7.18x9.19, from 1 to 64.');
   }
 
   // the cleaner reads a plain x between the two
   return text.trim().replace(/\s*[x×]\s*/i, 'x');
 }
+
+// a height typed is asked for outright: it wins over keeping the picture's own pixel size, which
+// otherwise left what was typed unused without a word
+export const keepsOwnSize = (size, height) => size === 'keep' && height === null;
 
 // What can be tuned before cleaning again: how tall, the grid if the guess was wrong, and (when
 // matching a reference) whether to take its height or keep the picture's own pixel size.
@@ -59,11 +64,15 @@ export function optionFields({ matching, keepScale }) {
     'aria-label': 'Grid size',
   });
   const size = matching ? sizeChoice(keepScale) : null;
-  const read = () => ({
-    height: heightAsked(height.value),
-    cell: gridAsked(cell.value),
-    keepScale: size ? size.value === 'keep' : false,
-  });
+  const read = () => {
+    const asked = heightAsked(height.value);
+
+    return {
+      height: asked,
+      cell: gridAsked(cell.value),
+      keepScale: keepsOwnSize(size?.value, asked),
+    };
+  };
 
   return {
     read,

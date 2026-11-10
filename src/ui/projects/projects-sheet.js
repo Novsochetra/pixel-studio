@@ -93,6 +93,19 @@ function newProjectOpener(body) {
   };
 }
 
+// New project, drawn again when the presets it offers change: open if it was
+async function showStart(job, body) {
+  const section = await startSection(job);
+  const before = body.querySelector('.start-section');
+
+  if (before) {
+    section.open = before.open;
+    before.replaceWith(section);
+  } else {
+    body.append(section);
+  }
+}
+
 export function openProjectsSheet(app) {
   const sheet = openSheet('Projects', null, { wide: true });
   const parts = { current: node('div.projects-current'), browser: node('div.projects-browser') };
@@ -114,7 +127,8 @@ export function openProjectsSheet(app) {
   sheet.body.classList.add('projects-sheet');
   sheet.body.append(parts.current, browseBar(job), parts.browser);
   job.redraw();
-  startSection(job).then((section) => sheet.body.append(section));
+  job.showStart = () => showStart(job, sheet.body);
+  job.showStart();
 
   // with many projects, finding one by name is the quickest way in; a phone's keyboard would
   // cover the list, so the search takes focus only with a pointer

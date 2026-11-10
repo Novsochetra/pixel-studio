@@ -428,6 +428,32 @@
   }
 }
 
+/* The frames bar has no room for one row beside the inspector here: the tabs and Play keep the
+   first, as on a phone, and what is set once sits on the row under them. */
+@media (max-width: 1014px) {
+  :root[data-layout='medium'] .grid-bar .spacer {
+    display: none;
+  }
+
+  :root[data-layout='medium'] .grid-tabs-bar {
+    order: -3;
+    flex: 1 0 calc(100% - 150px);
+    max-width: calc(100% - 150px);
+  }
+
+  :root[data-layout='medium'] .grid-fps {
+    order: -2;
+  }
+
+  :root[data-layout='medium'] .grid-play {
+    order: -1;
+  }
+
+  :root[data-layout='medium'] .grid-fold {
+    margin-left: auto;
+  }
+}
+
 /* A short window has no room for the tools in one column: they stand two across, as image
    editors do, so none waits unseen below the fold. */
 @media (max-height: 860px) {

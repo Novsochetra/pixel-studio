@@ -101,7 +101,7 @@ export function floodFill(sprite, [x, y], color, options = {}) {
   for (const [sx, sy] of mirrored(x, y, options.symmetry)) {
     const target = getPixel(sprite, sx, sy);
 
-    if (target !== color && inside(sprite, sx, sy)) {
+    if (target !== color && inside(sprite, sx, sy) && canPaint(sprite, sx, sy, options.paintOver)) {
       fillFrom(sprite, [sx, sy], { target, color, changed });
     }
   }
@@ -110,8 +110,12 @@ export function floodFill(sprite, [x, y], color, options = {}) {
 }
 
 // every pixel of one colour, anywhere in the sprite
-export function replaceColor(sprite, from, to) {
+export function replaceColor(sprite, from, to, { paintOver = null } = {}) {
   let count = 0;
+
+  if (paintOver !== null && from !== paintOver) {
+    return count;
+  }
 
   for (let y = 0; y < sprite.height; y++) {
     for (let x = 0; x < sprite.width; x++) {

@@ -25,11 +25,13 @@ export function addFolder(index, name = freshFolderName(index)) {
   return folder;
 }
 
+// a name another folder has is numbered, as a new folder's is: two alike are told apart by nothing
 export function renameFolder(index, id, name) {
   const folder = foldersOf(index).find((each) => each.id === id);
+  const others = { folders: foldersOf(index).filter((each) => each !== folder) };
 
   if (folder && name.trim()) {
-    folder.name = name.trim();
+    folder.name = freshFolderName(others, name.trim());
   }
 }
 

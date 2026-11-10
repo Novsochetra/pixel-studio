@@ -3,6 +3,7 @@ import { toast } from '../dom.js';
 import { moveProject, moveToNewFolder } from './change-list.js';
 import { folderOf } from '../../store/folders.js';
 import { foldersByName } from '../../store/browse.js';
+import { inWords } from '../../model/told.js';
 
 function moveMenu(job, project, anchor) {
   const index = job.app.index;
@@ -21,16 +22,19 @@ function moveMenu(job, project, anchor) {
   ]);
 }
 
+const onError = (error) =>
+  toast(inWords(error, 'That could not be done just now. Try again in a moment.'));
+
 export function cardMenu(job, project, { anchor, onOpen, onDelete }) {
   const move = ['Move to folder…', () => moveMenu(job, project, anchor)];
 
   if (project.isOpen) {
-    openMenu(anchor, [move], { onError: (error) => toast(error.message) });
+    openMenu(anchor, [move], { onError });
 
     return;
   }
 
   openMenu(anchor, [['Open', onOpen], move, null, ['Delete…', onDelete, { danger: true }]], {
-    onError: (error) => toast(error.message),
+    onError,
   });
 }

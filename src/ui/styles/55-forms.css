@@ -164,6 +164,13 @@ textarea.input {
   transition: background var(--duration-normal) var(--ease-standard);
 }
 
+/* a switch with its word beside it, in a title or a bar */
+.switch-label {
+  gap: 8px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
 .switch::after {
   content: '';
   position: absolute;
@@ -198,7 +205,7 @@ textarea.input {
 
 .guide-row {
   display: grid;
-  grid-template-columns: 1fr 56px auto;
+  grid-template-columns: 1fr 64px auto;
   gap: 6px;
   align-items: center;
 }

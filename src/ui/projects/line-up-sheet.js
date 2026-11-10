@@ -53,7 +53,8 @@ function lineUpBody({ drawn, empty }, close) {
     drawn.map((each) => each.sprite),
     TALLEST_ON_SCREEN_PX,
   );
-  const save = () => download(drawn, scale).catch((error) => toast(error.message));
+  const save = () =>
+    download(drawn, scale).catch(() => toast('The line-up could not be saved as a picture.'));
 
   return [
     node('p.hint', {}, HINT),

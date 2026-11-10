@@ -7,7 +7,14 @@ import { addFrame, removeViewFrame } from '../../src/model/frames.js';
 import { setFrameHidden } from '../../src/model/frame-play.js';
 import { startAnimation } from '../../src/model/animations.js';
 import { pinsOf, setPin } from '../../src/model/pins.js';
-import { pack, setPixel } from '../../src/model/sprite.js';
+import { CLEAR, createSprite, getPixel, pack, setPixel } from '../../src/model/sprite.js';
+import { floodFill, replaceColor } from '../../src/editor/paint.js';
+import { inWords, told } from '../../src/model/told.js';
+import { swapSaid } from '../../src/ui/swap/swap-said.js';
+import { frameIndexes } from '../../src/ui/batch/batch-items.js';
+import { keepsOwnSize } from '../../src/ui/import/import-options.js';
+import { addFolder, renameFolder } from '../../src/store/folders.js';
+import { readProjectBundle } from '../../src/store/project-file.js';
 import { cutCharacter } from '../unit/body-helpers.js';
 
 const RED = pack(255, 0, 0);
@@ -101,4 +108,73 @@ test('a setting put back by undo is a copy: changing it leaves the step as it wa
   history.redo(project);
   history.undo(project);
   assert.deepEqual(project.markup, none, 'the step still holds what it held');
+});
+
+// with "Paint only over" set to one colour, Fill and Replace colour still changed any other
+test('Fill and Replace colour keep to the colour "Paint only over" names', () => {
+  const sprite = createSprite(4, 4);
+  const blue = pack(0, 0, 255);
+
+  setPixel(sprite, 0, 0, RED);
+  setPixel(sprite, 3, 3, blue);
+
+  assert.equal(floodFill(sprite, [1, 1], blue, { paintOver: RED }).length, 0);
+  assert.equal(getPixel(sprite, 1, 1), CLEAR, 'a clear pixel is not the colour named');
+  assert.equal(floodFill(sprite, [0, 0], blue, { paintOver: RED }).length, 1);
+  assert.equal(getPixel(sprite, 0, 0), blue, 'the colour named is filled');
+
+  assert.equal(replaceColor(sprite, blue, RED, { paintOver: RED }), 0);
+  assert.equal(replaceColor(sprite, blue, RED, { paintOver: blue }), 2);
+});
+
+// a failure showed the browser's own words to the person: "QuotaExceededError", "x is undefined"
+test('a message says the studio’s own sentence, and plain words for any other error', async () => {
+  const fallback = 'The file could not be made.';
+
+  assert.equal(inWords(told('Height is a number.'), fallback), 'Height is a number.');
+  assert.equal(inWords(new TypeError('x is undefined'), fallback), fallback);
+  assert.equal(inWords(undefined, fallback), fallback);
+
+  const refused = await readProjectBundle('not a project').catch((error) => error);
+
+  assert.equal(refused.told, true, 'a file that is no project says so in its own sentence');
+});
+
+// two folders could be given the same name, and then told apart only by where they stood
+test('a folder renamed to another folder’s name is numbered, so the two stay apart', () => {
+  const index = { list: [], folders: [] };
+  const heroes = addFolder(index, 'Heroes');
+  const other = addFolder(index);
+
+  renameFolder(index, other.id, 'Heroes');
+  assert.equal(other.name, 'Heroes 2');
+  renameFolder(index, heroes.id, 'Heroes');
+  assert.equal(heroes.name, 'Heroes', 'a folder keeps its own name');
+});
+
+// with "Keep its own pixel size" picked, a height typed for the cleaning was left unused
+test('a height typed for a cleaning wins over keeping the picture’s own pixel size', () => {
+  assert.equal(keepsOwnSize('keep', null), true);
+  assert.equal(keepsOwnSize('keep', 48), false);
+  assert.equal(keepsOwnSize('match', null), false);
+  assert.equal(keepsOwnSize(undefined, null), false, 'cleaned alone, there is no choice of size');
+});
+
+// two images set to the same view and frame: the second took the place of the first, unseen
+test('two images cleaned for one view and frame both land: the later takes a new frame', () => {
+  const items = [
+    { direction: 'south', placement: '0' },
+    { direction: 'south', placement: '0' },
+    { direction: 'east', placement: '0' },
+    { direction: 'south', placement: 'new' },
+  ];
+
+  assert.deepEqual(frameIndexes(items, 2), [0, 2, 0, 3]);
+});
+
+// a swap on art that has none of its colours said "Colours swapped", with nothing changed
+test('a swap that changed nothing says so', () => {
+  assert.match(swapSaid({ changed: false, everywhere: true }), /^No colour changed/);
+  assert.match(swapSaid({ changed: true, everywhere: true }), /^Colours swapped across/);
+  assert.match(swapSaid({ changed: true, flattened: true }), /plain pixels$/);
 });

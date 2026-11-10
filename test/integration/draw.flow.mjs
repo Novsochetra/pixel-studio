@@ -163,4 +163,14 @@ await page.waitForTimeout(500);
 check((await status(page)).includes('48×40 canvas'), 'the new size is there after a reload');
 check((await pixels('#3d7fe0')).length === 8, 'and so is the art');
 
+// "Paint only over" names the blue: Fill on a clear pixel changes nothing and says why
+await page.selectOption('#paint-over', { label: '#3d7fe0' });
+await page.keyboard.press('g');
+await page.mouse.click(...(await at(2, 2)));
+check(
+  (await page.locator('.toast').textContent()).startsWith('Paint only over is set to #3d7fe0'),
+  'Fill on another colour than "Paint only over" names says why nothing changed',
+);
+check((await pixels('#3d7fe0')).length === 8, 'and the art is as it was');
+
 await finish();

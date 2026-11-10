@@ -29,8 +29,9 @@ function matchReference(app) {
 }
 
 function heading(app) {
-  const show = node('input', {
+  const show = node('input.switch', {
     type: 'checkbox',
+    role: 'switch',
     id: 'show-guides',
     checked: app.store.state.showGuides,
     onchange: (event) => app.store.set({ showGuides: event.target.checked }),
@@ -40,7 +41,7 @@ function heading(app) {
     'h2',
     { tabindex: '0' },
     'Guide lines',
-    node('label.group', { for: 'show-guides' }, show, 'Show'),
+    node('label.group.switch-label', { for: 'show-guides' }, 'Show', show),
   );
 }
 

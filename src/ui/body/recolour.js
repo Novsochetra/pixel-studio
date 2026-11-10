@@ -28,13 +28,13 @@ function redrawBodies(project, layers) {
 
 // New colours on some layers as one step. Everywhere, the cut parts take them too, so the next
 // pose keeps them; in one frame only, a posed Body there becomes plain pixels, as its parts keep
-// their colours. Returns whether a posed Body became pixels.
+// their colours. Says whether anything changed, and whether a posed Body became pixels.
 export function recolourLayers(app, { label, layers, mapping, everywhere }) {
   const { project } = app.store.state;
   const rigs = everywhere ? recolourRigs(project, mapping) : [];
   const bodies = everywhere ? [] : layers.filter(isPosedBody);
 
-  commitPose(app, { label, layers, rigs }, () => {
+  const changed = commitPose(app, { label, layers, rigs }, () => {
     layers.forEach((layer) => {
       layer.sprite = applyMapping(layer.sprite, mapping);
     });
@@ -46,5 +46,5 @@ export function recolourLayers(app, { label, layers, mapping, everywhere }) {
     }
   });
 
-  return bodies.length > 0;
+  return { changed, flattened: changed && bodies.length > 0 };
 }

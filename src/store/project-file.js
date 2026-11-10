@@ -2,6 +2,7 @@ import { allLayers } from '../model/project.js';
 import { dataUrlSprite, spriteDataUrl } from '../io/images.js';
 import { projectStructure } from './load.js';
 import { joinCuts } from '../model/body/shared-cuts.js';
+import { told } from '../model/told.js';
 
 // A whole project as one JSON text: its structure, with each layer's pixels as a PNG data URL, and
 // its own preview background when it has one.
@@ -57,11 +58,11 @@ export async function readProjectBundle(text) {
   const file = parsed(text);
 
   if (file?.kind !== 'pixel-clean-studio' || !file.project) {
-    throw new Error(NOT_A_PROJECT);
+    throw told(NOT_A_PROJECT);
   }
 
   if (!looksLikeProject(file.project)) {
-    throw new Error('This project file is damaged: its animations and frames cannot be read.');
+    throw told('This project file is damaged: its animations and frames cannot be read.');
   }
 
   for (const { layer } of allLayers(file.project)) {

@@ -10,6 +10,7 @@ import { folderOf, moveToFolder } from '../store/folders.js';
 import { allLayers, newId } from '../model/project.js';
 import { normalizeProject } from '../model/normalize.js';
 import { createSprite } from '../model/sprite.js';
+import { told } from '../model/told.js';
 
 export function fillMissingSprites(project) {
   normalizeProject(project);
@@ -27,7 +28,7 @@ async function saveBeforeLeaving(app) {
   await app.saver.flushNow();
 
   if (app.saver.failed) {
-    throw new Error(
+    throw told(
       `Your latest changes to ${app.store.state.project.name} could not be saved yet, so it stays open. Try again in a moment.`,
     );
   }
@@ -118,7 +119,7 @@ export async function openProject(app, entry) {
   const project = await loadProject(app.backend, keysFor(entry.prefix));
 
   if (!project) {
-    throw new Error(`"${entry.name}" could not be read from your saved work.`);
+    throw told(`"${entry.name}" could not be read from your saved work.`);
   }
 
   project.id ??= entry.id;

@@ -1,6 +1,7 @@
 import { toast } from '../dom.js';
 import { openProject } from '../session.js';
 import { portraitUrl, readPortrait } from '../../store/portraits.js';
+import { inWords } from '../../model/told.js';
 
 // The open project's picture is made from the screen, so it is never behind its last save. It is
 // made once for each project opened while the window is up, as a search draws the list per key.
@@ -26,7 +27,7 @@ export function castPictures(app) {
   const open = (entry) => () =>
     openProject(app, entry).then(
       () => toast(`Opened ${entry.name}`),
-      (error) => toast(error.message),
+      (error) => toast(inWords(error, `${entry.name} could not be opened. Try again in a moment.`)),
     );
   const cast = (entries = app.index.list) => {
     const { project } = app.store.state;

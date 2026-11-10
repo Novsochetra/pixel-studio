@@ -12,6 +12,7 @@ import { blankCopy } from '../../model/cast.js';
 import { projectFileText, readProjectFile } from '../../store/project-file.js';
 import { savePreset } from '../../store/presets.js';
 import { folderOf } from '../../store/folders.js';
+import { inWords } from '../../model/told.js';
 
 const LIKE_THIS =
   'Same canvas, views, animations and frames, with nothing drawn: the next one for your game';
@@ -32,7 +33,7 @@ async function addMadeFrom({ app, redraw }, { make, said }) {
       document.getElementById('current-project-name')?.select();
     }
   } catch (error) {
-    toast(error.message);
+    toast(inWords(error, 'The new project could not be made. Try again in a moment.'));
   }
 }
 
@@ -52,12 +53,15 @@ const newLikeThis = (job) =>
       `Made "${name}" with ${from}'s canvas, views and animations, nothing drawn. Name it above.`,
   });
 
-function keepAsPreset(app) {
+function keepAsPreset({ app, showStart }) {
   const preset = presetFromProject(app.store.state.project);
 
   savePreset(app.backend, preset).then(
-    () => toast(`"${preset.label}" is now a preset: pick it when you start a new project.`),
-    (error) => toast(`The preset could not be saved: ${error.message}`),
+    () => {
+      toast(`"${preset.label}" is now a preset: pick it when you start a new project.`);
+      showStart();
+    },
+    () => toast('The preset could not be saved. Try again in a moment.'),
   );
 }
 
@@ -86,7 +90,7 @@ function currentActions(job) {
       'Canvas size…',
     ),
     node('button.btn.quiet', { onclick: () => saveProject(app) }, 'Save as file'),
-    node('button.btn.quiet', { onclick: () => keepAsPreset(app) }, 'Save as a preset'),
+    node('button.btn.quiet', { onclick: () => keepAsPreset(job) }, 'Save as a preset'),
   );
 }
 

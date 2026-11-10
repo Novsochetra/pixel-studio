@@ -4,6 +4,7 @@ import { laterPicture, projectPicture } from './project-picture.js';
 import { cardMenu } from './card-menu.js';
 import { draggableProject } from './drag-to-folder.js';
 import { describeEntry } from '../../model/presets.js';
+import { inWords } from '../../model/told.js';
 
 const when = (time) =>
   time ? new Date(time).toLocaleDateString(undefined, { dateStyle: 'medium' }) : '';
@@ -20,14 +21,16 @@ function openCard(job, project) {
       toast(`Opened ${project.name}`);
       job.close();
     },
-    (error) => toast(error.message),
+    (error) => toast(inWords(error, `${project.name} could not be opened. Try again in a moment.`)),
   );
 }
 
 // asked on the card itself, which stays where it was, so the click that asks is near the answer
 function askDelete(job, project, card) {
   const remove = () =>
-    deleteProject(job.app, project.id).then(job.redraw, (error) => toast(error.message));
+    deleteProject(job.app, project.id).then(job.redraw, () =>
+      toast(`${project.name} could not be deleted. Try again in a moment.`),
+    );
 
   card.draggable = false;
   replace(

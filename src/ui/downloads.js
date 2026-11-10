@@ -12,6 +12,7 @@ import { backgroundUrl } from './preview-background.js';
 import { chooseFile } from './choose-file.js';
 import { openExportSheet } from './export-sheet.js';
 import { openChatgptSheet } from './prompt/prompt-sheet.js';
+import { inWords } from '../model/told.js';
 
 const slug = (text) => fileSlug(text, 'project');
 
@@ -80,7 +81,7 @@ export function openProjectFile(app, onOpened = () => {}) {
         `Opened ${project.name} as a project of its own. Switch projects from its name, top left.`,
       );
     } catch (error) {
-      toast(error.message);
+      toast(inWords(error, 'This file could not be opened as a project.'));
     }
   }, '.json,application/json');
 }
@@ -111,6 +112,6 @@ function menuItems(app) {
 export function openDownloadMenu(app, anchor) {
   openMenu(anchor, menuItems(app), {
     align: 'right',
-    onError: (error) => toast(`Could not make the file: ${error.message}`),
+    onError: (error) => toast(inWords(error, 'The file could not be made. Try again in a moment.')),
   });
 }

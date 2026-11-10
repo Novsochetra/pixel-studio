@@ -89,7 +89,10 @@ export function cleanAlone(imageData, canvas, options = {}) {
   const own = bbox(analyzed.opaque, analyzed.width);
 
   if (!own) {
-    throw new Error('nothing found: the whole picture looked like background');
+    // a sentence for the person, marked as the studio's errors are (model/told.js)
+    throw Object.assign(new Error('nothing found: the whole picture looked like background'), {
+      told: true,
+    });
   }
 
   const scaleBy = factors(own, canvas, options, analyzed.cell);

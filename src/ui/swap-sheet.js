@@ -4,6 +4,7 @@ import { allArtLayers } from './actions.js';
 import { recolourLayers } from './body/recolour.js';
 import { characterColors } from './character-colours.js';
 import { mappingRows } from './swap/swap-mapping.js';
+import { swapSaid } from './swap/swap-said.js';
 import {
   addPalette,
   paletteChooser,
@@ -29,13 +30,14 @@ function apply(job, mapping, scope) {
   const layers = layersFor(job.app.store.state, scope);
 
   const everywhere = scope !== 'view';
-  const flattened = recolourLayers(job.app, { label: 'Swap colours', layers, mapping, everywhere });
+  const { changed, flattened } = recolourLayers(job.app, {
+    label: 'Swap colours',
+    layers,
+    mapping,
+    everywhere,
+  });
 
-  toast(
-    everywhere
-      ? 'Colours swapped across the whole character'
-      : `Colours swapped in this frame${flattened ? ', its Body now plain pixels' : ''}`,
-  );
+  toast(swapSaid({ changed, flattened, everywhere }));
   job.close();
 }
 

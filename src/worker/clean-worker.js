@@ -21,6 +21,6 @@ self.onmessage = (event) => {
       [pixels.buffer],
     );
   } catch (error) {
-    self.postMessage({ id, error: error.message || String(error) });
+    self.postMessage({ id, error: error.message || String(error), told: Boolean(error.told) });
   }
 };

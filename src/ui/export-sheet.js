@@ -15,6 +15,7 @@ import { spritePng } from '../io/images.js';
 import { gameOf } from '../model/presets.js';
 import { mirrorsOf } from '../model/directions.js';
 import { placementOf } from '../model/kinds.js';
+import { inWords } from '../model/told.js';
 
 const count = (number, word) => `${number} ${word}${number === 1 ? '' : 's'}`;
 
@@ -159,7 +160,7 @@ export function openExportSheet(app) {
   job.run = (save) =>
     save(state, { ...choice.settings, includeMirrored: choice.includeMirrored }).then(
       warn,
-      (error) => toast(`Could not make the files: ${error.message}`),
+      (error) => toast(inWords(error, 'The files could not be made. Try again in a moment.')),
     );
 
   sheet.body.append(slot);

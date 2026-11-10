@@ -1,4 +1,4 @@
-import { CLEAR, cloneSprite, getPixel, setPixel } from '../model/sprite.js';
+import { CLEAR, cloneSprite, getPixel, setPixel, toHex } from '../model/sprite.js';
 import { brushPixels, canPaint, floodFill, linePoints, replaceColor } from '../editor/paint.js';
 import { shadeFamilies, shiftShade } from '../palette/families.js';
 import { Stroke } from '../editor/stroke.js';
@@ -48,8 +48,25 @@ export function stroke(app, point, color) {
   };
 }
 
+// "Paint only over" names one colour: a click on any other changes nothing, and says why
+function keptByPaintOver(state, sprite, [x, y]) {
+  if (canPaint(sprite, x, y, state.paintOver)) {
+    return false;
+  }
+
+  toast(
+    `Paint only over is set to ${toHex(state.paintOver)}, so only that colour changes. Set it to "Any pixel" to paint the rest.`,
+  );
+
+  return true;
+}
+
 export function fill(app, [x, y]) {
   const layer = currentLayer(app.store.state);
+
+  if (keptByPaintOver(app.store.state, layer.sprite, [x, y])) {
+    return null;
+  }
 
   commit(app, 'Fill', [layer], () =>
     floodFill(layer.sprite, [x, y], app.store.state.color, paintOptions(app.store.state)),
@@ -70,8 +87,12 @@ export function replace(app, [x, y]) {
     return null;
   }
 
+  if (keptByPaintOver(state, layer.sprite, [x, y])) {
+    return null;
+  }
+
   commit(app, 'Replace colour', [layer], () => {
-    count = replaceColor(layer.sprite, from, state.color);
+    count = replaceColor(layer.sprite, from, state.color, { paintOver: state.paintOver });
   });
   toast(count ? `Replaced ${count} pixels` : 'That pixel already has this colour');
 

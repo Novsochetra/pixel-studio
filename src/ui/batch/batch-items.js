@@ -59,12 +59,18 @@ export function batchItems(state, files) {
 }
 
 // The frame each image goes into. Images for new frames fill them in order, per view: three side
-// and three back images make three new frames, each with a side and a back.
-function frameIndexes(items, count) {
+// and three back images make three new frames, each with a side and a back. An image set to a
+// frame another image of its view has taken goes to a new frame too, so neither is lost.
+export function frameIndexes(items, count) {
   const fresh = {};
+  const taken = new Set();
 
   return items.map((item) => {
-    if (item.placement !== 'new') {
+    const asked = `${item.direction}:${item.placement}`;
+
+    if (item.placement !== 'new' && !taken.has(asked)) {
+      taken.add(asked);
+
       return Number(item.placement);
     }
 

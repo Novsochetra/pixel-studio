@@ -17,6 +17,7 @@ import { setUpApp } from './install-app.js';
 import { layoutSize, watchLayout } from './layout.js';
 import { watchPressesFromStart } from './after-press.js';
 import { watchSegmented } from './segmented-thumb.js';
+import { inWords } from '../model/told.js';
 
 // the editor, opened on one project; `save` as install() takes it
 async function startEditor(backend, index, { project, prefix, save, background = null }) {
@@ -80,11 +81,13 @@ function startScreenHandlers(backend, index, closeScreen) {
 
         await open({ ...fresh(project), background });
       } catch (error) {
-        toast(error.message);
+        toast(inWords(error, 'This file could not be opened as a project.'));
       }
     },
     onDeletePreset: (preset) =>
-      deletePreset(backend, preset.id).catch((error) => toast(error.message)),
+      deletePreset(backend, preset.id).catch(() =>
+        toast('The preset could not be forgotten. Try again in a moment.'),
+      ),
   };
 }
 

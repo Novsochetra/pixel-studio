@@ -12,7 +12,7 @@ export function changeList({ app, redraw }, change) {
   app.saver
     .flushNow()
     .then(() => saveProjectList(app.backend, app.index))
-    .catch((error) => toast(`Your folders could not be saved just now: ${error.message}`));
+    .catch(() => toast('Your folders could not be saved just now. Try again in a moment.'));
 
   return made;
 }

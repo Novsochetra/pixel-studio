@@ -10,6 +10,7 @@ import {
 import { saveFile } from './save-file.js';
 import { fileSlug } from './file-name.js';
 import { restoreProject } from './session.js';
+import { inWords } from '../model/told.js';
 
 const when = (time) =>
   new Date(time).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -36,7 +37,7 @@ async function restore(app, entry, close) {
     toast(`Back to "${entry.name}". Your work just before is saved as a version too.`);
     close();
   } catch (error) {
-    toast(`Could not go back to "${entry.name}": ${error.message}`);
+    toast(inWords(error, `Could not go back to "${entry.name}". Try again in a moment.`));
   }
 }
 
@@ -58,7 +59,9 @@ function deleteButton(app, entry, redraw) {
       return;
     }
 
-    await deleteVersion(app.backend, entry.id, app.keys).catch((error) => toast(error.message));
+    await deleteVersion(app.backend, entry.id, app.keys).catch(() =>
+      toast('That version could not be deleted. Try again in a moment.'),
+    );
     redraw();
   };
 

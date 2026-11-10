@@ -14,13 +14,13 @@ function startWorker() {
   );
   worker = new Worker(url);
   worker.onmessage = (event) => {
-    const { id, result, error } = event.data;
+    const { id, result, error, told } = event.data;
     const pending = waiting.get(id);
 
     waiting.delete(id);
 
     if (error) {
-      pending?.reject(new Error(error));
+      pending?.reject(Object.assign(new Error(error), { told }));
     } else {
       pending?.resolve(result);
     }

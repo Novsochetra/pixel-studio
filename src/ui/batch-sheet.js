@@ -9,6 +9,7 @@ import { decodeImage } from '../io/images.js';
 import { referenceOf } from '../model/reference.js';
 import { placementOf, viewName } from '../model/kinds.js';
 import { bounds } from '../model/sprite.js';
+import { inWords } from '../model/told.js';
 
 // characters are matched to the reference, later frames keeping their own pixel size; anything
 // else is cleaned on its own and placed as its kind stands
@@ -63,7 +64,7 @@ async function cleanOne(state, item, ref) {
     item.status = node(
       'span.hint',
       { style: { color: 'var(--bad)' } },
-      `Could not clean: ${error.message}`,
+      `Could not clean: ${inWords(error, 'this picture could not be read')}`,
     );
   }
 }

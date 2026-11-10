@@ -7,6 +7,7 @@ import { runClean } from './import/import-run.js';
 import { decodeImage } from '../io/images.js';
 import { referenceOf } from '../model/reference.js';
 import { viewName } from '../model/kinds.js';
+import { inWords } from '../model/told.js';
 
 const NOT_AN_IMAGE = 'This file is not an image the browser can open. Try PNG, WebP or JPEG.';
 
@@ -15,7 +16,7 @@ function cleanAgain(job, fields) {
   try {
     runClean(job, fields.read());
   } catch (error) {
-    toast(error.message);
+    toast(inWords(error, 'These settings could not be read: check the height and the grid size.'));
   }
 }
 

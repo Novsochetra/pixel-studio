@@ -100,7 +100,9 @@ export function openCanvasSizeSheet(app) {
     if (size.width !== canvas.width || size.height !== canvas.height) {
       button.disabled = true;
       button.textContent = 'Changing the size…';
-      await resize(app, { size, anchor: job.anchor }).catch((error) => toast(error.message));
+      await resize(app, { size, anchor: job.anchor }).catch(() =>
+        toast('The canvas size could not be changed. Try again in a moment.'),
+      );
     }
 
     sheet.close();

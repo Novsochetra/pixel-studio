@@ -196,7 +196,7 @@ test('new colours everywhere reach the cut, so the next pose keeps them; undo pu
 test("new colours in one frame only leave that frame's Body as plain pixels", () => {
   const { app, body } = editing();
 
-  const flattened = recolourLayers(app, {
+  const { flattened } = recolourLayers(app, {
     label: 'Swap',
     layers: [body()],
     mapping: {},

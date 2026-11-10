@@ -18,8 +18,13 @@ function wear(job, mapping, name) {
 
   keepVersion(app, `Before ${name}`);
   const layers = allArtLayers(app.store.state);
-  recolourLayers(app, { label: name, layers, mapping, everywhere: true });
-  toast(`${name} on the whole character. Undo takes it off.`);
+  const { changed } = recolourLayers(app, { label: name, layers, mapping, everywhere: true });
+
+  toast(
+    changed
+      ? `${name} on the whole character. Undo takes it off.`
+      : 'Nothing changed: none of the outfit’s colours is in the art.',
+  );
   job.close();
 }
 
@@ -28,7 +33,9 @@ function actions(job, mapping, name) {
   const nothing = !Object.keys(mapping).length;
   const why = nothing ? 'Say which colours make up each part, and pick new ones, first' : undefined;
   const download = () =>
-    downloadOutfit(app.store.state, mapping, name).catch((error) => toast(error.message));
+    downloadOutfit(app.store.state, mapping, name).catch(() =>
+      toast('The outfit could not be saved as a file. Try again in a moment.'),
+    );
 
   return node(
     'div.sheet-actions',
