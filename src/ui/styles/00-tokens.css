@@ -6,7 +6,7 @@
   --chrome: #1c1c1e;
   --chrome-raised: #2c2c2e;
   --segment-on: #636366;
-  --material: rgb(30 30 32 / 78%);
+  --material: rgb(30 30 32 / 88%);
   --glass: rgb(255 255 255 / 14%);
   --glass-hover: rgb(255 255 255 / 22%);
   --glass-edge: rgb(255 255 255 / 22%);
@@ -69,7 +69,7 @@
     --chrome: #f2f2f7;
     --chrome-raised: #ffffff;
     --segment-on: #ffffff;
-    --material: rgb(246 246 248 / 80%);
+    --material: rgb(246 246 248 / 90%);
     --glass: rgb(255 255 255 / 58%);
     --glass-hover: rgb(255 255 255 / 76%);
     --glass-edge: rgb(0 0 0 / 8%);
@@ -106,7 +106,7 @@
   --chrome: #f2f2f7;
   --chrome-raised: #ffffff;
   --segment-on: #ffffff;
-  --material: rgb(246 246 248 / 80%);
+  --material: rgb(246 246 248 / 90%);
   --glass: rgb(255 255 255 / 58%);
   --glass-hover: rgb(255 255 255 / 76%);
   --glass-edge: rgb(0 0 0 / 8%);

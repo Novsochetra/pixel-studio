@@ -1,11 +1,11 @@
 // The studio as an app: its manifest and icons, the service worker, opening with no network with
 // the saved work there, the Install button, and a host where service workers are not allowed.
 import { onChromium, openStudio } from './harness.mjs';
+import { ownServer } from './own-server.mjs';
 import { openExample } from './studio.mjs';
 
 const { browser, context, page, check, finish, url, shots } = await openStudio();
 const base = new URL('.', url).href;
-const picture = () => page.locator('.canvas-holder canvas').evaluate((el) => el.toDataURL());
 
 const manifest = await page.evaluate(
   async (address) => (await fetch(address)).json(),
@@ -45,29 +45,32 @@ if (onChromium) {
 }
 
 await openExample(page);
-await page.keyboard.press('b');
 const box = await page.locator('.canvas-holder canvas').boundingBox();
-await page.mouse.click(box.x + 20, box.y + 20);
-await page.waitForSelector('[data-state="saved"]');
-const saved = await picture();
-await page.reload();
-await page.waitForSelector('.grid-panel');
-await page.waitForTimeout(400);
 
-// Playwright's WebKit refuses a page loaded with the network off before the worker can answer,
-// so opening with no network is tried in Chromium only
-if (onChromium) {
-  await context.setOffline(true);
-  await page.reload();
-  await page.waitForSelector('.grid-panel');
-  await page.waitForTimeout(400);
-  check(true, 'with no network the app still opens');
-  check((await picture()) === saved, 'and the saved work is there');
-  await page.goto(base);
-  await page.waitForSelector('.grid-panel');
-  check(true, 'from its start address too');
-  await context.setOffline(false);
-}
+// With no network: the page is opened from a server of the flow's own, which is then stopped.
+const own = await ownServer();
+const away = await context.newPage();
+const awayPicture = () => away.locator('.canvas-holder canvas').evaluate((el) => el.toDataURL());
+
+await away.goto(`${own.address}wrapped.html`);
+await away.evaluate(() => navigator.serviceWorker.ready);
+await away.waitForFunction(() => navigator.serviceWorker.controller);
+await openExample(away);
+await away.keyboard.press('b');
+await away.mouse.click(box.x + 20, box.y + 20);
+await away.waitForSelector('[data-state="saved"]');
+const kept = await awayPicture();
+
+await own.stop();
+await away.reload();
+await away.waitForSelector('.grid-panel');
+await away.waitForTimeout(400);
+check(true, 'with no network the app still opens');
+check((await awayPicture()) === kept, 'and the saved work is there');
+await away.goto(own.address);
+await away.waitForSelector('.grid-panel');
+check(true, 'from its start address too');
+await away.close();
 
 const install = page.getByRole('button', { name: 'Install app' });
 check((await install.count()) === 0, 'there is no Install button until the browser allows it');

@@ -1,7 +1,7 @@
 // On a phone: the editor fills the screen and only the canvas scrolls, the frames and panels open
 // from the dock, a finger swipe scrolls the frames while press-and-hold drags one, and every
 // button still works.
-import { onChromium, openStudio } from './harness.mjs';
+import { fingers, openStudio } from './harness.mjs';
 import { forgetSavedWork, frameLabels, openDock, openExample, openWorkspace } from './studio.mjs';
 import { monkey } from './monkey.mjs';
 
@@ -64,44 +64,32 @@ check(
 const stage = await page.locator('.edit-scroll').boundingBox();
 check(stage.height > 150, 'the canvas keeps room above the frames');
 
-// finger drags go through Chromium's own tools: another browser leaves this part out
-if (onChromium) {
-  const cdp = await context.newCDPSession(page);
-  const touch = (type, x, y) =>
-    cdp.send('Input.dispatchTouchEvent', {
-      type,
-      touchPoints: type === 'touchEnd' ? [] : [{ x, y }],
-    });
-  const drag = async (from, to, hold) => {
-    const start = await page.locator('.grid-row.current .cell').nth(from).boundingBox();
-    const end = await page.locator('.grid-row.current .cell').nth(to).boundingBox();
-    const y = start.y + start.height / 2;
+const touch = await fingers(context, page);
+const drag = async (from, to, hold) => {
+  const start = await page.locator('.grid-row.current .cell').nth(from).boundingBox();
+  const end = await page.locator('.grid-row.current .cell').nth(to).boundingBox();
+  const [x, y] = [start.x + start.width / 2, start.y + start.height / 2];
 
-    await touch('touchStart', start.x + start.width / 2, y);
-    await page.waitForTimeout(hold);
+  await touch('touchStart', [[x, y]]);
+  await page.waitForTimeout(hold);
 
-    for (let i = 1; i <= 8; i++) {
-      await touch(
-        'touchMove',
-        start.x + start.width / 2 + ((end.x + end.width - 4 - start.x - start.width / 2) * i) / 8,
-        y,
-      );
-    }
+  for (let i = 1; i <= 8; i++) {
+    await touch('touchMove', [[x + ((end.x + end.width - 4 - x) * i) / 8, y]]);
+  }
 
-    await touch('touchEnd');
-    await page.waitForTimeout(300);
-  };
-  await drag(0, 2, 60);
-  check(
-    JSON.stringify(await frameLabels(page)) === '["1","2 · empty","3 · empty"]',
-    'a quick swipe over the frames moves none',
-  );
-  await drag(0, 2, 450);
-  check(
-    JSON.stringify(await frameLabels(page)) === '["1 · empty","2 · empty","3"]',
-    'press, hold and drag moves a frame',
-  );
-}
+  await touch('touchEnd', []);
+  await page.waitForTimeout(300);
+};
+await drag(0, 2, 60);
+check(
+  JSON.stringify(await frameLabels(page)) === '["1","2 · empty","3 · empty"]',
+  'a quick swipe over the frames moves none',
+);
+await drag(0, 2, 450);
+check(
+  JSON.stringify(await frameLabels(page)) === '["1 · empty","2 · empty","3"]',
+  'press, hold and drag moves a frame',
+);
 
 for (const name of ['Walk', 'Run', 'Jump', 'Attack', 'Hurt']) {
   await page.getByRole('button', { name: 'New animation' }).click();

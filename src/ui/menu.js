@@ -15,24 +15,34 @@ const EDGE = 8;
 const GAP = 6;
 const LEAST_HEIGHT = 132;
 
+// how high a menu may reach: one opened from the page stops under the bar at the top, which
+// stays in sight; one opened from that bar has the whole window
+function topEdge(anchor) {
+  const bar = document.getElementById('toolbar');
+
+  return !bar || bar.contains(anchor) ? EDGE : bar.getBoundingClientRect().bottom + EDGE;
+}
+
 // Below the anchor, or above it when there is no room below (menus of the frames, at the bottom).
 // A menu taller than the room on its side scrolls there: laid over its own button and the bar at
 // the top, it hid where it came from.
-function placeUpOrDown(menu, box) {
+function placeUpOrDown(menu, anchor) {
+  const box = anchor.getBoundingClientRect();
+  const top = topEdge(anchor);
   const roomBelow = window.innerHeight - box.bottom - GAP - EDGE;
-  const roomAbove = box.top - GAP - EDGE;
+  const roomAbove = box.top - GAP - top;
   const below = menu.offsetHeight <= roomBelow || roomBelow >= roomAbove;
   const height = Math.min(menu.offsetHeight, Math.max(LEAST_HEIGHT, below ? roomBelow : roomAbove));
 
   menu.style.maxHeight = `${height}px`;
-  menu.style.top = `${below ? box.bottom + GAP : Math.max(EDGE, box.top - GAP - height)}px`;
+  menu.style.top = `${below ? box.bottom + GAP : Math.max(top, box.top - GAP - height)}px`;
   menu.dataset.opens = below ? 'down' : 'up';
 }
 
 function position(menu, anchor, align) {
   const box = anchor.getBoundingClientRect();
 
-  placeUpOrDown(menu, box);
+  placeUpOrDown(menu, anchor);
 
   // a right-aligned menu under a button near the left edge (a phone's wrapped toolbar) would run
   // off the screen, so it is held inside it

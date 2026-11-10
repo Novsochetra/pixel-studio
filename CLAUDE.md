@@ -168,10 +168,10 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   - **integration** flows (`test/integration/*.flow.mjs`): the built page in a browser, each flow
     stating what must be true with `check()`; `run.mjs` runs them all, the monkey clicks everything,
   - **regression** tests (`test/regression/`): one test per fixed bug, saying what went wrong.
-- The flows run in Chromium, and on Safari's engine with `STUDIO_BROWSER=webkit` (see the README):
-  a flow that needs Chromium's own tools (a finger's drag, a pinch) says it is left out there
-  (`needsChromium`, `onChromium` in `harness.mjs`), so keep what a phone does by taps in a flow
-  both can run (`taps.flow.mjs`).
+- The flows run in Chromium, and on Safari's engine with `STUDIO_BROWSER=webkit` (see the README).
+  A finger's drag comes from `fingers` in `harness.mjs`, never from Chromium's tools directly: it
+  is a real touch in Chromium and hand-made pointer events elsewhere, so the flow runs on both.
+  Only what no other browser can say at all (what stops an install) is behind `onChromium`.
 - Fixing a bug: first write a test that reproduces it and fails, then fix it, then keep the test.
 - Verify your work: run `npm run check`, and look at UI changes in a browser (the flows save
   screenshots in `shots/`).

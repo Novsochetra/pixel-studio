@@ -1,19 +1,12 @@
 // Drawing with fingers on a phone: a stroke lands where the finger goes, a tap acts once, and two
 // fingers pan and pinch without the tool in hand touching the art.
-import { needsChromium, openStudio } from './harness.mjs';
+import { fingers, openStudio } from './harness.mjs';
 import { createProject, openDock } from './studio.mjs';
-
-needsChromium('finger strokes and pinches');
 
 const { page, context, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
 await createProject(page, { kind: 'Icon', name: 'Gem', width: 32 });
 const canvas = page.getByLabel('Pixel canvas');
-const cdp = await context.newCDPSession(page);
-const touch = (type, points) =>
-  cdp.send('Input.dispatchTouchEvent', {
-    type,
-    touchPoints: points.map(([x, y], id) => ({ x, y, id })),
-  });
+const touch = await fingers(context, page);
 const box = () => canvas.boundingBox();
 const zoom = async () => (await box()).width / 32;
 // the middle of an art pixel, on the screen
@@ -48,16 +41,16 @@ const tap = async (x, y) => {
 const pinch = async (spread) => {
   const art = await box();
   const middle = [art.x + art.width / 2, art.y + art.height / 2];
-  const fingers = (gap) => [
+  const apart = (gap) => [
     [middle[0] - gap, middle[1]],
     [middle[0] + gap, middle[1]],
   ];
 
-  await touch('touchStart', [fingers(40)[0]]);
-  await touch('touchStart', fingers(40));
+  await touch('touchStart', [apart(40)[0]]);
+  await touch('touchStart', apart(40));
 
   for (let i = 1; i <= 8; i++) {
-    await touch('touchMove', fingers(40 + (spread * i) / 8));
+    await touch('touchMove', apart(40 + (spread * i) / 8));
   }
 
   await touch('touchEnd', []);

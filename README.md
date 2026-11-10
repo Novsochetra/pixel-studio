@@ -94,10 +94,12 @@ The flows run in Chromium. To run them on Safari's engine too, install Playwrigh
 STUDIO_BROWSER=webkit npm run check
 ```
 
-Finger strokes, pinches and pulls are sent through Chromium's own tools, so `touch.flow.mjs` and
-the few checks like it are left out there and say so; `taps.flow.mjs` covers a phone used by taps
-on both. This is WebKit on the machine that runs the checks, not Safari on an iPhone: try a
-change to the phone's layout on a real one before calling it done.
+Every flow runs on both. A finger's drag, pinch or pull is a real touch in Chromium, sent through
+its own tools; no other browser's driver can drag a finger, so on WebKit the pointer events of
+that touch are made by hand (`fingers` in `test/integration/harness.mjs`), and taps are real
+touches on both (`taps.flow.mjs`). Opening with no network is tried by stopping a server the flow
+owns. This is WebKit on the machine that runs the checks, not Safari on an iPhone: try a change
+to the phone's layout on a real one before calling it done.
 
 ## Layout
 
