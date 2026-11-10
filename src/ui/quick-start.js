@@ -38,10 +38,14 @@ export function showQuickStart(stage, project) {
 
   const gotIt = node('button.btn.primary', { onclick: () => close() }, 'Got it');
   const onKey = (event) => event.key === 'Escape' && close();
+  // getting on with it is an answer too: a press anywhere else puts the card away, and still
+  // does what it was for
+  const onPress = (event) => card.contains(event.target) || close();
   const close = () => {
     remember();
     card.remove();
     document.removeEventListener('keydown', onKey);
+    document.removeEventListener('pointerdown', onPress, true);
   };
   const card = node(
     'div.quick-start',
@@ -65,5 +69,6 @@ export function showQuickStart(stage, project) {
   );
   stage.append(card);
   document.addEventListener('keydown', onKey);
+  document.addEventListener('pointerdown', onPress, true);
   gotIt.focus();
 }

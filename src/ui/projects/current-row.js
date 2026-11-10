@@ -101,6 +101,8 @@ function renameField({ app, redraw }) {
     value: project.name,
     id: 'current-project-name',
     'aria-label': 'Project name',
+    // the keyboard's return key says the name is done, as it does for a layer's
+    onkeydown: (event) => event.key === 'Enter' && event.target.blur(),
     onchange: (event) => {
       const name = event.target.value.trim() || project.name;
 

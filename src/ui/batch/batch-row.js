@@ -35,7 +35,7 @@ function framePicker(item, animation) {
       },
     },
     frames,
-    node('option', { value: 'new', selected: item.placement === 'new' }, 'A new frame at the end'),
+    node('option', { value: 'new', selected: item.placement === 'new' }, 'A new frame'),
   );
 }
 

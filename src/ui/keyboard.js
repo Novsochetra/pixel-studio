@@ -1,4 +1,4 @@
-import { toolsFor } from './tools.js';
+import { toolsFor } from './tool-list.js';
 import { flipCurrent } from './actions.js';
 import { redo, undo } from './undo.js';
 import { handleSelectionKey } from './selection-keys.js';

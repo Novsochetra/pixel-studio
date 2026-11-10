@@ -48,6 +48,37 @@ check(
   'a colour tapped is the one the next tap draws with',
 );
 
+// the tap that puts a menu away is not also a stroke
+await page.getByRole('button', { name: 'More', exact: true }).tap();
+const menu = await page.locator('.menu').boundingBox();
+const below = await canvas.boundingBox();
+
+// a spot of the canvas the menu does not lie over
+await page.touchscreen.tap(below.x + 6, Math.max(menu.y + menu.height + 12, below.y + 6));
+await page.waitForTimeout(350);
+check(
+  (await page.locator('.menu').count()) === 0 && (await status(page)).includes('sprite 7×7'),
+  'a tap on the canvas beside a menu closes the menu and draws nothing',
+);
+
+// "Select a colour" has nothing to select on a clear pixel; on the art, its bar keeps clear of it
+await tool(/^Select a colour/);
+await tapPixel(30, 2);
+check(
+  (await page.locator('.toast').textContent()).startsWith('There is no colour there') &&
+    !(await page.locator('.selection-bar').isVisible()),
+  'a clear pixel has no colour to select, and says so',
+);
+await tapPixel(10, 10);
+const bar = await page.locator('.selection-bar').boundingBox();
+const art = await canvas.boundingBox();
+check(
+  bar.y > art.y + (11 * art.width) / 32 && bar.height < 60,
+  'the selection’s bar is one row, clear of the pixels selected',
+);
+await page.locator('.selection-bar').getByRole('button', { name: 'Done' }).tap();
+await tool('Pencil');
+
 await page.getByRole('button', { name: 'More', exact: true }).tap();
 await page.getByRole('menuitem', { name: /Canvas size/ }).tap();
 await page.waitForTimeout(700);
@@ -58,6 +89,14 @@ check(
   'a window tapped open stands on the bottom edge',
 );
 await page.screenshot({ path: `${shots}/taps-sheet.png` });
+await page.fill('#canvas-width', '0');
+await page.getByRole('button', { name: 'Change the size' }).tap();
+check(
+  (await page.locator('.sheet').count()) === 1 &&
+    (await page.locator('.toast').textContent()).includes('from 8 to 512') &&
+    (await status(page)).includes('32×32 canvas'),
+  'a size no canvas can have is said, and nothing is changed',
+);
 await page.locator('.sheet-close').tap();
 check((await page.locator('.sheet').count()) === 0, 'and its × closes it');
 await page.waitForTimeout(600);

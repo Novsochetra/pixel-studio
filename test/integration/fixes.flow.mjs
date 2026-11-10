@@ -229,6 +229,13 @@ await openWorkspace(page, 'Views board');
 await page.getByRole('button', { name: 'Adds a note' }).click();
 const board = await page.locator('.board-canvas').boundingBox();
 await page.mouse.click(board.x + 40, board.y + 60);
+check(
+  (await page.locator('.toast').textContent()).startsWith('Type the note first'),
+  'a note with nothing typed is asked for, not stamped with words nobody wrote',
+);
+await page.fill('#note-text', 'arm too thin');
+await page.mouse.click(board.x + 40, board.y + 60);
+await page.locator('.board-canvas').focus();
 await page.keyboard.press('Meta+z');
 check(
   (await page.locator('.toast').textContent()) === 'Undone: Note',

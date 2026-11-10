@@ -8,7 +8,7 @@ const UNREADABLE =
 const ALONE =
   'Your other projects show here, each with its own views, animations, colours and history. For the next character of your game, "New character like this" above sets one up as this one is, with nothing drawn.';
 const EMPTY_FOLDER =
-  'Nothing in this folder yet. Drag a project onto it on the left, or pick "Move to folder…" in a project’s ⋯ menu.';
+  'Nothing in this folder yet. Pick "Move to folder…" in a project’s ⋯ menu, or drag a project onto the folder.';
 
 function emptyHint({ app, view }, entries) {
   if (app.index.unreadable) {

@@ -9,7 +9,7 @@ const TALLEST_ON_SCREEN_PX = 240;
 
 const HINT =
   'Every project at the same pixel size, standing on one line, so heights and widths can be ' +
-  'checked against each other. Each shows the first frame of its reference view. Click one to open it.';
+  'checked against each other. Each shows the first frame of its reference view. Pick one to open it.';
 
 async function readCast(cast) {
   const urls = await Promise.all(cast.map((member) => member.url));

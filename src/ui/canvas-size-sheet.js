@@ -4,7 +4,7 @@ import { keepVersion } from './versions-sheet.js';
 import { restoreProject } from './session.js';
 import { numberInput } from './number-input.js';
 import { CANVAS_LIMITS, canvasShift, withCanvasSize } from '../model/canvas-size.js';
-import { wholeNumber } from '../model/numbers.js';
+import { isWholeBetween, wholeNumber } from '../model/numbers.js';
 import { kindOf } from '../model/kinds.js';
 
 const ANCHORS = [
@@ -73,11 +73,52 @@ function anchorGrid(job, draw) {
   );
 }
 
+// each field is empty, to keep that size, or a size a canvas can have
+const sizesCanBe = ({ width, height }) =>
+  [width, height].every(
+    ({ input }) => !input.value.trim() || isWholeBetween(input.value, CANVAS_LIMITS),
+  );
+
+// a size no canvas can have is said, and nothing is changed
+function refuses(fields) {
+  if (sizesCanBe(fields)) {
+    return false;
+  }
+
+  toast(
+    `Width and height are whole numbers of art pixels from ${CANVAS_LIMITS.min} to ${CANVAS_LIMITS.max}.`,
+  );
+
+  return true;
+}
+
 // a field left empty keeps the size the canvas has
 const sizeOf = ({ width, height }, canvas) => ({
   width: wholeNumber(width.input.value, { ...CANVAS_LIMITS, fallback: canvas.width }),
   height: wholeNumber(height.input.value, { ...CANVAS_LIMITS, fallback: canvas.height }),
 });
+
+// The window stays over the canvas until the change is done: a stroke drawn meanwhile would land
+// on the project being replaced.
+async function changeSize(app, { fields, job, sheet }, button) {
+  const { canvas } = app.store.state.project;
+
+  if (refuses(fields)) {
+    return;
+  }
+
+  const size = sizeOf(fields, canvas);
+
+  if (size.width !== canvas.width || size.height !== canvas.height) {
+    button.disabled = true;
+    button.textContent = 'Changing the size…';
+    await resize(app, { size, anchor: job.anchor }).catch(() =>
+      toast('The canvas size could not be changed. Try again in a moment.'),
+    );
+  }
+
+  sheet.close();
+}
 
 // Grow or shrink the canvas of the whole project: every view, frame and layer, the art kept where
 // the anchor says. A version is kept first, as undo cannot bring cut-off art back.
@@ -91,22 +132,7 @@ export function openCanvasSizeSheet(app) {
   const job = { anchor: firstAnchor(app.store.state.project) };
   const anchors = node('div');
   const draw = () => replace(anchors, anchorGrid(job, draw));
-  // The window stays over the canvas until the change is done: a stroke drawn meanwhile would
-  // land on the project being replaced.
-  const apply = async (event) => {
-    const size = sizeOf(fields, canvas);
-    const button = event.currentTarget;
-
-    if (size.width !== canvas.width || size.height !== canvas.height) {
-      button.disabled = true;
-      button.textContent = 'Changing the size…';
-      await resize(app, { size, anchor: job.anchor }).catch(() =>
-        toast('The canvas size could not be changed. Try again in a moment.'),
-      );
-    }
-
-    sheet.close();
-  };
+  const apply = (event) => changeSize(app, { fields, job, sheet }, event.currentTarget);
 
   draw();
   sheet.body.append(

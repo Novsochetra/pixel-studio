@@ -10,34 +10,9 @@ import { onTurnHandle, turnSelectionDrag } from './selection-turn.js';
 import { pickLayerToDrag } from './pick-layer.js';
 import { moveFrameDrag } from './frame-move.js';
 import { moveLayerDrag } from './layer-move.js';
-import { kindOf } from '../model/kinds.js';
 import { isPosedBody } from '../model/body/body-kind.js';
 import { startOnPart } from './body/part-draw.js';
 import { poseTool } from './body/pose-tool.js';
-
-const TOOLS = [
-  { id: 'pencil', label: 'Pencil', key: 'b' },
-  { id: 'eraser', label: 'Eraser', key: 'e' },
-  { id: 'picker', label: 'Colour picker', key: 'i' },
-  { id: 'fill', label: 'Fill', key: 'g' },
-  { id: 'line', label: 'Line: drag from end to end (Shift: straight or diagonal)', key: 'n' },
-  { id: 'rect', label: 'Rectangle: drag corner to corner (Shift: a square)', key: 'u' },
-  { id: 'ellipse', label: 'Ellipse: drag corner to corner (Shift: a circle)', key: 'c' },
-  { id: 'replace', label: 'Replace colour', key: 'r' },
-  { id: 'shade', label: 'Light and dark brush (Shift: darker)', key: 'd' },
-  { id: 'select', label: 'Select and move: a click picks the layer under it', key: 's' },
-  { id: 'wand', label: 'Select a colour (Shift: everywhere)', key: 'w' },
-  {
-    id: 'lasso',
-    label:
-      'Lasso: draw round a part to select it, drag inside to move it (Shift: add, Alt: take away)',
-    key: 'l',
-  },
-  { id: 'pin', label: 'Pin a body part (Alt-click removes it)', key: 'p' },
-  { id: 'movelayer', label: 'Move this layer: drag it, or use the arrow keys', key: 't' },
-  { id: 'moveframe', label: 'Move the whole frame: drag it, or use the arrow keys', key: 'v' },
-  { id: 'pose', label: 'Pose the body parts: drag a part, or its handle to turn it', key: 'o' },
-];
 
 function pick(app, [x, y]) {
   const color = getPixel(currentLayer(app.store.state).sprite, x, y);
@@ -61,13 +36,6 @@ function pin(app, [x, y]) {
   app.store.set({ showPins: true });
 
   return null;
-}
-
-// pins and body parts are for what stands on its feet; tiles, effects and icons have none
-const STANDING_ONLY = new Set(['pin', 'pose']);
-
-export function toolsFor(project) {
-  return TOOLS.filter((tool) => !STANDING_ONLY.has(tool.id) || kindOf(project).place === 'feet');
 }
 
 const orTurnHandle = (tool) => (app, point, event) =>

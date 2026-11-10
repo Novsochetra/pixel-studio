@@ -1,8 +1,8 @@
-import { node, replace } from './dom.js';
+import { node, replace, toast } from './dom.js';
 import { commit, commitSelected, currentLayer } from './actions.js';
-import { liftPixels, transformSelected } from '../editor/selection.js';
+import { liftPixels, selectionBox, transformSelected } from '../editor/selection.js';
 import { eraseSelection } from '../editor/floating.js';
-import { keyNames } from './platform-keys.js';
+import { hasKeyboard, keyNames } from './platform-keys.js';
 import { selectionAngle, turnSelectionTo } from './selection-turn.js';
 
 const ACTIONS = [
@@ -26,6 +26,11 @@ function copySelected(app) {
   const { state } = app.store;
 
   app.clipboard = liftPixels(currentLayer(state).sprite, state.selection);
+  toast(
+    hasKeyboard()
+      ? keyNames('Copied. Paste it in any frame with ⌘V.')
+      : 'Copied. Paste is in the More menu, in any frame.',
+  );
 }
 
 function eraseSelected(app) {
@@ -53,6 +58,22 @@ function angleField(app) {
 
 const button = (title, onclick, label) => node('button.btn.quiet', { title, onclick }, label);
 
+// On a phone the bar lies over one end of the canvas: the end the selection is not in, so it
+// never hides the pixels it acts on. A selection all over the canvas leaves it by the thumb.
+export function barSide(box, canvas) {
+  return (box.top + box.bottom) / 2 > canvas.height * 0.55 ? 'top' : 'bottom';
+}
+
+// not while it is dragged: the bar would jump from under the finger's way
+function placeBar(el, app) {
+  const { selection, project } = app.store.state;
+  const box = selectionBox(selection);
+
+  if (box && !app.dragging) {
+    el.dataset.side = barSide(box, project.canvas);
+  }
+}
+
 // Shown over the canvas while something is selected: turn, flip, copy, delete, let go.
 export function renderSelectionBar(el, app) {
   el.hidden = !app.store.state.selection;
@@ -62,6 +83,8 @@ export function renderSelectionBar(el, app) {
 
     return;
   }
+
+  placeBar(el, app);
 
   const angle = el.querySelector('#selection-angle');
 
@@ -83,6 +106,10 @@ export function renderSelectionBar(el, app) {
     ),
     button(keyNames('Copy (⌘C); paste in any frame with ⌘V'), () => copySelected(app), 'Copy'),
     button('Erase the selected pixels (Delete)', () => eraseSelected(app), 'Delete'),
-    button('Let go of the selection (Esc)', () => app.store.set({ selection: null }), 'Done'),
+    node(
+      'button.btn.primary.selection-done',
+      { title: 'Let go of the selection (Esc)', onclick: () => app.store.set({ selection: null }) },
+      'Done',
+    ),
   );
 }

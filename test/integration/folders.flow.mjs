@@ -157,7 +157,7 @@ await page.keyboard.press('Enter');
 await page.waitForTimeout(200);
 await goTo('Pitch');
 await page.getByRole('button', { name: 'Delete folder' }).click();
-await page.getByRole('button', { name: /Click again/ }).click();
+await page.getByRole('button', { name: /Press again/ }).click();
 await page.waitForTimeout(300);
 check(
   JSON.stringify(await folders()) ===

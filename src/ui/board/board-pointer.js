@@ -1,6 +1,7 @@
 import { selectDirection } from '../actions.js';
 import { boardPoint } from '../board-canvas.js';
 import { changeMarkup, markupOf } from './board-marks.js';
+import { toast } from '../dom.js';
 
 function addNote(app, point) {
   changeMarkup(app, 'Note', (markup) =>
@@ -8,7 +9,7 @@ function addNote(app, point) {
       direction: point.direction,
       x: point.x,
       y: point.y,
-      text: app.noteText || 'Fix this',
+      text: app.noteText.trim(),
     }),
   );
 }
@@ -27,7 +28,13 @@ function press(app, canvas, point, event) {
   }
 
   if (mode === 'note') {
-    addNote(app, point);
+    // a note with nothing typed was stamped as "Fix this", which nobody had written
+    if (app.noteText?.trim()) {
+      addNote(app, point);
+    } else {
+      toast('Type the note first, then press the board where it goes.');
+      document.getElementById('note-text')?.focus();
+    }
 
     return null;
   }
@@ -46,6 +53,7 @@ function showMark(app, { stroke, before }) {
 
 export function bindBoardPointer(app, canvas, scale) {
   let drawing = null;
+
   const pointOf = (event) => boardPoint(app.store.state, scale, canvas, event);
 
   canvas.addEventListener('pointerdown', (event) => {

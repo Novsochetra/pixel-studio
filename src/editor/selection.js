@@ -43,9 +43,14 @@ function connected(sprite, [x, y], target) {
   return cells;
 }
 
-// pixels of the clicked colour: touching it (4-way) or, with `anywhere`, anywhere
+// Pixels of the clicked colour: touching it (4-way) or, with `anywhere`, anywhere. A clear pixel
+// has no colour to select: null, where every clear pixel of an empty canvas was "selected".
 export function colourSelection(sprite, x, y, anywhere) {
   const target = getPixel(sprite, x, y);
+
+  if (target === CLEAR) {
+    return null;
+  }
   const cells = anywhere ? everywhere(sprite, target) : connected(sprite, [x, y], target);
 
   return { width: sprite.width, height: sprite.height, cells };

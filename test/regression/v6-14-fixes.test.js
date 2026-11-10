@@ -10,6 +10,9 @@ import { pinsOf, setPin } from '../../src/model/pins.js';
 import { CLEAR, createSprite, getPixel, pack, setPixel } from '../../src/model/sprite.js';
 import { floodFill, replaceColor } from '../../src/editor/paint.js';
 import { inWords, told } from '../../src/model/told.js';
+import { isWholeBetween } from '../../src/model/numbers.js';
+import { barSide } from '../../src/ui/selection-bar.js';
+import { colourSelection } from '../../src/editor/selection.js';
 import { swapSaid } from '../../src/ui/swap/swap-said.js';
 import { frameIndexes } from '../../src/ui/batch/batch-items.js';
 import { keepsOwnSize } from '../../src/ui/import/import-options.js';
@@ -177,4 +180,34 @@ test('a swap that changed nothing says so', () => {
   assert.match(swapSaid({ changed: false, everywhere: true }), /^No colour changed/);
   assert.match(swapSaid({ changed: true, everywhere: true }), /^Colours swapped across/);
   assert.match(swapSaid({ changed: true, flattened: true }), /plain pixels$/);
+});
+
+// a canvas size of 0 by 99999 was taken as 8 by 512 without a word, and cut the art down
+test('a size outside what a canvas can be is told apart from one inside it', () => {
+  const limits = { min: 8, max: 512 };
+
+  assert.equal(isWholeBetween('64', limits), true);
+  assert.equal(isWholeBetween(' 512 ', limits), true);
+  assert.equal(isWholeBetween('0', limits), false);
+  assert.equal(isWholeBetween('99999', limits), false);
+  assert.equal(isWholeBetween('12.5', limits), false);
+  assert.equal(isWholeBetween('wide', limits), false);
+});
+
+// on a phone the selection's bar lay over the very pixels just selected
+test('the selection’s bar stands at the end of the canvas the selection is not in', () => {
+  const canvas = { width: 32, height: 32 };
+
+  assert.equal(barSide({ top: 26, bottom: 30 }, canvas), 'top');
+  assert.equal(barSide({ top: 2, bottom: 8 }, canvas), 'bottom');
+  assert.equal(barSide({ top: 0, bottom: 31 }, canvas), 'bottom', 'all of it: by the thumb');
+});
+
+// "Select a colour" on a clear pixel selected every clear pixel: the whole empty canvas
+test('there is no colour to select on a clear pixel', () => {
+  const sprite = createSprite(4, 4);
+
+  setPixel(sprite, 1, 1, RED);
+  assert.equal(colourSelection(sprite, 3, 3, false), null);
+  assert.equal(colourSelection(sprite, 1, 1, false).cells.filter(Boolean).length, 1);
 });

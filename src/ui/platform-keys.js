@@ -7,3 +7,6 @@ export function keyNames(text, mac = onMac) {
 
 // a keyboard's shortcuts mean nothing where there are only fingers
 export const hasKeyboard = () => matchMedia('(any-pointer: fine)').matches;
+
+// what is said to someone with keys and a pointer, or to someone with fingers only
+export const forHands = (withKeys, withFingers) => (hasKeyboard() ? withKeys : withFingers);

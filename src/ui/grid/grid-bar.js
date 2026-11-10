@@ -1,4 +1,4 @@
-import { icon, node } from '../dom.js';
+import { icon, node, toast } from '../dom.js';
 import { currentAnimation, restructure } from '../actions.js';
 import { chooseFiles } from '../choose-file.js';
 import { openBatchSheet } from '../batch-sheet.js';
@@ -9,6 +9,15 @@ import { togglePlayback } from './playback.js';
 import { isSingleView } from '../../model/kinds.js';
 import { wholeNumber } from '../../model/numbers.js';
 
+// a finger has no pointer to hover for what a bare picture means: switched, it says
+function switched(app, { key, label, title }, on) {
+  app.store.set({ [key]: on });
+
+  if (app.store.state.layout === 'compact') {
+    toast(on ? `${label}: ${title}` : `${label} off`);
+  }
+}
+
 function toggle(app, { key, iconName, label, title }) {
   const pressed = Boolean(app.store.state[key]);
 
@@ -18,7 +27,7 @@ function toggle(app, { key, iconName, label, title }) {
       'aria-pressed': String(pressed),
       'aria-label': label,
       title,
-      onclick: () => app.store.set({ [key]: !pressed }),
+      onclick: () => switched(app, { key, label, title }, !pressed),
     },
     icon(iconName),
   );

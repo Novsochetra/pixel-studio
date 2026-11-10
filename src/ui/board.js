@@ -16,7 +16,7 @@ function fittingScale(container, state) {
 
 function noteField(app) {
   return node('input.input', {
-    placeholder: 'Note text, then click the board',
+    placeholder: 'Note text, then press the board',
     id: 'note-text',
     'aria-label': 'Note text',
     value: app.noteText ?? '',

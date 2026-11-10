@@ -21,6 +21,13 @@
     padding: 8px 12px;
   }
 
+  /* the layer's actions are named in words on a phone (layer-bar.js), and a finger wide */
+  .layer-tools .btn.icon-only {
+    --btn-height: 40px;
+
+    width: 40px;
+  }
+
   .layer-row .btn {
     --btn-height: 36px;
     min-width: 36px;
@@ -121,18 +128,9 @@
     min-width: 40px;
   }
 
-  /* a line of text with a box to tick, or a line that opens: tall enough to land on */
-  label:has(> input[type='checkbox']:not(.switch)),
+  /* a line that opens what is under it: tall enough to land on */
   summary {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     min-height: 36px;
-  }
-
-  summary {
-    display: list-item;
-    padding-block: 8px;
   }
 
   .rail .btn[data-key]::after {

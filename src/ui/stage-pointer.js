@@ -98,13 +98,29 @@ function release(app, view, event) {
   }
 }
 
+// Chromium on a phone takes a finger lifted while still moving for a fling, and swallows the next
+// tap as the one that stops it: Undo tapped right after a quick stroke did nothing. A touch on
+// the canvas is the studio's alone, and says so.
+function ownTouches(canvas) {
+  for (const kind of ['touchstart', 'touchmove']) {
+    canvas.addEventListener(kind, (event) => event.preventDefault(), { passive: false });
+  }
+}
+
 export function bindPointer(canvas, app, stage) {
   const view = { canvas, stage, touches: new Map(), session: null, intent: null };
   const place = (event) =>
     view.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
   const finish = (event) => release(app, view, event);
 
+  ownTouches(canvas);
   canvas.addEventListener('pointerdown', (event) => {
+    // a name still being typed (a new layer's) is done once the canvas is drawn on: on a phone
+    // its keyboard would stay up over the art
+    if (document.activeElement?.matches?.('input, textarea')) {
+      document.activeElement.blur();
+    }
+
     // The canvas shows the frame playing, not the one selected, and every view side by side has
     // no one frame under the pointer: a press stops play, and the next one draws.
     if (app.playback) {

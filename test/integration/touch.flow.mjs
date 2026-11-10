@@ -141,10 +141,14 @@ await page.waitForTimeout(300);
 // with no keyboard there was no way to paste at all; pasting then dragging moved the original
 await tool(/^Select and move/);
 await stroke([1, 1], [13, 13]);
-// pressed as the other flows press: this browser makes no click of the first tap that follows
-// the hand-made touches of a stroke
-await page.locator('.selection-bar').getByRole('button', { name: 'Copy' }).click();
-await page.locator('.selection-bar').getByRole('button', { name: 'Done' }).click();
+// tapped the moment the finger is off the canvas: Chromium took a finger lifted while moving for
+// a fling and swallowed the tap that followed, so Copy did nothing until tapped again
+await page.locator('.selection-bar').getByRole('button', { name: 'Copy' }).tap();
+check(
+  (await page.locator('.toast').textContent()).startsWith('Copied'),
+  'a tap right after a stroke is taken, and Copy says it copied',
+);
+await page.locator('.selection-bar').getByRole('button', { name: 'Done' }).tap();
 await page.getByRole('button', { name: 'More', exact: true }).tap();
 await page.waitForTimeout(200);
 await page.getByRole('menuitem', { name: 'Paste' }).tap();

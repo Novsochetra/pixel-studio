@@ -39,6 +39,30 @@ input {
   accent-color: var(--tint);
 }
 
+/* A line that opens what is under it has the same mark as the inspector's titles, in place of
+   each browser's own triangle. */
+summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::before {
+  content: '▸';
+  font-family: var(--font-ui);
+}
+
+details[open] > summary::before {
+  content: '▾';
+}
+
 /* a scroll bar is a thin quiet line, not a gutter of its own */
 * {
   scrollbar-width: thin;

@@ -29,8 +29,8 @@ function deleteButton(job, folder, count) {
     if (!confirming) {
       confirming = true;
       event.currentTarget.textContent = count
-        ? `Delete the folder? Its ${counted(count)} ${count === 1 ? 'stays' : 'stay'}. Click again`
-        : 'Delete the folder? Click again';
+        ? `Delete the folder? Its ${counted(count)} ${count === 1 ? 'stays' : 'stay'}. Press again`
+        : 'Delete the folder? Press again';
 
       return;
     }

@@ -56,7 +56,7 @@ function foldersHead(job) {
 }
 
 const NONE_YET =
-  'Folders keep a game’s projects together. Drag a project onto one to put it there.';
+  'Folders keep a game’s projects together. Put a project in one from its ⋯ menu, or drag it onto the folder.';
 
 export function folderList(job) {
   const { index } = job.app;

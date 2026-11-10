@@ -201,6 +201,23 @@
   display: none;
 }
 
+/* each of a layer's actions says what it does, in rows a thumb can read */
+:root[data-layout='compact'] .layer-bar {
+  gap: 6px;
+}
+
+:root[data-layout='compact'] .layer-tools {
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-right: 0;
+  border-right: 0;
+}
+
+:root[data-layout='compact'] .layer-tools .btn {
+  background: var(--glass);
+  box-shadow: var(--shadow-glass);
+}
+
 :root[data-layout='compact'] .section {
   padding-inline: max(16px, env(safe-area-inset-left, 0px))
     max(16px, env(safe-area-inset-right, 0px));
@@ -253,6 +270,11 @@
 /* a line of advice costs a phone a third of its panel */
 :root[data-layout='compact'] .section > p.hint {
   display: none;
+}
+
+/* the picture and what cleaning made of it stand side by side, not a screen apart */
+:root[data-layout='compact'] .compare:has(> figure) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 :root[data-layout='compact'] .batch-row {
@@ -345,8 +367,9 @@
   justify-content: center;
 }
 
-/* the Pose bar is one row that scrolls: wrapped to three, it lay over half the canvas */
-:root[data-layout='compact'] .pose-bar {
+/* A bar over the canvas is one row that scrolls: wrapped to two or three, it lay over half the
+   canvas. */
+:root[data-layout='compact'] :is(.selection-bar, .pose-bar) {
   --rise-from: 0 10px;
 
   left: 8px;
@@ -360,18 +383,38 @@
   scrollbar-width: none;
 }
 
-:root[data-layout='compact'] .pose-bar::-webkit-scrollbar {
+:root[data-layout='compact'] :is(.selection-bar, .pose-bar)::-webkit-scrollbar {
   display: none;
 }
 
-:root[data-layout='compact'] .pose-bar > * {
+:root[data-layout='compact'] :is(.selection-bar, .pose-bar) > * {
   flex: none;
+}
+
+/* the selection's bar stands at the end of the canvas the selection is not in (selection-bar.js) */
+:root[data-layout='compact'] .selection-bar[data-side='top'] {
+  --rise-from: 0 -10px;
+
+  top: 10px;
+  bottom: auto;
+}
+
+/* Done stays in sight at the row's end, whatever is scrolled under it */
+:root[data-layout='compact'] .selection-done {
+  position: sticky;
+  right: 0;
+  margin-left: auto;
+  /* the first hides what scrolls past in the bar's own edge, the second fades what comes up to it */
+  box-shadow:
+    6px 0 0 var(--chrome),
+    -10px 0 12px -4px var(--chrome);
 }
 
 /* three choices side by side are wider than a phone: the row scrolls, where wrapped inside its
    track it looked broken */
 :root[data-layout='compact'] .segmented {
   flex-wrap: nowrap;
+  min-width: 0;
   max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;

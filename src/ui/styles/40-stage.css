@@ -109,9 +109,28 @@
   text-align: center;
 }
 
+/* A scene zoomed past the window scrolls sideways; its controls and its note stay in the window,
+   where they can be reached. The preview has the whole window's width: no rail, no inspector. */
+.stage-inner.preview > :is(.preview-bar, .preview-note) {
+  --across: min(100vw - 64px, 900px);
+
+  position: sticky;
+  left: calc((100vw - var(--across)) / 2);
+  justify-self: start;
+  width: var(--across);
+  box-sizing: border-box;
+}
+
+.stage-inner.preview > .preview-note {
+  --across: min(100vw - 64px, 680px);
+}
+
 /* the board fits the stage: on a phone it is drawn smaller, its pixels kept sharp */
 .stage-inner.board {
   width: 100%;
+  /* one column no wider than the stage: a board wider than that scrolls in its own holder, and
+     its controls stay as wide as the screen */
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   align-content: center;
 }
@@ -134,6 +153,9 @@
   gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
+  /* no wider than the controls it is in: what is too long for a phone scrolls inside itself */
+  max-width: 100%;
+  min-width: 0;
 }
 
 /* what stands beside a segmented control in these bars is a button, and looks like one */

@@ -126,6 +126,20 @@ check(
 );
 await openDock(page, 'Brush');
 
+// a scene zoomed past the screen scrolls; its controls stay where they can be reached
+await openWorkspace(page, 'On the pitch');
+await page.getByRole('button', { name: '3×' }).tap();
+await page.waitForTimeout(400);
+const play = await page.getByRole('button', { name: 'Play', exact: true }).boundingBox();
+const zooms = await page.getByRole('group', { name: 'Zoom' }).boundingBox();
+const wide = await page.evaluate(() => innerWidth);
+check(
+  play.x >= 0 && play.x + play.width <= wide && zooms.x >= 0 && zooms.x + zooms.width <= wide,
+  'zoomed to 3×, the preview’s controls are still on the screen',
+);
+await page.screenshot({ path: `${shots}/look-phone-pitch.png` });
+await page.getByRole('button', { name: '1×' }).tap();
+
 // a message is as wide as its words, not half the screen
 await openWorkspace(page, 'Edit');
 await page.locator('#rail [aria-label^="Select and move"]').evaluate((button) => button.click());

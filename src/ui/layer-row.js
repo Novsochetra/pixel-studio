@@ -95,7 +95,7 @@ export function layerRow(app, entry, active) {
       renameRow(app, entry);
     }
   };
-  const label = node('span.layer-name', { title: 'Double-click to rename' }, entry.name);
+  const label = node('span.layer-name', { title: 'Double-click to rename (F2)' }, entry.name);
 
   return node(
     'div.layer-row',

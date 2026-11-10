@@ -82,7 +82,7 @@ export function replace(app, [x, y]) {
   let count = 0;
 
   if (from === CLEAR) {
-    toast('Click the colour to replace: there is none on a clear pixel.');
+    toast('Pick the colour to replace on the canvas: there is none on a clear pixel.');
 
     return null;
   }

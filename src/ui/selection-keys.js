@@ -4,6 +4,7 @@ import { eraseSelection, floatPiece, moveFloating, shiftOnCanvas } from '../edit
 import { toast } from './dom.js';
 import { shiftCurrentFrame } from './frame-move.js';
 import { shiftCurrentLayer } from './layer-move.js';
+import { forHands } from './platform-keys.js';
 
 const ARROWS = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] };
 
@@ -43,7 +44,12 @@ export function paste(app) {
   }
 
   app.store.set({ selection, tool: 'select', mode: 'edit' });
-  toast('Pasted where it was copied from. Drag it or use the arrow keys to place it.');
+  toast(
+    forHands(
+      'Pasted where it was copied from. Drag it or use the arrow keys to place it.',
+      'Pasted where it was copied from. Drag it to place it.',
+    ),
+  );
 }
 
 function selectAll(app) {

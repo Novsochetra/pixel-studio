@@ -54,7 +54,7 @@ function deleteButton(app, entry, redraw) {
   const remove = async (event) => {
     if (!confirming) {
       confirming = true;
-      event.currentTarget.textContent = 'Delete? Click again';
+      event.currentTarget.textContent = 'Delete? Press again';
 
       return;
     }

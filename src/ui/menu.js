@@ -126,6 +126,11 @@ export function openMenu(anchor, entries, { align = 'left', onError = () => {} }
   const outside = (event) => {
     if (!menu.isConnected || (!menu.contains(event.target) && !anchor.contains(event.target))) {
       close();
+
+      // on the canvas that press would also draw: there it only puts the menu away
+      if (event.target.closest?.('canvas')) {
+        event.stopPropagation();
+      }
     }
   };
   const onKey = (event) => {

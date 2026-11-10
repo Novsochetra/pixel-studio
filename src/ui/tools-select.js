@@ -12,6 +12,7 @@ import { moveFloating, shiftOnCanvas } from '../editor/floating.js';
 import { combineSelections, lassoPiece, lassoSelection } from '../editor/lasso-select.js';
 import { refusesPaint } from './body/body-lock.js';
 import { pickLayerAt } from './pick-layer.js';
+import { toast } from './dom.js';
 
 // drag the selected pixels: each move redraws them from where the drag began
 export function moveSelection(app, start) {
@@ -84,9 +85,13 @@ export function select(app, start) {
 
 export function wand(app, [x, y], everywhere) {
   pickLayerAt(app, [x, y]);
-  app.store.set({
-    selection: colourSelection(currentLayer(app.store.state).sprite, x, y, everywhere),
-  });
+  const selection = colourSelection(currentLayer(app.store.state).sprite, x, y, everywhere);
+
+  app.store.set({ selection });
+
+  if (!selection) {
+    toast('There is no colour there to select: pick a pixel of the art.');
+  }
 
   return null;
 }

@@ -152,11 +152,6 @@ h4.start-heading {
   margin-top: 12px;
 }
 
-.start-section summary {
-  font-weight: 600;
-  cursor: pointer;
-}
-
 /* on a phone each kind is one short row, so the name, the size and Create are a short scroll away */
 :root[data-layout='compact'] .start-screen {
   padding: max(20px, env(safe-area-inset-top, 0px)) 16px
