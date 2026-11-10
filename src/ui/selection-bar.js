@@ -50,7 +50,11 @@ function angleField(app) {
       step: '1',
       'aria-label': 'Selection angle',
       value: String(selectionAngle(app.store.state)),
-      onchange: (event) => turnSelectionTo(app, Number(event.target.value) || 0),
+      // what was typed is shown as the angle it came to: 1000 is 80 short of three turns
+      onchange: (event) => {
+        turnSelectionTo(app, Number(event.target.value) || 0);
+        event.target.value = String(selectionAngle(app.store.state));
+      },
     }),
     '°',
   );

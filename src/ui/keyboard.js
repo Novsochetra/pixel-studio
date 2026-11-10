@@ -120,7 +120,7 @@ export function bindKeyboard(app) {
     }
 
     if (event.key === '?') {
-      openShortcuts();
+      openShortcuts(app.store.state.project);
 
       return;
     }

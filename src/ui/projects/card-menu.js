@@ -28,8 +28,11 @@ const onError = (error) =>
 export function cardMenu(job, project, { anchor, onOpen, onDelete }) {
   const move = ['Move to folder…', () => moveMenu(job, project, anchor)];
 
+  // the project open now cannot go from under the editor: its menu says how to delete it
   if (project.isOpen) {
-    openMenu(anchor, [move], { onError });
+    const whyNot = ['Delete… (open another project first)', () => {}, { disabled: true }];
+
+    openMenu(anchor, [move, null, whyNot], { onError });
 
     return;
   }

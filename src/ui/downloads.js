@@ -13,6 +13,7 @@ import { chooseFile } from './choose-file.js';
 import { openExportSheet } from './export-sheet.js';
 import { openChatgptSheet } from './prompt/prompt-sheet.js';
 import { inWords } from '../model/told.js';
+import { isSingleView, viewName } from '../model/kinds.js';
 
 const slug = (text) => fileSlug(text, 'project');
 
@@ -90,8 +91,10 @@ function menuItems(app) {
   const { state } = app.store;
   const scale = state.project.canvas.scale;
   const { width, height } = state.project.canvas;
-  const label = directionLabel(state.at.direction);
+  const label = viewName(state.project, state.at.direction);
   const big = `${width * scale}×${height * scale}`;
+  // art with one view has no views to zip together and no Views board
+  const single = isSingleView(state.project);
 
   return [
     ['Sprite sheet for the game…', async () => openExportSheet(app)],
@@ -101,8 +104,8 @@ function menuItems(app) {
     ...(scale > 1 ? [[`${label} · ${big}, transparent`, () => saveView(app, scale)]] : []),
     [`${label} · ${big} on the checkerboard`, () => saveView(app, scale, true)],
     null,
-    ['All views · zip with both sizes', () => saveAllViews(app)],
-    ['Views board · PNG with guide lines and marks', () => saveBoard(app)],
+    [`${single ? label : 'All views'} · zip with both sizes`, () => saveAllViews(app)],
+    ...(single ? [] : [['Views board · PNG with guide lines and marks', () => saveBoard(app)]]),
     null,
     ['Save project file (.json)', () => saveProject(app)],
     ['Open a project file…', () => openProjectFile(app)],

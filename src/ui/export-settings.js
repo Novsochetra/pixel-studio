@@ -39,13 +39,17 @@ const LARGEST_FRAME = 1024;
 const within = (value, least) =>
   Math.min(LARGEST_FRAME, Math.max(least, Math.round(value) || least));
 
+// the feet stand on a pixel of the frame: outside it, the art would be placed off the sheet
 export function sane(settings) {
+  const frameWidth = within(settings.frameWidth, 1);
+  const frameHeight = within(settings.frameHeight, 1);
+
   return {
     ...settings,
-    frameWidth: within(settings.frameWidth, 1),
-    frameHeight: within(settings.frameHeight, 1),
-    anchorX: within(settings.anchorX, 0),
-    anchorY: within(settings.anchorY, 0),
+    frameWidth,
+    frameHeight,
+    anchorX: Math.min(frameWidth - 1, within(settings.anchorX, 0)),
+    anchorY: Math.min(frameHeight - 1, within(settings.anchorY, 0)),
   };
 }
 

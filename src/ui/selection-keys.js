@@ -88,7 +88,7 @@ const COMMAND_KEYS = {
   a: { when: () => true, run: selectAll },
   c: { when: (state) => state.selection, run: (app) => copy(app, false) },
   x: { when: (state) => state.selection, run: (app) => copy(app, true) },
-  v: { when: (state, app) => app.clipboard?.length, run: paste },
+  v: { when: () => true, run: paste },
 };
 
 const PLAIN_KEYS = {

@@ -2,7 +2,8 @@ import { node, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
 import { currentAnimation } from './actions.js';
 import { saveFile } from './save-file.js';
-import { characterHeight, presetSettings, presetsFor, sane } from './export-settings.js';
+import { presetSettings, presetsFor, sane } from './export-settings.js';
+import { summary } from './export/export-summary.js';
 import {
   formatButtons,
   manifestBlock,
@@ -16,8 +17,6 @@ import { gameOf } from '../model/presets.js';
 import { mirrorsOf } from '../model/directions.js';
 import { placementOf } from '../model/kinds.js';
 import { inWords } from '../model/told.js';
-
-const count = (number, word) => `${number} ${word}${number === 1 ? '' : 's'}`;
 
 function warn(warnings) {
   if (warnings.length) {
@@ -72,27 +71,6 @@ function presetButtons(state, choice, pick) {
       ),
     ),
   );
-}
-
-function summary(result, animation, state) {
-  const rows = result.rows.map((row) => row.direction).join(', ');
-  const outside = result.warnings.some((warning) => warning.includes('outside'));
-
-  return [
-    node(
-      'p.hint',
-      {},
-      `${count(result.frames, 'frame')} × ${count(result.rows.length, 'row')} (${rows}) · ${result.sheet.width}×${result.sheet.height} px · ${animation.fps} fps`,
-    ),
-    outside
-      ? node(
-          'p.hint',
-          {},
-          `Some art does not fit this frame; the reference art is ${characterHeight(state)} px tall. "Fit the art" makes a frame that holds it.`,
-        )
-      : null,
-    result.warnings.length ? node('pre.report', {}, result.warnings.join('\n')) : null,
-  ];
 }
 
 function drawExport(slot, job) {

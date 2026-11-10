@@ -10,6 +10,10 @@ import { pinsOf, setPin } from '../../src/model/pins.js';
 import { CLEAR, createSprite, getPixel, pack, setPixel } from '../../src/model/sprite.js';
 import { floodFill, replaceColor } from '../../src/editor/paint.js';
 import { inWords, told } from '../../src/model/told.js';
+import { fittedView } from '../../src/ui/view-kept.js';
+import { paintOverChoices } from '../../src/ui/drawing-settings.js';
+import { parsePaletteText } from '../../src/palette/palette.js';
+import { sane } from '../../src/ui/export-settings.js';
 import { isWholeBetween } from '../../src/model/numbers.js';
 import { barSide } from '../../src/ui/selection-bar.js';
 import { colourSelection } from '../../src/editor/selection.js';
@@ -210,4 +214,49 @@ test('there is no colour to select on a clear pixel', () => {
   setPixel(sprite, 1, 1, RED);
   assert.equal(colourSelection(sprite, 3, 3, false), null);
   assert.equal(colourSelection(sprite, 1, 1, false).cells.filter(Boolean).length, 1);
+});
+
+// "Paint only over" fell back to "Any pixel" without a word once its colour left the art
+test('the colour "Paint only over" is set to stays on its list when the art has lost it', () => {
+  const blue = pack(0, 0, 255);
+
+  assert.equal(paintOverChoices([RED], RED).length, 2);
+  assert.deepEqual(paintOverChoices([RED], blue).at(-1), {
+    value: String(blue),
+    label: '#0000ff · none in the art now',
+  });
+  assert.equal(paintOverChoices([RED], null).length, 2);
+});
+
+// a pasted list dropped #fff, which the colour field takes
+test('a pasted palette takes three-digit codes that begin with #', () => {
+  assert.equal(parsePaletteText('#fff #000000 ff0000 add').length, 3);
+});
+
+// a sprite sheet's feet could be set far outside its frame
+test('the feet of a custom frame stand inside the frame', () => {
+  const settings = sane({ frameWidth: 64, frameHeight: 62, anchorX: 500, anchorY: -3 });
+
+  assert.equal(settings.anchorX, 63);
+  assert.equal(settings.anchorY, 0);
+});
+
+// a page loaded again brought the work back on its first view and frame, with the pencil
+test('the view a project was left on fits the project as it is now', () => {
+  const project = newProject({ kind: 'icon', width: 8, height: 8 });
+  const [animation] = project.animations;
+  const [direction] = Object.keys(animation.directions);
+  const view = fittedView(project, {
+    tool: 'pose',
+    mode: 'board',
+    zoom: 9,
+    color: RED,
+    at: { animation: animation.id, direction, frame: 7, layer: null },
+  });
+
+  assert.equal(view.tool, 'pencil', 'an icon has no Pose tool');
+  assert.equal(view.mode, 'edit', 'and no Views board');
+  assert.equal(view.color, RED);
+  assert.equal('zoom' in view, false, 'the canvas is fitted afresh');
+  assert.equal(view.at.frame, 0, 'a frame it no longer has gives way to one it has');
 });

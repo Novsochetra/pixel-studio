@@ -31,7 +31,11 @@ function placeButton(job, { place, name, count }) {
     },
     icon(ICONS[place] ?? 'folder'),
     node('span.place-name', {}, name),
-    node('span.place-count', { 'aria-label': `${count} projects` }, String(count)),
+    node(
+      'span.place-count',
+      { 'aria-label': `${count} ${count === 1 ? 'project' : 'projects'}` },
+      String(count),
+    ),
   );
 
   if (place !== EVERY_PROJECT) {

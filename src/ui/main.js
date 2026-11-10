@@ -18,6 +18,7 @@ import { layoutSize, watchLayout } from './layout.js';
 import { watchPressesFromStart } from './after-press.js';
 import { watchSegmented } from './segmented-thumb.js';
 import { inWords } from '../model/told.js';
+import { watchView } from './view-kept.js';
 
 // the editor, opened on one project; `save` as install() takes it
 async function startEditor(backend, index, { project, prefix, save, background = null }) {
@@ -42,6 +43,7 @@ async function startEditor(backend, index, { project, prefix, save, background =
   }
 
   mountApp(app);
+  watchView(app);
 
   // a project made or opened here is written at once, as adding one in the editor is
   if (save === 'all') {

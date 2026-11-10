@@ -11,6 +11,7 @@ import { allLayers, newId } from '../model/project.js';
 import { normalizeProject } from '../model/normalize.js';
 import { createSprite } from '../model/sprite.js';
 import { told } from '../model/told.js';
+import { VIEW, keptView } from './view-kept.js';
 
 export function fillMissingSprites(project) {
   normalizeProject(project);
@@ -63,27 +64,6 @@ function startSaving(app, project, save, stored) {
 }
 
 // how the editor was showing things, kept when a version of the same project takes its place
-const VIEW = [
-  'mode',
-  'zoom',
-  'tool',
-  'color',
-  'brush',
-  'showGrid',
-  'showGuides',
-  'viewFilter',
-  'onion',
-  'gridAll',
-  'gridOpen',
-  'symmetry',
-  'showPins',
-  'pinName',
-  'shapeFilled',
-  'paletteLock',
-  'paintOver',
-  'cleanLines',
-];
-
 function viewKept(state, project) {
   const kept = Object.fromEntries(VIEW.map((key) => [key, state[key]]));
 
@@ -104,7 +84,7 @@ export function install(app, project, { prefix, save = 'nothing', keepView = fal
   // the same project rewritten (a version restored): the old saver knows which layers are stored,
   // so the ones the restored project lacks get removed
   const stored = app.keys?.prefix === prefix ? app.saver?.stored : null;
-  const view = keepView ? viewKept(app.store.state, project) : {};
+  const view = keepView ? viewKept(app.store.state, project) : keptView(project);
   app.backgroundImage = null;
   app.keys = keysFor(prefix);
   app.history = new History(app.findLayer);

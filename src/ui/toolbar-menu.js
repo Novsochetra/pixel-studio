@@ -75,7 +75,7 @@ function moreEntries(app) {
     [
       ['Canvas size…', () => openCanvasSizeSheet(app)],
       ['History: saved versions…', () => openVersionsSheet(app)],
-      hasKeyboard() ? ['Keyboard shortcuts', () => openShortcuts()] : null,
+      hasKeyboard() ? ['Keyboard shortcuts', () => openShortcuts(app.store.state.project)] : null,
       canInstall() ? ['Install app', () => installApp()] : null,
     ].filter(Boolean),
   ];

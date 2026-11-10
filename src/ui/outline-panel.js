@@ -97,7 +97,8 @@ function operationButton(app, operation, colour) {
       onfocus: highlight(points),
       onblur: highlight(null),
     },
-    `${operation.label} (${count} here)`,
+    // with every frame and view on, far more than these change: the count is this layer's
+    `${operation.label} (${count} ${state.outline.everywhere ? 'in this layer' : 'here'})`,
   );
 }
 

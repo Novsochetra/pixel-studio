@@ -61,7 +61,7 @@ const wideButtons = (app) => [
     {
       title: 'Keyboard shortcuts (?)',
       'aria-label': 'Keyboard shortcuts',
-      onclick: openShortcuts,
+      onclick: () => openShortcuts(app.store.state.project),
     },
     '?',
   ),

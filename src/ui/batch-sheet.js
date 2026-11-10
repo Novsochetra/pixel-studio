@@ -82,10 +82,57 @@ function hintText(state) {
 }
 
 // Several AI images at once, each cleaned into its own view and frame, placed together in one step.
-export function openBatchSheet(app, files) {
+// Only pictures the browser can open are planned. One that cannot took a frame's place all the
+// same: its frame was left empty and the next picture pushed on to a new one.
+async function readable(files) {
+  const tried = await Promise.all(
+    [...files].map((file) =>
+      decodeImage(file).then(
+        () => file,
+        () => null,
+      ),
+    ),
+  );
+
+  return tried.filter(Boolean);
+}
+
+const leftOutText = (count) =>
+  count === 1
+    ? '1 file is not a picture the browser can open, and was left out.'
+    : `${count} files are not pictures the browser can open, and were left out.`;
+
+export async function openBatchSheet(app, files) {
+  const images = await readable(files);
+  const leftOut = files.length - images.length;
+
+  if (images.length) {
+    showBatch(app, images, leftOut);
+  } else {
+    toast(leftOutText(leftOut));
+  }
+}
+
+// each image cleaned in turn, the list drawn again as each is done
+async function cleanEach(state, items, { draw, accept }) {
+  let ref = referenceSprite(state);
+
+  for (const item of referenceFirst(state, items)) {
+    item.status = node('span.hint', {}, 'Cleaning…');
+    draw();
+    await cleanOne(state, item, ref);
+    ref = becomesReference(state, item, ref) ? item.sprite : ref;
+    draw();
+  }
+
+  accept.disabled = !items.some((item) => item.sprite);
+}
+
+function showBatch(app, files, leftOut) {
   const { state } = app.store;
   const animation = currentAnimation(state);
-  const sheet = openSheet(`Clean ${files.length} images`, null, { wide: true });
+  const title = `Clean ${files.length === 1 ? '1 image' : `${files.length} images`}`;
+  const sheet = openSheet(title, null, { wide: true });
   const list = node('div.view-list');
   const items = batchItems(state, files);
   const accept = node('button.btn.primary', { disabled: true }, 'Use them all');
@@ -94,19 +141,7 @@ export function openBatchSheet(app, files) {
       list,
       items.map((item) => batchRow(item, state.project, animation)),
     );
-  const run = async () => {
-    let ref = referenceSprite(state);
-
-    for (const item of referenceFirst(state, items)) {
-      item.status = node('span.hint', {}, 'Cleaning…');
-      draw();
-      await cleanOne(state, item, ref);
-      ref = becomesReference(state, item, ref) ? item.sprite : ref;
-      draw();
-    }
-
-    accept.disabled = !items.some((item) => item.sprite);
-  };
+  const run = () => cleanEach(state, items, { draw, accept });
 
   accept.addEventListener('click', () => {
     keepVersion(app, `Before cleaning ${files.length} images`);
@@ -119,6 +154,7 @@ export function openBatchSheet(app, files) {
   });
   sheet.body.append(
     node('p.hint', {}, hintText(state)),
+    leftOut ? node('p.hint', {}, leftOutText(leftOut)) : null,
     list,
     node('div.sheet-actions', {}, node('button.btn', { onclick: sheet.close }, 'Cancel'), accept),
   );

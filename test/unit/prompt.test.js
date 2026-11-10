@@ -31,7 +31,11 @@ test('a view is asked for by its words, at the reference height and colours', ()
   const project = newProject({ kind: 'character' });
   const text = promptText(project, ask(project));
 
-  assert.ok(text.startsWith('Draw the side view, facing right of the same character'));
+  assert.ok(
+    text.startsWith(
+      'Draw the same character as the attached reference sheet, in the side view, facing right.',
+    ),
+  );
   assert.ok(text.includes('Exactly 40 pixels tall'));
   assert.ok(text.includes('Use only these 1 colours: #ff0000.'));
   assert.ok(!text.includes('Pose:'));
@@ -44,7 +48,11 @@ test('a frame names its animation and carries the pose; marks are pointed out', 
     ask(project, { task: 'frame', pose: ' knee up ', marked: true }),
   );
 
-  assert.ok(text.includes('the next frame of the "Walk" animation, side view'));
+  assert.ok(
+    text.includes(
+      'the next frame of the "Walk" animation of the same character as the attached reference sheet, in the side view',
+    ),
+  );
   assert.ok(text.endsWith('Pose: knee up'));
   assert.ok(text.includes('The red marks and notes on the sheet show what to change.'));
 });

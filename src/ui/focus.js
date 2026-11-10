@@ -1,9 +1,14 @@
 const FOCUSABLE =
   'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [href], [tabindex]:not([tabindex="-1"])';
 
+// What can take the focus now: a field in a part that is folded shut cannot, and asking it to
+// left the focus on the button behind the window (Enter then opened the window twice).
+const foldedShut = (element) =>
+  Boolean(element.closest('details:not([open])')) && !element.closest('summary');
+
 export function focusables(container) {
   return [...container.querySelectorAll(FOCUSABLE)].filter(
-    (element) => !element.closest('[hidden]'),
+    (element) => !element.closest('[hidden]') && !foldedShut(element),
   );
 }
 

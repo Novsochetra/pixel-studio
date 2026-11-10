@@ -50,7 +50,7 @@ async function resize(app, { size, anchor }) {
 }
 
 function sizeField(label, id, value) {
-  const input = numberInput({ id, label, max: CANVAS_LIMITS.max, value });
+  const input = numberInput({ id, label, ...CANVAS_LIMITS, value });
 
   return { input, field: node('label.field', {}, node('span', {}, label), input) };
 }

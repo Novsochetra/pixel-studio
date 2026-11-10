@@ -1,5 +1,5 @@
 import { node } from './dom.js';
-import { changeStructure } from './actions.js';
+import { changeGuides } from './guide-changes.js';
 import { characterColors } from './character-colours.js';
 import { GUIDE_RULES } from '../views/guides.js';
 import { guideChips } from './guide-chips.js';
@@ -20,10 +20,7 @@ function checks(app, guide) {
 // A change to a guide, made after the press that took the focus from its field: the panel is
 // drawn again, and "Add guide" must still be there for its click.
 const updater = (app, guide) => (patch) =>
-  afterPress(() => {
-    Object.assign(guide, patch);
-    changeStructure(app, 'guides');
-  });
+  afterPress(() => changeGuides(app, `Change ${guide.name}`, () => Object.assign(guide, patch)));
 
 function ruleFields(app, guide) {
   const update = updater(app, guide);
@@ -83,10 +80,8 @@ function rowField(project, guide, update) {
 export function guideRow(app, guide) {
   const { project } = app.store.state;
   const update = updater(app, guide);
-  const remove = () => {
-    project.guides = project.guides.filter((other) => other !== guide);
-    changeStructure(app, 'guides');
-  };
+  const remove = () =>
+    changeGuides(app, `Remove ${guide.name}`, (guides) => guides.splice(guides.indexOf(guide), 1));
 
   return node(
     'div.guide-row',

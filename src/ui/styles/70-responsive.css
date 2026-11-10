@@ -608,7 +608,7 @@
 /* A short window has no room for the tools in one column: they stand two across, as image
    editors do, so none waits unseen below the fold. */
 @media (max-height: 860px) {
-  :root:not([data-layout='compact']) .rail {
+  :root:not([data-layout='compact']) .app[data-mode='edit'] .rail {
     display: grid;
     grid-template-columns: repeat(2, 40px);
     align-content: start;

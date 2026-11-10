@@ -1,13 +1,17 @@
 import { node } from '../dom.js';
 import { DIRECTION_SETS } from '../../model/directions.js';
 import { defaultName } from '../../model/presets.js';
-import { wholeNumber } from '../../model/numbers.js';
+import { isWholeBetween, wholeNumber } from '../../model/numbers.js';
 import { numberInput } from '../number-input.js';
+import { CANVAS_LIMITS } from '../../model/canvas-size.js';
 
 const SIZES = [16, 24, 32, 48, 64, 96, 128, 160];
 
 const sizeOr = (text, usual) =>
-  wholeNumber(Number(text) > 0 ? text : '', { min: 8, max: 512, fallback: usual });
+  wholeNumber(Number(text) > 0 ? text : '', { ...CANVAS_LIMITS, fallback: usual });
+
+// empty, or 0, takes the size the kind comes with; anything else is a size a canvas can have
+const sizeCanBe = (text) => !(Number(text) > 0) || isWholeBetween(text, CANVAS_LIMITS);
 
 function field(label, control) {
   return node('label.field', {}, node('span', {}, label), control);
@@ -16,8 +20,8 @@ function field(label, control) {
 function controls() {
   return {
     name: node('input.input', { id: 'project-name', 'aria-label': 'Name' }),
-    width: numberInput({ id: 'project-width', label: 'Canvas width', max: 512 }),
-    height: numberInput({ id: 'project-height', label: 'Canvas height', max: 512 }),
+    width: numberInput({ id: 'project-width', label: 'Canvas width', ...CANVAS_LIMITS }),
+    height: numberInput({ id: 'project-height', label: 'Canvas height', ...CANVAS_LIMITS }),
     scale: numberInput({
       id: 'project-scale',
       label: 'Pixels per art pixel in the big copy',
@@ -55,12 +59,14 @@ function sizeButtons(width, height) {
   return { buttons, mark };
 }
 
-export function projectFields() {
-  const { name, width, height, scale, directions } = controls();
-  const directionsField = field('Directions', directions);
-  const sizes = sizeButtons(width, height);
-  let usual = { width: 64, height: 64 };
-  const el = node(
+// why the sizes typed cannot be: said, where 5 was quietly made 8 and 99999 made 512
+const sizeProblem = (sizes) =>
+  sizes.every((size) => sizeCanBe(size.value))
+    ? null
+    : `Width and height are whole numbers of art pixels from ${CANVAS_LIMITS.min} to ${CANVAS_LIMITS.max}. Leave one empty for the size this kind comes with.`;
+
+function laidOut({ name, width, height, scale }, sizes, directionsField) {
+  return node(
     'div.start-fields',
     {},
     field('Name', name),
@@ -74,6 +80,14 @@ export function projectFields() {
     node('div.start-sizes', { role: 'group', 'aria-label': 'Common sizes' }, sizes.buttons),
     directionsField,
   );
+}
+
+export function projectFields() {
+  const { name, width, height, scale, directions } = controls();
+  const directionsField = field('Directions', directions);
+  const sizes = sizeButtons(width, height);
+  let usual = { width: 64, height: 64 };
+  const el = laidOut({ name, width, height, scale }, sizes, directionsField);
 
   return {
     el,
@@ -87,6 +101,7 @@ export function projectFields() {
       directions.value = preset.directionSet;
       directionsField.hidden = preset.kind !== 'character';
     },
+    problem: () => sizeProblem([width, height]),
     read: () => ({
       name: name.value.trim() || name.placeholder,
       // a field left empty, or 0, takes the size the kind picked comes with

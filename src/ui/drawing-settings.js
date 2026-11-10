@@ -4,14 +4,26 @@ import { bounds, toHex } from '../model/sprite.js';
 import { brushField } from './brush-settings.js';
 import { slider } from './slider.js';
 
+// What "Paint only over" can be set to: any pixel, or one of the art's colours. The colour it is
+// set to stays in the list when the art no longer has it, and says so: dropped to "Any pixel"
+// without a word, the next strokes painted everywhere, and undo did not bring the setting back.
+export function paintOverChoices(colors, paintOver) {
+  const gone = paintOver !== null && !colors.includes(paintOver);
+
+  return [
+    { value: '', label: 'Any pixel' },
+    ...colors.map((color) => ({ value: String(color), label: toHex(color) })),
+    ...(gone
+      ? [{ value: String(paintOver), label: `${toHex(paintOver)} · none in the art now` }]
+      : []),
+  ];
+}
+
 function paintOverField(app, colors) {
   const { state } = app.store;
-  const options = [
-    node('option', { value: '' }, 'Any pixel'),
-    ...colors.map((color) =>
-      node('option', { value: String(color), selected: state.paintOver === color }, toHex(color)),
-    ),
-  ];
+  const options = paintOverChoices(colors, state.paintOver).map(({ value, label }) =>
+    node('option', { value, selected: String(state.paintOver ?? '') === value }, label),
+  );
 
   return node(
     'label.field',

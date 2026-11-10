@@ -1,6 +1,7 @@
 import { node } from './dom.js';
 import { openSheet } from './sheet.js';
 import { keyNames } from './platform-keys.js';
+import { kindOf } from '../model/kinds.js';
 
 const GROUPS = [
   [
@@ -8,11 +9,11 @@ const GROUPS = [
     [
       ['B', 'Pencil'],
       ['E', 'Eraser'],
-      ['I or Alt-click', 'Pick a colour'],
+      ['I or Alt-click', 'Colour picker'],
       ['G', 'Fill'],
       ['N  U  C', 'Line, rectangle, ellipse (Shift: straight, square, circle)'],
-      ['R', 'Replace a colour everywhere'],
-      ['D', 'Lighter shade (Shift: darker)'],
+      ['R', 'Replace colour: every pixel of the one clicked'],
+      ['D', 'Light and dark brush (Shift: darker)'],
       ['[  ]', 'Brush smaller, bigger'],
       ['S', 'Select and move: a click picks the layer under it'],
       ['W', 'Select a colour (Shift: everywhere)'],
@@ -53,7 +54,7 @@ const GROUPS = [
       ['Arrows, Home, End', 'In the frames: walk the frames and views; on a tab: the tabs'],
       ['Shift F10, right-click', 'A tab’s menu: rename, duplicate, delete'],
       ['+  −', 'Zoom'],
-      ['⌘ + scroll, pinch', 'Zoom around the pointer'],
+      ['⌘scroll, or pinch', 'Zoom around the pointer'],
       ['Space + drag, middle drag', 'Pan'],
       ['Two fingers', 'Pan and pinch on a touch screen'],
     ],
@@ -68,7 +69,15 @@ const GROUPS = [
   ],
 ];
 
-export function openShortcuts() {
+// pins and body parts are for what stands on its feet: their keys do nothing for a tile or an icon
+const STANDING_KEYS = new Set(['P', 'O']);
+
+const rowsFor = (rows, project) =>
+  !project || kindOf(project).place === 'feet'
+    ? rows
+    : rows.filter(([keys]) => !STANDING_KEYS.has(keys));
+
+export function openShortcuts(project = null) {
   const sheet = openSheet('Keyboard shortcuts', null, { wide: true });
 
   sheet.body.append(
@@ -80,7 +89,7 @@ export function openShortcuts() {
           'div',
           { style: { display: 'grid', gap: '6px', alignContent: 'start' } },
           node('h2.eyebrow', {}, title),
-          rows.map(([keys, what]) =>
+          rowsFor(rows, project).map(([keys, what]) =>
             node('div.shortcut', {}, node('kbd', {}, keyNames(keys)), node('span', {}, what)),
           ),
         ),

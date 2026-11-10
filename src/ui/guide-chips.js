@@ -5,6 +5,11 @@ import { viewName } from '../model/kinds.js';
 
 // how far off each view is from a guide; views that all say the same say it once
 export function guideChips(state, guide) {
+  // a guide that follows a colour, with none picked yet, has nothing to check
+  if (guide.rule === 'colour-top' && (guide.colour === null || guide.colour === undefined)) {
+    return node('span.chip', { 'data-state': 'off' }, 'Pick the colour it follows');
+  }
+
   const found = directionsInUse(state).map((direction) => {
     const sprite = directionSprite(state, direction);
 

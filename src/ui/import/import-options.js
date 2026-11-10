@@ -50,7 +50,7 @@ export const keepsOwnSize = (size, height) => size === 'keep' && height === null
 
 // What can be tuned before cleaning again: how tall, the grid if the guess was wrong, and (when
 // matching a reference) whether to take its height or keep the picture's own pixel size.
-export function optionFields({ matching, keepScale }) {
+export function optionFields({ matching, keepScale, onChange, onEnter }) {
   const height = node('input.input.mono', {
     type: 'number',
     min: '8',
@@ -74,14 +74,17 @@ export function optionFields({ matching, keepScale }) {
     };
   };
 
-  return {
-    read,
-    el: node(
-      'div.compare',
-      {},
-      size ? node('label.field', {}, node('span', {}, 'Size'), size) : null,
-      node('label.field', {}, node('span', {}, 'Height (art pixels)'), height),
-      node('label.field', {}, node('span', {}, 'Grid size, if the guess looks wrong'), cell),
-    ),
-  };
+  const el = node(
+    'div.compare',
+    {},
+    size ? node('label.field', {}, node('span', {}, 'Size'), size) : null,
+    node('label.field', {}, node('span', {}, 'Height (art pixels)'), height),
+    node('label.field', {}, node('span', {}, 'Grid size, if the guess looks wrong'), cell),
+  );
+
+  el.addEventListener('input', onChange);
+  el.addEventListener('change', onChange);
+  el.addEventListener('keydown', (event) => event.key === 'Enter' && onEnter());
+
+  return { read, el };
 }

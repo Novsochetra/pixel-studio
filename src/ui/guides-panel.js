@@ -1,5 +1,6 @@
 import { node, replace } from './dom.js';
-import { changeStructure, referenceSprite } from './actions.js';
+import { referenceSprite } from './actions.js';
+import { changeGuides } from './guide-changes.js';
 import { guideRow } from './guide-row.js';
 import { measureGuide, newGuide } from '../views/guides.js';
 import { viewName } from '../model/kinds.js';
@@ -11,8 +12,7 @@ function addGuide(app) {
   const guide = newGuide('Guide', 0, 'fixed');
 
   guide.row = ref ? Math.floor(ref.height / 2) : 0;
-  state.project.guides.push(guide);
-  changeStructure(app, 'guides');
+  changeGuides(app, 'Add guide', (guides) => guides.push(guide));
 }
 
 // every guide that checks the art moves to the row the reference view has it at
@@ -20,12 +20,13 @@ function matchReference(app) {
   const { state } = app.store;
   const ref = referenceSprite(state);
 
-  state.project.guides.forEach((guide) => {
-    const row = ref ? measureGuide(ref, guide) : null;
+  changeGuides(app, 'Match guides', (guides) =>
+    guides.forEach((guide) => {
+      const row = ref ? measureGuide(ref, guide) : null;
 
-    guide.row = row ?? guide.row;
-  });
-  changeStructure(app, 'guides');
+      guide.row = row ?? guide.row;
+    }),
+  );
 }
 
 function heading(app) {

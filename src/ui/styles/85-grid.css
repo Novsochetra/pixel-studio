@@ -70,6 +70,11 @@
   color: var(--label-secondary);
   font-weight: 500;
   white-space: nowrap;
+  /* a long name is cut short: whole, one tab took the strip and pushed Play to a second row */
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: none;
   transition:
     color var(--duration-normal) var(--ease-standard),
     opacity var(--duration-fast) var(--ease-standard);

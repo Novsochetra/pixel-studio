@@ -20,24 +20,33 @@ export function saveText(state) {
   return state.saveStatus === 'saved' ? `Saved ${where}` : (SAVE_TEXT[state.saveStatus] ?? '');
 }
 
+const ZOOM = { least: 1, most: 24 };
+
+// one step closer or further: a button that stops at the end of what the canvas can zoom to
+function zoomStep(app, { step, name, keys, iconName }) {
+  const zoom = app.store.state.zoom + step;
+
+  return node(
+    'button.btn.quiet',
+    {
+      title: `${name} (${keys})`,
+      'aria-label': name,
+      disabled: zoom < ZOOM.least || zoom > ZOOM.most,
+      onclick: () => app.store.set({ zoom }),
+    },
+    icon(iconName),
+  );
+}
+
 export function zoomControls(app) {
   const { state } = app.store;
-  const setZoom = (zoom) => app.store.set({ zoom: Math.max(1, Math.min(24, zoom)) });
 
   return node(
     'div.group',
     {},
-    node(
-      'button.btn.quiet',
-      { title: 'Zoom out (−)', 'aria-label': 'Zoom out', onclick: () => setZoom(state.zoom - 1) },
-      icon('minus'),
-    ),
+    zoomStep(app, { step: -1, name: 'Zoom out', keys: '−', iconName: 'minus' }),
     node('span.zoom-label', {}, `${state.zoom * 100}%`),
-    node(
-      'button.btn.quiet',
-      { title: 'Zoom in (+)', 'aria-label': 'Zoom in', onclick: () => setZoom(state.zoom + 1) },
-      icon('plus'),
-    ),
+    zoomStep(app, { step: 1, name: 'Zoom in', keys: '+', iconName: 'plus' }),
     node(
       'button.btn.quiet',
       { title: 'Fit the canvas in the window', onclick: app.fitCanvas },

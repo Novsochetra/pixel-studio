@@ -18,6 +18,8 @@ function noteField(app) {
   return node('input.input', {
     placeholder: 'Note text, then press the board',
     id: 'note-text',
+    // a note is a few words by a mark: longer, it ran across the view beside it
+    maxlength: '40',
     'aria-label': 'Note text',
     value: app.noteText ?? '',
     oninput: (event) => {

@@ -26,12 +26,13 @@ function request(project, { animation, direction, task }) {
     return `Draw another ${subject} in the same style as the attached reference sheet.`;
   }
 
+  // the view comes last, after what it is a view of: "the side view, facing right of the same
+  // character" read as the character facing right of something
+  const view = single ? '' : `, in the ${viewWords(direction)}`;
   const what =
-    task === 'frame'
-      ? `the next frame of the "${animation}" animation${single ? '' : `, ${viewWords(direction)}`}`
-      : `the ${viewWords(direction)}`;
+    task === 'frame' ? `the next frame of the "${animation}" animation of the same` : 'the same';
 
-  return `Draw ${what} of the same ${subject} as the attached reference sheet. Keep the same shapes, colours and proportions.`;
+  return `Draw ${what} ${subject} as the attached reference sheet${view}. Keep the same shapes, colours and proportions.`;
 }
 
 // where the art sits on the grid, in the numbers of the big copy the AI is shown

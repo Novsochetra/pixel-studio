@@ -13,6 +13,11 @@
   display: none;
 }
 
+/* the brush and its settings draw nothing on the Views board */
+.app[data-mode='board'] .section[data-name='drawing'] {
+  display: none;
+}
+
 .app[data-mode='game'] {
   grid-template-columns: auto minmax(0, 1fr) 0;
 }
@@ -61,6 +66,11 @@
 
 .wordmark small {
   display: block;
+  /* a long name is cut short: wrapped, it pushed the bar's buttons onto a second row */
+  max-width: 220px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font: 400 11px/1.4 var(--font-ui);
   letter-spacing: 0;
   color: var(--label-muted);

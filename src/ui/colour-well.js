@@ -20,7 +20,9 @@ function hexField(app) {
 
       if (color === null) {
         event.target.value = toHex(state.color);
-        toast(`That is not a colour code: six letters and digits, like ${FIRST_PENCIL_COLOUR}.`);
+        toast(
+          `That is not a colour code: three or six letters and digits, like ${FIRST_PENCIL_COLOUR}.`,
+        );
       } else {
         app.store.set({ color });
       }

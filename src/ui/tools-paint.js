@@ -136,6 +136,11 @@ export function shade(app, point, darker) {
       if (app.history.record(darker ? 'Darken' : 'Lighten', [{ layer, before }])) {
         app.saver.markLayers([layer.id]);
         app.store.touch('pixels');
+      } else {
+        // it steps along the art's own shades: with none to step to, it left no trace or word
+        toast(
+          `The art has no ${darker ? 'darker' : 'lighter'} shade of the colours under the brush to step to.`,
+        );
       }
     },
   };

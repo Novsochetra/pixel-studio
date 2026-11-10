@@ -86,7 +86,6 @@ export async function openImport(app, direction, file, frame = app.store.state.a
   const alone = cleansAlone(state, direction, frame);
 
   // a later frame of an animation is another pose: by default it keeps its own height
-  const fields = optionFields({ matching: !alone, keepScale: frame > 0 });
   const job = {
     app,
     direction,
@@ -98,6 +97,17 @@ export async function openImport(app, direction, file, frame = app.store.state.a
     slot: node('div', { style: { display: 'grid', gap: '12px' } }),
     accept: node('button.btn.primary', { disabled: true }, `Use for ${place}`),
   };
+  // What is typed is not what the result on show was cleaned with: Use waits for Clean again,
+  // where it placed the old result without a word. Enter in a field cleans again.
+  const fields = optionFields({
+    matching: !alone,
+    keepScale: frame > 0,
+    onChange: () => {
+      job.accept.disabled = true;
+    },
+    onEnter: () => job.image && cleanAgain(job, fields),
+  });
+
   job.accept.addEventListener('click', () => accept(job, place));
   sheet.body.append(...sheetBody(job, file, fields));
   job.image = await decodeImage(file).catch(() => null);

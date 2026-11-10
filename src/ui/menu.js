@@ -115,8 +115,10 @@ export function openMenu(anchor, entries, { align = 'left', onError = () => {} }
   closeOpenMenu?.();
 
   const menu = node('div.menu', { role: 'menu', style: MENU_STYLE });
+  // the button it hangs from moves when the window changes size: the menu would stay behind
   const close = () => {
     leave(menu, 'menu-out');
+    window.removeEventListener('resize', close);
     document.removeEventListener('pointerdown', outside, true);
     document.removeEventListener('keydown', onKey, true);
     closeOpenMenu = null;
@@ -146,6 +148,7 @@ export function openMenu(anchor, entries, { align = 'left', onError = () => {} }
   menu.append(...entries.map((entry) => (entry ? item(entry, close, onError) : node('hr'))));
   document.body.append(menu);
   position(menu, anchor, align);
+  window.addEventListener('resize', close);
   document.addEventListener('pointerdown', outside, true);
   document.addEventListener('keydown', onKey, true);
   closeOpenMenu = close;

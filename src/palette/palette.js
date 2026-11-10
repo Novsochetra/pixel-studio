@@ -14,7 +14,8 @@ export function parsePaletteText(text) {
       continue;
     }
 
-    for (const hex of line.match(/#?\b[0-9a-f]{6}\b/gi) ?? []) {
+    // three digits count only after a #: bare, "add" and "bad" are words
+    for (const hex of line.match(/#?\b[0-9a-f]{6}\b|#[0-9a-f]{3}\b/gi) ?? []) {
       colors.push(fromHex(hex));
     }
   }

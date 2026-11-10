@@ -63,7 +63,7 @@ export function showQuickStart(stage, project) {
       { style: { gap: '6px' } },
       gotIt,
       hasKeyboard()
-        ? node('button.btn.quiet', { onclick: () => openShortcuts() }, 'Shortcuts (?)')
+        ? node('button.btn.quiet', { onclick: () => openShortcuts(project) }, 'Shortcuts (?)')
         : null,
     ),
   );

@@ -1,4 +1,4 @@
-import { icon, node, replace } from '../dom.js';
+import { icon, node, replace, toast } from '../dom.js';
 import { newProject } from '../../model/new-project.js';
 import { startChoices } from '../../model/start-choices.js';
 import { projectFields } from './fields.js';
@@ -99,7 +99,13 @@ export function newProjectChooser({ presets, onCreate, onDeletePreset }) {
     },
   };
   const create = () => {
-    onCreate(newProject({ ...fields.read(), preset: picked.preset }));
+    const problem = fields.problem();
+
+    if (problem) {
+      toast(problem);
+    } else {
+      onCreate(newProject({ ...fields.read(), preset: picked.preset }));
+    }
   };
 
   handlers.onPick(picked);
