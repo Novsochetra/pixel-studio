@@ -193,3 +193,21 @@ export const paintedPixels = (canvas, size) =>
 
     return found;
   }, size);
+
+// A visit with nothing saved: the saved work is deleted from a page that does not hold it open,
+// and waited for. Safari drops a delete still waiting on the page that asked for it when that
+// page loads again.
+export async function forgetSavedWork(page, url) {
+  await page.goto(new URL('manifest.webmanifest', url).href);
+  await page.evaluate(
+    () =>
+      new Promise((resolve, reject) => {
+        const request = indexedDB.deleteDatabase('pixel-clean-studio');
+
+        request.onsuccess = resolve;
+        request.onerror = reject;
+      }),
+  );
+  await page.goto(url);
+  await page.waitForSelector('.start-screen');
+}

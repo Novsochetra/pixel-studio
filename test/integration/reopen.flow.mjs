@@ -3,6 +3,7 @@
 import { openStudio } from './harness.mjs';
 import {
   createProject,
+  forgetSavedWork,
   frameAction,
   openExample,
   selectFrame,
@@ -42,20 +43,7 @@ check(
   'and that view still has the fewer frames',
 );
 
-// Deleted from a page that does not hold the saved work open, and waited for: Safari drops a
-// delete still waiting on the page that asked for it when that page loads again.
-await page.goto(new URL('manifest.webmanifest', url).href);
-await page.evaluate(
-  () =>
-    new Promise((resolve, reject) => {
-      const request = indexedDB.deleteDatabase('pixel-clean-studio');
-
-      request.onsuccess = resolve;
-      request.onerror = reject;
-    }),
-);
-await page.goto(url);
-await page.waitForSelector('.start-screen');
+await forgetSavedWork(page, url);
 await createProject(page, { kind: 'Tiles', name: 'Floor' });
 await comesBack('the first project made on the start screen opens again on the next visit');
 check(

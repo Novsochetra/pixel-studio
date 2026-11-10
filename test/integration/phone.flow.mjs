@@ -2,7 +2,7 @@
 // from the dock, a finger swipe scrolls the frames while press-and-hold drags one, and every
 // button still works.
 import { onChromium, openStudio } from './harness.mjs';
-import { frameLabels, openDock, openExample, openWorkspace } from './studio.mjs';
+import { forgetSavedWork, frameLabels, openDock, openExample, openWorkspace } from './studio.mjs';
 import { monkey } from './monkey.mjs';
 
 const studio = await openStudio({ device: 'Pixel 7' });
@@ -143,11 +143,7 @@ check(
 await page.screenshot({ path: `${shots}/phone-projects.png` });
 await page.keyboard.press('Escape');
 
-await page.goto(studio.url);
-await page.waitForTimeout(800);
-await page.evaluate(() => indexedDB.deleteDatabase('pixel-clean-studio'));
-await page.reload();
-await page.waitForSelector('.start-screen');
+await forgetSavedWork(page, studio.url);
 await monkey(studio);
 check((await overflow()) <= 0, 'and still fits after every button');
 await studio.finish();
