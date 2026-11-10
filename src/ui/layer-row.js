@@ -1,6 +1,6 @@
 import { node, icon } from './dom.js';
 import { restructure } from './actions.js';
-import { pickLayerToMove } from './layer-move.js';
+import { pickLayer } from './layer-move.js';
 import { renameInPlace } from './rename-field.js';
 import { setLayerShown, updateLayer } from '../model/structure.js';
 import { frameAt } from '../model/project.js';
@@ -86,7 +86,7 @@ export function layerRow(app, entry, active) {
   const select = (event) => {
     const rename = secondClickOnName(entry, event);
 
-    pickLayerToMove(app, entry.key);
+    pickLayer(app, entry.key);
 
     if (rename) {
       renameRow(app, entry);

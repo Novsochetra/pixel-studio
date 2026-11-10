@@ -3,7 +3,7 @@ import { frameAt } from '../model/project.js';
 import { removePinNear, setPin } from '../model/pins.js';
 import { currentLayer, restructure } from './actions.js';
 import { toast } from './dom.js';
-import { fill, replace, shade, stroke } from './tools-paint.js';
+import { PAINTING, fill, replace, shade, stroke } from './tools-paint.js';
 import { shape } from './tools-shape.js';
 import { lasso, select, wand } from './tools-select.js';
 import { onTurnHandle, turnSelectionDrag } from './selection-turn.js';
@@ -69,17 +69,6 @@ const STANDING_ONLY = new Set(['pin', 'pose']);
 export function toolsFor(project) {
   return TOOLS.filter((tool) => !STANDING_ONLY.has(tool.id) || kindOf(project).place === 'feet');
 }
-
-const PAINTING = new Set([
-  'pencil',
-  'eraser',
-  'fill',
-  'replace',
-  'shade',
-  'line',
-  'rect',
-  'ellipse',
-]);
 
 const orTurnHandle = (tool) => (app, point, event) =>
   onTurnHandle(app, point) ? turnSelectionDrag(app, point) : tool(app, point, event);

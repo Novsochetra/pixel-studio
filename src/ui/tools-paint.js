@@ -8,6 +8,9 @@ import { toast } from './dom.js';
 
 export const BRUSH_TOOLS = new Set(['pencil', 'eraser', 'shade', 'line', 'rect', 'ellipse']);
 
+// the tools that put pixels on the layer being edited
+export const PAINTING = new Set([...BRUSH_TOOLS, 'fill', 'replace']);
+
 // clean lines tidies drawn lines; for the eraser it would put erased corners back
 export function paintOptions(state, color = state.color) {
   return {

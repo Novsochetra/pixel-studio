@@ -2,8 +2,17 @@
    the inspector's panels open from the dock, one at a time, between the canvas and the tools. */
 :root[data-layout='compact'] body {
   font-size: 15px;
-  /* a drag that reaches the screen's edge draws: it never pulls the page down to reload it */
+}
+
+/* a drag that reaches the screen's edge draws: it never pulls the page down to reload it */
+:root[data-layout='compact'],
+:root[data-layout='compact'] body {
   overscroll-behavior: none;
+}
+
+/* an iPhone zooms the page in on a field whose text is under 16 px, and leaves it zoomed */
+:root[data-layout='compact'] :is(input, select, textarea) {
+  font-size: 16px;
 }
 
 /* two quick taps on a button are two presses, not a zoom of the page; a long press picks no text */
@@ -96,7 +105,13 @@
   border-top: 1px solid var(--separator);
   padding: 4px 28px 4px max(6px, env(safe-area-inset-left, 0px));
   /* the fade says the tools go on past the edge */
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
   mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+}
+
+/* older Safari has no scrollbar-width */
+:root[data-layout='compact'] :is(.rail, .dock)::-webkit-scrollbar {
+  display: none;
 }
 
 :root[data-layout='compact'] .rail .btn {
@@ -273,6 +288,7 @@
     border-top: 0;
     border-right: 1px solid var(--separator);
     padding: 4px 4px 28px max(4px, env(safe-area-inset-left, 0px));
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent);
     mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent);
   }
 

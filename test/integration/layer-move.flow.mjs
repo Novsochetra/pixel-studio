@@ -120,6 +120,18 @@ check(
 );
 await eye('Show', 'Hair');
 
+// picking the layer to draw on put the pencil down for Move this layer
+await page.keyboard.press('b');
+await page.locator('.layer-row', { hasText: 'Hair' }).click();
+check(
+  (await page
+    .locator('#rail')
+    .getByRole('button', { name: 'Pencil' })
+    .getAttribute('aria-pressed')) === 'true' &&
+    (await page.locator('.layer-row[aria-selected="true"]').textContent()).includes('Hair'),
+  'with a tool that draws in hand, clicking a layer keeps the tool: it is the layer to draw on',
+);
+
 await page.locator('.layer-row', { hasText: 'Art' }).click();
 await page.keyboard.press('b');
 await frameAction(page, 'Duplicate frame');

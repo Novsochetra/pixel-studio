@@ -1,6 +1,7 @@
 import { commitPose, currentLayer, goTo } from './actions.js';
 import { toast } from './dom.js';
 import { clampLayerShift, shiftLayer } from '../model/frame-shift.js';
+import { PAINTING } from './tools-paint.js';
 
 function shownLayer(app) {
   const layer = currentLayer(app.store.state);
@@ -25,10 +26,16 @@ function moveLayer(app, layer, shift) {
   }
 }
 
-// a selection would keep the arrow keys on its pixels instead of on the layer just picked
-export function pickLayerToMove(app, key) {
+const DRAWS = new Set([...PAINTING, 'picker']);
+
+// A layer picked in the list. With a tool that draws in hand it is the layer to draw on, and the
+// tool stays; with any other, a drag is about to move something, and it should be this layer
+// alone. A selection would keep the arrow keys on its pixels instead of on the layer just picked.
+export function pickLayer(app, key) {
+  const { tool } = app.store.state;
+
   goTo(app, { layer: key });
-  app.store.set({ tool: 'movelayer', selection: null });
+  app.store.set({ tool: DRAWS.has(tool) ? tool : 'movelayer', selection: null });
 }
 
 export function shiftCurrentLayer(app, shift) {
