@@ -5,6 +5,7 @@ import { paint } from './stage-paint.js';
 import { bindPointer } from './stage-pointer.js';
 import { renderEmptyFrame } from './empty-frame.js';
 import { mountGridPanel } from './grid/grid-panel.js';
+import { mountGridResizer } from './grid/grid-resizer.js';
 import { stopPlayback } from './grid/playback.js';
 import { renderPoseBar } from './body/pose-bar.js';
 
@@ -110,7 +111,10 @@ export function mountEditStage(container, app) {
     },
   });
 
-  container.replaceChildren(node('div.edit-layout', {}, scroller, grid.el));
+  const layout = node('div.edit-layout', {}, scroller, grid.el);
+
+  container.replaceChildren(layout);
+  mountGridResizer(layout, grid.el);
   bindPointer(canvas, app, scroller);
   bindWheelZoom(scroller, canvas, app);
   keepFitted(app, scroller, canvas);
