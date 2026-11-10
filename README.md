@@ -42,7 +42,15 @@ and the dock at the bottom opens one panel at a time: Frames, Colours, Brush, La
 Guides. One finger draws, two pan and pinch. The top bar keeps the project's name (Projects), undo
 and redo, the workspace (Edit, Views board, Preview), a More menu (fit the canvas, the pixel grid,
 canvas size, saved versions) and Download. On its side, the tools and panels stand beside the
-canvas. A small tablet gets the same layout; a wider one gets the desktop's.
+canvas. A small tablet gets the same layout; a wider one gets the desktop's. A window rides up from
+the bottom edge and is pulled down by its bar to close.
+
+## The look
+
+The studio wears the arcade's design (`Novsochetra/fighting-games`): its greys and blue in light and
+dark, Inter, round glass buttons and pills that give under the press, segmented controls whose
+thumb slides, frosted menus and messages, and windows that spring in and ease away. Anyone who has
+asked their device for less motion gets none of it. The tokens are in `src/ui/styles/00-tokens.css`.
 
 ## Run it
 

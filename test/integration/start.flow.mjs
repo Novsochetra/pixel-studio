@@ -8,8 +8,8 @@ const workspaces = () =>
   page.locator('#toolbar .segmented[aria-label="Workspace"] button').allTextContents();
 const openProjects = async () => {
   await page.locator('button.wordmark').click();
-  await page.waitForSelector('.start-section');
-  await page.locator('.start-section').evaluate((details) => {
+  await page.waitForSelector('.sheet .start-section');
+  await page.locator('.sheet .start-section').evaluate((details) => {
     details.open = true;
   });
 };

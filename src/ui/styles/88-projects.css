@@ -1,5 +1,5 @@
 /* The projects browser: the open project, the folders down the side, every project as a card. */
-.sheet.projects-sheet {
+.projects-sheet:is(.sheet, .sheet-out) {
   width: min(1080px, 100%);
   gap: 14px;
 }
@@ -18,9 +18,9 @@
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  padding: 12px;
-  border-radius: var(--radius);
-  background: var(--well);
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  background: var(--fill-quiet);
 }
 
 .current-project .project-picture {
@@ -46,10 +46,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 8px;
-  border: 1px solid var(--separator);
-  border-radius: var(--radius-sm);
-  background: var(--well);
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--fill-quiet);
 }
 
 .projects-find:focus-within {
@@ -66,10 +66,25 @@
 /* the box around it shows the focus */
 .projects-search {
   flex: 1;
-  padding: 6px 0;
+  padding: 7px 0;
   border: 0;
   background: transparent;
   outline: none;
+}
+
+.projects-search:focus-visible {
+  border: 0;
+  box-shadow: none;
+}
+
+.browse-bar > .btn {
+  flex: none;
+}
+
+/* what can be done with the open project, and with a file: the arcade's glass pills */
+:is(.current-project, .browse-bar) .btn.quiet {
+  background: var(--glass);
+  box-shadow: var(--shadow-glass);
 }
 
 /* the folders and the projects scroll apart, so a long list of either keeps the other in sight */
@@ -79,7 +94,7 @@
   height: min(60vh, 560px);
   min-height: 320px;
   border: 1px solid var(--separator);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -163,7 +178,9 @@
 
 .btn.folders-new {
   min-height: 24px;
-  padding: 0 6px;
+  padding: 0 8px;
+  background: none;
+  box-shadow: none;
   font-size: 12px;
   font-weight: 400;
   color: var(--tint);
@@ -236,13 +253,22 @@
   position: relative;
   min-width: 0;
   border: 1px solid var(--separator);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   background: var(--chrome-raised);
+  transition:
+    scale var(--duration-press) var(--ease-spring),
+    border-color var(--duration-normal) var(--ease-standard);
+}
+
+.project-card:has(.card-open:active) {
+  scale: var(--scale-pressed);
 }
 
 .project-card[aria-current='true'] {
   border-color: var(--tint);
-  box-shadow: 0 0 0 1px var(--tint);
+  box-shadow:
+    0 0 0 1px var(--tint),
+    0 0 0 4px var(--tint-quiet);
 }
 
 .project-card.dragging {
@@ -261,11 +287,6 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
-}
-
-.card-open:focus-visible {
-  outline: 2px solid var(--tint);
-  outline-offset: 2px;
 }
 
 .card-open .project-picture {

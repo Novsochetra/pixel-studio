@@ -40,8 +40,11 @@
   background: transparent;
   text-align: left;
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  transition:
+    scale var(--duration-press) var(--ease-spring),
+    background-color var(--duration-normal) var(--ease-standard);
   /* Silkscreen is drawn on an 8 px grid: 16 px keeps its pixels square */
   font: 700 16px/1 var(--font-pixel);
   margin-right: 4px;
@@ -50,6 +53,10 @@
 
 .wordmark:hover {
   background: var(--fill-quiet);
+}
+
+.wordmark:active {
+  scale: var(--scale-pressed);
 }
 
 .wordmark small {
@@ -67,4 +74,34 @@
   display: flex;
   align-items: center;
   gap: 2px;
+}
+
+/* the bar's buttons are the arcade's header buttons: round glass, a little apart */
+.toolbar .group {
+  gap: 6px;
+}
+
+.toolbar .btn {
+  min-height: 32px;
+}
+
+.toolbar .btn.quiet:not(.on) {
+  background: var(--glass);
+  box-shadow: var(--shadow-glass);
+}
+
+/* a button that is only its picture is a circle */
+.toolbar .btn:has(> svg:only-child) {
+  min-width: 32px;
+  padding: 0;
+}
+
+.toolbar .segmented button {
+  padding-block: 6px;
+}
+
+@media (hover: hover) {
+  .toolbar .btn.quiet:not(.on):hover {
+    background: var(--glass-hover);
+  }
 }

@@ -2,7 +2,7 @@
   position: absolute;
   top: 12px;
   left: 50%;
-  transform: translateX(-50%);
+  translate: -50%;
   z-index: 2;
   width: min(calc(100% - 24px), 720px);
   box-sizing: border-box;
@@ -12,11 +12,16 @@
   justify-content: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: var(--radius);
-  background: var(--chrome);
-  border: 1px solid var(--separator);
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-card);
+  background: var(--material);
+  -webkit-backdrop-filter: var(--blur-glass);
+  backdrop-filter: var(--blur-glass);
+  box-shadow: var(--shadow), var(--shadow-glass);
   font-size: 13px;
+  animation: rise-in var(--duration-fade) var(--ease-spring);
+
+  --rise-from: -50% -10px;
+
   /* the card lies over the canvas's first rows: a press on it, off its buttons, draws there */
   pointer-events: none;
 }
@@ -28,6 +33,8 @@
 /* Over the canvas on a phone too, at its foot: a card in the canvas's own column pushed the
    canvas down, and let it jump up under the finger at the first pixel drawn. */
 :root[data-layout='compact'] .empty-frame {
+  --rise-from: -50% 10px;
+
   top: auto;
   bottom: 8px;
   gap: 6px;

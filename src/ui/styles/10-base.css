@@ -12,6 +12,7 @@ body {
   background: var(--bg);
   color: var(--label);
   font: 13px/1.4 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }
 
@@ -24,6 +25,22 @@ textarea {
 }
 
 :focus-visible {
-  outline: 2px solid var(--tint);
+  outline: 3px solid var(--tint);
   outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.01em;
+}
+
+input {
+  accent-color: var(--tint);
+}
+
+/* a scroll bar is a thin quiet line, not a gutter of its own */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--label-muted), transparent 55%) transparent;
 }

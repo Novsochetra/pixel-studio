@@ -16,6 +16,7 @@ import { allLayers, newId } from '../model/project.js';
 import { setUpApp } from './install-app.js';
 import { layoutSize, watchLayout } from './layout.js';
 import { watchPressesFromStart } from './after-press.js';
+import { watchSegmented } from './segmented-thumb.js';
 
 // the editor, opened on one project; `save` as install() takes it
 async function startEditor(backend, index, { project, prefix, save, background = null }) {
@@ -118,4 +119,5 @@ async function boot() {
 setUpApp();
 watchLayout();
 watchPressesFromStart();
+watchSegmented();
 boot();

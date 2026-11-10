@@ -50,6 +50,7 @@ export const browser = [
   'alert',
   'confirm',
   'Node',
+  'MutationObserver',
 ];
 
 export const node = ['process', 'Buffer'];

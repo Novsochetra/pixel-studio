@@ -48,6 +48,19 @@
     min-height: 40px;
   }
 
+  /* a tablet's frames bar keeps to one row beside the inspector */
+  :root[data-layout='medium'] .grid-bar {
+    gap: 4px;
+  }
+
+  :root[data-layout='medium'] :is(.tab-more, .grid-tab-add, .icon-toggle) {
+    width: 36px;
+  }
+
+  :root[data-layout='medium'] .grid-fps .input {
+    width: 44px;
+  }
+
   .grid-tab {
     min-height: 36px;
   }

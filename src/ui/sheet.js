@@ -1,6 +1,8 @@
 import { node } from './dom.js';
 import { drawChecker, drawGuide, drawSprite } from './draw.js';
 import { focusables, rememberFocus, trapTab } from './focus.js';
+import { leave } from './leave.js';
+import { pullToClose } from './sheet-pull.js';
 
 function sheetHead(title, close) {
   return node(
@@ -15,6 +17,18 @@ function sheetHead(title, close) {
   );
 }
 
+// The window's content is added after it opens. A phone's keyboard would cover the sheet, so a
+// field takes focus only where there is a pointer.
+function focusFirst(body, focusField) {
+  const controls = focusables(body);
+  const field =
+    focusField && matchMedia('(pointer: fine)').matches
+      ? controls.find((control) => control.matches('input:not([type=file]), textarea'))
+      : null;
+
+  (field ?? controls[0])?.focus();
+}
+
 // focusField: a text field takes focus first, where there is a pointer; a sheet whose fields
 // are a list of names to change now and then leaves them be
 export function openSheet(title, onClose, { wide = false, focusField = true } = {}) {
@@ -26,7 +40,8 @@ export function openSheet(title, onClose, { wide = false, focusField = true } = 
   });
   const backdrop = node('div.sheet-backdrop', {}, body);
   const close = () => {
-    backdrop.remove();
+    body.classList.replace('sheet', 'sheet-out');
+    leave(backdrop, 'sheet-backdrop-out');
     document.removeEventListener('keydown', onKey);
     onClose?.();
     restoreFocus();
@@ -39,7 +54,10 @@ export function openSheet(title, onClose, { wide = false, focusField = true } = 
     trapTab(body, event);
   };
 
-  body.append(sheetHead(title, close));
+  const head = sheetHead(title, close);
+
+  body.append(head);
+  pullToClose({ head, body, close });
   backdrop.addEventListener('pointerdown', (event) => {
     if (event.target === backdrop) {
       close();
@@ -49,16 +67,7 @@ export function openSheet(title, onClose, { wide = false, focusField = true } = 
   // a message from before would lie over the window's title
   document.querySelector('.toast')?.remove();
   document.body.append(backdrop);
-  // the content is added after this returns. A phone's keyboard would cover the sheet, so a
-  // field takes focus only where there is a pointer.
-  queueMicrotask(() => {
-    const controls = focusables(body);
-    const field =
-      focusField && matchMedia('(pointer: fine)').matches
-        ? controls.find((control) => control.matches('input:not([type=file]), textarea'))
-        : null;
-    (field ?? controls[0])?.focus();
-  });
+  queueMicrotask(() => focusFirst(body, focusField));
 
   return { body, close };
 }

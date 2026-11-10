@@ -35,22 +35,33 @@
   margin-left: auto;
 }
 
-.sheet-backdrop {
+/* A window, as the arcade's sheet: it springs up over a blurred page and eases away. What is
+   closing wears the -out classes (leave.js), so the page counts it gone while it plays out. */
+:is(.sheet-backdrop, .sheet-backdrop-out) {
   position: fixed;
   inset: 0;
   background: var(--scrim);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   display: grid;
   place-items: center;
   padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px))
     max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   z-index: 20;
+  animation: fade-in var(--duration-fade) var(--ease-standard);
 }
 
-.sheet {
-  background: var(--chrome);
-  border: 1px solid var(--separator);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
+.sheet-backdrop-out {
+  pointer-events: none;
+  animation: fade-out var(--duration-fade) var(--ease-standard) forwards;
+}
+
+:is(.sheet, .sheet-out) {
+  background: var(--sheet);
+  border-radius: var(--radius-sheet);
+  box-shadow:
+    var(--shadow),
+    inset 0 0 0 1px var(--separator);
   width: min(600px, 100%);
   max-height: 100%;
   overflow: auto;
@@ -59,11 +70,16 @@
   grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: 16px;
-  padding: 20px;
+  padding: 24px;
   box-sizing: border-box;
+  animation: sheet-in var(--duration-sheet) var(--ease-spring);
 }
 
-.sheet.wide {
+.sheet-out {
+  animation: sheet-out var(--duration-fade) var(--ease-standard) forwards;
+}
+
+.wide:is(.sheet, .sheet-out) {
   width: min(920px, 100%);
 }
 
@@ -77,17 +93,21 @@
 /* a window's own title: headings inside it keep the page's type */
 .sheet-head h3 {
   margin: 0;
-  font: 700 16px/1.2 var(--font-pixel);
+  font: 700 20px/1.2 var(--font-ui);
 }
 
-.sheet-close {
+.btn.sheet-close {
   flex: none;
-  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--fill-quiet);
+  color: var(--label-secondary);
+  font-size: 20px;
   line-height: 1;
-  padding: 0 8px;
 }
 
-.sheet .segmented {
+:is(.sheet, .sheet-out) .segmented {
   flex-wrap: wrap;
   justify-self: start;
   max-width: 100%;
@@ -95,20 +115,26 @@
 }
 
 /* long words wrap inside a window */
-.sheet .btn {
+:is(.sheet, .sheet-out) .btn {
   white-space: normal;
   min-width: 0;
 }
 
 /* in a long window the main buttons, the last thing in it, stay in sight */
-.sheet > .sheet-actions:last-child,
-.sheet > :last-child > .sheet-actions:last-child {
+:is(.sheet, .sheet-out) > .sheet-actions:last-child,
+:is(.sheet, .sheet-out) > :last-child > .sheet-actions:last-child {
   position: sticky;
-  bottom: -20px;
+  bottom: -24px;
   z-index: 1;
-  margin-bottom: -20px;
-  padding-block: 12px 20px;
-  background: var(--chrome);
+  margin-bottom: -24px;
+  padding-block: 12px 24px;
+  background: var(--sheet);
+}
+
+/* what a window is for is said by a button a thumb cannot miss */
+.sheet-actions .btn {
+  min-height: 36px;
+  padding-inline: 16px;
 }
 
 .sheet-actions {
@@ -159,6 +185,7 @@
 .anchor-grid .btn {
   min-height: 36px;
   padding: 0;
+  border-radius: 10px;
 }
 
 .anchor-grid .btn::before {
@@ -234,19 +261,34 @@
 }
 
 /* above the windows, as a project's ⋯ in Projects opens one from inside its window */
-.menu {
+:is(.menu, .menu-out) {
   position: absolute;
   z-index: 25;
-  background: var(--chrome-raised);
-  border: 1px solid var(--separator);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  background: var(--material);
+  -webkit-backdrop-filter: var(--blur-glass);
+  backdrop-filter: var(--blur-glass);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    var(--shadow),
+    inset 0 0 0 1px var(--separator);
   padding: 6px;
   display: grid;
   min-width: 250px;
+  transform-origin: top center;
+  animation: pop-in var(--duration-normal) var(--ease-spring);
 }
 
-.menu button {
+/* a menu with no room below opens upward, from its button */
+:is(.menu, .menu-out)[data-opens='up'] {
+  transform-origin: bottom center;
+}
+
+.menu-out {
+  pointer-events: none;
+  animation: pop-out var(--duration-fast) var(--ease-standard) forwards;
+}
+
+:is(.menu, .menu-out) button {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -254,38 +296,58 @@
   border: 0;
   background: transparent;
   text-align: left;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  border-radius: 10px;
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
-.menu [aria-hidden] {
+:is(.menu, .menu-out) [aria-hidden] {
   font-weight: 600;
 }
 
-.menu button:hover {
+@media (hover: hover) {
+  .menu button:hover {
+    background: var(--tint);
+    color: var(--on-tint);
+  }
+}
+
+.menu button:is(:active, :focus-visible) {
+  outline: 0;
   background: var(--tint);
   color: var(--on-tint);
 }
 
-.menu hr {
+:is(.menu, .menu-out) hr {
   border: 0;
   border-top: 1px solid var(--separator);
-  margin: 4px 6px;
+  margin: 4px 10px;
 }
 
-.toast {
+:is(.toast, .toast-out) {
+  --toast-from: 0 12px;
+
   position: fixed;
   left: 50%;
   bottom: calc(40px + env(safe-area-inset-bottom, 0px));
-  transform: translateX(-50%);
-  background: var(--chrome-raised);
-  border: 1px solid var(--separator);
-  border-radius: 999px;
-  box-shadow: var(--shadow);
-  padding: 8px 16px;
+  translate: -50%;
+  background: var(--material);
+  -webkit-backdrop-filter: var(--blur-glass);
+  backdrop-filter: var(--blur-glass);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow), var(--shadow-glass);
+  padding: 9px 18px;
+  font-weight: 500;
   z-index: 30;
   max-width: calc(100% - 32px);
+  box-sizing: border-box;
+  animation: toast-in var(--duration-fade) var(--ease-spring);
+}
+
+.toast-out {
+  pointer-events: none;
+  animation: fade-out var(--duration-normal) var(--ease-standard) forwards;
 }
 
 .board-caption {

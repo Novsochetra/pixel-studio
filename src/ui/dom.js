@@ -1,3 +1,5 @@
+import { leave } from './leave.js';
+
 // node('button.btn.primary', { onclick }, 'Save') builds an element; children may be strings,
 // nodes, arrays or null.
 export function node(selector, props = {}, ...children) {
@@ -135,5 +137,5 @@ export function toast(message) {
   const el = node('div.toast', { role: 'status' }, message);
   document.body.append(el);
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.remove(), 3200);
+  toastTimer = setTimeout(() => leave(el, 'toast-out'), 3200);
 }

@@ -1,42 +1,73 @@
+/* The arcade's buttons: a pill of glass that gives under the press. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 28px;
-  padding: 0 10px;
+  min-height: 30px;
+  padding: 0 12px;
   border: 0;
-  border-radius: var(--radius-sm);
-  background: var(--fill-quiet);
+  border-radius: var(--radius-pill);
+  background: var(--glass);
+  box-shadow: var(--shadow-glass);
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
+  transition:
+    scale var(--duration-press) var(--ease-spring),
+    background-color var(--duration-normal) var(--ease-standard),
+    color var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-press) var(--ease-standard);
 }
 
-.btn:hover {
-  background: color-mix(in srgb, var(--fill-quiet), var(--label) 8%);
+/* a tap leaves no hover behind on a touch screen */
+@media (hover: hover) {
+  .btn:hover {
+    background: var(--glass-hover);
+  }
+
+  .btn.primary:hover {
+    background: var(--button-primary);
+    opacity: var(--dim-pressed);
+  }
+
+  .btn.quiet:hover {
+    background: var(--fill-quiet);
+  }
+
+  .btn.on:hover {
+    background: var(--tint);
+    opacity: var(--dim-pressed);
+  }
+}
+
+.btn:active {
+  scale: var(--scale-pressed);
+  transition-duration: var(--duration-fast);
 }
 
 .btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
+  scale: none;
   cursor: default;
 }
 
 .btn.primary {
-  background: var(--tint);
-  color: var(--on-tint);
+  background: var(--button-primary);
+  color: var(--on-button-primary);
+  box-shadow: none;
+  font-weight: 600;
 }
 
 .btn.quiet {
   background: transparent;
-}
-
-.btn.quiet:hover {
-  background: var(--fill-quiet);
+  box-shadow: none;
 }
 
 .btn.on {
-  background: var(--tint-quiet);
-  color: var(--tint);
+  background: var(--tint);
+  color: var(--on-tint);
+  box-shadow: none;
 }
 
 .btn svg {
@@ -46,29 +77,63 @@
 }
 
 .segmented {
+  position: relative;
   display: inline-flex;
   padding: 2px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--fill-quiet);
 }
 
 .segmented button {
+  position: relative;
   border: 0;
   background: transparent;
-  padding: 3px 12px;
-  border-radius: 6px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  color: var(--label-secondary);
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
+  transition:
+    color var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard);
 }
 
-.segmented button:hover {
-  background: var(--fill-quiet);
+.segmented button:active {
+  opacity: var(--dim-pressed);
 }
 
 /* its own colour: on dark chrome the raised white of a light theme would be darker than the track */
 .segmented button[aria-pressed='true'] {
   background: var(--segment-on);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+  box-shadow: var(--shadow-thumb);
+  color: var(--label);
+}
+
+/* The thumb that slides from the option left to the one picked (segmented-thumb.js measures
+   them); without it the picked option wears the thumb's look itself. */
+.segmented[data-thumb]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--thumb-width);
+  height: var(--thumb-height);
+  translate: var(--thumb-x) var(--thumb-y);
+  border-radius: 8px;
+  background: var(--segment-on);
+  box-shadow: var(--shadow-thumb);
+}
+
+.segmented[data-thumb='sliding']::before {
+  transition:
+    translate var(--duration-segment) var(--ease-segment),
+    width var(--duration-segment) var(--ease-segment);
+}
+
+.segmented[data-thumb] button[aria-pressed='true'] {
+  background: transparent;
+  box-shadow: none;
 }
 
 .zoom-label {
@@ -90,17 +155,17 @@
 
 /* a quick pick: a size or a name, outlined so it reads as a button, marked when it is the one */
 .btn.chip {
-  min-height: 26px;
-  padding: 0 10px;
+  min-height: 28px;
+  padding: 0 12px;
   border: 1px solid var(--separator);
-  border-radius: 999px;
   background: transparent;
+  box-shadow: none;
 }
 
 .btn.chip[aria-pressed='true'] {
   border-color: var(--tint);
-  background: var(--tint-quiet);
-  color: var(--tint);
+  background: var(--tint);
+  color: var(--on-tint);
 }
 
 /* a way into more, worded as a link so it does not compete with the section's own button */

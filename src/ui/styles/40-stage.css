@@ -30,7 +30,7 @@
   place-items: center;
   z-index: 3;
   border: 2px dashed var(--tint);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   background: var(--tint-quiet);
   font: 700 12px var(--font-pixel);
   pointer-events: none;
@@ -60,13 +60,13 @@
   }
 }
 
-/* floats over the canvas, so the canvas never moves when it shows */
+/* floats over the canvas, so the canvas never moves when it shows: glass, as the art shows through */
 .selection-bar,
 .pose-bar {
   position: absolute;
   top: 12px;
   left: 50%;
-  transform: translateX(-50%);
+  translate: -50%;
   z-index: 2;
   width: max-content;
   max-width: calc(100% - 24px);
@@ -74,11 +74,15 @@
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
-  padding: 4px;
-  border-radius: var(--radius);
-  background: var(--chrome);
-  border: 1px solid var(--separator);
-  box-shadow: var(--shadow);
+  padding: 5px;
+  border-radius: var(--radius-card);
+  background: var(--material);
+  -webkit-backdrop-filter: var(--blur-glass);
+  backdrop-filter: var(--blur-glass);
+  box-shadow: var(--shadow), var(--shadow-glass);
+  animation: rise-in var(--duration-fade) var(--ease-spring);
+
+  --rise-from: -50% -10px;
 }
 
 .stage-inner.preview {

@@ -1,5 +1,6 @@
 import { node } from './dom.js';
 import { focusables, rememberFocus } from './focus.js';
+import { leave } from './leave.js';
 
 // called straight from the click, so a file picker it opens still counts as the viewer's doing
 function run(action, onError) {
@@ -17,6 +18,7 @@ function position(menu, anchor, align) {
   const below = box.bottom + 6 + height <= window.innerHeight - 8;
 
   menu.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - height)}px`;
+  menu.dataset.opens = below ? 'down' : 'up';
 
   // a right-aligned menu under a button near the left edge (a phone's wrapped toolbar) would run
   // off the screen, so it is held inside it
@@ -91,7 +93,7 @@ export function openMenu(anchor, entries, { align = 'left', onError = () => {} }
 
   const menu = node('div.menu', { role: 'menu', style: MENU_STYLE });
   const close = () => {
-    menu.remove();
+    leave(menu, 'menu-out');
     document.removeEventListener('pointerdown', outside, true);
     document.removeEventListener('keydown', onKey, true);
     closeOpenMenu = null;

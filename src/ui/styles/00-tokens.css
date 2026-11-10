@@ -1,10 +1,19 @@
 /* Layout: a Mac pro-app frame. Toolbar on top, tool rail left, canvas centre, inspector right,
-   status bar below; the arcade's Apple greys and blue, dark first, Silkscreen for labels. */
+   status bar below. The look is the arcade's: its greys and blue, dark first, its glass and pill
+   buttons, its type (Inter) and its motion; Silkscreen is kept for the studio's own name. */
 :root {
   --bg: #000000;
   --chrome: #1c1c1e;
   --chrome-raised: #2c2c2e;
   --segment-on: #636366;
+  --material: rgb(30 30 32 / 78%);
+  --glass: rgb(255 255 255 / 14%);
+  --glass-hover: rgb(255 255 255 / 22%);
+  --glass-edge: rgb(255 255 255 / 22%);
+  --glass-highlight: rgb(255 255 255 / 30%);
+  --button-primary: #ffffff;
+  --on-button-primary: #000000;
+  --sheet: #1c1c1e;
   --well: #242426;
   --stage: #2a2a2d;
   --checker-a: #3a3a3e;
@@ -26,22 +35,48 @@
   --ink: #000000;
   --lift: 0 1px 2px rgb(0 0 0 / 40%);
   --shadow: 0 24px 60px rgb(0 0 0 / 45%);
-  --font-ui: -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
+  --shadow-glass: inset 0 0 0 1px var(--glass-edge), inset 0 1px 0 var(--glass-highlight);
+  --shadow-thumb: 0 3px 8px rgb(0 0 0 / 28%);
+  --blur-glass: blur(24px) saturate(180%);
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
   --font-pixel: 'Silkscreen', ui-monospace, 'SF Mono', Menlo, monospace;
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-card: 22px;
+  --radius-sheet: 28px;
+  --radius-pill: 999px;
+  --duration-fast: 120ms;
+  --duration-press: 180ms;
+  --duration-normal: 200ms;
+  --duration-segment: 320ms;
+  --duration-fade: 400ms;
+  --duration-sheet: 450ms;
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-segment: cubic-bezier(0.3, 0.8, 0.2, 1);
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --scale-pressed: 0.96;
+  --dim-pressed: 0.85;
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) {
-    --bg: #f2f2f7;
-    --chrome: #f6f6f8;
+    --bg: #ffffff;
+    --chrome: #f2f2f7;
     --chrome-raised: #ffffff;
     --segment-on: #ffffff;
+    --material: rgb(246 246 248 / 80%);
+    --glass: rgb(255 255 255 / 58%);
+    --glass-hover: rgb(255 255 255 / 76%);
+    --glass-edge: rgb(0 0 0 / 8%);
+    --glass-highlight: rgb(255 255 255 / 80%);
+    --button-primary: #000000;
+    --on-button-primary: #ffffff;
+    --sheet: #ffffff;
     --well: #e9e9ee;
     --stage: #d6d6db;
     --checker-a: #c9c9cf;
@@ -67,10 +102,18 @@
 }
 
 :root[data-theme='light'] {
-  --bg: #f2f2f7;
-  --chrome: #f6f6f8;
+  --bg: #ffffff;
+  --chrome: #f2f2f7;
   --chrome-raised: #ffffff;
   --segment-on: #ffffff;
+  --material: rgb(246 246 248 / 80%);
+  --glass: rgb(255 255 255 / 58%);
+  --glass-hover: rgb(255 255 255 / 76%);
+  --glass-edge: rgb(0 0 0 / 8%);
+  --glass-highlight: rgb(255 255 255 / 80%);
+  --button-primary: #000000;
+  --on-button-primary: #ffffff;
+  --sheet: #ffffff;
   --well: #e9e9ee;
   --stage: #d6d6db;
   --checker-a: #c9c9cf;

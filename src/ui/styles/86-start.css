@@ -13,6 +13,7 @@
   gap: 14px;
   max-width: 760px;
   margin: 0 auto;
+  animation: rise-in var(--duration-sheet) var(--ease-spring);
 }
 
 .wordmark-big {
@@ -33,7 +34,8 @@
 
 .start-heading {
   margin: 4px 0 0;
-  font-size: 15px;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 h4.start-heading {
@@ -58,12 +60,20 @@ h4.start-heading {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 12px;
-  border: 1.5px solid var(--separator);
-  border-radius: var(--radius);
+  padding: 14px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
   background: var(--chrome);
   color: var(--tint);
   cursor: pointer;
+  transition:
+    scale var(--duration-press) var(--ease-spring),
+    border-color var(--duration-normal) var(--ease-standard),
+    background-color var(--duration-normal) var(--ease-standard);
+}
+
+.start-card:active {
+  scale: var(--scale-pressed);
 }
 
 .start-card svg {
@@ -85,11 +95,6 @@ h4.start-heading {
 .start-card[aria-checked='true'] {
   border-color: var(--tint);
   background: var(--tint-quiet);
-}
-
-.start-card:focus-visible {
-  outline: 2px solid var(--tint);
-  outline-offset: 2px;
 }
 
 .start-forget {
@@ -121,8 +126,22 @@ h4.start-heading {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding-top: 12px;
+  padding-top: 16px;
   border-top: 1px solid var(--separator);
+}
+
+/* the ways in that make nothing new are the arcade's glass pills; Create is its Play */
+.start-more .btn.quiet {
+  min-height: 40px;
+  padding-inline: 18px;
+  background: var(--glass);
+  box-shadow: var(--shadow-glass);
+}
+
+.start-chooser .sheet-actions .btn.primary {
+  min-height: 44px;
+  padding-inline: 28px;
+  font-size: 15px;
 }
 
 .start-section {

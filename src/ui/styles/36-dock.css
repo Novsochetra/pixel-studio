@@ -19,12 +19,21 @@
   gap: 2px;
   padding: 4px 2px;
   border: 0;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   background: transparent;
   color: var(--label-muted);
   font-size: 11px;
+  font-weight: 500;
   line-height: 1.2;
   cursor: pointer;
+  transition:
+    scale var(--duration-press) var(--ease-spring),
+    background-color var(--duration-normal) var(--ease-standard),
+    color var(--duration-normal) var(--ease-standard);
+}
+
+.dock-tab:active {
+  scale: var(--scale-pressed);
 }
 
 .dock-tab[aria-pressed='true'] {
@@ -40,6 +49,6 @@
 }
 
 .dock-swatch {
-  border-radius: 6px;
+  border-radius: 50%;
   border: 1px solid rgb(127 127 127 / 45%);
 }

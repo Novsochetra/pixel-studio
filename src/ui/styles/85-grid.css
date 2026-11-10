@@ -60,22 +60,29 @@
   max-width: 100%;
   padding: 2px;
   overflow-x: auto;
-  border-radius: 8px;
-  background: var(--well);
+  border-radius: 10px;
+  background: var(--fill-quiet);
 }
 
 .grid-tab {
-  padding: 4px 12px;
-  border-radius: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
   color: var(--label-secondary);
   font-weight: 500;
   white-space: nowrap;
+  transition:
+    color var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard);
+}
+
+.grid-tab:active {
+  opacity: var(--dim-pressed);
 }
 
 .grid-tab[aria-selected='true'] {
   color: var(--label);
   background: var(--segment-on);
-  box-shadow: var(--lift);
+  box-shadow: var(--shadow-thumb);
 }
 
 .grid-tabs-bar {
@@ -93,7 +100,7 @@
   display: grid;
   place-items: center;
   width: 30px;
-  height: 28px;
+  height: 30px;
   padding: 0;
 }
 
@@ -116,8 +123,13 @@
 .grid-play {
   display: grid;
   place-items: center;
-  width: 36px;
+  width: 40px;
   padding: 0;
+}
+
+/* the triangle is filled, as the arcade's Play */
+.grid-play svg {
+  fill: currentColor;
 }
 
 .grid-scroll {
@@ -212,9 +224,17 @@
   place-items: center;
   width: 64px;
   height: 64px;
-  border: 1.5px solid transparent;
-  border-radius: 8px;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
   box-sizing: border-box;
+  transition:
+    scale var(--duration-press) var(--ease-spring),
+    border-color var(--duration-normal) var(--ease-standard),
+    background-color var(--duration-normal) var(--ease-standard);
+}
+
+:is(.cell:not(.mirror), .cell-add):active {
+  scale: var(--scale-pressed);
 }
 
 .cell {
@@ -247,18 +267,15 @@
   color: var(--tint);
 }
 
+/* the frame in hand wears the arcade's ring */
 .cell.selected {
-  border: 1.5px solid var(--tint);
+  border: 2px solid var(--tint);
   background: var(--chrome-raised);
+  box-shadow: 0 0 0 3px var(--tint-quiet);
 }
 
 .cell.playing {
   box-shadow: 0 0 0 2px var(--ok);
-}
-
-.cell:focus-visible {
-  outline: 2px solid var(--tint);
-  outline-offset: 2px;
 }
 
 .cell.mirror {
@@ -275,7 +292,7 @@
   width: 20px;
   height: 20px;
   padding: 0;
-  border-radius: 5px;
+  border-radius: 50%;
   background: var(--tint);
   color: var(--on-tint);
 }
@@ -326,7 +343,7 @@
   height: 20px;
   padding: 0;
   border: 0;
-  border-radius: 5px;
+  border-radius: 50%;
   background: var(--chrome-raised);
   color: var(--label-secondary);
   cursor: pointer;

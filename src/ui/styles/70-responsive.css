@@ -169,6 +169,11 @@
     max(16px, env(safe-area-inset-right, 0px));
 }
 
+/* a panel opened from the dock rises into place */
+:root[data-layout='compact'] :is(.section, .grid-panel) {
+  animation: rise-in var(--duration-fade) var(--ease-spring);
+}
+
 /* the dock opens and shuts a panel, so its title folds nothing here */
 :root[data-layout='compact'] .section > h2 {
   cursor: default;
@@ -241,28 +246,55 @@
 }
 
 /* a window comes up from the bottom edge, as wide as the screen, within the thumb's reach */
-:root[data-layout='compact'] .sheet-backdrop {
+:root[data-layout='compact'] :is(.sheet-backdrop, .sheet-backdrop-out) {
   place-items: end stretch;
   padding: max(28px, env(safe-area-inset-top, 0px)) 0 0;
 }
 
-:root[data-layout='compact'] .sheet {
+:root[data-layout='compact'] :is(.sheet, .sheet-out) {
   width: 100%;
-  border-width: 1px 0 0;
-  border-radius: 18px 18px 0 0;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  box-shadow: var(--shadow);
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  animation: sheet-up var(--duration-sheet) var(--ease);
 }
 
+:root[data-layout='compact'] .sheet-out {
+  animation: sheet-down var(--duration-fade) var(--ease) forwards;
+}
+
+:root[data-layout='compact'] :is(.sheet, .sheet-out) > .sheet-actions:last-child,
+:root[data-layout='compact'] :is(.sheet, .sheet-out) > :last-child > .sheet-actions:last-child {
+  bottom: -20px;
+  margin-bottom: -20px;
+  padding-block: 12px 20px;
+}
+
+/* the bar it can be pulled down by, with the grabber that says so */
 :root[data-layout='compact'] .sheet-head {
   position: sticky;
   top: -20px;
   z-index: 2;
   margin: -20px -20px -8px;
-  padding: 10px 10px 6px 20px;
-  background: var(--chrome);
+  padding: 22px 12px 8px 20px;
+  background: var(--sheet);
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  touch-action: none;
 }
 
-:root[data-layout='compact'] .sheet-close {
+:root[data-layout='compact'] .sheet-head::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 36px;
+  height: 5px;
+  translate: -50%;
+  border-radius: var(--radius-pill);
+  background: var(--fill-quiet);
+}
+
+:root[data-layout='compact'] .btn.sheet-close {
   width: 40px;
   height: 40px;
   font-size: 24px;
@@ -271,19 +303,23 @@
 /* at the canvas's foot, by the thumb, clear of the messages that show at the top */
 :root[data-layout='compact'] .selection-bar,
 :root[data-layout='compact'] .pose-bar {
+  --rise-from: -50% 10px;
+
   top: auto;
   bottom: 10px;
 }
 
-:root[data-layout='compact'] .menu button {
-  padding: 11px 12px;
+:root[data-layout='compact'] :is(.menu, .menu-out) button {
+  padding: 12px 14px;
 }
 
 /* at the top, clear of the tools and the dock under the thumb */
-:root[data-layout='compact'] .toast {
-  top: calc(56px + env(safe-area-inset-top, 0px));
+:root[data-layout='compact'] :is(.toast, .toast-out) {
+  --toast-from: 0 -12px;
+
+  top: calc(60px + env(safe-area-inset-top, 0px));
   bottom: auto;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   text-align: center;
 }
 
@@ -345,7 +381,7 @@
 }
 
 /* a narrower window keeps one toolbar row: the words go first, their meaning stays in the tooltip */
-@media (max-width: 1360px) {
+@media (max-width: 1420px) {
   .save-status {
     font-size: 0;
   }
@@ -405,12 +441,6 @@
     grid-column: 1 / -1;
     width: 100%;
     box-sizing: border-box;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
   }
 }
 

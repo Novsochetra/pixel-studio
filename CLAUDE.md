@@ -119,6 +119,27 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   or a shortcut. One finger on the canvas waits a moment before its tool acts
   (`touch-intent.js`), as it may be the first of a pinch.
 
+## The look
+
+- The look is the arcade's (`Novsochetra/fighting-games`, `apps/web/arcade/src/styles/`): its
+  greys and blue, glass and pills, Inter, and its motion. All of it is tokens in
+  `src/ui/styles/00-tokens.css` (`--glass`, `--shadow-glass`, `--material`, `--radius-*`,
+  `--duration-*`, `--ease-*`, `--scale-pressed`); a stylesheet names no duration or easing of its
+  own. Silkscreen is kept for the studio's name only.
+- A button is `.btn`, a pill of glass that gives under the press. `.primary` is the one thing a
+  view is for, in the page's ink, as the arcade's Play; `.quiet` is bare until pointed at; `.on` is
+  a switch that is on, in the tint. What floats over the art (a menu, a message, the bars over
+  the canvas) is frosted `--material`; a bar in the frame is plain `--chrome`.
+- What closes leaves through `leave()` (`src/ui/leave.js`) under an `-out` class
+  (`.sheet-out`, `.menu-out`, `.toast-out`), so the page and the flows count it gone at once
+  while it plays out: style both with `:is(.sheet, .sheet-out)`.
+- The bars are drawn again on every change, so nothing in them animates as it is made: an
+  entrance is for what is shown once (a window, a menu, a panel opened from the dock). A
+  segmented control's thumb slides because `segmented-thumb.js` remembers where the last one
+  stood, by the control's `aria-label`: give every `.segmented` one.
+- `90-motion.css` holds the keyframes and turns every transition and animation off for someone
+  who asked for less motion; `look.flow.mjs` and `look-phone.flow.mjs` hold the look to this.
+
 ## Fields, drags and undo
 
 - A field says it has changed as it loses focus, in the middle of the press that took the focus.
