@@ -12,7 +12,7 @@ import { STARTER_PALETTES } from '../../art/starter-palettes.js';
 export function previewFigure(app, mapping) {
   return node(
     'figure',
-    { style: { margin: '0', display: 'grid', gap: '6px' } },
+    {},
     boardPreview(app.store.state, 420, { overlay: null, mapping, onScreen: true }),
     node('figcaption.hint', {}, 'With the swap applied'),
   );

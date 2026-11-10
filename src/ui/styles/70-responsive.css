@@ -292,7 +292,10 @@
   box-shadow: 0 1px 0 var(--sheet);
 }
 
+/* its corners are rounded less: on the narrowest phones a view's name, in the picture's own
+   corner, lost a piece of its first letter to them */
 :root[data-layout='compact'] .compare:has(> .map-table) > figure canvas {
+  border-radius: 4px;
   background: none;
 }
 
