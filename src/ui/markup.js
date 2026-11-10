@@ -65,9 +65,12 @@ export function drawMarks(context, project, direction, scale) {
         : context.moveTo((x + 0.5) * scale, (y + 0.5) * scale),
     );
 
-    // a press with no drag is a mark of one point: a dot, where nothing at all was drawn
+    // A press with no drag is a mark of one point: a dot. A line of no length paints nothing,
+    // whatever its ends are like, and the press made an undo step of nothing.
     if (stroke.points.length === 1) {
-      context.lineTo(...stroke.points[0].map((value) => (value + 0.5) * scale));
+      const [x, y] = stroke.points[0].map((value) => (value + 0.5) * scale);
+
+      context.arc(x, y, context.lineWidth / 2, 0, Math.PI * 2);
     }
 
     context.stroke();

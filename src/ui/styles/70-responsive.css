@@ -276,8 +276,21 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+/* the picture stays in sight while the colours scroll under it: it shows what each pick does */
 :root[data-layout='compact'] .compare:has(> .map-table) > figure {
   order: -1;
+  position: sticky;
+  top: 44px;
+  z-index: 1;
+  padding-bottom: 6px;
+  background: var(--sheet);
+}
+
+/* the place being edited would show through the selection's bar when the bar is over it */
+:root[data-layout='compact']
+  .edit-area:has(.selection-bar[data-side='top']:not([hidden]))
+  .stage-place {
+  display: none;
 }
 
 :root[data-layout='compact'] .map-table {
@@ -332,11 +345,13 @@
   animation: sheet-down var(--duration-fade) var(--ease) forwards;
 }
 
+/* as wide as the window, its sides too: in the gutters beside it, the focus ring of what
+   scrolled under it showed */
 :root[data-layout='compact'] :is(.sheet, .sheet-out) > .sheet-actions:last-child,
 :root[data-layout='compact'] :is(.sheet, .sheet-out) > :last-child > .sheet-actions:last-child {
   bottom: -20px;
-  margin-bottom: -20px;
-  padding-block: 12px 20px;
+  margin: 0 -20px -20px;
+  padding: 12px 20px 20px;
 }
 
 /* the bar it can be pulled down by, with the grabber that says so */
@@ -409,14 +424,14 @@
 }
 
 /* Done stays in sight at the row's end, whatever is scrolled under it */
-:root[data-layout='compact'] .selection-done {
+:root[data-layout='compact'] .selection-end {
   position: sticky;
   right: 0;
   margin-left: auto;
-  /* the first hides what scrolls past in the bar's own edge, the second fades what comes up to it */
-  box-shadow:
-    6px 0 0 var(--chrome),
-    -10px 0 12px -4px var(--chrome);
+  padding-left: 4px;
+  background: var(--chrome);
+  /* hides what scrolls past in the bar's own edge */
+  box-shadow: 6px 0 0 var(--chrome);
 }
 
 /* three choices side by side are wider than a phone: the row scrolls, where wrapped inside its

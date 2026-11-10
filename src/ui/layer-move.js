@@ -24,6 +24,8 @@ function moveLayer(app, layer, shift) {
     commitPose(app, { label: `Move ${layer.name}`, layers: [layer] }, () => {
       shiftLayer(layer, [dx, dy]);
     });
+  } else {
+    saysNoRoom({ x: 0, y: 0 }, shift[0] || shift[1]);
   }
 }
 

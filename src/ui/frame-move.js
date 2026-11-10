@@ -11,6 +11,8 @@ export function shiftCurrentFrame(app, [dx, dy]) {
     restructure(app, 'Move frame', (draft) => {
       shiftFrame(frameAt(draft.project, draft.at), [shiftX, shiftY]);
     });
+  } else {
+    saysNoRoom({ x: 0, y: 0 }, dx || dy);
   }
 }
 

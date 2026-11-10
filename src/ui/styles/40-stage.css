@@ -118,22 +118,31 @@
   --rise-from: -50% -10px;
 }
 
-/* More of the bar waits behind Done where it is one row that scrolls: a strip at Done's edge
-   says so (selection-bar.js marks the bar while there is more). */
-.selection-bar[data-more='true'] .selection-done::before {
-  content: '›';
+/* More of the bar waits behind Done where it is one row that scrolls: a strip at the edge of
+   Done's end of the bar says so (selection-bar.js marks the bar while there is more). Its arrow
+   is drawn: a letter there would be read out with the bar's buttons. */
+.selection-bar[data-more='true'] .selection-end::before {
+  content: '';
   position: absolute;
   top: 0;
   right: 100%;
   bottom: 0;
-  display: grid;
-  place-items: center end;
   width: 30px;
-  padding-right: 6px;
-  box-sizing: border-box;
-  background: linear-gradient(to right, transparent, var(--chrome) 60%);
-  color: var(--label-secondary);
-  font-size: 18px;
+  background: linear-gradient(to right, transparent, var(--chrome) 70%);
+  pointer-events: none;
+}
+
+.selection-bar[data-more='true'] .selection-end::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 5px);
+  width: 6px;
+  height: 6px;
+  margin-top: -4px;
+  border-top: 2px solid var(--label-secondary);
+  border-right: 2px solid var(--label-secondary);
+  rotate: 45deg;
   pointer-events: none;
 }
 
@@ -159,10 +168,12 @@
   }
 
   /* Done stays in sight at the row's end, whatever is scrolled under it */
-  :root:not([data-layout='compact']) .selection-done {
+  :root:not([data-layout='compact']) .selection-end {
     position: sticky;
     right: 0;
     margin-left: auto;
+    padding-left: 4px;
+    background: var(--chrome);
   }
 }
 

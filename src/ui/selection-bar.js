@@ -87,6 +87,19 @@ function placeBar(el, app) {
   }
 }
 
+// Done in a square end of its own: under the pill's round corners, what scrolled past showed
+// through
+const doneEnd = (app) =>
+  node(
+    'span.selection-end',
+    {},
+    node(
+      'button.btn.primary.selection-done',
+      { title: 'Let go of the selection (Esc)', onclick: () => app.store.set({ selection: null }) },
+      'Done',
+    ),
+  );
+
 // where the bar is one row that scrolls, whether more of it waits behind Done
 function markMore(el) {
   el.dataset.more = String(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
@@ -130,11 +143,7 @@ export function renderSelectionBar(el, app) {
     button(keyNames('Copy (⌘C); paste in any frame with ⌘V'), () => copySelected(app), 'Copy'),
     button('Erase the selected pixels (Delete)', () => eraseSelected(app), 'Delete'),
     modeControls(app),
-    node(
-      'button.btn.primary.selection-done',
-      { title: 'Let go of the selection (Esc)', onclick: () => app.store.set({ selection: null }) },
-      'Done',
-    ),
+    doneEnd(app),
   );
   syncModes(el, app);
   el.onscroll = () => markMore(el);

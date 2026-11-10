@@ -58,8 +58,8 @@ export function drawThumbnail(
     from.top,
     wide,
     tall,
-    (size - across) / 2,
-    (size - down) / 2,
+    Math.round((size - across) / 2),
+    Math.round((size - down) / 2),
     across,
     down,
   );

@@ -62,6 +62,17 @@ await page.waitForTimeout(200);
 check((await boardPixels()) !== before, 'a second finger off the art leaves the mark being drawn');
 await page.getByRole('button', { name: 'Clear marks' }).click();
 
+// a press with no drag made an undo step and drew nothing: a line of no length paints nothing
+const picture = () => board.evaluate((canvas) => canvas.toDataURL());
+const unmarked = await picture();
+
+await page.mouse.click(box.x + box.width * 0.2, box.y + box.height * 0.3);
+await page.waitForTimeout(200);
+check((await picture()) !== unmarked, 'a press with no drag marks a dot');
+await page.keyboard.press('ControlOrMeta+z');
+await page.waitForTimeout(200);
+check((await picture()) === unmarked, 'which one undo takes away');
+
 await workspace('On the pitch');
 const [pitchWidth] = await sceneSize();
 check(pitchWidth > 700, 'a Naga Eleven character stands on the match screenshot');
