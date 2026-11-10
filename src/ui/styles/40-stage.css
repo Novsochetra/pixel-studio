@@ -89,6 +89,28 @@
   --rise-from: -50% -10px;
 }
 
+/* A window too short for the band above the canvas: the bar is one row that scrolls, at the end
+   of the canvas the selection is not in (selection-bar.js), so it does not lie over the pixels
+   it acts on. */
+@media (max-height: 799px) {
+  :root:not([data-layout='compact']) .selection-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  :root:not([data-layout='compact']) .selection-bar > * {
+    flex: none;
+  }
+
+  :root:not([data-layout='compact']) .selection-bar[data-side='bottom'] {
+    --rise-from: -50% 10px;
+
+    top: auto;
+    bottom: 12px;
+  }
+}
+
 .stage-inner.preview {
   gap: 14px;
   align-content: center;
