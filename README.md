@@ -31,7 +31,8 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
   project goes in the folder that is open. "New character like this" sets up the next character
   of a game as the open one is: the same canvas, views, animations, frames, layers and guide lines,
   with nothing drawn, in the same folder. "Line up" stands every project shown side by side at one
-  pixel size, to check heights agree, and downloads it as a PNG.
+  pixel size, to check heights agree, and downloads it as a PNG. A project open in two tabs is
+  saved by both: the tab that did not make a change is told, and can load the latest.
 - **Export**: sprite sheet + Aseprite-style JSON (Phaser, Godot, Unity), separate frames, GIFs, and
   the Naga Eleven game pack.
 
