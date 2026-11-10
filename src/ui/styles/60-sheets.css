@@ -14,6 +14,19 @@
   overflow: hidden;
 }
 
+.status-link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.status-link:hover {
+  color: var(--tint);
+}
+
 .statusbar span:empty {
   display: none;
 }
@@ -132,6 +145,36 @@
   border-radius: var(--radius);
   image-rendering: pixelated;
   background: var(--well);
+}
+
+/* nine places the art can stay put: the pressed one is where it is kept */
+.anchor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 36px);
+  gap: 4px;
+}
+
+.anchor-grid .btn {
+  min-height: 36px;
+  padding: 0;
+}
+
+.anchor-grid .btn::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--label-muted);
+}
+
+.anchor-grid .btn[aria-pressed='true'] {
+  background: var(--tint-quiet);
+}
+
+.anchor-grid .btn[aria-pressed='true']::before {
+  width: 14px;
+  height: 14px;
+  background: var(--tint);
 }
 
 .report {

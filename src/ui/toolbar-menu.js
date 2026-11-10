@@ -1,9 +1,11 @@
 import { icon, node } from './dom.js';
 import { openMenu } from './menu.js';
 import { openVersionsSheet } from './versions-sheet.js';
+import { openCanvasSizeSheet } from './canvas-size-sheet.js';
 import { openShortcuts } from './shortcuts.js';
 import { canInstall, installApp } from './install-app.js';
 import { FILTERS } from './toolbar-parts.js';
+import { hasKeyboard } from './platform-keys.js';
 import { gameOf } from '../model/presets.js';
 import { isSingleView } from '../model/kinds.js';
 
@@ -39,9 +41,6 @@ const filterEntries = (app) =>
     { checked: app.store.state.viewFilter === id, title },
   ]);
 
-// a keyboard's shortcuts mean nothing where there are only fingers
-const hasKeyboard = () => matchMedia('(any-pointer: fine)').matches;
-
 // on a phone the workspaces are one button, named for the one that is open
 export function workspaceButton(app) {
   const { state } = app.store;
@@ -68,6 +67,7 @@ function moreEntries(app) {
     compact && state.mode === 'edit' ? canvasEntries(app) : [],
     state.mode !== 'game' ? filterEntries(app) : [],
     [
+      ['Canvas size…', () => openCanvasSizeSheet(app)],
       ['Saved versions…', () => openVersionsSheet(app)],
       hasKeyboard() ? ['Keyboard shortcuts', () => openShortcuts()] : null,
       canInstall() ? ['Install app', () => installApp()] : null,

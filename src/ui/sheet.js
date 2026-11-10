@@ -46,6 +46,8 @@ export function openSheet(title, onClose, { wide = false, focusField = true } = 
     }
   });
   document.addEventListener('keydown', onKey);
+  // a message from before would lie over the window's title
+  document.querySelector('.toast')?.remove();
   document.body.append(backdrop);
   // the content is added after this returns. A phone's keyboard would cover the sheet, so a
   // field takes focus only where there is a pointer.

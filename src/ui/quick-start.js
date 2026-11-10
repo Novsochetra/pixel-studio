@@ -1,7 +1,7 @@
 import { node } from './dom.js';
 import { openShortcuts } from './shortcuts.js';
 import { keepSetting, readSetting } from './remembered.js';
-import { keyNames } from './platform-keys.js';
+import { hasKeyboard, keyNames } from './platform-keys.js';
 import { isSingleView } from '../model/kinds.js';
 
 const SEEN = 'pixel-clean-quick-start';
@@ -10,12 +10,23 @@ const seen = () => Boolean(readSetting(SEEN, false));
 
 const remember = () => keepSetting(SEEN, true);
 
-const steps = (project) => [
+const CLEAN = {
+  keys: 'drop an AI image on the canvas, or into a frame below it.',
+  fingers: 'open Frames and put an AI image into a frame from its ⋯ menu.',
+};
+
+const FIX = {
+  keys: keyNames('touch up pixels with the pencil (B) and eraser (E). ⌘Z undoes anything.'),
+  fingers:
+    'draw with one finger, pinch with two to zoom and move. The arrows at the top undo anything.',
+};
+
+const steps = (project, hands) => [
   [
     'Clean: ',
-    `drop an AI image on the canvas, or into a frame below it. ${isSingleView(project) ? 'Every frame' : 'Every view and frame'} is fitted to the first: same pixel size, place, colours. Projects (top left) holds the rest of your art.`,
+    `${CLEAN[hands]} ${isSingleView(project) ? 'Every frame' : 'Every view and frame'} is fitted to the first: same pixel size, place, colours. Projects (top left) holds the rest of your art.`,
   ],
-  ['Fix: ', keyNames('touch up pixels with the pencil (B) and eraser (E). ⌘Z undoes anything.')],
+  ['Fix: ', FIX[hands]],
   ['Use: ', 'Download gives PNGs at both sizes, sprite sheets and GIFs for your game.'],
 ];
 
@@ -39,13 +50,17 @@ export function showQuickStart(stage, project) {
     node(
       'ol',
       {},
-      steps(project).map(([title, text]) => node('li', {}, node('b', {}, title), text)),
+      steps(project, hasKeyboard() ? 'keys' : 'fingers').map(([title, text]) =>
+        node('li', {}, node('b', {}, title), text),
+      ),
     ),
     node(
       'div.group',
       { style: { gap: '6px' } },
       gotIt,
-      node('button.btn.quiet', { onclick: () => openShortcuts() }, 'Shortcuts (?)'),
+      hasKeyboard()
+        ? node('button.btn.quiet', { onclick: () => openShortcuts() }, 'Shortcuts (?)')
+        : null,
     ),
   );
   stage.append(card);

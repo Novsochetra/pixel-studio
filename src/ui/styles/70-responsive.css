@@ -2,6 +2,20 @@
    the inspector's panels open from the dock, one at a time, between the canvas and the tools. */
 :root[data-layout='compact'] body {
   font-size: 15px;
+  /* a drag that reaches the screen's edge draws: it never pulls the page down to reload it */
+  overscroll-behavior: none;
+}
+
+/* two quick taps on a button are two presses, not a zoom of the page; a long press picks no text */
+:root[data-layout='compact'] .app {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root[data-layout='compact'] :is(.toolbar, .rail, .dock) {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 :root[data-layout='compact'] .app {

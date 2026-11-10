@@ -56,6 +56,7 @@ export const ROUTES = {
   layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations'],
   colours: [
     'color',
+    'basicColours',
     'paintOver',
     'paletteLock',
     'cleanLines',

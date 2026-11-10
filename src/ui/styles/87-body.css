@@ -36,19 +36,14 @@
   max-width: 150px;
 }
 
-/* a phone's canvas is small, so the bar sits above it, as an empty frame's card does */
-@media (max-width: 700px) {
-  .pose-bar {
-    position: static;
-    transform: none;
-    contain: inline-size;
-    width: min(100%, calc(100vw - 32px));
-    justify-content: center;
-  }
+/* on a phone the bar floats at the canvas's foot (70-responsive.css): standing in the canvas's
+   own column it moved the canvas under the finger each time a part was picked */
+:root[data-layout='compact'] .pose-bar {
+  justify-content: center;
+}
 
-  .pose-gap {
-    display: none;
-  }
+:root[data-layout='compact'] .pose-gap {
+  display: none;
 }
 
 /* Cutting into parts: the art, painted by part, beside the list of parts. */

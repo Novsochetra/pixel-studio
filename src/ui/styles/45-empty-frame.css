@@ -23,7 +23,23 @@
    canvas down, and let it jump up under the finger at the first pixel drawn. */
 :root[data-layout='compact'] .empty-frame {
   top: auto;
-  bottom: 10px;
-  gap: 6px 8px;
-  padding: 8px 10px;
+  bottom: 8px;
+  gap: 6px;
+  padding: 8px;
+  font-size: 13px;
+}
+
+/* the buttons say what can be done: the line of advice would hide a small canvas */
+:root[data-layout='compact'] .empty-frame .hint {
+  display: none;
+}
+
+:root[data-layout='compact'] .empty-frame > div {
+  flex: 1 0 100%;
+  text-align: center;
+}
+
+:root[data-layout='compact'] .empty-frame .btn {
+  min-height: 34px;
+  padding-inline: 8px;
 }

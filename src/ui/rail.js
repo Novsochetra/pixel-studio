@@ -11,26 +11,26 @@ function pickTool(app, tool) {
   }
 }
 
-export function renderRail(el, app) {
+function toolButton(app, tool) {
   const { state } = app.store;
-  const toolButtons = toolsFor(state.project).map((tool) =>
-    node(
-      `button.btn.quiet${state.tool === tool.id ? '.on' : ''}`,
-      {
-        title: `${tool.label} (${tool.key.toUpperCase()})`,
-        'data-key': tool.key.toUpperCase(),
-        'aria-label': tool.label,
-        'aria-pressed': String(state.tool === tool.id),
-        onclick: () => pickTool(app, tool),
-      },
-      icon(tool.id),
-    ),
-  );
 
-  replace(
-    el,
-    toolButtons,
-    node('hr'),
+  return node(
+    `button.btn.quiet${state.tool === tool.id ? '.on' : ''}`,
+    {
+      title: `${tool.label} (${tool.key.toUpperCase()})`,
+      'data-key': tool.key.toUpperCase(),
+      'aria-label': tool.label,
+      'aria-pressed': String(state.tool === tool.id),
+      onclick: () => pickTool(app, tool),
+    },
+    icon(tool.id),
+  );
+}
+
+function viewButtons(app) {
+  const { state } = app.store;
+
+  return [
     node(
       `button.btn.quiet${state.symmetry.on ? '.on' : ''}`,
       {
@@ -50,5 +50,20 @@ export function renderRail(el, app) {
       },
       icon('flip'),
     ),
-  );
+  ];
+}
+
+export function renderRail(el, app) {
+  const { state } = app.store;
+  const tools = toolsFor(state.project).map((tool) => toolButton(app, tool));
+
+  replace(el, tools, node('hr'), viewButtons(app));
+
+  // a tool picked from elsewhere (a layer's row, a key) may be past the edge of a phone's strip
+  if (state.layout === 'compact') {
+    el.querySelector('[aria-pressed="true"]')?.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+    });
+  }
 }

@@ -3,6 +3,7 @@ import { startTool } from './tools.js';
 import { panSession, twoFingerSession } from './navigate.js';
 import { stopPlayback } from './grid/playback.js';
 import { playsAllViews } from './play-all-views.js';
+import { touchIntent } from './touch-intent.js';
 import { getPixel, toHex } from '../model/sprite.js';
 
 export function pixelAt(canvas, event, scale) {
@@ -50,11 +51,30 @@ function showCursor(app, point) {
   });
 }
 
+// a mouse or a pen starts the tool at once; one finger waits to see whether it is half a pinch
+function press(app, view, event) {
+  const start = () => {
+    view.intent = null;
+    view.session = pressSession(app, view, event);
+  };
+
+  view.intent?.drop();
+  view.intent = null;
+
+  if (event.pointerType === 'touch' && view.touches.size === 1) {
+    view.intent = touchIntent(event, start);
+  } else {
+    start();
+  }
+}
+
 export function bindPointer(canvas, app, stage) {
-  const view = { canvas, stage, touches: new Map(), session: null };
+  const view = { canvas, stage, touches: new Map(), session: null, intent: null };
   const place = (event) =>
     view.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
   const finish = (event) => {
+    // a finger lifted before its tool began was a tap: the tool acts where it landed
+    view.intent?.begin();
     view.touches.delete(event.pointerId);
 
     if (view.touches.size !== 1) {
@@ -76,7 +96,7 @@ export function bindPointer(canvas, app, stage) {
       place(event);
     }
 
-    view.session = pressSession(app, view, event);
+    press(app, view, event);
   });
   canvas.addEventListener('pointermove', (event) => {
     if (playsAllViews(app)) {
@@ -86,6 +106,8 @@ export function bindPointer(canvas, app, stage) {
     if (view.touches.has(event.pointerId)) {
       place(event);
     }
+
+    view.intent?.moved(event);
 
     const point = pixelAt(canvas, event, app.store.state.zoom);
     showCursor(app, point);

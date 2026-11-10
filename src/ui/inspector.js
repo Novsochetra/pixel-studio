@@ -9,8 +9,15 @@ const FOLDED = 'pixel-clean-folded';
 // what is used on every visit stays open; the rest waits one click away
 const FOLDED_AT_FIRST = ['outline', 'guides'];
 
+// on a phone the dock opens and shuts a panel: its title folds nothing
+const foldsFromTitle = () => document.documentElement.dataset.layout !== 'compact';
+
 function folding(folded) {
   return (title) => {
+    if (!foldsFromTitle()) {
+      return;
+    }
+
     const section = title.parentElement;
     const collapsed = section.dataset.collapsed !== 'true';
 

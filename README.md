@@ -8,9 +8,12 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
 - **Clean**: finds the image's pixel grid, removes the background and fringe, and fits it as its
   kind stands: a character matched to its reference view, a tile filling its canvas, an effect
   centred. Later animation frames keep their own pixel size.
-- **Edit**: pencil and eraser from 1 to 8 px, round or square; fill, colour swap, selection (a box, a lasso, or a colour),
-  turned to any angle by its handle; a click on the art picks its layer; outlines, guides, layers,
-  pictures to trace.
+- **Edit**: pencil and eraser from 1 to 8 px, round or square; lines, rectangles and ellipses
+  (outlined or filled, Shift holds them true); fill, colour swap, selection (a box, a lasso, or a
+  colour), turned to any angle by its handle; a click on the art picks its layer; outlines, guides,
+  layers, pictures to trace. Colours: the art's own, basic ones to start a blank canvas with, any
+  palette you add, and a picker on the colour in hand. Canvas size (in Projects, or the size in the
+  status bar) grows or shrinks every view and frame at once, the art kept where you anchor it.
 - **Animate**: each animation is a grid, views down and frames across, as the sheet will be: drag
   frames to reorder them, play them on the canvas (every view side by side with All views), hide a
   frame from play without deleting it, see the mirrored side, fold the frames away for room.
@@ -29,6 +32,15 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
   pixel size, to check heights agree, and downloads it as a PNG.
 - **Export**: sprite sheet + Aseprite-style JSON (Phaser, Godot, Unity), separate frames, GIFs, and
   the Naga Eleven game pack.
+
+## On a phone
+
+The whole editor works with fingers. The canvas fills the screen; the tools sit in a strip under it
+and the dock at the bottom opens one panel at a time: Frames, Colours, Brush, Layers, Outline,
+Guides. One finger draws, two pan and pinch. The top bar keeps the project's name (Projects), undo
+and redo, the workspace (Edit, Views board, Preview), a More menu (fit the canvas, the pixel grid,
+canvas size, saved versions) and Download. On its side, the tools and panels stand beside the
+canvas. A small tablet gets the same layout; a wider one gets the desktop's.
 
 ## Run it
 

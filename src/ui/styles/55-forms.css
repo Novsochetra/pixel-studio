@@ -4,6 +4,21 @@
   gap: 4px;
 }
 
+/* the way to the basic colours reads as a caption until it is pointed at */
+.swatches-toggle {
+  justify-self: start;
+  min-height: 0;
+  padding: 0;
+  background: none;
+  color: var(--label-muted);
+  font-size: 11px;
+}
+
+.swatches-toggle:hover {
+  background: none;
+  color: var(--tint);
+}
+
 .swatch {
   aspect-ratio: 1;
   border-radius: 5px;

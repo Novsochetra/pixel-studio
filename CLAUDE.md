@@ -102,6 +102,23 @@ No catch-all folders (`helpers/`, `utils/`, `constants/`): a constant lives with
 imports `ui/`, anything but `ui/` imports `store/`, anything but `store/`, `ui/` and `worker/`
 imports `io/`, or `clean/` or `art/` import anything outside themselves.
 
+## The page at every size
+
+- `src/ui/layout.js` names the window's size: `compact` (a phone held either way, a small tablet),
+  `medium` or `wide`. It is on the page's root (`:root[data-layout]`) for the stylesheets and in
+  the state (`layout`) for the bars, so the two never disagree: the editor's layout never asks the
+  window's width with a media query of its own.
+- On `compact` only the canvas scrolls. The frames and each of the inspector's panels open one at a
+  time from the dock (`dock.js`); the toolbar keeps one row, and what does not fit waits in the
+  More menu (`toolbar-menu.js`). Something new in the inspector or the toolbar needs its place
+  there too.
+- What shows over the canvas (the selection's bar, the Pose bar, an empty frame's card) floats over
+  it, never in the canvas's own column: a card that pushed the canvas down let it jump under the
+  finger at the first pixel drawn (`touch.flow.mjs`).
+- A finger has no pointer to hover and no keys: a control's meaning cannot live only in a tooltip
+  or a shortcut. One finger on the canvas waits a moment before its tool acts
+  (`touch-intent.js`), as it may be the first of a pinch.
+
 ## Testing
 
 - Unit tests are not enough. Each change needs the right mix of:

@@ -2,6 +2,7 @@ import { node, replace } from './dom.js';
 import { currentFrames, currentLayer, directionSprite } from './actions.js';
 import { viewName } from '../model/kinds.js';
 import { bounds, colorCounts } from '../model/sprite.js';
+import { openCanvasSizeSheet } from './canvas-size-sheet.js';
 
 // where you are, what the art measures, and what is under the pointer
 export function renderStatus(el, app) {
@@ -19,7 +20,15 @@ export function renderStatus(el, app) {
       {},
       `${viewName(state.project, state.at.direction)} · frame ${frame} of ${frames} · ${currentLayer(state).name}`,
     ),
-    node('span', {}, `${sprite.width}×${sprite.height} canvas`),
+    node(
+      'span',
+      {},
+      node(
+        'button.status-link',
+        { title: 'Change the canvas size', onclick: () => openCanvasSizeSheet(app) },
+        `${sprite.width}×${sprite.height} canvas`,
+      ),
+    ),
     node(
       'span',
       {},

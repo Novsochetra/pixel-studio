@@ -2,6 +2,7 @@ import { node, toast } from '../dom.js';
 import { changeStructure } from '../actions.js';
 import { addProject } from '../session.js';
 import { saveProject } from '../downloads.js';
+import { openCanvasSizeSheet } from '../canvas-size-sheet.js';
 import { backgroundUrl } from '../preview-background.js';
 import { projectPicture } from './project-picture.js';
 import { describeProject, defaultName } from '../../model/presets.js';
@@ -71,6 +72,18 @@ function currentActions(job) {
       `${defaultName(app.store.state.project)} like this`,
     ),
     node('button.btn.quiet', { onclick: () => duplicate(job) }, 'Duplicate'),
+    node(
+      'button.btn.quiet',
+      {
+        title: 'Grow or shrink the canvas of every view and frame',
+        onclick: () => {
+          // one sheet at a time: two open sheets would both close on one Escape
+          job.close();
+          openCanvasSizeSheet(app);
+        },
+      },
+      'Canvas size…',
+    ),
     node('button.btn.quiet', { onclick: () => saveProject(app) }, 'Save as file'),
     node('button.btn.quiet', { onclick: () => keepAsPreset(app) }, 'Save as a preset'),
   );
