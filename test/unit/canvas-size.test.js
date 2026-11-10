@@ -4,6 +4,11 @@ import { CLEAR, createSprite, getPixel, pack, setPixel } from '../../src/model/s
 import { newProject } from '../../src/model/new-project.js';
 import { setPin } from '../../src/model/pins.js';
 import { canvasShift, placedSprite, withCanvasSize } from '../../src/model/canvas-size.js';
+import { duplicateAnimation } from '../../src/model/animations.js';
+import { bodyOf } from '../../src/model/body/body-kind.js';
+import { renderBody, restPose } from '../../src/model/body/rig.js';
+import { bounds, samePixels } from '../../src/model/sprite.js';
+import { cutCharacter } from './body-helpers.js';
 
 const RED = pack(255, 0, 0);
 const BOTTOM = { x: 0.5, y: 1 };
@@ -77,4 +82,30 @@ test('every layer of every frame and animation gets the new size', () => {
   }
 
   assert.deepEqual([...sizes], ['20x12']);
+});
+
+test('a character cut into parts keeps its cut: the parts move, and a new pose lines up', () => {
+  const { project, animation } = cutCharacter();
+
+  duplicateAnimation(project, animation);
+  const before = bounds(bodyOf(animation.directions.south.frames[0]).sprite);
+  const bigger = withCanvasSize(project, { width: 200, height: 180 }, BOTTOM);
+  const [first, copy] = bigger.animations;
+  const body = bodyOf(first.directions.south.frames[0]);
+  const after = bounds(body.sprite);
+
+  assert.deepEqual(
+    [after.left, after.top, after.right, after.bottom],
+    [before.left + 20, before.top + 20, before.right + 20, before.bottom + 20],
+  );
+  assert.deepEqual(body.pose, restPose(), 'the pose is as it was: the parts themselves moved');
+  assert.ok(
+    samePixels(body.sprite, renderBody(first.directions.south.rig, restPose(), bigger.canvas)),
+    'a frame posed afresh from the cut stands where this one does',
+  );
+  assert.equal(
+    first.directions.south.rig,
+    copy.directions.south.rig,
+    'animations that shared the cut still share it',
+  );
 });

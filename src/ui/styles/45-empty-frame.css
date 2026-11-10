@@ -29,8 +29,10 @@
   font-size: 13px;
 }
 
-/* the buttons say what can be done: the line of advice would hide a small canvas */
-:root[data-layout='compact'] .empty-frame .hint {
+/* the buttons say what can be done: the line of advice would hide a small canvas, and the
+   frames' own bar has the onion skin */
+:root[data-layout='compact'] .empty-frame .hint,
+:root[data-layout='compact'] .empty-frame .btn.quiet {
   display: none;
 }
 

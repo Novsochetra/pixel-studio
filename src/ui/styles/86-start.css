@@ -136,20 +136,25 @@ h4.start-heading {
   cursor: pointer;
 }
 
-/* a phone shows the kinds two across, so the name, the size and Create are a short scroll away */
+/* on a phone each kind is one short row, so the name, the size and Create are a short scroll away */
 :root[data-layout='compact'] .start-screen {
   padding: max(20px, env(safe-area-inset-top, 0px)) 16px
     calc(24px + env(safe-area-inset-bottom, 0px));
 }
 
 :root[data-layout='compact'] .start-cards {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
 }
 
 :root[data-layout='compact'] .start-card {
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px;
+  align-items: center;
+  padding: 8px 12px;
+}
+
+:root[data-layout='compact'] .start-card span {
+  display: block;
+  line-height: 1.3;
 }
 
 :root[data-layout='compact'] .wordmark-big {

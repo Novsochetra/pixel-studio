@@ -68,20 +68,29 @@ function press(app, view, event) {
   }
 }
 
+function release(view, event) {
+  // a finger lifted before its tool began was a tap: the tool acts where it landed. One the
+  // browser took away (a system gesture) was never meant for the art.
+  if (event.type === 'pointercancel') {
+    view.intent?.drop();
+    view.intent = null;
+  } else {
+    view.intent?.begin();
+  }
+
+  view.touches.delete(event.pointerId);
+
+  if (view.touches.size !== 1) {
+    view.session?.end?.();
+    view.session = null;
+  }
+}
+
 export function bindPointer(canvas, app, stage) {
   const view = { canvas, stage, touches: new Map(), session: null, intent: null };
   const place = (event) =>
     view.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
-  const finish = (event) => {
-    // a finger lifted before its tool began was a tap: the tool acts where it landed
-    view.intent?.begin();
-    view.touches.delete(event.pointerId);
-
-    if (view.touches.size !== 1) {
-      view.session?.end?.();
-      view.session = null;
-    }
-  };
+  const finish = (event) => release(view, event);
 
   canvas.addEventListener('pointerdown', (event) => {
     // every view side by side has no one frame under the pointer to draw on: a press stops play

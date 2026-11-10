@@ -31,16 +31,40 @@ export function placedSprite(sprite, { width, height }, [dx, dy]) {
   return out;
 }
 
+// a view's cut on the new canvas: every part's art and pivot move with the rest of the art
+function movedRig(rig, [dx, dy]) {
+  return {
+    ...rig,
+    pieces: rig.pieces.map((piece) => ({
+      ...piece,
+      pivot: { x: piece.pivot.x + dx, y: piece.pivot.y + dy },
+      art: { ...piece.art, x: piece.art.x + dx, y: piece.art.y + dy },
+    })),
+  };
+}
+
+// Animations share their views' cuts, one object each: each is moved once, and stays shared.
+function rigMover(shift) {
+  const moved = new Map();
+
+  return (rig) => {
+    if (rig && !moved.has(rig)) {
+      moved.set(rig, movedRig(rig, shift));
+    }
+
+    return rig ? moved.get(rig) : rig;
+  };
+}
+
 function placeLayer(layer, rig, { canvas, shift }) {
   if (layer.sprite) {
     layer.sprite = placedSprite(layer.sprite, canvas, shift);
   }
 
-  // a posed Body is drawn again from its parts, so a part that was off the old canvas shows
+  // a posed Body is drawn again from its moved parts, so a part that was off the old canvas
+  // shows, and the next pose made from the cut lines up with this one
   if (isPosedBody(layer) && rig) {
-    const pose = { ...layer.pose, x: layer.pose.x + shift[0], y: layer.pose.y + shift[1] };
-
-    poseBody(layer, { rig, pose, canvas });
+    poseBody(layer, { rig, pose: layer.pose, canvas });
   }
 }
 
@@ -58,8 +82,14 @@ export function withCanvasSize(project, size, anchor) {
   const canvas = { ...project.canvas, width: size.width, height: size.height };
   const shift = canvasShift(project.canvas, canvas, anchor);
 
+  const moveRig = rigMover(shift);
+
   for (const animation of next.animations) {
     for (const entry of Object.values(animation.directions)) {
+      if (entry.rig) {
+        entry.rig = moveRig(entry.rig);
+      }
+
       entry.frames.forEach((frame) => placeFrame(frame, entry.rig, { canvas, shift }));
     }
   }

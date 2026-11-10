@@ -37,7 +37,7 @@ function basicColours(app, colors) {
 
   return [
     node(
-      'button.btn.link.swatches-toggle',
+      'button.btn.swatches-toggle',
       { 'aria-expanded': String(shown), onclick: () => app.store.set({ basicColours: !shown }) },
       shown ? 'Basic colours ▾' : 'Basic colours ▸',
     ),
