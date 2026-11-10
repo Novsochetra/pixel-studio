@@ -34,18 +34,26 @@ function fromPrevious(app, { direction, index }) {
   ];
 }
 
-// Over an empty frame: what to do with it, so a new frame never looks like a dead end.
-export function renderEmptyFrame(el, app) {
+// The Pose tool's own bar says what an empty frame can do, and a selection's bar stands in the
+// same place: the card waits until the selection is let go. A phone's open panel leaves a canvas
+// so short that the card lay over a quarter of it.
+function staysAway(app) {
   const { state } = app.store;
 
-  // the Pose tool's own bar says what an empty frame can do
-  // and a selection's bar stands in the same place: the card waits until the selection is let go
-  el.hidden =
+  return (
     state.mode !== 'edit' ||
     state.tool === 'pose' ||
     Boolean(state.selection) ||
     Boolean(app.playback) ||
-    !isEmptyFrame(state);
+    (state.layout === 'compact' && Boolean(state.panel))
+  );
+}
+
+// Over an empty frame: what to do with it, so a new frame never looks like a dead end.
+export function renderEmptyFrame(el, app) {
+  const { state } = app.store;
+
+  el.hidden = staysAway(app) || !isEmptyFrame(state);
 
   if (el.hidden) {
     return;

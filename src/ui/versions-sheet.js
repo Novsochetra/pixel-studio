@@ -11,6 +11,7 @@ import { saveFile } from './save-file.js';
 import { fileSlug } from './file-name.js';
 import { restoreProject } from './session.js';
 import { inWords } from '../model/told.js';
+import { askDelete } from './ask-delete.js';
 
 const when = (time) =>
   new Date(time).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -33,8 +34,8 @@ async function restore(app, entry, close) {
   try {
     await keepVersion(app, 'Before going back to an earlier version');
     const project = await loadVersion(app.backend, entry, app.keys);
-    await restoreProject(app, project);
-    toast(`Back to "${entry.name}". Your work just before is saved as a version too.`);
+    await restoreProject(app, project, { label: `Go back to "${entry.name}"` });
+    toast(`Back to "${entry.name}". Undo returns to your work just before, a version too.`);
     close();
   } catch (error) {
     toast(inWords(error, `Could not go back to "${entry.name}". Try again in a moment.`));
@@ -49,24 +50,20 @@ async function download(app, entry) {
   await saveFile(name, new Blob([text], { type: 'application/json' }));
 }
 
-// asks once more before the version is gone for good
+// asks before the version is gone for good
 function deleteButton(app, entry, redraw) {
-  let confirming = false;
-  const remove = async (event) => {
-    if (!confirming) {
-      confirming = true;
-      event.currentTarget.textContent = 'Delete? Press again';
-
-      return;
-    }
-
+  const place = node('span.ask-place');
+  const remove = async () => {
     await deleteVersion(app.backend, entry.id, app.keys).catch(() =>
       toast('That version could not be deleted. Try again in a moment.'),
     );
     redraw();
   };
+  const ask = () => askDelete(place, { question: 'Delete this version?', onDelete: remove });
 
-  return node('button.btn.quiet', { onclick: remove }, 'Delete');
+  place.append(node('button.btn.quiet', { onclick: ask }, 'Delete'));
+
+  return place;
 }
 
 function row(app, entry, { redraw, close }) {

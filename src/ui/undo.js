@@ -1,6 +1,7 @@
 import { changedLayers } from '../editor/snapshots.js';
 import { goToSettled, settleAt } from './actions.js';
 import { toast } from './dom.js';
+import { swapProject } from './session.js';
 import { allLayers, frameAt } from '../model/project.js';
 
 // frames, layers or animations put back, or made again
@@ -52,8 +53,31 @@ function moveSelection(app, step, back) {
   app.store.set({ selection: step.selection[back ? 'before' : 'after'] ?? null });
 }
 
+// a canvas of another size or a version gone back to: the project it took the place of is put
+// back whole, or put in its place again, with what the editor showed with it
+function afterProject(app, step, back) {
+  const side = back ? 'before' : 'after';
+
+  const [was, now] = [step.before.canvas, step.after.canvas];
+
+  swapProject(app, step[side]);
+  app.store.set(step.view?.[side] ?? {});
+  app.store.touch('project');
+
+  // a canvas of another size is fitted to the window again; the same size keeps its zoom
+  if (was.width !== now.width || was.height !== now.height) {
+    app.fitCanvas?.();
+  }
+}
+
 function afterHistory(app, step, back) {
   if (!step) {
+    return;
+  }
+
+  if (step.kind === 'project') {
+    afterProject(app, step, back);
+
     return;
   }
 

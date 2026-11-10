@@ -1,4 +1,4 @@
-import { node } from './dom.js';
+import { icon, node } from './dom.js';
 import { changeStructure } from './actions.js';
 import { characterColors } from './character-colours.js';
 import { sharedColours } from '../palette/kits.js';
@@ -35,9 +35,9 @@ function nameAndRemove(app, part, save) {
     { style: { gap: '6px' } },
     node('input.input', { value: part.name, 'aria-label': 'Part name', onchange: rename }),
     node(
-      'button.btn.quiet',
+      'button.btn.quiet.icon-only',
       { 'aria-label': `Remove ${part.name}`, title: 'Remove this part', onclick: remove },
-      '×',
+      icon('close'),
     ),
   );
 }

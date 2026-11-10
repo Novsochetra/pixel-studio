@@ -75,8 +75,23 @@ function showMark(app, { stroke, before }) {
   app.store.touch('markup');
 }
 
+// Chromium on a phone takes a finger lifted from a mark while still moving for a fling, and
+// swallows the tap after it: a mark's touches are the board's alone. Opening a view keeps the
+// browser's, as a finger scrolls a wide board sideways then.
+function ownMarkTouches(app, canvas) {
+  for (const kind of ['touchstart', 'touchmove']) {
+    canvas.addEventListener(
+      kind,
+      (event) => (app.store.state.markupMode ?? 'edit') !== 'edit' && event.preventDefault(),
+      { passive: false },
+    );
+  }
+}
+
 export function bindBoardPointer(app, canvas, scale) {
   let drawing = null;
+
+  ownMarkTouches(app, canvas);
 
   const pointOf = (event) => boardPoint(app.store.state, scale, canvas, event);
 

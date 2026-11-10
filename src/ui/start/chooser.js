@@ -2,27 +2,26 @@ import { icon, node, replace, toast } from '../dom.js';
 import { newProject } from '../../model/new-project.js';
 import { startChoices } from '../../model/start-choices.js';
 import { projectFields } from './fields.js';
+import { askDelete } from '../ask-delete.js';
 
+// A preset forgotten cannot be brought back: its card asks first, as deleting a folder, a version
+// or a project asks.
 function forgetButton(choice, onDelete) {
+  const ask = (event) => {
+    event.stopPropagation();
+    askDelete(event.currentTarget.closest('.start-choice'), {
+      question: `Forget the ${choice.label} preset?`,
+      word: 'Forget',
+      onDelete: () => onDelete(choice.preset),
+    });
+  };
+
   return node(
     'button.btn.quiet.start-forget',
     {
       'aria-label': `Forget the ${choice.label} preset`,
       title: 'Forget this preset',
-      // A preset forgotten cannot be brought back: the first press asks, the second forgets, as
-      // deleting a folder or a version asks.
-      onclick: (event) => {
-        const button = event.currentTarget;
-
-        event.stopPropagation();
-
-        if (button.classList.contains('armed')) {
-          onDelete(choice.preset);
-        } else {
-          button.classList.add('armed');
-          toast(`Forget the ${choice.label} preset? Press its × again.`);
-        }
-      },
+      onclick: ask,
     },
     icon('close'),
   );

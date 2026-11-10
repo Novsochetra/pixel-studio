@@ -165,8 +165,10 @@
   box-shadow: none;
 }
 
+/* An open panel leaves the canvas room for 160 art pixels at least: on the shortest phones it
+   took so much that the canvas's foot was under it. */
 :root[data-layout='compact'] .inspector {
-  max-height: min(44vh, 380px);
+  max-height: min(44vh, 380px, 100dvh - 350px);
   border-left: 0;
   border-top: 1px solid var(--separator);
   overscroll-behavior: contain;
@@ -220,7 +222,7 @@
 }
 
 :root[data-layout='compact'] .grid-panel {
-  max-height: min(44vh, 380px);
+  max-height: min(44vh, 380px, 100dvh - 350px);
   padding-inline: max(12px, env(safe-area-inset-left, 0px))
     max(12px, env(safe-area-inset-right, 0px));
 }
@@ -264,8 +266,24 @@
 }
 
 /* the picture and what cleaning made of it stand side by side, not a screen apart */
-:root[data-layout='compact'] .compare:has(> figure) {
+:root[data-layout='compact'] .compare:not(:has(> :not(figure))) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* a list beside its picture (the colours of a swap) has half a phone each way: the picture goes
+   above it, and the list is as long as it is, in the window's own scroll */
+:root[data-layout='compact'] .compare:has(> .map-table) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+:root[data-layout='compact'] .compare:has(> .map-table) > figure {
+  order: -1;
+}
+
+:root[data-layout='compact'] .map-table {
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
 }
 
 :root[data-layout='compact'] .batch-row {

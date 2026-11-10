@@ -1,0 +1,45 @@
+import { strict as assert } from 'node:assert';
+import { test } from 'node:test';
+import { History } from '../../src/editor/history.js';
+import { newProject } from '../../src/model/new-project.js';
+import { withCanvasSize } from '../../src/model/canvas-size.js';
+import { renameStored } from '../../src/store/stored-project.js';
+
+// a canvas of another size, or a version gone back to, started the undo history afresh: neither
+// could be undone, and nothing before it either
+test('a project put in another’s place is a step that undo and redo cross', () => {
+  const before = newProject({ kind: 'icon', width: 16, height: 16 });
+  const after = withCanvasSize(before, { width: 32, height: 32 }, { x: 0.5, y: 0.5 });
+  const history = new History(() => null);
+
+  history.recordSetting('Guides', 'guides', [], []);
+  history.recordProject(
+    'Canvas size',
+    { before, after },
+    { before: { zoom: 4 }, after: { zoom: 2 } },
+  );
+
+  const undone = history.undo(after);
+
+  assert.equal(undone.kind, 'project');
+  assert.equal(undone.before, before, 'the project as it was is handed back whole');
+  assert.deepEqual(undone.view.before, { zoom: 4 });
+  assert.equal(after.canvas.width, 32, 'and the one put in its place is left as it was');
+  assert.equal(history.canUndo, true, 'what was done before it can still be undone');
+  assert.equal(history.redo(before).after, after);
+});
+
+// a project could be renamed only while it was the open one
+test('a saved project is renamed where it is saved, and in the list', async () => {
+  const docs = new Map([['p-1-project', { json: JSON.stringify({ id: '1', name: 'Hero' }) }]]);
+  const backend = {
+    read: async (key) => docs.get(key) ?? null,
+    write: async (key, value) => docs.set(key, value),
+  };
+  const entry = { id: '1', name: 'Hero', prefix: 'p-1-' };
+
+  assert.equal(await renameStored(backend, entry, 'Striker'), true);
+  assert.equal(JSON.parse(docs.get('p-1-project').json).name, 'Striker');
+  assert.equal(entry.name, 'Striker');
+  assert.equal(await renameStored(backend, { id: '2', prefix: 'p-2-' }, 'Ghost'), false);
+});

@@ -2,6 +2,7 @@ import { commitPose, currentLayer, goTo } from './actions.js';
 import { toast } from './dom.js';
 import { clampLayerShift, shiftLayer } from '../model/frame-shift.js';
 import { PAINTING } from './tools-paint.js';
+import { saysNoRoom } from './frame-move.js';
 
 function shownLayer(app) {
   const layer = currentLayer(app.store.state);
@@ -55,11 +56,13 @@ export function moveLayerDrag(app, start) {
   }
 
   const { canvas } = app.store.state.project;
+  let wanted = false;
 
   return {
     move([x, y]) {
       const [dx, dy] = clampLayerShift(layer, canvas, [x - start[0], y - start[1]]);
 
+      wanted ||= x !== start[0] || y !== start[1];
       app.store.set({ frameDrag: { x: dx, y: dy, layer: layer.key } });
     },
 
@@ -67,6 +70,7 @@ export function moveLayerDrag(app, start) {
       const drag = app.store.state.frameDrag;
 
       app.store.set({ frameDrag: null });
+      saysNoRoom(drag, wanted);
 
       if (drag) {
         moveLayer(app, layer, [drag.x, drag.y]);

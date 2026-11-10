@@ -235,6 +235,13 @@ await page
   .click();
 await page.waitForTimeout(800);
 check((await pixels()) === kept, 'and going back to it restores the art');
+// going back started the undo history afresh: the work left behind was out of undo's reach
+await page.keyboard.press('ControlOrMeta+z');
+await page.waitForTimeout(600);
+check((await pixels()) !== kept, 'undo returns to the work as it was before going back');
+await page.keyboard.press('ControlOrMeta+Shift+z');
+await page.waitForTimeout(600);
+check((await pixels()) === kept, 'and redo goes back to the version again');
 await page.screenshot({ path: `${shots}/edit.png` });
 check((await waitSaved(page)).startsWith('Saved'), 'everything ends up saved');
 

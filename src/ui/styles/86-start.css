@@ -98,10 +98,15 @@ h4.start-heading {
   background: var(--tint-quiet);
 }
 
-/* pressed once: it waits for the press that means it */
-.start-forget.armed {
-  background: var(--bad);
-  color: var(--on-tint);
+/* a preset's card asking whether to forget it (ask-delete.js) */
+.start-choice.asking {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius);
+  box-sizing: border-box;
 }
 
 .start-forget {

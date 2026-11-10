@@ -171,7 +171,12 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   change to the project's own settings (guides, the board's marks, palettes) is a step too
   (`recordSetting`).
 - What undo cannot bring back (a project, a folder, a saved version, a preset) asks before it
-  goes; what undo can bring back does not ask.
+  goes, the same way everywhere: where the thing stood, a question with Delete and Keep
+  (`askDelete` in `src/ui/ask-delete.js`; a project's card asks the same). What undo can bring
+  back does not ask.
+- A whole project put in the open one's place (a canvas of another size, a version gone back to)
+  is one step too (`restoreProject`, `History.recordProject`): the undo history is kept across
+  it, and undo swaps the project back (`swapProject`).
 - The view a project is left on (view, frame, tool, colour) is kept for the next visit
   (`view-kept.js`): something new in the state that is how the editor is showing things joins
   `VIEW` there.

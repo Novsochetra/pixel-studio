@@ -157,7 +157,12 @@ await page.keyboard.press('Enter');
 await page.waitForTimeout(200);
 await goTo('Pitch');
 await page.getByRole('button', { name: 'Delete folder' }).click();
-await page.getByRole('button', { name: /Press again/ }).click();
+check(
+  (await page.locator('.ask-question').textContent()).startsWith('Delete the folder?') &&
+    (await page.getByRole('button', { name: 'Keep', exact: true }).count()) === 1,
+  'deleting a folder asks first, with Delete and Keep, as every delete that cannot be undone',
+);
+await page.locator('.ask-answers').getByRole('button', { name: 'Delete', exact: true }).click();
 await page.waitForTimeout(300);
 check(
   JSON.stringify(await folders()) ===

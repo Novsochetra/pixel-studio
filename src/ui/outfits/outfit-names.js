@@ -1,4 +1,4 @@
-import { node } from '../dom.js';
+import { icon, node } from '../dom.js';
 import { changeStructure } from '../actions.js';
 
 function outfitRow(app, outfit, redraw) {
@@ -20,7 +20,11 @@ function outfitRow(app, outfit, redraw) {
     'div.group',
     { style: { gap: '6px' } },
     node('input.input', { value: outfit.name, 'aria-label': 'Outfit name', onchange: rename }),
-    node('button.btn.quiet', { 'aria-label': `Remove ${outfit.name}`, onclick: remove }, '×'),
+    node(
+      'button.btn.quiet.icon-only',
+      { 'aria-label': `Remove ${outfit.name}`, onclick: remove },
+      icon('close'),
+    ),
   );
 }
 

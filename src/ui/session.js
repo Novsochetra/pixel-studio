@@ -146,13 +146,27 @@ export async function deleteProject(app, id) {
   await saveProjectList(app.backend, app.index);
 }
 
-// an earlier version of the open project takes its place, under the same id and documents
-export async function restoreProject(app, project) {
+// A whole project in the place of the open one, under the same id and documents, with the undo
+// history kept: install starts a new one, as it does for a project just opened.
+export function swapProject(app, project) {
+  const { history } = app;
+
+  install(app, project, { prefix: app.keys.prefix, save: 'all', keepView: true });
+  app.history = history;
+}
+
+// An earlier version of the open project, or the project on a canvas of another size, takes its
+// place as one step: undo puts the project back as it was. view: what the editor shows
+// differently with the new one (the mirror line on a canvas whose left edge moved).
+export async function restoreProject(app, project, { label, view = {} }) {
   await saveBeforeLeaving(app);
-  project.id = app.store.state.project.id;
-  install(app, fillMissingSprites(project), {
-    prefix: app.keys.prefix,
-    save: 'all',
-    keepView: true,
-  });
+  const { state } = app.store;
+  const before = state.project;
+  const shown = Object.fromEntries(Object.keys(view).map((key) => [key, state[key]]));
+
+  project.id = before.id;
+  swapProject(app, fillMissingSprites(project));
+  app.store.set(view);
+  app.history.recordProject(label, { before, after: project }, { before: shown, after: view });
+  app.store.touch('project');
 }

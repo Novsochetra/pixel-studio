@@ -132,6 +132,28 @@ check(
   'projects saved before pictures were kept still show theirs',
 );
 
+// a project that is not the open one had to be opened to be renamed or copied
+const wordmark = async () =>
+  (await page.locator('.wordmark small').textContent()).replace(' ▾', '').trim();
+const leftOpen = await wordmark();
+const other = page.locator('.project-card:not([aria-current="true"])').first();
+
+await other.locator('.card-more').click();
+await page.getByRole('menuitem', { name: 'Rename', exact: true }).click();
+await page.locator('.project-card input').fill('Renamed here');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(600);
+check(
+  (await page.locator('.card-name').allTextContents()).includes('Renamed here') &&
+    (await wordmark()) === leftOpen &&
+    (await page.locator('.sheet').count()) === 1,
+  'a project that is not open is renamed on its card, the open one left as it is',
+);
+await page.locator('.project-card', { hasText: 'Renamed here' }).locator('.card-more').click();
+await page.getByRole('menuitem', { name: 'Duplicate', exact: true }).click();
+await page.waitForTimeout(1500);
+check((await wordmark()) === 'Renamed here copy', 'and copied from its card, the copy opened');
+
 // the project open now could not be deleted at all: another had to be opened first
 const openName = (await page.locator('.wordmark small').textContent()).replace(' ▾', '').trim();
 const cards = () => page.locator('.project-card').count();

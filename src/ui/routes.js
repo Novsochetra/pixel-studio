@@ -53,6 +53,7 @@ export const ROUTES = {
     'gridOpen',
     'layout',
     'lassoMode',
+    'panel',
   ],
   layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations', 'layout'],
   colours: [

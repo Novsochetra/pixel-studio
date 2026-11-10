@@ -348,6 +348,15 @@
   font-weight: 600;
 }
 
+/* a card asking for its project's new name (card-changes.js) */
+.card-ask .input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  box-sizing: border-box;
+  font-weight: 400;
+}
+
 .card-answers {
   display: flex;
   flex-wrap: wrap;

@@ -80,7 +80,18 @@ export class History {
     this.push({ label, kind: 'setting', key, before, after });
   }
 
+  // A whole project in the place of the open one (a canvas of another size, a version gone back
+  // to): before and after are the two projects, and view what the editor showed with each. The
+  // page swaps them itself, as each has saved work of its own to write.
+  recordProject(label, { before, after }, view = null) {
+    this.push({ label, kind: 'project', before, after, view });
+  }
+
   apply(step, side, project) {
+    if (step.kind === 'project') {
+      return;
+    }
+
     if (step.kind === 'structure') {
       project.animations = snapshotAnimations(step[side]);
 

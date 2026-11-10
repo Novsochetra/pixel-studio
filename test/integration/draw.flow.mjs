@@ -157,6 +157,31 @@ check(
   'the project as it was is kept as a version',
 );
 await page.keyboard.press('Escape');
+
+// a canvas of another size started the undo history afresh: neither it nor the strokes before
+// it could be undone
+await page.keyboard.press('ControlOrMeta+z');
+await page.waitForTimeout(500);
+const back = await pixels('#3d7fe0');
+check(
+  (await status(page)).includes('32×32 canvas') && back.length === 8 && !back.includes('18,10'),
+  'undo puts the canvas back at its size, the art where it was',
+);
+await page.keyboard.press('ControlOrMeta+z');
+await page.waitForTimeout(300);
+check(
+  (await page.locator('.toast').textContent()).startsWith('Undone: '),
+  'and what was done before it can still be undone',
+);
+await page.keyboard.press('ControlOrMeta+Shift+z');
+await page.keyboard.press('ControlOrMeta+Shift+z');
+await page.waitForTimeout(500);
+check(
+  (await status(page)).includes('48×40 canvas') &&
+    JSON.stringify(await pixels('#3d7fe0')) === JSON.stringify(moved),
+  'redo makes the canvas the new size again',
+);
+check(/^Saved/.test(await waitSaved(page)), 'which is saved again');
 await page.reload();
 await page.waitForSelector('.grid-panel');
 await page.waitForTimeout(500);

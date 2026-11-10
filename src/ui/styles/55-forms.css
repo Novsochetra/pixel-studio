@@ -342,3 +342,21 @@ input[type='number']::-webkit-outer-spin-button {
     0 1px 4px rgb(0 0 0 / 35%),
     0 0 0 3px var(--tint);
 }
+
+/* what cannot be undone asks where it stood (ask-delete.js): a question, the word that does it,
+   and Keep */
+.ask-place.asking {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.ask-question {
+  font-weight: 600;
+}
+
+.ask-answers {
+  display: inline-flex;
+  gap: 6px;
+}

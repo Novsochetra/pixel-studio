@@ -3,6 +3,7 @@ import { renameInPlace } from '../rename-field.js';
 import { changeList } from './change-list.js';
 import { EVERY_PROJECT, NO_FOLDER } from '../../store/browse.js';
 import { removeFolder, renameFolder } from '../../store/folders.js';
+import { askDelete } from '../ask-delete.js';
 
 const counted = (count) => `${count} project${count === 1 ? '' : 's'}`;
 
@@ -24,21 +25,18 @@ function renameButton(job, folder) {
 }
 
 function deleteButton(job, folder, count) {
-  let confirming = false;
-  const remove = (event) => {
-    if (!confirming) {
-      confirming = true;
-      event.currentTarget.textContent = count
-        ? `Delete the folder? Its ${counted(count)} ${count === 1 ? 'stays' : 'stay'}. Press again`
-        : 'Delete the folder? Press again';
+  const place = node('span.ask-place');
+  const ask = () =>
+    askDelete(place, {
+      question: count
+        ? `Delete the folder? Its ${counted(count)} ${count === 1 ? 'stays' : 'stay'}.`
+        : 'Delete the folder?',
+      onDelete: () => changeList(job, (index) => removeFolder(index, folder.id)),
+    });
 
-      return;
-    }
+  place.append(node('button.btn.quiet', { onclick: ask }, 'Delete folder'));
 
-    changeList(job, (index) => removeFolder(index, folder.id));
-  };
-
-  return node('button.btn.quiet', { onclick: remove }, 'Delete folder');
+  return place;
 }
 
 function title(job, folder) {

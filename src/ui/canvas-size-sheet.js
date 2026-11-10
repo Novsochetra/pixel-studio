@@ -23,8 +23,8 @@ const ANCHORS = [
 const firstAnchor = (project) =>
   ANCHORS.find(({ label }) => label === (kindOf(project).place === 'feet' ? 'Bottom' : 'Centre'));
 
-// Resolves to whether the canvas changed. Cut-off art cannot be undone, so with no version kept
-// the canvas is left as it is.
+// Resolves to whether the canvas changed. Undo brings cut-off art back until the page is closed;
+// the version kept first brings it back after that, so with none kept the canvas is left as it is.
 async function resize(app, { size, anchor }) {
   const { project } = app.store.state;
   const [across] = canvasShift(project.canvas, size, anchor);
@@ -36,15 +36,18 @@ async function resize(app, { size, anchor }) {
     return false;
   }
 
-  // read again: the save before it may have waited, and the project is whatever is open now
-  await restoreProject(app, withCanvasSize(app.store.state.project, size, anchor));
-
   // the mirror line is counted from the canvas's left edge, which may have moved
   const { symmetry } = app.store.state;
 
-  app.store.set({ symmetry: { ...symmetry, axisSum: symmetry.axisSum + 2 * across } });
+  // read again: the save before it may have waited, and the project is whatever is open now
+  await restoreProject(app, withCanvasSize(app.store.state.project, size, anchor), {
+    label: 'Canvas size',
+    view: { symmetry: { ...symmetry, axisSum: symmetry.axisSum + 2 * across } },
+  });
   app.fitCanvas();
-  toast(`The canvas is now ${size.width}×${size.height}. The one before is kept in History.`);
+  toast(
+    `The canvas is now ${size.width}×${size.height}. Undo puts it back; the one before is in History too.`,
+  );
 
   return true;
 }
@@ -144,7 +147,7 @@ export function openCanvasSizeSheet(app) {
     node(
       'p.hint',
       {},
-      `Now ${canvas.width}×${canvas.height}. Every view, frame and layer takes the new size; art left outside a smaller canvas is cut off. The project as it is now is kept in History first.`,
+      `Now ${canvas.width}×${canvas.height}. Every view, frame and layer takes the new size; art left outside a smaller canvas is cut off. Undo puts it back, and the project as it is now is kept in History first.`,
     ),
     node('div.compare.canvas-size-fields', {}, fields.width.field, fields.height.field),
     node('div.field', {}, node('span', {}, 'Keep the art at'), anchors),

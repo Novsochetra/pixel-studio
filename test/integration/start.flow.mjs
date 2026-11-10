@@ -124,11 +124,16 @@ check(
 );
 await page.getByRole('button', { name: 'Forget the Striker preset' }).click();
 check(
-  (await page.getByRole('radio', { name: /^Striker/ }).count()) === 1 &&
-    (await page.locator('.toast').textContent()).startsWith('Forget the Striker preset?'),
+  (await page.locator('.ask-question').textContent()) === 'Forget the Striker preset?',
   'forgetting a preset, which cannot be undone, asks first',
 );
+await page.getByRole('button', { name: 'Keep', exact: true }).click();
+check(
+  (await page.getByRole('radio', { name: /^Striker/ }).count()) === 1,
+  'Keep leaves it where it was',
+);
 await page.getByRole('button', { name: 'Forget the Striker preset' }).click();
+await page.getByRole('button', { name: 'Forget', exact: true }).click();
 await page.waitForTimeout(300);
 check(!(await page.getByRole('radio', { name: /^Striker/ }).count()), 'and it can be forgotten');
 await page.getByRole('button', { name: 'Try the example character' }).last().click();

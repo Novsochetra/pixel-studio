@@ -2,6 +2,7 @@ import { icon, node, replace, toast } from '../dom.js';
 import { deleteProject, openProject } from '../session.js';
 import { laterPicture, projectPicture } from './project-picture.js';
 import { cardMenu } from './card-menu.js';
+import { duplicateStored, renameOnCard } from './card-changes.js';
 import { draggableProject } from './drag-to-folder.js';
 import { describeEntry } from '../../model/presets.js';
 import { inWords } from '../../model/told.js';
@@ -49,6 +50,13 @@ function askDelete(job, project, card) {
       node('button.btn', { onclick: job.redraw }, 'Keep'),
     ),
   );
+  // Esc answers the question: it does not go on to close Projects
+  card.onkeydown = (event) => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      job.redraw();
+    }
+  };
   card.querySelector('.btn:not(.danger)').focus();
 }
 
@@ -67,13 +75,17 @@ function moreButton(job, project, card) {
       anchor: event.currentTarget,
       onOpen: () => openCard(job, project),
       onDelete: () => askDelete(job, project, card),
+      onRename: () => renameOnCard(job, project, card),
+      onDuplicate: () => duplicateStored(job, project),
     });
 
   return node(
     'button.btn.quiet.icon-only.card-more',
     {
       'aria-label': `More for ${project.name}`,
-      title: project.isOpen ? 'Move to a folder, delete' : 'Open, move to a folder, delete',
+      title: project.isOpen
+        ? 'Move to a folder, delete'
+        : 'Open, rename, duplicate, move to a folder, delete',
       onclick: more,
     },
     icon('more'),
