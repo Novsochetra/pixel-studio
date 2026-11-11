@@ -1,7 +1,7 @@
 // A phone used by taps alone, with the touches every browser's driver can make: this flow runs on
 // Safari's engine too (STUDIO_BROWSER=webkit), where the finger drags of touch.flow.mjs cannot.
 import { openStudio } from './harness.mjs';
-import { createProject, openDock, paintedPixels, status } from './studio.mjs';
+import { createProject, openDock, paintedPixels, shutDock, status } from './studio.mjs';
 
 const { page, check, finish, shots } = await openStudio({ device: 'iPhone 13' });
 await createProject(page, { kind: 'Icon', name: 'Gem', width: 32 });
@@ -90,11 +90,11 @@ check(
   (await said()).includes('Add and Take away are on its bar'),
   'the Lasso says where adding and taking away are',
 );
-await page.locator('.dock-tab', { hasText: 'Brush' }).tap();
+await openDock(page, 'Brush');
 await page.waitForTimeout(500);
 await page.locator('#shape-even').tap();
 check(await page.locator('#shape-even').isChecked(), 'Even shapes stands in for Shift on shapes');
-await page.locator('.dock-tab', { hasText: 'Brush' }).tap();
+await shutDock(page);
 await page.waitForTimeout(400);
 await tool('Pencil');
 

@@ -1,10 +1,11 @@
 // Every button in every workspace, panel and dialog clicked in turn, for each kind of project: the
 // page must never throw. Shared by the desktop and phone runs.
-import { createProject, isCompact, openExample, openWorkspace } from './studio.mjs';
+import { createProject, isCompact, openDock, openExample, openWorkspace } from './studio.mjs';
 
-// Close this panel: a phone's panel is a sheet with a way out, and shut it has no buttons to click
+// A phone's panel is a sheet with a way out and a row that picks another panel: shut, or
+// changed for another, it would not have the buttons still to click.
 const SKIP =
-  /Delete|Clear marks|Go back|Wear it|Apply to|Use them all|Use for|Forget|Remove|Close this panel/;
+  /Delete|Clear marks|Go back|Wear it|Apply to|Use them all|Use for|Forget|Remove|Close this panel|^(Frames|Colours|Brush|Layers|Outline|Guides)$/;
 // the workspace buttons are left alone, so each workspace's own panels are clicked through
 const TOOLBAR_SKIP =
   /Download|History|^\?$|PIXEL|^Edit$|Views board|On the pitch|^Preview$|^More$|^Workspace/;
@@ -81,7 +82,7 @@ async function everyPanel(run) {
   const tabs = await page.locator('.dock-tab').allTextContents();
 
   for (const tab of tabs) {
-    await page.locator('.dock-tab', { hasText: tab }).click();
+    await openDock(page, tab);
     await page.waitForTimeout(150);
     await clickAll(run, '#stage');
     await clickAll(run, '#inspector');
@@ -110,10 +111,7 @@ async function everyWorkspace(run) {
 
 async function openDialog(page, [panel, opener, item]) {
   if (panel) {
-    await page
-      .locator('.dock-tab[aria-pressed="false"]', { hasText: panel })
-      .click({ timeout: 1000 })
-      .catch(() => {});
+    await openDock(page, panel).catch(() => {});
   }
 
   await page

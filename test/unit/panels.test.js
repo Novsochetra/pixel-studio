@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { openPanel } from '../../src/ui/dock.js';
+import { openPanel } from '../../src/ui/panels.js';
 
 const state = (patch) => ({ layout: 'compact', mode: 'edit', panel: null, ...patch });
 

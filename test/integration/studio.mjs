@@ -33,12 +33,44 @@ export async function createProject(page, { kind = 'Character', name, width, hei
 export const isCompact = (page) =>
   page.evaluate(() => document.documentElement.dataset.layout === 'compact');
 
-// on a phone the frames and the inspector's panels open from the dock; a wide window has no dock
+// On a phone the frames and the inspector's panels open as a sheet; a wide window has no dock.
+// On its side the phone has a tab for each; upright, the Panels button opens the sheet and the
+// row at the sheet's top picks the panel.
 export async function openDock(page, name) {
   const tab = page.locator('.dock-tab', { hasText: name });
 
-  if ((await tab.count()) && (await tab.getAttribute('aria-pressed')) !== 'true') {
-    await tab.click();
+  if (!(await tab.count())) {
+    return;
+  }
+
+  if (await tab.isVisible()) {
+    if ((await tab.getAttribute('aria-pressed')) !== 'true') {
+      await tab.click();
+      await page.waitForTimeout(200);
+    }
+
+    return;
+  }
+
+  if (!(await page.locator('.app').getAttribute('data-panel'))) {
+    await page.locator('.dock-more').click();
+    await page.waitForTimeout(200);
+  }
+
+  const pick = page.locator('.panel-tabs button:visible', { hasText: name });
+
+  if ((await pick.getAttribute('aria-pressed')) !== 'true') {
+    await pick.click();
+    await page.waitForTimeout(200);
+  }
+}
+
+// shuts the panel a phone has open, if it has one
+export async function shutDock(page) {
+  const close = page.locator('.panel-close:visible');
+
+  if (await close.count()) {
+    await close.click();
     await page.waitForTimeout(200);
   }
 }

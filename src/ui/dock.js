@@ -1,25 +1,7 @@
 import { icon, node, replace } from './dom.js';
+import { openPanel, panelsFor } from './panels.js';
+import { panelHead } from './panel-sheet.js';
 import { toHex } from '../model/sprite.js';
-
-// what the dock opens, and the workspaces each belongs to: frames and the brush are for drawing
-const PANELS = [
-  { id: 'frames', label: 'Frames', iconName: 'frames', modes: ['edit'] },
-  { id: 'colours', label: 'Colours', modes: ['edit', 'board'] },
-  { id: 'brush', label: 'Brush', iconName: 'brush', modes: ['edit'] },
-  { id: 'layers', label: 'Layers', iconName: 'layers', modes: ['edit', 'board'] },
-  { id: 'outline', label: 'Outline', iconName: 'outline', modes: ['edit', 'board'] },
-  { id: 'guides', label: 'Guides', iconName: 'guides', modes: ['edit', 'board'] },
-];
-
-const panelsFor = (mode) => PANELS.filter((panel) => panel.modes.includes(mode));
-
-// the panel that is open, if this workspace has it
-export function openPanel(state) {
-  const open =
-    state.layout === 'compact' && panelsFor(state.mode).some((panel) => panel.id === state.panel);
-
-  return open ? state.panel : null;
-}
 
 // the colour in hand shows on its tab, so it is in sight with every panel shut
 const tabMark = (panel, state) =>
@@ -31,6 +13,8 @@ function tab(app, panel, open) {
   return node(
     'button.dock-tab',
     {
+      'data-panel': panel.id,
+      'aria-label': panel.label,
       'aria-pressed': String(open === panel.id),
       'aria-expanded': String(open === panel.id),
       onclick: () => app.store.set({ panel: open === panel.id ? null : panel.id }),
@@ -40,25 +24,54 @@ function tab(app, panel, open) {
   );
 }
 
+// Held upright, a phone has one bar at its foot, the tools', and beside it two round buttons:
+// the colour, and this one for every other panel. It opens the one used last; the sheet's own
+// row picks another.
+function moreButton(app, panels, open) {
+  const others = panels.filter((panel) => panel.id !== 'colours');
+  const last = others.find((panel) => panel.id === app.lastPanel) ?? others[0];
+  const shown = Boolean(open) && open !== 'colours';
+
+  return node(
+    'button.dock-more',
+    {
+      'aria-label': 'Panels',
+      title: 'Frames, layers and settings',
+      'aria-pressed': String(shown),
+      'aria-expanded': String(shown),
+      onclick: () => app.store.set({ panel: shown ? null : last.id }),
+    },
+    icon('sliders'),
+  );
+}
+
 // On a phone the frames and the inspector's panels wait here, one open at a time over the bottom
-// of the canvas, so the canvas keeps the screen.
+// of the screen, so the canvas keeps the rest of it.
 export function renderDock(el, app) {
   const { state } = app.store;
   const panels = state.layout === 'compact' ? panelsFor(state.mode) : [];
   const open = openPanel(state);
-
   const frame = el.closest('.app');
 
   el.hidden = !panels.length;
 
+  if (open && open !== 'colours') {
+    app.lastPanel = open;
+  }
+
   // another panel opens at its top, not where the last one was scrolled to
   if (frame.dataset.panel !== (open ?? '')) {
     frame.dataset.panel = open ?? '';
-    frame.querySelector('.inspector').scrollTop = 0;
+    frame.querySelectorAll('.inspector, .inspector > .section').forEach((part) => {
+      part.scrollTop = 0;
+    });
   }
 
   replace(
     el,
     panels.map((panel) => tab(app, panel, open)),
+    moreButton(app, panels, open),
   );
+  // the top of each sheet, the frames' too, says which panel is open
+  frame.querySelectorAll('.panel-grab').forEach((head) => replace(head, panelHead(app)));
 }

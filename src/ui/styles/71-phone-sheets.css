@@ -1,19 +1,21 @@
-/* A phone held upright: the tools and the dock float over the stage as bars of glass, the dock
-   centred as a tab bar is, and a panel opened from it is a sheet at the screen's foot. */
-.panel-grab {
+/* A phone held upright: one bar floats at the screen's foot, the tools', with two round buttons
+   beside it for the colour and the panels; a panel is a sheet that rises over the foot. */
+.panel-grab,
+.dock-more {
   display: none;
 }
 
 @media (orientation: portrait), (min-height: 521px) {
   :root[data-layout='compact'] .app {
+    grid-template:
+      'bar bar' auto 'stage stage' minmax(0, 1fr) 'inspector inspector' auto
+      'rail dock' auto / minmax(0, 1fr) auto;
     background: var(--stage);
   }
 
-  :root[data-layout='compact'] :is(.rail, .dock) {
-    position: relative;
-    z-index: 1;
+  /* glass over the stage, as the bars of the phone's own system are */
+  :root[data-layout='compact'] :is(.rail, .dock-tab[data-panel='colours'], .dock-more) {
     border: 0;
-    border-radius: var(--radius-pill);
     background: var(--material);
     -webkit-backdrop-filter: var(--blur-glass);
     backdrop-filter: var(--blur-glass);
@@ -22,58 +24,87 @@
       0 6px 18px rgb(0 0 0 / 14%);
   }
 
-  :root[data-layout='compact'] .rail {
-    margin: 6px max(10px, env(safe-area-inset-right, 0px)) 0
-      max(10px, env(safe-area-inset-left, 0px));
-    padding: 4px 6px;
-  }
-
-  /* in the middle of the screen, short of its edges, each tab wide enough for its mark to be
-     a pill round its word */
-  :root[data-layout='compact'] .dock {
-    justify-self: center;
-    box-sizing: border-box;
-    width: min(100% - 16px, 372px);
-    margin: 6px 0 calc(8px + env(safe-area-inset-bottom, 0px));
-    gap: 4px;
-    padding: 4px 6px;
-  }
-
-  :root[data-layout='compact'] .dock-tab {
+  :root[data-layout='compact'] :is(.rail, .dock) {
     position: relative;
-    isolation: isolate;
-    flex: 1 1 0;
-    min-width: 0;
-    gap: 1px;
-    padding: 4px 2px;
+    z-index: 1;
+    margin-block: 6px calc(8px + env(safe-area-inset-bottom, 0px));
   }
 
-  :root[data-layout='compact'] .dock-tab :is(svg, .dock-swatch) {
-    width: 20px;
-    height: 20px;
+  /* A capsule, and the tools in it round: each stands as far from the bar's edge as from its
+     end, so the two curves run side by side as a tab bar's do. */
+  :root[data-layout='compact'] .rail {
+    margin-inline: max(10px, env(safe-area-inset-left, 0px)) 0;
+    padding: 4px;
+    border-radius: var(--radius-pill);
   }
 
-  /* The open tab's mark is lower than the tab and as wide, with room between it and the next:
-     as tall as the tab, tab against tab, it was nearly a circle and not the pill a tab bar
-     marks its tab with. */
-  :root[data-layout='compact'] .dock-tab[aria-pressed='true'] {
+  :root[data-layout='compact'] .rail .btn {
+    border-radius: 50%;
+  }
+
+  /* beside the bar, two buttons as tall as it is: the colour in hand, and the panels */
+  :root[data-layout='compact'] .dock {
+    align-items: center;
+    gap: 8px;
+    margin-inline: 8px max(10px, env(safe-area-inset-right, 0px));
+    padding: 0;
+    border: 0;
     background: none;
   }
 
-  :root[data-layout='compact'] .dock-tab[aria-pressed='true']::before {
-    content: '';
-    position: absolute;
-    inset: 4px 0;
-    z-index: -1;
-    border-radius: var(--radius-pill);
-    background: var(--tint-quiet);
+  :root[data-layout='compact'] .dock-tab {
+    display: none;
   }
 
-  /* The sheet's own colour goes on under the bars to the screen's foot, so they float on the
-     sheet as they do on the stage: ending above them, it read as a card between two bars. */
+  :root[data-layout='compact'] :is(.dock-tab[data-panel='colours'], .dock-more) {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 52px;
+    height: 52px;
+    min-height: 0;
+    padding: 0;
+    border-radius: 50%;
+    color: var(--label);
+    cursor: pointer;
+    transition:
+      scale var(--duration-press) var(--ease-spring),
+      color var(--duration-normal) var(--ease-standard);
+  }
+
+  :root[data-layout='compact'] .dock-more:active {
+    scale: var(--scale-pressed);
+  }
+
+  :root[data-layout='compact'] .dock-more svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  :root[data-layout='compact'] .dock-tab[data-panel='colours'] > span:not(.dock-swatch) {
+    display: none;
+  }
+
+  :root[data-layout='compact'] .dock-tab[data-panel='colours'] .dock-swatch {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* the one whose sheet is open */
+  :root[data-layout='compact']
+    :is(.dock-tab[data-panel='colours'], .dock-more)[aria-pressed='true'] {
+    color: var(--tint-text);
+    box-shadow:
+      var(--shadow-glass),
+      0 0 0 2px var(--tint),
+      0 6px 18px rgb(0 0 0 / 14%);
+  }
+
+  /* The sheet's own colour goes on under the bar to the screen's foot, so the bar floats on the
+     sheet as it does on the stage: ending above it, the sheet read as a card over a bar. */
   :root[data-layout='compact'] .app[data-panel]:not([data-panel=''])::after {
     content: '';
-    grid-row: rail-start / dock-end;
+    grid-row: rail-start / rail-end;
     grid-column: 1 / -1;
     background: var(--sheet);
   }
@@ -100,21 +131,42 @@
     background: linear-gradient(to right, transparent, var(--sheet) 85%);
   }
 
+  /* The sheet's top stays put and the panel scrolls under it, in a box of its own: held at the
+     top of one scrolling sheet instead, the browser drew nothing at all behind the sheet's
+     round corners. */
+  :root[data-layout='compact'] .inspector {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
   /* the sheet rises once; a panel changed for another under the same sheet is simply there */
   :root[data-layout='compact'] .section {
-    padding-top: 2px;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-top: 4px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     animation: none;
   }
 
-  /* the bar the sheet is pulled down by, with the grabber that says so */
+  /* the row at the sheet's top says which panel this is: its own title would say it twice */
+  :root[data-layout='compact'] .section > h2 {
+    display: none;
+  }
+
+  /* The sheet's top: the grabber it is pulled down by, the row that picks a panel, and the way
+     out. */
   :root[data-layout='compact'] .panel-grab {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    display: block;
-    height: 30px;
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 12px 8px;
     background: var(--sheet);
     touch-action: none;
+    --behind: var(--sheet);
   }
 
   :root[data-layout='compact'] .panel-grab::before {
@@ -129,35 +181,28 @@
     background: var(--fill-quiet);
   }
 
-  :root[data-layout='compact'] .section > h2 {
-    touch-action: none;
+  :root[data-layout='compact'] .panel-tabs {
+    flex: 1;
+    min-width: 0;
   }
 
   /* in the frames' sheet the bar scrolls with nothing under it: bare, it leaves the sheet's
      round corners showing */
   :root[data-layout='compact'] .grid-panel > .panel-grab {
-    margin: -8px -12px -6px;
+    min-width: 0;
+    margin: -8px -12px 0;
     background: none;
   }
 
-  /* small to the eye in the sheet's corner: the room round it takes the tap */
   :root[data-layout='compact'] .btn.panel-close {
-    --btn-height: 26px;
+    --btn-height: 36px;
 
-    position: absolute;
-    top: 6px;
-    right: 12px;
-    width: 26px;
+    flex: none;
+    width: 36px;
     padding: 0;
     background: var(--fill-quiet);
     color: var(--label-secondary);
-    font-size: 17px;
+    font-size: 20px;
     line-height: 1;
-  }
-
-  :root[data-layout='compact'] .btn.panel-close::after {
-    content: '';
-    position: absolute;
-    inset: -8px;
   }
 }

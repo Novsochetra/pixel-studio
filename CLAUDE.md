@@ -112,16 +112,14 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   time from the dock (`dock.js`); the toolbar keeps one row, and what does not fit waits in the
   More menu (`toolbar-menu.js`). Something new in the inspector or the toolbar needs its place
   there too.
-- A phone held upright has the look of its own system (`71-phone-sheets.css`): the tools and the
-  dock float over the stage as bars of glass, the dock centred as a tab bar is, and a panel
-  opened from the dock is a sheet at the screen's foot, with the bar it is pulled down by and a
-  × (`panel-sheet.js`). The sheet still takes its row: the canvas is fitted in the room above
-  it, never under it. What stays put in a panel while it scrolls is painted in `--sheet` there.
-- What shows over the canvas (the selection's bar, the Pose and Pin bars, an empty frame's card,
-  the place being edited) floats over it, never in the canvas's own column: a card that pushed the
-  canvas down let it jump under the finger at the first pixel drawn (`touch.flow.mjs`). It stands
-  on `.edit-area`, beside the scroller and not in it: inside, a canvas zoomed in carried the
-  selection's Done off the screen.
+- A phone held upright has the look of its own system (`71-phone-sheets.css`): one bar floats
+  at the screen's foot, the tools', a capsule with round tools in it, and beside it two round
+  buttons, the colour in hand and Panels (`dock.js`). There is no second bar of tabs: a panel
+  is a sheet at the screen's foot, and the row at the sheet's top names it and picks another
+  (`panel-sheet.js`, the panels themselves in `panels.js`), beside the bar it is pulled down by
+  and a ×. The sheet still takes its row: the canvas is fitted in the room above it, never
+  under it. What stays put in a panel while it scrolls is painted in `--sheet` there. On its
+  side the phone keeps a tab for each panel at the screen's edge.
 - Two fingers never zoom the page (`touch-action` on `html`): they zoom the canvas, on the art or
   on the stage beside it (`stage-beside.js`). While they hold it the canvas is moved and sized as
   a picture (`pinch.js`), and drawn again once, at the whole zoom nearest, when they let go:
