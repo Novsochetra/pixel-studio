@@ -4,7 +4,6 @@ import { afterPress } from '../after-press.js';
 import { addProject } from '../session.js';
 import { saveProject } from '../downloads.js';
 import { openCanvasSizeSheet } from '../canvas-size-sheet.js';
-import { backgroundUrl } from '../preview-background.js';
 import { projectPicture } from './project-picture.js';
 import { describeProject, defaultName } from '../../model/presets.js';
 import { presetFromProject } from '../../model/preset-from-project.js';
@@ -21,10 +20,9 @@ async function addMadeFrom({ app, redraw }, { make, said }) {
   const { project } = app.store.state;
 
   try {
-    const background = await backgroundUrl(app);
     const made = await make(project);
 
-    await addProject(app, made, background);
+    await addProject(app, made);
     toast(said(made.name, project.name));
     redraw();
 

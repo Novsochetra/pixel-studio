@@ -5,12 +5,12 @@
 What still locks the studio to one game and one kind of art, and what to do about it:
 
 1. **Start with "What are you making?"**: Character (multi-view, animated), Object or item (one view,
-   centre or bottom anchor), Tiles (tile grid, seamless preview), Effect (animated, centre anchor),
-   Icon or portrait. Each kind brings its own guides, anchor, export and preview.
+   centre or bottom anchor), Tiles (tile grid), Effect (animated, centre anchor),
+   Icon or portrait. Each kind brings its own guides, anchor and export.
 2. **Animation cleaning matches pixel size, not height**: today every frame is scaled to the
    standing pose's height, so a crouch or a slide is stretched.
-3. **Game presets are data, not code**: canvas, directions, palette, parts, export settings and
-   preview background. Naga Eleven (team kits, 64×62 frames, the pitch, game pack) becomes one preset;
+3. **Game presets are data, not code**: canvas, directions, palette, parts and export settings.
+   Naga Eleven (team kits, 64×62 frames, game pack) becomes one preset;
    anyone can save their own.
 4. **A neutral start screen**: recent projects and New; the Sochetra sample moves behind "Try an
    example".

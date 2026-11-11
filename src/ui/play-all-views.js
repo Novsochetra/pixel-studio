@@ -1,14 +1,12 @@
 import { currentAnimation } from './actions.js';
 import { cssVar, drawChecker, drawSprite, sizeCanvas } from './draw.js';
-import { cast, frameSprite } from './preview-scene.js';
 import { isSingleView, viewName } from '../model/kinds.js';
 import { bounds, unionBounds } from '../model/sprite.js';
 import { CAPTION, GAP, playLayout } from '../views/play-layout.js';
+import { playedSprite, playedViews } from '../views/played-views.js';
 
 const AIR = 2;
 const CORNER = 10;
-
-const playedViews = (state) => cast(state.project, currentAnimation(state), true);
 
 // with All views on, Play shows every view moving together, the mirrored sides as the game flips them
 export function playsAllViews(app) {
@@ -18,7 +16,7 @@ export function playsAllViews(app) {
     Boolean(app.playback) &&
     state.gridAll &&
     !isSingleView(state.project) &&
-    playedViews(state).length > 1
+    playedViews(state.project, currentAnimation(state)).length > 1
   );
 }
 
@@ -30,7 +28,7 @@ function playedBox(project, animation, views) {
   const longest = Math.max(...views.map((view) => animation.directions[view.source].frames.length));
   const boxes = views.flatMap((view) =>
     Array.from({ length: longest }, (unused, tick) =>
-      bounds(frameSprite(project, animation, view, tick)),
+      bounds(playedSprite(project, animation, view, tick)),
     ),
   );
   const box = unionBounds(boxes) ?? { left: 0, top: 0, right: width, bottom: height };
@@ -78,7 +76,7 @@ export function paintAllViews(canvas, app) {
   const { state } = app.store;
   const { project } = state;
   const animation = currentAnimation(state);
-  const views = playedViews(state);
+  const views = playedViews(project, animation);
 
   // found once for a play: the art does not change while it runs
   app.playback.box ??= playedBox(project, animation, views);
@@ -101,7 +99,7 @@ export function paintAllViews(canvas, app) {
     context.save();
     context.translate((i % columns) * step.x, Math.floor(i / columns) * step.y);
     drawView(context, {
-      sprite: frameSprite(project, animation, view, app.playback.frame),
+      sprite: playedSprite(project, animation, view, app.playback.frame),
       name: viewName(project, view.direction),
       box,
       scale,

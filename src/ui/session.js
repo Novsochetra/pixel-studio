@@ -81,7 +81,6 @@ export function install(app, project, { prefix, save = 'nothing', keepView = fal
   // so the ones the restored project lacks get removed
   const stored = app.keys?.prefix === prefix ? app.saver?.stored : null;
   const view = keepView ? viewKept(app.store.state, project) : keptView(project);
-  app.backgroundImage = null;
   app.keys = keysFor(prefix);
   app.history = new History(app.findLayer);
   startSaving(app, project, save, stored);
@@ -106,7 +105,7 @@ export async function openProject(app, entry) {
 
 // a project made here, or read from a file, joins the list under a fresh id and is saved whole
 // the new project is written before the list names it, so the list never points at nothing
-export async function addProject(app, project, background = null) {
+export async function addProject(app, project) {
   await saveBeforeLeaving(app);
   // a game's next character is made while another of it is open, so it joins that one's folder
   const folder = folderOf(app.index, app.index.current);
@@ -115,13 +114,6 @@ export async function addProject(app, project, background = null) {
   fillMissingSprites(project);
   install(app, project, { prefix: prefixFor(project.id), save: 'all' });
   moveToFolder(app.index, project.id, folder);
-
-  if (background) {
-    await app.backend.write(app.keys.background, { url: background });
-  } else if (project.preview?.background) {
-    project.preview = { ...project.preview, background: false };
-  }
-
   await app.saver.flushNow();
   await saveProjectList(app.backend, app.index);
 }

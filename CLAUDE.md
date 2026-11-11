@@ -87,7 +87,7 @@ any game. One page, built from `src/` by `build/build.py`. The rules are the fig
 - `store/`: saved work: the backends, each project's documents, the projects list and its folders,
   pictures, versions, presets,
 - `art/`: colours painted as pixel art,
-- `ui/`: the page. One folder per feature (`grid/`, `start/`, `preview/`, `import/`, `projects/`,
+- `ui/`: the page. One folder per feature (`grid/`, `start/`, `import/`, `projects/`,
   …), a part two features share at its top, `styles/` and `page.html`.
 
 Where a file goes:
@@ -186,7 +186,7 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   step (`History.recordStructure` says whether it did).
 - A step that moves the editor to another frame, layer or animation remembers both places
   (`restructure` does it): undo goes back to where it was made from, redo to where it led. A
-  change to the project's own settings (guides, the board's marks, palettes) is a step too
+  change to the project's own settings (guides, palettes) is a step too
   (`recordSetting`).
 - What undo cannot bring back (a project, a folder, a saved version, a preset) asks before it
   goes, the same way everywhere: where the thing stood, a question with Delete and Keep

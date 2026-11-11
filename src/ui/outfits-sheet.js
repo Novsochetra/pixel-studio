@@ -2,7 +2,7 @@ import { node, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
 import { allArtLayers } from './actions.js';
 import { recolourLayers } from './body/recolour.js';
-import { boardPreview } from './board-canvas.js';
+import { viewsToFit } from './views-side-by-side.js';
 import { partsEditor } from './parts-editor.js';
 import { keepVersion } from './versions-sheet.js';
 import { downloadOutfit, keepAsSwap } from './outfit-files.js';
@@ -94,7 +94,7 @@ function drawOutfits(job) {
     node(
       'div',
       { style: { overflowX: 'auto' } },
-      boardPreview(state, 860, { overlay: null, mapping, onScreen: true }),
+      viewsToFit(state, 860, { mapping, onScreen: true }),
     ),
     outfitFirstStep(job, mapping),
     partsSection(job),

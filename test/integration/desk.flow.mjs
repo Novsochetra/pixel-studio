@@ -8,7 +8,6 @@ import {
   imageFile,
   openExample,
   openPanel,
-  openWorkspace,
   selectView,
 } from './studio.mjs';
 
@@ -57,20 +56,6 @@ await page.getByRole('button', { name: 'Remove', exact: true }).click();
 check((await palettes()) === offered - 1, 'a palette can be taken off the project');
 await page.keyboard.press('Escape');
 
-// one mark on the Views board could not be taken away: only all of them, or the last
-await openWorkspace(page, 'Views board');
-await page.getByRole('button', { name: 'Draws a mark' }).click();
-const board = await page.locator('.board-canvas').boundingBox();
-await page.mouse.move(board.x + 60, board.y + 80);
-await page.mouse.down();
-await page.mouse.move(board.x + 90, board.y + 100, { steps: 4 });
-await page.mouse.up();
-await page.getByRole('button', { name: 'Rubs one out' }).click();
-await page.mouse.click(board.x + 75, board.y + 90);
-await page.keyboard.press('Meta+z');
-check((await said()) === 'Undone: Rub out mark', 'a press on a mark rubs that one out');
-await openWorkspace(page, 'Edit');
-
 // the window's first field was in a part folded shut: the focus stayed on the button behind,
 // and Enter opened the window a second time
 await page.getByRole('button', { name: 'Team kits…' }).focus();
@@ -88,19 +73,6 @@ await page.setViewportSize({ width: 1300, height: 900 });
 await page.waitForTimeout(300);
 check((await page.locator('.menu').count()) === 0, 'a menu is put away when the window resizes');
 
-// zoomed past the window, the preview carried its own controls off the screen
-await page.setViewportSize({ width: 1100, height: 700 });
-await openWorkspace(page, 'On the pitch');
-await page.getByRole('button', { name: '3×' }).click();
-await page.waitForTimeout(400);
-const play = await page.getByRole('button', { name: 'Play', exact: true }).boundingBox();
-const zooms = await page.getByRole('group', { name: 'Zoom' }).boundingBox();
-check(
-  play.x >= 0 && zooms.x + zooms.width <= 1100,
-  'zoomed to 3×, the preview’s controls are still in the window',
-);
-await page.getByRole('button', { name: '1×' }).click();
-await openWorkspace(page, 'Edit');
 await page.setViewportSize({ width: 1440, height: 960 });
 
 // a file that is no picture took a frame's place, and pushed the next picture to a new frame

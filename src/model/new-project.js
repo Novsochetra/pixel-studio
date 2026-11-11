@@ -36,12 +36,10 @@ const partsOf = (preset) =>
     return { id: name.toLowerCase(), name, colours: [...colours] };
   });
 
-// what a project saved as a preset carries over besides its shape; its own background picture
-// stays with it, as the picture is stored with that project
+// what a project saved as a preset carries over besides its shape
 const carried = (preset) => ({
   palettes: structuredClone(preset.palettes ?? []),
   exportSettings: structuredClone(preset.exportSettings ?? null),
-  preview: preset.preview ? { ...structuredClone(preset.preview), background: false } : null,
 });
 
 // What a project of icons or tiles holds is the art itself, one to a tab: the first takes the

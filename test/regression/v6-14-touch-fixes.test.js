@@ -10,7 +10,6 @@ import { menuPlace } from '../../src/ui/menu.js';
 import { moveAnimation, startAnimation } from '../../src/model/animations.js';
 import { zipFiles } from '../../src/io/zip.js';
 import { pieceOnCanvas } from '../../src/editor/floating.js';
-import { markAt } from '../../src/views/markup.js';
 import { lassoModeFor } from '../../src/ui/tools-select.js';
 import { fittedView } from '../../src/ui/view-kept.js';
 import { buildSheet } from '../../src/export/sheet.js';
@@ -34,7 +33,7 @@ test('the view a project was left on fits the project as it is now', () => {
   });
 
   assert.equal(view.tool, 'pencil', 'an icon has no Pose tool');
-  assert.equal(view.mode, 'edit', 'and no Views board');
+  assert.equal('mode' in view, false, 'a workspace kept by an earlier version is let go');
   assert.equal(view.color, RED);
   assert.equal('zoom' in view, false, 'the canvas is fitted afresh');
   assert.equal(view.at.frame, 0, 'a frame it no longer has gives way to one it has');
@@ -59,39 +58,6 @@ test('a structure step remembers where it was made from and where it led', () =>
   history.keepPlace({ frame: 0 }, { frame: 1 });
 
   assert.deepEqual(history.undo(project).place, { before: { frame: 0 }, after: { frame: 1 } });
-});
-
-// one mark or note on the Views board could not be taken away: only all of them, or the last
-test('a press on the Views board finds the mark or note under it, on that view', () => {
-  const markup = {
-    strokes: [
-      {
-        direction: 'south',
-        points: [
-          [10, 10],
-          [14, 12],
-        ],
-      },
-    ],
-    notes: [
-      { direction: 'south', x: 30, y: 30, text: 'arm' },
-      { direction: 'east', x: 12, y: 11, text: 'leg' },
-    ],
-  };
-
-  assert.deepEqual(markAt(markup, { direction: 'south', x: 13, y: 12 }), {
-    kind: 'strokes',
-    index: 0,
-  });
-  assert.deepEqual(markAt(markup, { direction: 'south', x: 31, y: 28 }), {
-    kind: 'notes',
-    index: 0,
-  });
-  assert.deepEqual(markAt(markup, { direction: 'east', x: 13, y: 12 }), {
-    kind: 'notes',
-    index: 1,
-  });
-  assert.equal(markAt(markup, { direction: 'south', x: 50, y: 50 }), null);
 });
 
 // a frame's menu was kept above its frame and its last items cut off, with room under the frame
@@ -135,33 +101,6 @@ test('the files of art with one view name no view', () => {
     frameFiles(result, settings).map((file) => file.path),
     [`${result.name}/01.png`],
   );
-});
-
-// a mark could be rubbed out only at the points the pointer had reported, a note only at its pin
-test('a mark is found anywhere along its line, and a note on its label', () => {
-  const markup = {
-    strokes: [
-      {
-        direction: 'south',
-        points: [
-          [10, 10],
-          [110, 90],
-        ],
-      },
-    ],
-    notes: [{ direction: 'south', x: 40, y: 120, text: 'arm too thin' }],
-  };
-  const view = { scale: 4, width: 160 };
-
-  assert.deepEqual(markAt(markup, { direction: 'south', x: 60, y: 51 }, view), {
-    kind: 'strokes',
-    index: 0,
-  });
-  assert.deepEqual(markAt(markup, { direction: 'south', x: 62, y: 117 }, view), {
-    kind: 'notes',
-    index: 0,
-  });
-  assert.equal(markAt(markup, { direction: 'south', x: 60, y: 20 }, view), null);
 });
 
 // pixels copied from a larger canvas were pasted where they came from: outside the smaller one

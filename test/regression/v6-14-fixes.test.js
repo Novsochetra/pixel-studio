@@ -20,7 +20,7 @@ import { swapSaid } from '../../src/ui/swap/swap-said.js';
 import { frameIndexes } from '../../src/ui/batch/batch-items.js';
 import { keepsOwnSize } from '../../src/ui/import/import-options.js';
 import { addFolder, renameFolder } from '../../src/store/folders.js';
-import { readProjectBundle } from '../../src/store/project-file.js';
+import { readProjectFile } from '../../src/store/project-file.js';
 import { cutCharacter } from '../unit/body-helpers.js';
 
 const RED = pack(255, 0, 0);
@@ -99,21 +99,21 @@ test('a change that changes nothing is no undo step, and keeps what can be redon
   assert.equal(history.recordStructure('Paint', before, project), true, 'pixels count as a change');
 });
 
-// a mark drawn on the Views board after an undo was pushed into the undo step's own copy
+// a setting changed after an undo was changed in the undo step's own copy too
 test('a setting put back by undo is a copy: changing it leaves the step as it was', () => {
   const project = newProject({ kind: 'icon', width: 8, height: 8 });
   const history = new History(() => null);
-  const none = { strokes: [], notes: [] };
-  const one = { strokes: [], notes: [{ direction: 'south', x: 1, y: 1, text: 'fix' }] };
+  const none = [];
+  const one = [{ id: 'g1', name: 'Feet', row: 6, rule: 'bottom', colour: null }];
 
-  project.markup = structuredClone(one);
-  history.recordSetting('Note', 'markup', none, one);
+  project.guides = structuredClone(one);
+  history.recordSetting('New guide', 'guides', none, one);
   history.undo(project);
-  assert.deepEqual(project.markup, none);
-  project.markup.notes.push({ direction: 'south', x: 2, y: 2, text: 'again' });
+  assert.deepEqual(project.guides, none);
+  project.guides.push({ id: 'g2', name: 'Head', row: 1, rule: 'top', colour: null });
   history.redo(project);
   history.undo(project);
-  assert.deepEqual(project.markup, none, 'the step still holds what it held');
+  assert.deepEqual(project.guides, none, 'the step still holds what it held');
 });
 
 // with "Paint only over" set to one colour, Fill and Replace colour still changed any other
@@ -141,7 +141,7 @@ test('a message says the studio’s own sentence, and plain words for any other 
   assert.equal(inWords(new TypeError('x is undefined'), fallback), fallback);
   assert.equal(inWords(undefined, fallback), fallback);
 
-  const refused = await readProjectBundle('not a project').catch((error) => error);
+  const refused = await readProjectFile('not a project').catch((error) => error);
 
   assert.equal(refused.told, true, 'a file that is no project says so in its own sentence');
 });

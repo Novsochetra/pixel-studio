@@ -11,7 +11,7 @@ import { openBackend } from '../store/backends.js';
 import { readIndex } from '../store/projects.js';
 import { deletePreset, readPresets } from '../store/presets.js';
 import { prefixFor } from '../store/keys.js';
-import { readProjectBundle } from '../store/project-file.js';
+import { readProjectFile } from '../store/project-file.js';
 import { allLayers, newId } from '../model/project.js';
 import { setUpApp } from './install-app.js';
 import { layoutSize, watchLayout } from './layout.js';
@@ -22,7 +22,7 @@ import { watchView } from './view-kept.js';
 import { watchOtherTabs } from './other-tabs.js';
 
 // the editor, opened on one project; `save` as install() takes it
-async function startEditor(backend, index, { project, prefix, save, background = null }) {
+async function startEditor(backend, index, { project, prefix, save }) {
   // the window's size and the panel open on a phone belong to the window, not to a project
   const store = createStore({
     ...startingState(project),
@@ -35,17 +35,7 @@ async function startEditor(backend, index, { project, prefix, save, background =
   app.findLayer = (id) =>
     [...allLayers(store.state.project)].find(({ layer }) => layer.id === id)?.layer ?? null;
   install(app, project, { prefix, save });
-  app.addProject = (next, nextBackground) => addProject(app, next, nextBackground);
-
-  // A project made here or opened from a file has only the picture that came with it. One read
-  // from saved work has its picture saved beside it: taken off here, a background of one's own
-  // was gone at every load of the page.
-  if (background) {
-    await backend.write(app.keys.background, { url: background });
-  } else if (save === 'all' && project.preview?.background) {
-    project.preview = { ...project.preview, background: false };
-  }
-
+  app.addProject = (next) => addProject(app, next);
   mountApp(app);
   watchView(app);
   app.otherTabs = watchOtherTabs(app);
@@ -85,9 +75,7 @@ function startScreenHandlers(backend, index, closeScreen) {
     },
     async onOpenFile(file) {
       try {
-        const { project, background } = await readProjectBundle(await file.text());
-
-        await open({ ...fresh(project), background });
+        await open(fresh(await readProjectFile(await file.text())));
       } catch (error) {
         toast(inWords(error, 'This file could not be opened as a project.'));
       }

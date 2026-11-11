@@ -1,10 +1,9 @@
 import { node, replace, toast } from '../dom.js';
 import { openSheet } from '../sheet.js';
 import { artSprite, currentAnimation, directionsInUse, referenceSprite } from '../actions.js';
-import { boardCanvas, boardPreview } from '../board-canvas.js';
+import { viewsSideBySide, viewsToFit } from '../views-side-by-side.js';
 import { saveFile } from '../save-file.js';
 import { fileSlug } from '../file-name.js';
-import { hasMarks } from '../markup.js';
 import { promptText } from './prompt-text.js';
 import { poseField } from './prompt-pose.js';
 import { canvasToBlob } from '../../io/images.js';
@@ -85,31 +84,26 @@ function shownState(state) {
 function draw(slot, state, ask, { close, redraw }) {
   const scale = state.project.canvas.scale;
   const shown = shownState(state);
-  const board = boardCanvas(shown, scale, { overlay: null, mapping: null });
+  const sheet = viewsSideBySide(shown, scale);
   const box = node(
     'textarea.input.mono',
     { rows: 9, id: 'prompt-text', 'aria-label': 'Prompt', readonly: true },
     promptText(state, ask.direction, ask.task, ask.pose),
   );
-  const marks = hasMarks(state.project) ? ', with your marks' : '';
   const download = async () =>
     saveFile(
       `${fileSlug(state.project.name, 'project')}-reference-sheet.png`,
-      await canvasToBlob(board),
+      await canvasToBlob(sheet),
     );
 
   replace(
     slot,
     choices(state, ask, redraw),
-    node(
-      'div',
-      { style: { overflowX: 'auto' } },
-      boardPreview(shown, 860, { overlay: null, mapping: null }),
-    ),
+    node('div', { style: { overflowX: 'auto' } }, viewsToFit(shown, 860)),
     node(
       'p.hint',
       {},
-      `Attach the reference sheet (${board.width}×${board.height}, ${scale}× pixels${marks}) and paste the prompt. Then bring the AI's answer back to be cleaned: ${forHands('drop it on the canvas, or use', 'use')} Image into this frame.`,
+      `Attach the reference sheet (${sheet.width}×${sheet.height}, ${scale}× pixels) and paste the prompt. Then bring the AI's answer back to be cleaned: ${forHands('drop it on the canvas, or use', 'use')} Image into this frame.`,
     ),
     ask.task === 'frame' ? poseField(state, ask, box) : null,
     box,

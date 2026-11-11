@@ -1,4 +1,4 @@
-/* The edit workspace: the canvas scrolls and zooms on its own above the frame grid, which stays
+/* The stage: the canvas scrolls and zooms on its own above the frame grid, which stays
    docked at the bottom. */
 .stage:has(.edit-layout) {
   overflow: hidden;

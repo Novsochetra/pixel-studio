@@ -1,8 +1,7 @@
 import { newId } from './project.js';
 
 // What a project starts others with: its kind, views, canvas, parts and their colours, animation
-// names and speed, game settings, guides, palettes, export settings and preview, but none of its
-// pixels.
+// names and speed, game settings, guides, palettes and export settings, but none of its pixels.
 export function presetFromProject(project, label = project.name) {
   const first = project.animations[0];
 
@@ -21,6 +20,5 @@ export function presetFromProject(project, label = project.name) {
     guides: structuredClone(project.guides ?? []),
     palettes: structuredClone(project.palettes ?? []),
     exportSettings: structuredClone(project.exportSettings ?? null),
-    preview: structuredClone(project.preview ?? null),
   };
 }

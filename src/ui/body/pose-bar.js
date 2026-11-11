@@ -122,8 +122,7 @@ function uncutBar(app, state) {
   );
 }
 
-const showsBar = (state) =>
-  state.mode === 'edit' && !state.selection && (state.tool === 'pose' || drawsOnPart(state));
+const showsBar = (state) => !state.selection && (state.tool === 'pose' || drawsOnPart(state));
 
 // which bar is showing, and what it holds
 function barFor(app, state) {

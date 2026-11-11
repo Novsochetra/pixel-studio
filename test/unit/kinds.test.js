@@ -49,13 +49,17 @@ test('a one-view kind cannot be given directions', () => {
 test('the Naga Eleven preset copies its game into the project, which then stands alone', () => {
   const project = newProject({ preset: NAGA_ELEVEN, name: 'Striker' });
 
-  assert.equal(gameOf(project).spriteHeight, 58);
+  assert.equal(gameOf(project).frame.frameWidth, 64);
   assert.deepEqual(
     project.parts.map((part) => part.name),
     NAGA_ELEVEN.parts,
   );
-  project.game.spriteHeight = 1;
-  assert.equal(NAGA_ELEVEN.game.spriteHeight, 58, 'changing the project leaves the preset alone');
+  project.game.frame.frameWidth = 1;
+  assert.equal(
+    NAGA_ELEVEN.game.frame.frameWidth,
+    64,
+    'changing the project leaves the preset alone',
+  );
   assert.equal(describeProject(project), 'Character for Naga Eleven');
   assert.equal(describeProject(newProject({ kind: 'tile' })), 'Tiles');
 });

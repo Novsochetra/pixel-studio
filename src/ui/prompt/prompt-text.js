@@ -1,6 +1,5 @@
 import { currentAnimation, referenceSprite } from '../actions.js';
 import { characterColors } from '../character-colours.js';
-import { hasMarks } from '../markup.js';
 import { promptText as writePrompt } from '../../export/prompt.js';
 
 export function promptText(state, direction, task, pose = '') {
@@ -11,6 +10,5 @@ export function promptText(state, direction, task, pose = '') {
     pose,
     reference: referenceSprite(state),
     colours: characterColors(state),
-    marked: hasMarks(state.project),
   });
 }

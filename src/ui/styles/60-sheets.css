@@ -386,9 +386,3 @@
   pointer-events: none;
   animation: fade-out var(--duration-normal) var(--ease-standard) forwards;
 }
-
-.board-caption {
-  font: 700 10px var(--font-pixel);
-  letter-spacing: 0.06em;
-  fill: var(--label);
-}

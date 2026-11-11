@@ -75,18 +75,6 @@ export async function shutDock(page) {
   }
 }
 
-// Edit, Views board or the preview: buttons in a wide toolbar, one button's menu on a phone
-export async function openWorkspace(page, name) {
-  if (await isCompact(page)) {
-    await page.getByRole('button', { name: /^Workspace/ }).click();
-    await page.getByRole('menuitemcheckbox', { name, exact: true }).click();
-  } else {
-    await page.getByRole('button', { name, exact: true }).click();
-  }
-
-  await page.waitForTimeout(300);
-}
-
 export async function showAllViews(page) {
   const all = page.getByRole('button', { name: 'All views' });
 

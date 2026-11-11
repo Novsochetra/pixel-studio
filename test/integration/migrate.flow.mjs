@@ -1,5 +1,7 @@
 // Work saved by earlier versions opens intact: version 4 left one project with plain document
-// names and no list; version 5 a list of projects, each view with its own number of frames.
+// names and no list; version 5 a list of projects, each view with its own number of frames; and
+// before the studio was the editor alone, marks and notes from a Views board, and a scene to
+// preview the art in.
 import { openStudio } from './harness.mjs';
 import { frameLabels, selectView, showAllViews, waitSaved } from './studio.mjs';
 
@@ -71,10 +73,6 @@ check(
   'as a Naga Eleven character, team kits and all',
 );
 check(
-  (await page.getByRole('button', { name: 'On the pitch', exact: true }).count()) === 1,
-  'previewed on the pitch',
-);
-check(
   (await page.locator('#statusbar span').nth(2).textContent()).startsWith('sprite 16×16'),
   'with its pixels',
 );
@@ -102,6 +100,11 @@ const v5 = project(
     version: 2,
     parts: [],
     outfits: [],
+    markup: {
+      strokes: [{ direction: 'south', points: [[4, 4]] }],
+      notes: [{ direction: 'east', x: 8, y: 8, text: 'arm too thin' }],
+    },
+    preview: { background: true, ground: 0.9 },
   },
   { south: { frames: [frame(1), frame(2), frame(3)] }, east: { frames: [frame(4)] } },
 );
@@ -112,13 +115,37 @@ await seed(other, {
     current: 'p1',
   },
   'p-p1-project': { json: JSON.stringify(v5) },
+  'p-p1-background': { url: art5 },
   ...layers,
 });
+// the view it was left on: the Views board, with the eraser in hand
+await other.evaluate(() =>
+  localStorage.setItem(
+    'pixel-clean-view',
+    JSON.stringify({
+      id: 'p1',
+      view: {
+        mode: 'board',
+        tool: 'eraser',
+        at: { animation: 'a1', direction: 'south', frame: 0, layer: null },
+      },
+    }),
+  ),
+);
 await other.reload();
 await other.waitForSelector('.grid-panel');
 check(
-  (await other.getByRole('button', { name: 'Preview', exact: true }).count()) === 1,
-  'a version 5 project for any game opens with a plain preview',
+  (await other.locator('button.wordmark small').textContent()).startsWith('Knight') &&
+    (await other.getByLabel('Pixel canvas').isVisible()),
+  'a project left on the Views board, with marks and a scene of its own, opens in the editor',
+);
+check(
+  (await other.getByRole('button', { name: 'Eraser' }).getAttribute('aria-pressed')) === 'true',
+  'with the tool that was in hand',
+);
+check(
+  (await other.locator('#toolbar [aria-label^="Workspace"]').count()) === 0,
+  'and the bar names no workspace to go back to',
 );
 await selectView(other, 'Side');
 check(

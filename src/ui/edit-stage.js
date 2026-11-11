@@ -35,7 +35,6 @@ const STOPS_PLAYING = ['at', 'pixels', 'animations', 'frames', 'layers', 'tool',
 // What the frame grid shows. Drawing it again for anything else (a zoom, the pointer moving) would
 // take a field or button being used out from under the person; a stroke redraws it once, at its end.
 const GRID_KEYS = [
-  'mode',
   'at',
   'pixels',
   'animations',

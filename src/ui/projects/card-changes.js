@@ -53,14 +53,14 @@ export async function duplicateStored(job, project) {
   try {
     const stored = await readStored(job.app.backend, project.entry);
     const copy = {
-      ...(await readProjectFile(projectFileText(stored.project))),
+      ...(await readProjectFile(projectFileText(stored))),
       name: `${project.name} copy`,
     };
 
     const { app } = job;
     const folder = folderOf(app.index, project.id);
 
-    await addProject(app, copy, stored.background);
+    await addProject(app, copy);
     // beside the one it was made from: a new project joins the open one's folder otherwise
     moveToFolder(app.index, app.store.state.project.id, folder);
     await saveProjectList(app.backend, app.index);

@@ -8,24 +8,6 @@
   padding-right: max(0px, env(safe-area-inset-right, 0px));
 }
 
-/* tools draw on the canvas, so they show only where the canvas is; the pitch takes the whole window */
-.app:not([data-mode='edit']) .rail {
-  display: none;
-}
-
-/* the brush and its settings draw nothing on the Views board */
-.app[data-mode='board'] .section[data-name='drawing'] {
-  display: none;
-}
-
-.app[data-mode='game'] {
-  grid-template-columns: auto minmax(0, 1fr) 0;
-}
-
-.app[data-mode='game'] .inspector {
-  display: none;
-}
-
 .toolbar {
   grid-area: bar;
   display: flex;

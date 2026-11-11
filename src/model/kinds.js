@@ -1,7 +1,7 @@
 import { directionLabel } from './project.js';
 
 // What a project makes. The kind decides how many views there are, where the art stands on the
-// canvas, how it is previewed and exported, and the names offered for new animations.
+// canvas, how it is exported, and the names offered for new animations.
 export const KINDS = {
   character: {
     label: 'Character',
@@ -12,7 +12,6 @@ export const KINDS = {
     size: 64,
     scale: 6,
     names: ['Idle', 'Walk', 'Run', 'Jump', 'Attack', 'Hurt'],
-    preview: 'scene',
     // it has a head, hands and feet to pin, and parts to cut it into and pose
     body: true,
   },
@@ -26,7 +25,6 @@ export const KINDS = {
     size: 32,
     scale: 10,
     names: ['Idle', 'Open', 'Break'],
-    preview: 'scene',
   },
   tile: {
     label: 'Tiles',
@@ -37,7 +35,6 @@ export const KINDS = {
     size: 16,
     scale: 16,
     names: ['Ground', 'Wall', 'Water'],
-    preview: 'tiled',
   },
   effect: {
     label: 'Effect',
@@ -48,7 +45,6 @@ export const KINDS = {
     size: 48,
     scale: 8,
     names: ['Burst', 'Loop', 'Fade'],
-    preview: 'centred',
   },
   icon: {
     label: 'Icon',
@@ -59,7 +55,6 @@ export const KINDS = {
     size: 32,
     scale: 10,
     names: ['Coin', 'Heart', 'Key', 'Potion'],
-    preview: 'centred',
   },
 };
 

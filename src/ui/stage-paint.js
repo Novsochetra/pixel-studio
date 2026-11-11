@@ -6,7 +6,7 @@ import {
   drawSprite,
   sizeCanvas,
 } from './draw.js';
-import { currentFrames, directionSprite } from './actions.js';
+import { currentFrames } from './actions.js';
 import { drawPins } from './pins-draw.js';
 import { drawLayersHandle } from './layer-turn.js';
 import { drawTurnHandle } from './selection-turn.js';
@@ -88,15 +88,6 @@ function shownState(app) {
 }
 
 function paintArt(context, state, scale) {
-  const ghost =
-    state.overlay.direction && state.overlay.direction !== state.at.direction
-      ? directionSprite(state, state.overlay.direction)
-      : null;
-
-  if (ghost) {
-    drawSprite(context, ghost, scale, state.overlay.opacity);
-  }
-
   // lining a frame up with its neighbours needs them showing
   if (state.onion || state.tool === 'move') {
     drawOnion(context, state, scale);

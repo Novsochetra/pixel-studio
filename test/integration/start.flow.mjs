@@ -4,8 +4,6 @@ import { openStudio } from './harness.mjs';
 import { createProject, frameLabels, projectsPage, showAllViews, status } from './studio.mjs';
 
 const { page, check, finish, shots } = await openStudio();
-const workspaces = () =>
-  page.locator('#toolbar .segmented[aria-label="Workspace"] button').allTextContents();
 const openProjects = async () => {
   await page.locator('button.wordmark').click();
   await page.waitForSelector('.sheet .start-section', { state: 'attached' });
@@ -27,7 +25,6 @@ check(
   (await page.locator('button.wordmark small').textContent()).startsWith('Grass'),
   'the new project opens',
 );
-check(!(await workspaces()).includes('Views board'), 'one-view kinds have no views board');
 check(
   (await status(page)).startsWith('Tile · frame 1 of 1'),
   'a tile project names its view "Tile"',
@@ -80,8 +77,10 @@ check(
   'the Naga Eleven preset brings its 160 by 160 canvas',
 );
 await createProject(page, { kind: 'Naga Eleven', name: 'Striker' });
-check((await workspaces()).includes('On the pitch'), 'a Naga Eleven project previews on the pitch');
-check((await page.getByRole('button', { name: 'Team kits…' }).count()) === 1, 'and has team kits');
+check(
+  (await page.getByRole('button', { name: 'Team kits…' }).count()) === 1,
+  'a Naga Eleven project has team kits',
+);
 check(
   JSON.stringify(await page.locator('.grid-view').allTextContents()) ===
     '["Front","Side","Back","Side, left"]',

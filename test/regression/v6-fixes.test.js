@@ -33,7 +33,6 @@ test('a version restored keeps how the editor was showing things', () => {
     showPins: true,
     viewFilter: 'grey',
     gridAll: true,
-    mode: 'board',
     at: { animation: project.animations[0].id, direction: 'east', frame: 0, layer: null },
   };
   const app = {

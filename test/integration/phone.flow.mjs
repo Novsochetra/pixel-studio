@@ -2,7 +2,7 @@
 // from the dock, a finger swipe scrolls the frames while press-and-hold drags one, and every
 // button still works.
 import { fingers, openStudio } from './harness.mjs';
-import { forgetSavedWork, frameLabels, openDock, openExample, openWorkspace } from './studio.mjs';
+import { forgetSavedWork, frameLabels, openDock, openExample } from './studio.mjs';
 import { monkey } from './monkey.mjs';
 
 const studio = await openStudio({ device: 'Pixel 7' });
@@ -51,16 +51,13 @@ check(
   'the download menu stays on the screen',
 );
 await page.keyboard.press('Escape');
-await openWorkspace(page, 'Views board');
-const controls = await page.locator('.board-controls').boundingBox();
 check(
-  controls.x >= 0 && controls.x + controls.width <= (await page.evaluate(() => innerWidth)),
-  'the board controls wrap within the screen',
+  (await page.locator('#toolbar [aria-label^="Workspace"]').count()) === 0,
+  'the bar has no workspace to go to: the editor is the whole studio',
 );
-await openWorkspace(page, 'Edit');
 check(
   (await page.locator('.grid-row.current .cell').count()) === 3,
-  'back in Edit, the frames show again',
+  'the frames added stand in their row',
 );
 const stage = await page.locator('.edit-scroll').boundingBox();
 check(stage.height > 150, 'the canvas keeps room above the frames');

@@ -19,12 +19,5 @@ export async function renameStored(backend, entry, name) {
   return true;
 }
 
-// the whole of a saved project and the picture behind it, to make a copy from; null when it
-// could not be read
-export async function readStored(backend, entry) {
-  const keys = keysFor(entry.prefix);
-  const project = await loadProject(backend, keys);
-  const background = project && (await backend.read(keys.background).catch(() => null));
-
-  return project ? { project, background: background?.url ?? null } : null;
-}
+// the whole of a saved project, to make a copy from; null when it could not be read
+export const readStored = (backend, entry) => loadProject(backend, keysFor(entry.prefix));

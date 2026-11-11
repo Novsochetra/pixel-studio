@@ -1,6 +1,6 @@
 import { node } from '../dom.js';
 import { changeStructure } from '../actions.js';
-import { boardPreview } from '../board-canvas.js';
+import { viewsToFit } from '../views-side-by-side.js';
 import { paletteForm } from '../palette-form.js';
 import { makeReducedPalette } from './swap-mapping.js';
 import { paletteFromHexCodes } from '../../palette/palette.js';
@@ -13,7 +13,7 @@ export function previewFigure(app, mapping) {
   return node(
     'figure',
     {},
-    boardPreview(app.store.state, 420, { overlay: null, mapping, onScreen: true }),
+    viewsToFit(app.store.state, 420, { mapping, onScreen: true }),
     node('figcaption.hint', {}, 'With the swap applied'),
   );
 }

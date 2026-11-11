@@ -5,9 +5,8 @@ import { directionSprite, directionsInUse } from './actions.js';
 import { canvasToBlob, checkerPainter, spritePng } from '../io/images.js';
 import { zipFiles } from '../io/zip.js';
 import { saveFile } from './save-file.js';
-import { boardCanvas } from './board-canvas.js';
-import { projectFileText, readProjectBundle } from '../store/project-file.js';
-import { backgroundUrl } from './preview-background.js';
+import { viewsSideBySide } from './views-side-by-side.js';
+import { projectFileText, readProjectFile } from '../store/project-file.js';
 import { chooseFile } from './choose-file.js';
 import { openExportSheet } from './export-sheet.js';
 import { openChatgptSheet } from './prompt/prompt-sheet.js';
@@ -65,18 +64,16 @@ async function saveAllViews(app) {
   );
 }
 
-async function saveBoard(app) {
+async function saveSideBySide(app) {
   const { state } = app.store;
-  const blob = await canvasToBlob(
-    boardCanvas(state, state.project.canvas.scale, { overlay: null, mapping: null }),
-  );
+  const blob = await canvasToBlob(viewsSideBySide(state, state.project.canvas.scale));
 
-  await saveFile(`${slug(state.project.name)}-views-board.png`, blob);
+  await saveFile(`${slug(state.project.name)}-views-side-by-side.png`, blob);
 }
 
 export async function saveProject(app) {
   const { project } = app.store.state;
-  const text = projectFileText(project, await backgroundUrl(app));
+  const text = projectFileText(project);
 
   await saveFile(`${slug(project.name)}.json`, new Blob([text], { type: 'application/json' }));
 }
@@ -84,9 +81,9 @@ export async function saveProject(app) {
 export function openProjectFile(app, onOpened = () => {}) {
   chooseFile(async (file) => {
     try {
-      const { project, background } = await readProjectBundle(await file.text());
+      const project = await readProjectFile(await file.text());
 
-      await app.addProject(project, background);
+      await app.addProject(project);
       onOpened();
       toast(
         `Opened ${project.name} as a project of its own. Switch projects from its name, top left.`,
@@ -103,7 +100,7 @@ function menuItems(app) {
   const { width, height } = state.project.canvas;
   const label = viewName(state.project, state.at.direction);
   const big = `${width * scale}×${height * scale}`;
-  // art with one view has no views to zip together and no Views board
+  // art with one view has no views to zip together or to set side by side
   const single = isSingleView(state.project);
 
   return [
@@ -115,7 +112,9 @@ function menuItems(app) {
     [`${label} · ${big} on the checkerboard`, () => saveView(app, scale, true)],
     null,
     [`${single ? label : 'All views'} · zip with both sizes`, () => saveAllViews(app)],
-    ...(single ? [] : [['Views board · PNG with guide lines and marks', () => saveBoard(app)]]),
+    ...(single
+      ? []
+      : [['All views side by side · PNG with guide lines', () => saveSideBySide(app)]]),
     null,
     ['Save project file (.json)', () => saveProject(app)],
     ['Open a project file…', () => openProjectFile(app)],

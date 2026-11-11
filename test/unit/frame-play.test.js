@@ -3,7 +3,6 @@ import { test } from 'node:test';
 import { newProject } from '../../src/model/new-project.js';
 import { addFrame, moveFrame } from '../../src/model/frames.js';
 import {
-  frameAtTick,
   frameAtTime,
   isFrameHidden,
   playedFrames,
@@ -75,15 +74,4 @@ test('a hidden frame stays hidden as it is moved', () => {
 
   assert.ok(isFrameHidden(animation, 3));
   assert.deepEqual(playedFrames(animation), [0, 1, 2]);
-});
-
-test('the preview on its own clock goes round the frames shown', () => {
-  const animation = fourFrames();
-
-  setFrameHidden(animation, 0, true);
-
-  assert.deepEqual(
-    [0, 1, 2, 3].map((tick) => frameAtTick(animation, tick)),
-    [1, 2, 3, 1],
-  );
 });

@@ -118,7 +118,7 @@ export function forget(index, id) {
   index.deleted.add(id);
 }
 
-// every document of one project: its layers, structure, background, picture and versions
+// every document of one project: its layers, structure, picture and versions
 export async function deleteProjectData(backend, prefix) {
   const keys = keysFor(prefix);
   const stored = await backend.read(keys.project);
@@ -130,6 +130,7 @@ export async function deleteProjectData(backend, prefix) {
   }
 
   await backend.remove(keys.project);
+  // a project saved while the studio had a scene to preview it in may have that scene's picture
   await backend.remove(keys.background);
   await backend.remove(keys.portrait);
   await deleteAllVersions(backend, keys);

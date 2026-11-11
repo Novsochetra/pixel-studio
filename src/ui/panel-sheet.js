@@ -1,5 +1,5 @@
 import { node } from './dom.js';
-import { openPanel, panelsFor } from './panels.js';
+import { PANELS, openPanel } from './panels.js';
 
 function panelTabs(app) {
   const { state } = app.store;
@@ -8,7 +8,7 @@ function panelTabs(app) {
   return node(
     'div.segmented.panel-tabs',
     { role: 'group', 'aria-label': 'Panel' },
-    panelsFor(state.mode).map((panel) =>
+    PANELS.map((panel) =>
       node(
         'button',
         {

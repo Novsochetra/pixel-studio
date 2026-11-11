@@ -6,7 +6,6 @@ import {
   download,
   frameAction,
   openPanel,
-  openWorkspace,
   projectsPage,
   selectFrame,
   status,
@@ -220,15 +219,12 @@ await page.waitForTimeout(500);
 check((await count(RED)) === drawn, 'an edit made a moment before a reload is still there');
 check(/^Saved/.test(await waitSaved(page)), 'and the project is saved');
 
-// the Preview's animation picker went to a view the animation did not have, and the editor died
+// an animation opened from a view it does not have went to no view at all, and the editor died
 await createCharacterWithTwoAnimations();
-await openWorkspace(page, 'Preview');
-await page.selectOption('#pitch-animation', { label: 'Idle' });
-await openWorkspace(page, 'Edit');
 check(
   (await page.locator('.grid-row.current').count()) === 1 &&
     (await page.locator('.layer-row').count()) >= 1,
-  'picking an animation in the Preview lands on a view it has',
+  'an animation without the view being edited opens on a view it has',
 );
 
 // a tab's menu duplicated the animation that was open, not its own
@@ -238,24 +234,6 @@ await page.waitForTimeout(250);
 check(
   (await page.locator('.grid-tab').allTextContents()).join() === 'Idle,Idle copy,Run',
   'a tab’s menu acts on its own animation, open or not',
-);
-
-// marks on the Views board were outside undo, which took back art the board does not show
-await openWorkspace(page, 'Views board');
-await page.getByRole('button', { name: 'Adds a note' }).click();
-const board = await page.locator('.board-canvas').boundingBox();
-await page.mouse.click(board.x + 40, board.y + 60);
-check(
-  (await page.locator('.toast').textContent()).startsWith('Type the note first'),
-  'a note with nothing typed is asked for, not stamped with words nobody wrote',
-);
-await page.fill('#note-text', 'arm too thin');
-await page.mouse.click(board.x + 40, board.y + 60);
-await page.locator('.board-canvas').focus();
-await page.keyboard.press('Meta+z');
-check(
-  (await page.locator('.toast').textContent()) === 'Undone: Note',
-  'a note on the Views board is an undo step of its own',
 );
 await finish();
 

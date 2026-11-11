@@ -1,18 +1,16 @@
 import { cssVar, drawChecker, drawGuide, drawSprite } from './draw.js';
 import { directionSprite, directionsInUse } from './actions.js';
-import { drawMarks } from './markup.js';
 import { checkerPainter } from '../io/images.js';
 import { viewName } from '../model/kinds.js';
 import { applyMapping } from '../palette/palette.js';
 import { VIEW_FILTERS } from '../views/filters.js';
 
-export const CAPTION = 30;
+const CAPTION = 30;
+const GAP = 16;
 
-export const GAP = 16;
-
-// one view's column: its art (and the overlay) on the checkerboard, the guides, the marks
+// one view's column: its art on the checkerboard, under the guides
 function drawView(context, state, view) {
-  const { direction, scale, ghost, options } = view;
+  const { direction, scale, options } = view;
   const { width, height } = state.project.canvas;
   const sprite = directionSprite(state, direction);
   const filter = VIEW_FILTERS[state.viewFilter ?? 'colour'];
@@ -23,10 +21,6 @@ function drawView(context, state, view) {
     drawChecker(context, { width: width * scale, height: height * scale }, scale * 4);
   } else {
     checkerPainter(scale * 2)(context, width * scale, height * scale);
-  }
-
-  if (ghost && direction !== options.overlay.direction) {
-    drawSprite(context, ghost, scale, options.overlay.opacity);
   }
 
   if (sprite) {
@@ -40,22 +34,11 @@ function drawView(context, state, view) {
   state.project.guides.forEach((guide) =>
     drawGuide(context, guide, { width: width * scale, scale, label: view.first }),
   );
-
-  if (options.marks) {
-    drawMarks(context, state.project, direction, scale);
-  }
 }
 
-// Every view of the current animation side by side, with the guide lines
-// across all of them, your marks and, optionally, one view laid see-through over the others.
-export function boardCanvas(state, scale, overrides = {}) {
-  const options = {
-    overlay: state.overlay,
-    mapping: state.swapPreview,
-    marks: true,
-    onScreen: false,
-    ...overrides,
-  };
+// Every view of the current animation side by side, with the guide lines across all of them.
+// options: { mapping: colours to show swapped, onScreen: for a window, not a file }
+export function viewsSideBySide(state, scale, options = {}) {
   const directions = directionsInUse(state);
   const { width, height } = state.project.canvas;
   const canvas = document.createElement('canvas');
@@ -65,16 +48,13 @@ export function boardCanvas(state, scale, overrides = {}) {
   const context = canvas.getContext('2d');
   context.fillStyle = cssVar('--stage');
   context.fillRect(0, 0, canvas.width, canvas.height);
-  const ghost = options.overlay?.direction
-    ? directionSprite(state, options.overlay.direction)
-    : null;
 
   directions.forEach((direction, i) => {
     const x = i * (width * scale + GAP);
 
     context.save();
     context.translate(x, CAPTION);
-    drawView(context, state, { direction, scale, ghost, options, first: i === 0 });
+    drawView(context, state, { direction, scale, options, first: i === 0 });
     context.restore();
     context.font = '700 16px Silkscreen, ui-monospace, monospace';
     context.fillStyle = cssVar('--label');
@@ -84,29 +64,15 @@ export function boardCanvas(state, scale, overrides = {}) {
   return canvas;
 }
 
-// which view and art pixel a point on the board falls on, or null in a gap or the captions
-export function boardPoint(state, scale, canvas, event) {
-  const box = canvas.getBoundingClientRect();
-  const px = ((event.clientX - box.left) / box.width) * canvas.width;
-  const py = ((event.clientY - box.top) / box.height) * canvas.height;
-  const { width, height } = state.project.canvas;
-  const index = Math.floor(px / (width * scale + GAP));
-  const x = Math.floor((px - index * (width * scale + GAP)) / scale);
-  const y = Math.floor((py - CAPTION) / scale);
-  const direction = directionsInUse(state)[index];
-
-  return direction && x >= 0 && x < width && y >= 0 && y < height ? { direction, x, y } : null;
-}
-
-// The board for a dialog: the biggest whole zoom that fits `room` px across (pixels stay square
+// The views for a dialog: the biggest whole zoom that fits `room` px across (pixels stay square
 // and sharp), never stretched past it.
-export function boardPreview(state, room, options = {}) {
+export function viewsToFit(state, room, options = {}) {
   const count = directionsInUse(state).length;
   const scale = Math.max(
     1,
     Math.min(6, Math.floor((room - (count - 1) * GAP) / (count * state.project.canvas.width))),
   );
-  const canvas = boardCanvas(state, scale, options);
+  const canvas = viewsSideBySide(state, scale, options);
 
   canvas.style.maxWidth = '100%';
   canvas.style.height = 'auto';

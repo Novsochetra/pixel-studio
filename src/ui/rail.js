@@ -5,7 +5,7 @@ import { flipCurrent } from './actions.js';
 
 // a finger has no pointer to hover for a tool's name: picking the tool says what it does
 function pickTool(app, tool) {
-  app.store.set({ tool: tool.id, mode: 'edit' });
+  app.store.set({ tool: tool.id });
 
   if (app.store.state.layout === 'compact') {
     toast(toolSaid(tool));

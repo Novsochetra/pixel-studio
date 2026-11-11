@@ -9,7 +9,6 @@ import { encodeGif } from '../../src/io/gif.js';
 import { keysFor } from '../../src/store/keys.js';
 import { normalizeProject } from '../../src/model/normalize.js';
 import { projectStructure } from '../../src/store/load.js';
-import { projectFileText, readProjectBundle } from '../../src/store/project-file.js';
 import { readIndex } from '../../src/store/projects.js';
 import { History } from '../../src/editor/history.js';
 import { snapshotAnimations } from '../../src/editor/snapshots.js';
@@ -136,25 +135,6 @@ test('"Fit the art" holds the art of every animation, not only the open one', ()
 
   assert.ok(all.frameHeight > one.frameHeight);
   assert.equal(all.anchorY, anchor.y - 2 + 1);
-});
-
-// a project file left its background picture behind, and took any address as one
-test('a project file carries its own background, and refuses anything that is not a picture', async () => {
-  const project = newProject({ width: 8, height: 8 });
-
-  for (const animation of project.animations) {
-    for (const entry of Object.values(animation.directions)) {
-      entry.frames[0].layers[0].sprite = null;
-    }
-  }
-
-  const picture = 'data:image/png;base64,AAAA';
-  const forged = JSON.parse(projectFileText(project));
-  forged.background = 'javascript:alert(1)';
-
-  assert.equal((await readProjectBundle(projectFileText(project, picture))).background, picture);
-  assert.equal((await readProjectBundle(projectFileText(project))).background, null);
-  assert.equal((await readProjectBundle(JSON.stringify(forged))).background, null);
 });
 
 // a big GIF threw "Maximum call stack size exceeded" while encoding

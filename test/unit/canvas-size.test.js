@@ -68,31 +68,6 @@ test('a project on a new canvas moves its art, pins and guide lines together', (
   assert.equal(getPixel(frame.layers[0].sprite, 8, 15), RED);
 });
 
-test('marks and notes drawn on the Views board move with the art they point at', () => {
-  const project = newProject({ kind: 'character', width: 16, height: 16 });
-
-  project.markup = {
-    strokes: [
-      {
-        direction: 'south',
-        points: [
-          [1, 2],
-          [3, 4],
-        ],
-      },
-    ],
-    notes: [{ direction: 'south', x: 5, y: 6, text: 'longer arm' }],
-  };
-  const { markup } = withCanvasSize(project, { width: 32, height: 24 }, BOTTOM);
-
-  assert.deepEqual(markup.strokes[0].points, [
-    [9, 10],
-    [11, 12],
-  ]);
-  assert.deepEqual(markup.notes[0], { direction: 'south', x: 13, y: 14, text: 'longer arm' });
-  assert.deepEqual(project.markup.notes[0].x, 5);
-});
-
 test('every layer of every frame and animation gets the new size', () => {
   const project = newProject({ kind: 'character', width: 16, height: 16 });
   const resized = withCanvasSize(project, { width: 20, height: 12 }, TOP_LEFT);

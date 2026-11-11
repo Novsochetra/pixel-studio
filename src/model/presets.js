@@ -16,11 +16,6 @@ export const NAGA_ELEVEN = {
     name: 'Naga Eleven',
     teamKits: true,
     gamePack: true,
-    background: 'pitch',
-    // where the feet stand on the bundled match screenshot (404 of 432 px)
-    ground: 404 / 432,
-    // the game draws its footballer this tall (src/data/sprites.js)
-    spriteHeight: 58,
     frame: {
       label: 'Naga Eleven today (64×62)',
       frameWidth: 64,

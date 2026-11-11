@@ -89,7 +89,7 @@ function plainKey(app, event, key) {
   const tool = event.altKey ? null : tools.find((candidate) => candidate.key === key);
 
   if (tool) {
-    app.store.set({ tool: tool.id, mode: 'edit' });
+    app.store.set({ tool: tool.id });
   }
 }
 
@@ -97,10 +97,7 @@ function onKey(app, event) {
   const command = event.metaKey || event.ctrlKey;
   const key = event.key.toLowerCase();
 
-  // the keys that act on the art are for the workspace that shows it being edited
-  const editing = app.store.state.mode === 'edit';
-
-  if (editing && (handlePoseKey(app, event, key) || handleSelectionKey(app, event, key, command))) {
+  if (handlePoseKey(app, event, key) || handleSelectionKey(app, event, key, command)) {
     return;
   }
 

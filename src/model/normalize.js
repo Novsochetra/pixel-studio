@@ -57,5 +57,4 @@ function normalizeSettings(project) {
   project.mappings = Array.isArray(project.mappings) || !project.mappings ? {} : project.mappings;
   project.guides ??= [];
   project.exportSettings ??= null;
-  project.preview ??= null;
 }

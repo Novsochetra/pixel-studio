@@ -45,7 +45,7 @@ check((await page.locator('.menu-out').count()) === 0, 'and is taken away once i
 // the thumb's place, and the picked option's, across the control
 const thumb = () =>
   page.evaluate(() => {
-    const control = document.querySelector('.segmented[aria-label="Workspace"]');
+    const control = document.querySelector('.segmented[aria-label="Show the art as"]');
     const picked = control.querySelector('[aria-pressed="true"]');
 
     return {
@@ -59,7 +59,7 @@ check(
   before.plain && before.at === before.option,
   'a segmented control’s thumb lies under its pick',
 );
-await page.getByRole('button', { name: 'Views board', exact: true }).click();
+await page.getByRole('button', { name: 'Silhouette', exact: true }).click();
 const sliding = await page.evaluate(
   () =>
     new Promise((resolve) => {
@@ -80,7 +80,20 @@ check(sliding, 'picking another option slides the thumb to it');
 await page.waitForTimeout(500);
 const after = await thumb();
 check(after.at === after.option && after.at > before.at, 'and it comes to rest under the new pick');
-await page.getByRole('button', { name: 'Edit', exact: true }).click();
+await page.getByRole('button', { name: 'Colour', exact: true }).click();
+
+// the editor is the one place the art is worked on: the bar names no other to go to
+check(
+  (await page.locator('#toolbar [aria-label^="Workspace"]').count()) === 0 &&
+    (await page.locator('#toolbar .segmented').count()) === 1,
+  'the toolbar offers no Workspace control: its one row of choices is how the art is shown',
+);
+check(
+  (await page.getByRole('button', { name: 'Zoom in' }).isVisible()) &&
+    (await page.getByRole('button', { name: 'Fit', exact: true }).isVisible()),
+  'and the zoom stands beside undo and redo',
+);
+await page.locator('#toolbar').screenshot({ path: `${shots}/look-toolbar.png` });
 
 await page.getByRole('button', { name: 'History' }).click();
 await page.waitForTimeout(600);

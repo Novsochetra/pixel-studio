@@ -43,10 +43,3 @@ export function frameAtTime({ from, fps, order }, elapsed) {
 
   return order[(start + step) % order.length];
 }
-
-// the frame a preview on its own clock shows at `tick` frames since it began
-export const frameAtTick = (animation, tick) => {
-  const order = playedFrames(animation);
-
-  return order[tick % order.length];
-};

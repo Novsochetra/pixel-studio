@@ -4,9 +4,8 @@ import { projectStructure } from './load.js';
 import { joinCuts } from '../model/body/shared-cuts.js';
 import { told } from '../model/told.js';
 
-// A whole project as one JSON text: its structure, with each layer's pixels as a PNG data URL, and
-// its own preview background when it has one.
-export function projectFileText(project, background = null) {
+// A whole project as one JSON text: its structure, with each layer's pixels as a PNG data URL.
+export function projectFileText(project) {
   const copy = projectStructure(project);
   const pngs = {};
 
@@ -14,16 +13,9 @@ export function projectFileText(project, background = null) {
     pngs[layer.id] = layer.sprite ? spriteDataUrl(layer.sprite) : null;
   }
 
-  return JSON.stringify({
-    kind: 'pixel-clean-studio',
-    version: 1,
-    project: copy,
-    pngs,
-    ...(background ? { background } : {}),
-  });
+  return JSON.stringify({ kind: 'pixel-clean-studio', version: 1, project: copy, pngs });
 }
 
-// { project, background }: background is a data URL, or null
 const NOT_A_PROJECT = 'This is not a Pixel Clean Studio project file.';
 
 // the file as an object, or null when it is not JSON at all
@@ -54,7 +46,7 @@ function looksLikeProject(project) {
   );
 }
 
-export async function readProjectBundle(text) {
+export async function readProjectFile(text) {
   const file = parsed(text);
 
   if (file?.kind !== 'pixel-clean-studio' || !file.project) {
@@ -71,14 +63,5 @@ export async function readProjectBundle(text) {
     layer.sprite = png ? await dataUrlSprite(png) : null;
   }
 
-  const background =
-    typeof file.background === 'string' && file.background.startsWith('data:image/')
-      ? file.background
-      : null;
-
-  return { project: joinCuts(file.project), background };
-}
-
-export async function readProjectFile(text) {
-  return (await readProjectBundle(text)).project;
+  return joinCuts(file.project);
 }

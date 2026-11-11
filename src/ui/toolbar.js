@@ -5,25 +5,9 @@ import { openShortcuts } from './shortcuts.js';
 import { canInstall, installApp } from './install-app.js';
 import { openProjectsSheet } from './projects/projects-sheet.js';
 import { saveText, undoRedo, viewFilter, zoomControls } from './toolbar-parts.js';
-import { modesFor, moreButton, workspaceButton } from './toolbar-menu.js';
+import { moreButton } from './toolbar-menu.js';
 import { hasKeyboard } from './platform-keys.js';
 import { paste } from './selection-keys.js';
-
-function workspaces(app) {
-  const { state } = app.store;
-
-  return node(
-    'div.segmented',
-    { role: 'group', 'aria-label': 'Workspace' },
-    modesFor(state.project).map(([id, label]) =>
-      node(
-        'button',
-        { 'aria-pressed': String(state.mode === id), onclick: () => app.store.set({ mode: id }) },
-        label,
-      ),
-    ),
-  );
-}
 
 function projectButton(app) {
   return node(
@@ -52,7 +36,7 @@ function installButton() {
 
 // the widest bar has no More menu: a tablet that wide, with no keys, pastes from the bar
 const pasteButton = (app) =>
-  !hasKeyboard() && app.store.state.mode === 'edit' && app.clipboard?.length
+  !hasKeyboard() && app.clipboard?.length
     ? node(
         'button.btn.quiet',
         { title: 'Paste what was copied, in this frame', onclick: () => paste(app) },
@@ -117,12 +101,10 @@ export function renderToolbar(el, app) {
     el,
     projectButton(app),
     undoRedo(app),
-    layout !== 'compact' ? workspaces(app) : null,
-    layout !== 'compact' && state.mode === 'edit' ? zoomControls(app) : null,
-    layout === 'wide' && state.mode !== 'game' ? viewFilter(app) : null,
+    layout !== 'compact' ? zoomControls(app) : null,
+    layout === 'wide' ? viewFilter(app) : null,
     node('div.spacer'),
     saveStatus(state),
-    layout === 'compact' ? workspaceButton(app) : null,
     layout === 'wide' ? wideButtons(app) : moreButton(app),
     downloadButton(app),
   );

@@ -80,8 +80,13 @@ check(
 await page.keyboard.press('Escape');
 const view = await saved(() => menu(/for editing/), 'front.png');
 check(view.name.endsWith('-160.png'), 'the view downloads at its own size');
-const views = readZip((await saved(() => menu(/All views/), 'views.zip')).path);
+const views = readZip((await saved(() => menu(/All views · zip/), 'views.zip')).path);
 check(Object.keys(views).length === 6, 'All views saves each view at both sizes');
+const sideBySide = await saved(() => menu(/All views side by side/), 'side-by-side.png');
+check(
+  sideBySide.name.endsWith('-views-side-by-side.png') && isPng(readFileSync(sideBySide.path)),
+  'and All views side by side saves them as one picture',
+);
 const projectFile = await saved(() => menu(/Save project file/), 'project.json');
 const file = JSON.parse(readFileSync(projectFile.path, 'utf8'));
 check(

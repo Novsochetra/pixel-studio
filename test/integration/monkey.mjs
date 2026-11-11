@@ -1,14 +1,12 @@
-// Every button in every workspace, panel and dialog clicked in turn, for each kind of project: the
+// Every button in every bar, panel and dialog clicked in turn, for each kind of project: the
 // page must never throw. Shared by the desktop and phone runs.
-import { createProject, isCompact, openDock, openExample, openWorkspace } from './studio.mjs';
+import { createProject, openDock, openExample } from './studio.mjs';
 
 // A phone's panel is a sheet with a way out and a row that picks another panel: shut, or
 // changed for another, it would not have the buttons still to click.
 const SKIP =
-  /Delete|Clear marks|Go back|Wear it|Apply to|Use them all|Use for|Forget|Remove|Close this panel|^(Frames|Colours|Brush|Layers|Outline|Guides)$/;
-// the workspace buttons are left alone, so each workspace's own panels are clicked through
-const TOOLBAR_SKIP =
-  /Download|History|^\?$|PIXEL|^Edit$|Views board|On the pitch|^Preview$|^More$|^Workspace/;
+  /Delete|Go back|Wear it|Apply to|Use them all|Use for|Forget|Remove|Close this panel|^(Frames|Colours|Brush|Layers|Outline|Guides)$/;
+const TOOLBAR_SKIP = /Download|History|^\?$|PIXEL|^More$/;
 // [panel of the dock that holds the opener on a phone, the opener, the item of its menu]
 const DIALOGS = [
   ['Colours', 'Swap colours…', null],
@@ -63,19 +61,6 @@ async function clickAll(run, scope, skip = SKIP) {
   }
 }
 
-async function workspaceNames(page) {
-  if (!(await isCompact(page))) {
-    return page.locator('#toolbar .segmented[aria-label="Workspace"] button').allTextContents();
-  }
-
-  await page.getByRole('button', { name: /^Workspace/ }).click();
-  const names = await page.getByRole('menuitemcheckbox').allTextContents();
-  await page.keyboard.press('Escape');
-
-  // the open workspace's item carries its tick
-  return names.map((name) => name.replace('✓', '').trim());
-}
-
 // a phone shows the panels one at a time, from the dock: each is opened and clicked through
 async function everyPanel(run) {
   const { page } = run;
@@ -89,24 +74,18 @@ async function everyPanel(run) {
   }
 }
 
-async function everyWorkspace(run) {
+async function everyBar(run) {
   const { page } = run;
 
   await page
     .locator('.section[data-collapsed="true"] > h2')
     .evaluateAll((titles) => titles.forEach((title) => title.click()));
 
-  for (const mode of await workspaceNames(page)) {
-    await openWorkspace(page, mode);
-
-    for (const scope of ['#toolbar', '#rail', '#stage', '#inspector']) {
-      await clickAll(run, scope, scope === '#toolbar' ? TOOLBAR_SKIP : SKIP);
-    }
-
-    await everyPanel(run);
+  for (const scope of ['#toolbar', '#rail', '#stage', '#inspector']) {
+    await clickAll(run, scope, scope === '#toolbar' ? TOOLBAR_SKIP : SKIP);
   }
 
-  await openWorkspace(page, 'Edit');
+  await everyPanel(run);
 }
 
 async function openDialog(page, [panel, opener, item]) {
@@ -161,11 +140,11 @@ export async function monkey({ page, check }) {
       await newKind(page, kind);
     }
 
-    await everyWorkspace(run);
+    await everyBar(run);
     await everyDialog(run);
   }
 
   await page.keyboard.press('Meta+z');
   await page.keyboard.press('Meta+Shift+z');
-  check(run.clicks > 300, `${run.clicks} clicks across every kind, workspace and dialog`);
+  check(run.clicks > 150, `${run.clicks} clicks across every kind, panel and dialog`);
 }

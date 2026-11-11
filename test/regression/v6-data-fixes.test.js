@@ -42,7 +42,6 @@ test('a preset carries what its project was set up with', async () => {
 
   project.palettes = [{ id: 'pal', name: 'Mine', colors: [1, 2, 3] }];
   project.exportSettings = { preset: 'fit' };
-  project.preview = { background: true };
   project.referenceDirection = 'east';
   project.parts = [{ id: 'cape', name: 'Cape', colours: [4, 5] }];
   project.animations[0].fps = 12;
@@ -50,7 +49,6 @@ test('a preset carries what its project was set up with', async () => {
 
   assert.deepEqual(made.palettes, project.palettes);
   assert.deepEqual(made.exportSettings, project.exportSettings);
-  assert.deepEqual(made.preview, { background: false });
   assert.equal(made.referenceDirection, 'east');
   assert.deepEqual(made.parts[0].colours, [4, 5]);
   assert.equal(made.animations[0].fps, 12);

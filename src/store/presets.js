@@ -1,7 +1,7 @@
 const PRESETS = 'presets';
 
 // the presets saved here: [{ id, label, kind, directionSet, startWith, canvas, parts, names, game,
-// guides, palettes, exportSettings, preview, referenceDirection, fps }]
+// guides, palettes, exportSettings, referenceDirection, fps }]
 const listIn = async (backend) => {
   const doc = await backend.read(PRESETS);
 

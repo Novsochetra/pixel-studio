@@ -49,7 +49,7 @@ export function paste(app) {
     return;
   }
 
-  app.store.set({ selection, tool: 'select', mode: 'edit' });
+  app.store.set({ selection, tool: 'select' });
   const where =
     piece === app.clipboard ? 'where it was copied from' : 'in the middle of the canvas';
 

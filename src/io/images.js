@@ -37,7 +37,7 @@ export async function decodeSprite(blob) {
 }
 
 // The sprite drawn `scale` times bigger with hard pixel edges, over an optional background
-// painter (a checkerboard, a pitch).
+// painter (a checkerboard).
 export function spriteCanvas(sprite, scale = 1, paintBackground = null) {
   const canvas = makeCanvas(sprite.width * scale, sprite.height * scale);
   const context = canvas.getContext('2d');

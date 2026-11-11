@@ -1,5 +1,5 @@
 import { icon, node, replace } from './dom.js';
-import { openPanel, panelsFor } from './panels.js';
+import { PANELS, openPanel } from './panels.js';
 import { panelHead } from './panel-sheet.js';
 import { toHex } from '../model/sprite.js';
 
@@ -52,7 +52,7 @@ function moreButton(app, panels, open) {
 // of the screen, so the canvas keeps the rest of it.
 export function renderDock(el, app) {
   const { state } = app.store;
-  const panels = state.layout === 'compact' ? panelsFor(state.mode) : [];
+  const panels = state.layout === 'compact' ? PANELS : [];
   const open = openPanel(state);
   const frame = el.closest('.app');
 

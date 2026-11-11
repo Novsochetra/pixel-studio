@@ -56,8 +56,8 @@ function sizeLine(project, box) {
 }
 
 // The prompt that makes an AI image fit: the grid, the size and place of the art, the colours.
-// ask: { animation, direction, task, pose, reference, colours, marked }, where reference is the
-// sprite everything is matched to and marked says the sheet carries marks.
+// ask: { animation, direction, task, pose, reference, colours }, where reference is the sprite
+// everything is matched to.
 export function promptText(project, ask) {
   const { width, height, scale } = project.canvas;
   const outline = outlineColour(ask.reference);
@@ -74,7 +74,6 @@ export function promptText(project, ask) {
       ? `A 1-pixel outline in ${toHex(outline)}. No anti-aliasing, no gradients, no soft edges.`
       : 'No anti-aliasing, no gradients, no soft edges.',
     `A flat magenta (${KEY_BACKGROUND}) background, nothing else in the picture.`,
-    ask.marked ? 'The red marks and notes on the sheet show what to change.' : null,
     ask.task === 'frame' && pose ? `Pose: ${pose}` : null,
   ]
     .filter((line) => line !== null)

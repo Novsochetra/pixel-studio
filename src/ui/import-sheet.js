@@ -53,7 +53,7 @@ function accept(job, place) {
   // before the step, so it is saved with it
   state.project.cleanScales = scalesAfter(state.project.cleanScales, direction, job.report);
   replaceDirectionArt(app, { direction, frame }, job.result, `Clean into ${place}`);
-  app.store.set({ at: { ...app.store.state.at, direction, frame }, mode: 'edit', selection: null });
+  app.store.set({ at: { ...app.store.state.at, direction, frame }, selection: null });
   job.close();
   toast(
     replaced

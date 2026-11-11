@@ -1,7 +1,7 @@
 // The arcade's sheet on a phone: a window rides up from the bottom edge, and is pulled down by
 // its bar to close it.
 import { fingers, openStudio } from './harness.mjs';
-import { openDock, openExample, openWorkspace } from './studio.mjs';
+import { openDock, openExample } from './studio.mjs';
 
 const { page, context, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
 await openExample(page);
@@ -62,28 +62,36 @@ await openSheet();
 await page.locator('.sheet-close').tap();
 check((await page.locator('.sheet').count()) === 0, 'its × still closes it with a tap');
 
-// the bar keeps one row and the workspace's name whole, down to the narrowest phone
-await openWorkspace(page, 'Views board');
-const picked = () =>
-  page.locator('.workspace-pick span').evaluate((name) => ({
-    text: name.textContent,
-    whole: name.scrollWidth <= name.clientWidth,
-  }));
+// the editor is the one place the art is worked on: the bar names no other to go to, and keeps
+// one row down to the narrowest phone
+const oneRow = () =>
+  page.locator('#toolbar').evaluate((bar) => {
+    // the spacer between its two ends has no height of its own
+    const boxes = [...bar.children]
+      .map((part) => part.getBoundingClientRect())
+      .filter((box) => box.height > 0);
+
+    return Math.max(...boxes.map((box) => box.top)) < Math.min(...boxes.map((box) => box.bottom));
+  });
 check(
-  (await picked()).text === 'Board' && (await picked()).whole,
-  'the workspace is named in one word, whole',
+  (await page.locator('#toolbar [aria-label^="Workspace"]').count()) === 0 &&
+    (await page.locator('#toolbar .segmented').count()) === 0,
+  'the phone’s bar offers no Workspace control',
 );
+check(await oneRow(), 'and what it holds stands in one row');
+await page.waitForTimeout(700);
+await page.locator('#toolbar').screenshot({ path: `${shots}/look-phone-toolbar.png` });
 await page.setViewportSize({ width: 320, height: 640 });
 await page.waitForTimeout(300);
 check(
   await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
   'on a 320 px phone the bar still fits the screen',
 );
-check((await picked()).whole, 'and the workspace keeps its name whole');
+check(await oneRow(), 'still in one row');
+await page.screenshot({ path: `${shots}/look-phone-narrow.png` });
 
 // every view plays in the room above the frames, cut to the art, with nothing to scroll to
 await page.setViewportSize({ width: 412, height: 839 });
-await openWorkspace(page, 'Edit');
 await openDock(page, 'Frames');
 await page.getByRole('button', { name: 'Play' }).click();
 await page.waitForTimeout(400);
@@ -128,75 +136,8 @@ check(
 );
 await openDock(page, 'Brush');
 
-// a scene zoomed past the screen scrolls; its controls stay where they can be reached
-await openWorkspace(page, 'On the pitch');
-await page.waitForTimeout(600);
-// the scene is wider than a phone: it opened on its corner, the art being previewed out of sight
-const middle = () =>
-  page.locator('.stage canvas').evaluate((scene) => {
-    const box = scene.getBoundingClientRect();
-
-    return (box.left + box.width / 2) / window.innerWidth;
-  });
-check(Math.abs((await middle()) - 0.5) < 0.1, 'the scene opens on the art being previewed');
-// scrolled to the art, the scene took its controls up out of sight: Play was behind the toolbar
-const playTop = await page
-  .getByRole('button', { name: 'Play', exact: true })
-  .evaluate((button) => button.getBoundingClientRect().top);
-const underBar = await page
-  .locator('#toolbar')
-  .evaluate((toolbar) => toolbar.getBoundingClientRect().bottom);
-check(playTop >= underBar, 'with Play in sight above it');
-// its first look was framed before the pitch's own picture came, on another ground line
-const down = () => page.locator('#stage').evaluate((stage) => stage.scrollTop);
-const opened = await down();
-
-await page.getByRole('button', { name: '2×' }).tap();
-await page.getByRole('button', { name: '1×' }).tap();
-await page.waitForTimeout(300);
-check((await down()) === opened, 'framed for the scene as it is, feet and all, from the first');
-await page.getByRole('button', { name: '3×' }).tap();
-await page.waitForTimeout(300);
-check(Math.abs((await middle()) - 0.5) < 0.1, 'and stays on it when zoomed in');
-await page.locator('#stage').evaluate((stage) => stage.scrollTo(300, 0));
-await page.waitForTimeout(400);
-const play = await page.getByRole('button', { name: 'Play', exact: true }).boundingBox();
-const zooms = await page.getByRole('group', { name: 'Zoom' }).boundingBox();
-const wide = await page.evaluate(() => innerWidth);
-check(
-  play.x >= 0 && play.x + play.width <= wide && zooms.x >= 0 && zooms.x + zooms.width <= wide,
-  'zoomed to 3× and swiped sideways, the preview’s controls are still on the screen',
-);
-check(
-  (await page.locator('.stage canvas').evaluate((scene) => getComputedStyle(scene).touchAction)) !==
-    'none',
-  'and a finger on the scene scrolls it',
-);
-await page.screenshot({ path: `${shots}/look-phone-pitch.png` });
-await page.getByRole('button', { name: '1×' }).tap();
-
-// the narrowest phone: the workspace keeps its word whole, the board's choices start in reach
-await page.setViewportSize({ width: 320, height: 568 });
-await openWorkspace(page, 'Views board');
-const narrow = await page.evaluate(() => {
-  const word = document.querySelector('.workspace-pick span');
-  const [first] = document.querySelectorAll('.board-row .segmented button');
-
-  return {
-    cut: word.scrollWidth - word.clientWidth,
-    first: first.getBoundingClientRect().left,
-    spill: document.documentElement.scrollWidth - window.innerWidth,
-  };
-});
-check(narrow.cut <= 0, 'on the narrowest phone the workspace’s name is whole');
-check(narrow.first >= 0, 'and the first choice of a row too wide for it is in reach');
-check(narrow.spill <= 0, 'with nothing off the screen’s edge');
-await page.screenshot({ path: `${shots}/look-phone-narrow.png` });
-await page.setViewportSize({ width: 412, height: 839 });
-
 // which part a tap pins was chosen in the frames' bar alone, shut on a phone: every tap moved
 // the head
-await openWorkspace(page, 'Edit');
 await page.locator('#rail [aria-label^="Pin a body part"]').evaluate((button) => button.click());
 check(
   (await page.locator('.pin-bar #pin-name').count()) === 1,
@@ -268,7 +209,6 @@ check(
 );
 
 // a message is as wide as its words, not half the screen
-await openWorkspace(page, 'Edit');
 await page.locator('#rail [aria-label^="Select and move"]').evaluate((button) => button.click());
 const said = await page.locator('.toast').boundingBox();
 check(said.width > 200 && said.height < 80, 'a message spreads across the screen');

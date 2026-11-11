@@ -41,12 +41,9 @@ test('a view is asked for by its words, at the reference height and colours', ()
   assert.ok(!text.includes('Pose:'));
 });
 
-test('a frame names its animation and carries the pose; marks are pointed out', () => {
+test('a frame names its animation and carries the pose', () => {
   const project = newProject({ kind: 'character' });
-  const text = promptText(
-    project,
-    ask(project, { task: 'frame', pose: ' knee up ', marked: true }),
-  );
+  const text = promptText(project, ask(project, { task: 'frame', pose: ' knee up ' }));
 
   assert.ok(
     text.includes(
@@ -54,7 +51,6 @@ test('a frame names its animation and carries the pose; marks are pointed out', 
     ),
   );
   assert.ok(text.endsWith('Pose: knee up'));
-  assert.ok(text.includes('The red marks and notes on the sheet show what to change.'));
 });
 
 test('a tile is asked for seamless, and another of a kind in the same style', () => {

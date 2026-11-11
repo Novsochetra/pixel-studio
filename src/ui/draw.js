@@ -1,4 +1,4 @@
-// Canvas painting shared by the editor, the views board and the game preview.
+// Canvas painting shared by the editor and the pictures of every view side by side.
 
 export function cssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();

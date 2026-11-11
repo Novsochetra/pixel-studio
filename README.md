@@ -25,8 +25,6 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
   to correct with a brush or a freehand lasso), then pose them in each frame: drag a part to move it, its handle to
   turn it (RotSprite keeps turned pixel art clean), the parts that follow it coming along. Draw what
   a turn left missing on the part, and it stays there in every frame. Frames stay plain pixels for every download; turn one into pixels to touch it up by hand.
-- **Preview**: characters in a scene (the pitch for Naga Eleven), tiles laid as a floor, effects and
-  icons at 1×, 2× and 4×.
 - **Cast**: Projects (the name, top left) shows every project as a card with its picture, its
   folders (one per game, or heroes, enemies, tiles) down the side. Drag a card onto a folder or use
   its ⋯ menu to move it; search finds any project or folder by name; sort by latest or A–Z. A new
@@ -44,10 +42,10 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
 The whole editor works with fingers. The canvas fills the screen; the tools sit in a strip under it
 and the dock at the bottom opens one panel at a time: Frames, Colours, Brush, Layers, Outline,
 Guides. One finger draws, two pan and pinch. The top bar keeps the project's name (Projects), undo
-and redo, the workspace (Edit, Views board, Preview), a More menu (fit the canvas, the pixel grid,
-canvas size, saved versions) and Download. On its side, the tools and panels stand beside the
-canvas. A small tablet gets the same layout; a wider one gets the desktop's. A window rides up from
-the bottom edge and is pulled down by its bar to close.
+and redo, a More menu (fit the canvas, the pixel grid, canvas size, saved versions) and Download.
+On its side, the tools and panels stand beside the canvas. A small tablet gets the same layout; a
+wider one gets the desktop's. A window rides up from the bottom edge and is pulled down by its bar
+to close.
 
 ## The look
 
@@ -111,7 +109,7 @@ to the phone's layout on a real one before calling it done.
 - `src/model/`: projects, kinds, presets, animations, frames, layers, sprites
 - `src/editor/`, `src/palette/`, `src/export/`, `src/io/`, `src/store/`: tools, colours, exports,
   file formats, saving
-- `src/ui/`: the page, one folder per feature (`grid/`, `start/`, `preview/`, `import/`, …);
+- `src/ui/`: the page, one folder per feature (`grid/`, `start/`, `import/`, …);
   `src/ui/page.html` is its shell and `src/ui/styles/` its stylesheets, tokens first
 - `src/art/`: colours painted as pixel art
 - `build/build.py`: joins the modules into one page and refuses import cycles, missing exports and

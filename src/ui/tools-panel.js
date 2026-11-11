@@ -4,7 +4,7 @@ import { toolName, toolSaid, toolsFor } from './tool-list.js';
 function tile(app, tool) {
   const pick = () => {
     // picked, the tool is for the canvas: the sheet gets out of its way
-    app.store.set({ tool: tool.id, mode: 'edit', panel: null });
+    app.store.set({ tool: tool.id, panel: null });
     toast(toolSaid(tool));
   };
 

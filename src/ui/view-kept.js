@@ -1,14 +1,12 @@
 import { settleAt } from './actions.js';
 import { keepSetting, readSetting } from './remembered.js';
 import { toolsFor } from './tool-list.js';
-import { isSingleView } from '../model/kinds.js';
 
 const KEY = 'pixel-clean-view';
 const WAIT_MS = 400;
 
 // how the editor is showing things: the tools in hand and what is on show
 export const VIEW = [
-  'mode',
   'zoom',
   'tool',
   'color',
@@ -34,8 +32,8 @@ export const VIEW = [
 // frames being folded or showing every view is remembered for every project, where it is set.
 const NOT_KEPT = new Set(['zoom', 'gridAll', 'gridOpen']);
 
-// What of a view kept on an earlier visit still holds for the project as it is now: a tool or a
-// workspace its kind has, and a frame it still has.
+// What of a view kept on an earlier visit still holds for the project as it is now: a tool its
+// kind has, and a frame it still has.
 export function fittedView(project, view) {
   const known = Object.fromEntries(
     VIEW.filter((key) => key in view && !NOT_KEPT.has(key)).map((key) => [key, view[key]]),
@@ -45,7 +43,6 @@ export function fittedView(project, view) {
   return {
     ...known,
     tool: tools.includes(view.tool) ? view.tool : 'pencil',
-    mode: view.mode === 'board' && isSingleView(project) ? 'edit' : (view.mode ?? 'edit'),
     ...(view.at ? { at: settleAt({ project, at: view.at }) } : {}),
   };
 }

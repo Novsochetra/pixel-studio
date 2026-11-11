@@ -43,7 +43,6 @@ function staysAway(app) {
   const { state } = app.store;
 
   return (
-    state.mode !== 'edit' ||
     state.tool === 'pose' ||
     Boolean(state.selection) ||
     Boolean(app.playback) ||
