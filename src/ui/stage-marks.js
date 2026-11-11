@@ -27,7 +27,12 @@ export function drawSelection(context, selection, scale) {
   const on = (x, y) => x >= 0 && y >= 0 && x < width && y < height && cells[y * width + x];
   const selected = [];
 
-  cells.forEach((cell, i) => cell && selected.push([i % width, Math.floor(i / width)]));
+  for (let i = 0; i < cells.length; i++) {
+    if (cells[i]) {
+      selected.push([i % width, Math.floor(i / width)]);
+    }
+  }
+
   context.save();
   context.beginPath();
   traceEdges(context, selected, on, scale);

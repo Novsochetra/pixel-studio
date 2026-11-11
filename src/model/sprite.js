@@ -76,14 +76,13 @@ export function fromHex(hex) {
 // colours in use, most used first: [{ color, count }]
 export function colorCounts(sprite) {
   const counts = new Map();
+  const { pixels } = sprite;
 
-  for (let y = 0; y < sprite.height; y++) {
-    for (let x = 0; x < sprite.width; x++) {
-      const color = getPixel(sprite, x, y);
+  for (let i = 0; i < pixels.length; i += 4) {
+    if (pixels[i + 3]) {
+      const color = pack(pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3]);
 
-      if (color !== CLEAR) {
-        counts.set(color, (counts.get(color) ?? 0) + 1);
-      }
+      counts.set(color, (counts.get(color) ?? 0) + 1);
     }
   }
 
@@ -94,11 +93,12 @@ export function colorCounts(sprite) {
 
 // { left, top, right, bottom } of the opaque pixels (right and bottom exclusive), or null
 export function bounds(sprite) {
+  const { width, height, pixels } = sprite;
   let box = null;
 
-  for (let y = 0; y < sprite.height; y++) {
-    for (let x = 0; x < sprite.width; x++) {
-      if (getPixel(sprite, x, y) !== CLEAR) {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (pixels[(y * width + x) * 4 + 3]) {
         box ??= { left: x, top: y, right: x + 1, bottom: y + 1 };
         box.left = Math.min(box.left, x);
         box.right = Math.max(box.right, x + 1);

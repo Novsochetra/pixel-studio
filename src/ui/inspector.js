@@ -1,6 +1,7 @@
 import { node } from './dom.js';
 import { panelGrab, pullsShut } from './panel-sheet.js';
 import { keepSetting, readSetting } from './remembered.js';
+import { keepFocus } from './keep-focus.js';
 import { renderColourPanel, renderDrawingPanel } from './colour-panel.js';
 import { renderGuidesPanel } from './guides-panel.js';
 import { renderLayersPanel } from './layers-panel.js';
@@ -46,7 +47,7 @@ function playFold(section, change) {
   section.style.height = `${to}px`;
 }
 
-function folding(folded) {
+function folding(folded, redraw) {
   return (title) => {
     if (!foldsFromTitle()) {
       return;
@@ -57,16 +58,17 @@ function folding(folded) {
 
     playFold(section, () => {
       section.dataset.collapsed = String(collapsed);
-      title.setAttribute('aria-expanded', String(!collapsed));
+      // a section may draw its rows only while it is open (outline-panel.js)
+      redraw(section.dataset.name);
     });
     collapsed ? folded.add(section.dataset.name) : folded.delete(section.dataset.name);
     keepSetting(FOLDED, [...folded]);
   };
 }
 
-function bindCollapsing(inspector, sections) {
+function bindCollapsing(inspector, sections, redraw) {
   const folded = new Set(readSetting(FOLDED, FOLDED_AT_FIRST));
-  const toggle = folding(folded);
+  const toggle = folding(folded, redraw);
 
   for (const [name, section] of Object.entries(sections)) {
     section.dataset.name = name;
@@ -100,7 +102,6 @@ export function mountInspector(app) {
   };
 
   inspector.replaceChildren(panelGrab(app), ...Object.values(sections));
-  bindCollapsing(inspector, sections);
   pullsShut(inspector, app);
 
   const panels = {
@@ -120,6 +121,8 @@ export function mountInspector(app) {
     title?.setAttribute('role', 'button');
     title?.setAttribute('aria-expanded', String(sections[name].dataset.collapsed !== 'true'));
   };
+
+  bindCollapsing(inspector, sections, (name) => keepFocus(inspector, drawn(name)));
 
   return Object.fromEntries(Object.keys(panels).map((name) => [name, drawn(name)]));
 }

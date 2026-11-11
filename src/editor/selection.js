@@ -124,20 +124,23 @@ export function moveSelected(sprite, selection, dx, dy) {
 const snap = (value, box) =>
   box.right - box.left >= box.bottom - box.top ? Math.floor(value + 0.5) : Math.ceil(value - 0.5);
 
+// a plain loop: the box is asked for several times at every move of the pointer, and a callback
+// for every cell of a large canvas was what a selection being dragged waited for
 export function selectionBox(selection) {
+  const { width, cells } = selection;
   let box = null;
 
-  selection.cells.forEach((on, i) => {
-    if (on) {
-      const x = i % selection.width;
-      const y = (i - x) / selection.width;
+  for (let i = 0; i < cells.length; i++) {
+    if (cells[i]) {
+      const x = i % width;
+      const y = (i - x) / width;
 
       box ??= { left: x, top: y, right: x, bottom: y };
       box.left = Math.min(box.left, x);
       box.right = Math.max(box.right, x);
       box.bottom = y;
     }
-  });
+  }
 
   return box;
 }

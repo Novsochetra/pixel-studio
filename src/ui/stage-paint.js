@@ -1,11 +1,5 @@
-import {
-  drawChecker,
-  drawGrid,
-  drawGuide,
-  drawMirrorLine,
-  drawSprite,
-  sizeCanvas,
-} from './draw.js';
+import { drawGrid, drawGuide, drawMirrorLine, drawSprite, sizeCanvas } from './draw.js';
+import { drawChecker } from './checker.js';
 import { currentFrames } from './actions.js';
 import { drawPins } from './pins-draw.js';
 import { drawLayersHandle } from './layer-turn.js';

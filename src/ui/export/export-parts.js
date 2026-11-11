@@ -1,5 +1,5 @@
 import { node, toast } from '../dom.js';
-import { drawChecker } from '../draw.js';
+import { drawChecker } from '../checker.js';
 import { afterPress } from '../after-press.js';
 import { saveFrames, saveGamePack, saveGifs, saveSheetsWithJson } from '../export-files.js';
 

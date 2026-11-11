@@ -118,9 +118,20 @@ export function moveFrame(animation, from, to) {
 }
 
 // whether any layer but a picture to trace has a pixel drawn
+// A plain loop over each pixel's alpha: this is asked at every move of the pointer, and with a
+// callback for every byte it was most of what a large canvas took to follow the hand.
+function hasPixels({ pixels }) {
+  for (let i = 3; i < pixels.length; i += 4) {
+    if (pixels[i]) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function hasArt(frame) {
   return frame.layers.some(
-    (layer) =>
-      layer.kind !== 'reference' && layer.sprite?.pixels.some((value, i) => i % 4 === 3 && value),
+    (layer) => layer.kind !== 'reference' && layer.sprite && hasPixels(layer.sprite),
   );
 }

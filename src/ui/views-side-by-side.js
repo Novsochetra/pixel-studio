@@ -1,4 +1,5 @@
-import { cssVar, drawChecker, drawGuide, drawSprite } from './draw.js';
+import { cssVar, drawGuide, drawSprite } from './draw.js';
+import { drawChecker } from './checker.js';
 import { directionSprite, directionsInUse } from './actions.js';
 import { checkerPainter } from '../io/images.js';
 import { viewName } from '../model/kinds.js';

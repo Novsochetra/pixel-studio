@@ -96,6 +96,6 @@ export const ROUTES = {
     'animations',
   ],
   guides: ['guides', 'pixels', 'showGuides', 'project', 'at', 'frames', 'layers', 'animations'],
-  outline: ['outline', 'pixels', 'at', 'project', 'layers'],
+  outline: ['outline', 'pixels', 'at', 'project', 'layers', 'panel', 'layout'],
   status: ['cursor', 'at', 'zoom', 'pixels', 'project', 'tool'],
 };

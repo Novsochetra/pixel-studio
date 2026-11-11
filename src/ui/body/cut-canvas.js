@@ -1,5 +1,6 @@
 import { node } from '../dom.js';
-import { cssVar, drawChecker, drawSprite, sizeCanvas } from '../draw.js';
+import { cssVar, drawSprite, sizeCanvas } from '../draw.js';
+import { drawChecker } from '../checker.js';
 import { PART_COLOURS } from '../../art/editor-colours.js';
 import { linePoints } from '../../editor/paint.js';
 import { paintOwners, pivotsOf } from '../../model/body/cut-plan.js';

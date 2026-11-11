@@ -12,6 +12,7 @@ import {
 import { toHex } from '../model/sprite.js';
 import { characterColors } from './character-colours.js';
 import { actionRow, fieldRow, listGroup, switchRow } from './list-group.js';
+import { openPanel } from './panels.js';
 
 // `label` names the step in the history; `short` is the row's own word for it
 const OPERATIONS = [
@@ -126,8 +127,21 @@ function everywhereToggle(app) {
   );
 }
 
+// The rows count their pixels from every pixel of the layer. While the section is folded shut,
+// or is not the panel a phone has open, it draws its title alone: counted at every stroke, they
+// were most of what a large canvas made the hand wait for.
+const outOfSight = (el, state) =>
+  state.layout === 'compact' ? openPanel(state) !== 'outline' : el.dataset.collapsed === 'true';
+
 export function renderOutlinePanel(el, app) {
   const { state } = app.store;
+
+  if (outOfSight(el, state)) {
+    replace(el, node('h2', { tabindex: '0' }, 'Outline'));
+
+    return;
+  }
+
   const detected = outlineColour(directionSprite(state, state.at.direction));
 
   state.outline ??= { colour: null, everywhere: false };

@@ -39,23 +39,6 @@ export function drawSprite(context, sprite, scale, alpha = 1) {
   context.restore();
 }
 
-export function drawChecker(context, { width, height }, square) {
-  const colors = [cssVar('--checker-a'), cssVar('--checker-b')];
-
-  for (let row = 0; row * square < height; row++) {
-    for (let col = 0; col * square < width; col++) {
-      context.fillStyle = colors[(row + col) % 2];
-      const cellWidth = Math.min(square, width - col * square);
-      context.fillRect(
-        col * square,
-        row * square,
-        cellWidth,
-        Math.min(square, height - row * square),
-      );
-    }
-  }
-}
-
 // lines between the art pixels, one device pixel wide at any zoom
 export function drawGrid(context, { cols, rows }, { scale, ratio }) {
   const half = 0.5 / ratio;

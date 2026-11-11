@@ -1,5 +1,6 @@
 import { currentAnimation } from './actions.js';
-import { cssVar, drawChecker, drawSprite, sizeCanvas } from './draw.js';
+import { cssVar, drawSprite, sizeCanvas } from './draw.js';
+import { drawChecker } from './checker.js';
 import { showsEveryView } from './grid/views-menu.js';
 import { isSingleView, viewName } from '../model/kinds.js';
 import { bounds, unionBounds } from '../model/sprite.js';

@@ -1,5 +1,6 @@
 import { icon, node } from './dom.js';
-import { drawChecker, drawGuide, drawSprite } from './draw.js';
+import { drawGuide, drawSprite } from './draw.js';
+import { drawChecker } from './checker.js';
 import { focusables, rememberFocus, trapTab } from './focus.js';
 import { leave } from './leave.js';
 import { pullToClose } from './sheet-pull.js';
