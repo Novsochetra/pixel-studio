@@ -12,9 +12,12 @@ const dragBy = async (distance) => {
   const x = box.x + box.width / 2;
   const y = box.y + box.height / 2;
 
+  // kept inside the window: Safari's engine is sent no move from beyond its edge
+  const end = Math.max(1, Math.min(page.viewportSize().height - 2, y + distance));
+
   await page.mouse.move(x, y);
   await page.mouse.down();
-  await page.mouse.move(x, y + distance, { steps: 6 });
+  await page.mouse.move(x, end, { steps: 6 });
   await page.mouse.up();
   await page.waitForTimeout(150);
 };
