@@ -57,8 +57,9 @@ export function mountBoard(container, app) {
       const opens = (state.markupMode ?? 'edit') === 'edit';
 
       shown.canvas.style.cursor = opens ? 'pointer' : 'crosshair';
-      // a finger scrolls a wide board sideways, except while it is drawing a mark on it
-      shown.canvas.style.touchAction = opens ? 'pan-x' : 'none';
+      // a finger scrolls a board wider or taller than the screen, except while it is drawing a
+      // mark on it
+      shown.canvas.style.touchAction = opens ? 'pan-x pan-y' : 'none';
       replace(inner, boardControls(app, note), holder, guideSummary(state));
     },
   };

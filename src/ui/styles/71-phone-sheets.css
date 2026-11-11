@@ -109,7 +109,13 @@
     background: var(--sheet);
   }
 
+  /* Every sheet is as tall as the next: of their own heights, the canvas hopped and changed
+     size as one panel was changed for another. Tall enough for two rows of frames on a small
+     phone, and never so tall that a canvas of 160 pixels has no room above it. */
   :root[data-layout='compact'] :is(.inspector, .grid-panel) {
+    height: min(50vh, 400px, 100dvh - 300px);
+    max-height: none;
+    box-sizing: border-box;
     border: 0;
     border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
     background: var(--sheet);
@@ -148,6 +154,12 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     animation: none;
+  }
+
+  /* the sheet says where the editor is; over a canvas made small by the sheet, the words lay
+     on its corner */
+  :root[data-layout='compact'] .app[data-panel]:not([data-panel='']) .stage-place {
+    display: none;
   }
 
   /* the row at the sheet's top says which panel this is: its own title would say it twice */

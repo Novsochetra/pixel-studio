@@ -2,7 +2,7 @@
 // the colour in hand, and the panels. A panel is a sheet that rises over the screen's foot; the
 // row at its top picks another panel, and it is pulled down by its bar or shut by its ×.
 import { fingers, openStudio } from './harness.mjs';
-import { openExample } from './studio.mjs';
+import { openExample, openWorkspace } from './studio.mjs';
 
 const { page, context, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
 await openExample(page);
@@ -80,6 +80,34 @@ check(
   (await open()) === 'colours' &&
     (await page.locator('#inspector').evaluate((panel) => panel.style.translate)) === '',
   'the colour’s button opens Colours, the sheet in its place again',
+);
+
+// On the views board a press opened the view under it: the finger that came to scroll the
+// board was sent to Edit, and the last view of a phone's board could not be reached.
+await page.getByRole('button', { name: 'Close this panel' }).tap();
+await openWorkspace(page, 'Views board');
+await page.waitForTimeout(400);
+const board = await box('.board-canvas');
+const [startX, startY] = [board.left + board.width * 0.6, board.top + board.height * 0.4];
+
+await touch('touchStart', [[startX, startY]]);
+
+for (let i = 1; i <= 8; i++) {
+  await touch('touchMove', [[startX - i * 14, startY]]);
+  await page.waitForTimeout(20);
+}
+
+await touch('touchEnd', []);
+await page.waitForTimeout(300);
+check(
+  (await page.locator('.app').getAttribute('data-mode')) === 'board',
+  'a swipe across the views board scrolls it, and opens no view',
+);
+await page.locator('.board-canvas').click({ position: { x: 30, y: 60 } });
+await page.waitForTimeout(300);
+check(
+  (await page.locator('.app').getAttribute('data-mode')) === 'edit',
+  'a tap on a view opens it',
 );
 
 await finish();

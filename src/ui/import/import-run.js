@@ -5,6 +5,7 @@ import { cleanImage } from '../../io/cleaner.js';
 import { isPose, referenceOf } from '../../model/reference.js';
 import { placementOf, viewName } from '../../model/kinds.js';
 import { artHeight, reportText } from './import-report.js';
+import { cleanAtViewScale, scaleOf } from './view-scale.js';
 import { inWords } from '../../model/told.js';
 
 const FAILED =
@@ -39,6 +40,7 @@ function showResult(job, result, ref, alone) {
     node('pre.report', {}, text),
   );
   job.result = sprite;
+  job.report = result.report;
   job.accept.disabled = false;
 }
 
@@ -55,11 +57,14 @@ export async function runClean(job, options) {
   const alone = job.alone || !isPose(ref);
   const placement = placementOf(state.project);
 
+  const like = { width: ref.width, height: ref.height, data: ref.pixels };
+  const factor = scaleOf(state.project.cleanScales, job.direction);
+
   try {
-    const result = await cleanImage(
-      job.image,
-      { width: ref.width, height: ref.height, data: ref.pixels },
+    const result = await cleanAtViewScale(
+      (asked) => cleanImage(job.image, like, asked),
       { ...options, ...placement, alone },
+      factor,
     );
 
     showResult(job, result, ref, alone);

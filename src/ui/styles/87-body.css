@@ -196,9 +196,13 @@
     padding: 6px;
   }
 
-  /* one row that scrolls: on three rows, the smallest phones showed no part under the tools */
+  /* One row that scrolls: on three rows, the smallest phones showed no part under the tools.
+     It keeps its height: a row that scrolls has none of its own to the column it stands in,
+     and was squeezed to nothing, its controls with it. */
   .cut-brush {
+    flex: none;
     flex-wrap: nowrap;
+    min-height: 44px;
     overflow-x: auto;
     scrollbar-width: none;
   }

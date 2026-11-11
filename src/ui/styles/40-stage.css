@@ -174,14 +174,26 @@
    three rows, the Pose bar lay over the part being posed. The selection's bar stands at the end
    of the canvas the selection is not in (selection-bar.js), so it does not lie over the pixels
    it acts on. */
+/* the Pose and Pin bars are one row at any height: on two, a tablet held wide had the bar over
+   the top of the art and the handle that turns the head */
+:root:not([data-layout='compact']) :is(.pose-bar, .pin-bar) {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+:root:not([data-layout='compact']) :is(.pose-bar, .pin-bar) > * {
+  flex: none;
+}
+
 @media (max-height: 799px) {
-  :root:not([data-layout='compact']) :is(.selection-bar, .pose-bar, .pin-bar) {
+  :root:not([data-layout='compact']) .selection-bar {
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
   }
 
-  :root:not([data-layout='compact']) :is(.selection-bar, .pose-bar, .pin-bar) > * {
+  :root:not([data-layout='compact']) .selection-bar > * {
     flex: none;
   }
 

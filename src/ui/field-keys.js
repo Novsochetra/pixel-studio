@@ -38,7 +38,11 @@ function leaveAtEnter(root) {
     if (isField(target) && target === pressed) {
       clicked.add(target);
     }
+
+    // the click is spent: a field come back to with Tab is a keyboard's field again
+    pressed = null;
   });
+  root.addEventListener('focusout', ({ target }) => clicked.delete(target));
   root.addEventListener(
     'keydown',
     ({ key, target }) => {

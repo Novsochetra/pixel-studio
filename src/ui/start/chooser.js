@@ -86,6 +86,13 @@ function drawCards(el, saved, picked, handlers) {
 
 // "What are you making?": a kind or a game preset, then a name and a canvas. onCreate gets the
 // new project; onDeletePreset forgets a saved preset.
+// Enter in the name or a size is the form's own: it creates, as Create does
+const atEnter = (create) => (event) => {
+  if (event.key === 'Enter' && event.target.matches('input')) {
+    create();
+  }
+};
+
 export function newProjectChooser({ presets, onCreate, onDeletePreset }) {
   const fields = projectFields();
   const cards = node('div');
@@ -121,7 +128,7 @@ export function newProjectChooser({ presets, onCreate, onDeletePreset }) {
 
   return node(
     'div.start-chooser',
-    {},
+    { onkeydown: atEnter(create) },
     node('h3.start-heading', {}, 'What are you making?'),
     cards,
     fields.el,

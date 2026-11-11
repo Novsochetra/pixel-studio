@@ -38,6 +38,14 @@ check(
   cutArt.bottom < foot.y && firstPart.y < foot.y,
   'and the art and the parts are both in sight above the buttons',
 );
+// a row that scrolls has no height of its own to the column it stands in: the brush's controls
+// were squeezed to nothing, and a cut could not be corrected on a phone
+const brush = await page.locator('.cut-brush').boundingBox();
+check(
+  brush.height >= 36 &&
+    (await page.locator('.cut-brush').getByRole('button', { name: 'Unpaint' }).isVisible()),
+  'and the brush’s controls are a row a finger can use',
+);
 await page.locator('.sheet .btn.primary').tap();
 await page.waitForTimeout(800);
 const firstControl = await page.locator('.pose-bar > :first-child').boundingBox();

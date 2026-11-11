@@ -63,7 +63,9 @@ export function renderLayersPanel(el, app) {
 
   const stack = frameOf(state).layers;
   const active = currentLayer(state);
-  const hadFocus = Boolean(document.activeElement?.closest?.('.layer-row'));
+  // The row itself: a control inside it (its eye) keeps the keys where it stood, as any control
+  // of the page does. Sent to the row, a second Enter on the eye did nothing.
+  const hadFocus = Boolean(document.activeElement?.matches?.('.layer-row'));
 
   replace(
     el,

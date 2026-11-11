@@ -4,6 +4,7 @@ import { currentAnimation, referenceSprite } from './actions.js';
 import { keepVersion } from './versions-sheet.js';
 import { batchItems, placeAll } from './batch/batch-items.js';
 import { batchRow } from './batch/batch-row.js';
+import { cleanAtViewScale, scaleOf, scalesAfter } from './import/view-scale.js';
 import { cleanImage } from '../io/cleaner.js';
 import { decodeImage } from '../io/images.js';
 import { isPose, referenceOf } from '../model/reference.js';
@@ -41,18 +42,22 @@ function statusText(report) {
   return `${report.size[0]}×${report.size[1]} px${scaled}`;
 }
 
-async function cleanOne(state, item, ref) {
+// scales: each view's scale so far, this picture's own added to it when it was matched
+async function cleanOne(state, item, { ref, scales }) {
   try {
-    const result = await cleanImage(
-      await decodeImage(item.file),
-      { width: ref.width, height: ref.height, data: ref.pixels },
+    const image = await decodeImage(item.file);
+    const like = { width: ref.width, height: ref.height, data: ref.pixels };
+    const result = await cleanAtViewScale(
+      (asked) => cleanImage(image, like, asked),
       // an empty reference, or a sketch of a few pixels, has nothing to match: the image is
       // cleaned alone, as its kind stands
       isPose(ref)
         ? cleanOptions(state.project, item)
         : { alone: true, ...placementOf(state.project) },
+      scaleOf(scales, item.direction),
     );
 
+    Object.assign(scales, scalesAfter(scales, item.direction, result.report));
     item.sprite = {
       width: result.width,
       height: result.height,
@@ -114,13 +119,13 @@ export async function openBatchSheet(app, files) {
 }
 
 // each image cleaned in turn, the list drawn again as each is done
-async function cleanEach(state, items, { draw, accept }) {
+async function cleanEach(state, items, { draw, accept, scales }) {
   let ref = referenceSprite(state);
 
   for (const item of referenceFirst(state, items)) {
     item.status = node('span.hint', {}, 'Cleaning…');
     draw();
-    await cleanOne(state, item, ref);
+    await cleanOne(state, item, { ref, scales });
     ref = becomesReference(state, item, ref) ? item.sprite : ref;
     draw();
   }
@@ -141,10 +146,13 @@ function showBatch(app, files, leftOut) {
       list,
       items.map((item) => batchRow(item, state.project, animation)),
     );
-  const run = () => cleanEach(state, items, { draw, accept });
+  const scales = { ...state.project.cleanScales };
+  const run = () => cleanEach(state, items, { draw, accept, scales });
 
   accept.addEventListener('click', () => {
     keepVersion(app, `Before cleaning ${files.length} images`);
+    // before the step, so it is saved with it
+    app.store.state.project.cleanScales = scales;
     placeAll(
       app,
       items.filter((item) => item.sprite),

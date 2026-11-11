@@ -61,10 +61,11 @@ function fpsField(app) {
     const playback = app.playback;
 
     restructure(app, 'Frame rate', (draft) => {
+      // what cannot be read keeps the rate there was, not a rate nobody asked for
       currentAnimation(draft).fps = wholeNumber(event.target.value, {
         min: 1,
         max: 30,
-        fallback: 8,
+        fallback: animation.fps,
       });
     });
 

@@ -4,6 +4,7 @@ import { currentAnimation, replaceDirectionArt } from './actions.js';
 import { keepVersion } from './versions-sheet.js';
 import { optionFields } from './import/import-options.js';
 import { runClean } from './import/import-run.js';
+import { scalesAfter } from './import/view-scale.js';
 import { decodeImage } from '../io/images.js';
 import { referenceOf } from '../model/reference.js';
 import { viewName } from '../model/kinds.js';
@@ -49,6 +50,8 @@ function accept(job, place) {
   const replaced = Boolean(was && hasArt(was));
 
   keepVersion(app, `Before cleaning into ${place}`);
+  // before the step, so it is saved with it
+  state.project.cleanScales = scalesAfter(state.project.cleanScales, direction, job.report);
   replaceDirectionArt(app, { direction, frame }, job.result, `Clean into ${place}`);
   app.store.set({ at: { ...app.store.state.at, direction, frame }, mode: 'edit', selection: null });
   job.close();

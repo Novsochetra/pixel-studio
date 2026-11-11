@@ -13,6 +13,7 @@ import { guessOwners } from '../../src/model/body/guess.js';
 import { cutIntoParts, leftOver } from '../../src/model/body/cut.js';
 import { viewBox } from '../../src/ui/body/cut-view.js';
 import { isPose } from '../../src/model/reference.js';
+import { cleanAtViewScale, scaleOf, scalesAfter } from '../../src/ui/import/view-scale.js';
 
 const GREEN = pack(0, 200, 0);
 
@@ -151,4 +152,28 @@ test('a few pixels sketched in the reference view are no pose to match a picture
   assert.equal(isPose(createSprite(64, 64)), false);
   assert.equal(isPose(null), false);
   assert.equal(isPose(figure), true);
+});
+
+// A view's second picture kept its own pixel size, though the first was scaled to stand as tall
+// as the reference: the same file cleaned into frame 2 came out a quarter smaller than in frame 1.
+test('a later frame of a view is cleaned at the scale its first frame was matched at', async () => {
+  const asked = [];
+  const clean = async (options) => {
+    asked.push(options);
+
+    return options.keepScale
+      ? { report: { kept: true, size: [36, 75], scaled: null } }
+      : { report: { kept: false, size: [47, 98], scaled: { fy: 1.31 } } };
+  };
+  const scales = scalesAfter({}, 'north', (await clean({})).report);
+  const later = await cleanAtViewScale(clean, { keepScale: true }, scaleOf(scales, 'north'));
+
+  assert.deepEqual(scales, { north: 1.31 });
+  assert.equal(asked.at(-1).height, 98, 'its own 75 rows, by the view’s 1.31');
+  assert.equal(later.report.kept, false);
+  assert.equal(
+    scaleOf(scales, 'east'),
+    1,
+    'a view with no picture matched yet keeps pixels as they are',
+  );
 });

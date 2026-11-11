@@ -80,6 +80,27 @@ check(
   'a layer named with Enter keeps the keys on its row',
 );
 
+// the eye is in the layer's row: sent to the row, the keys left it and a second Enter did nothing
+await page.getByRole('button', { name: 'New layer' }).click();
+await page.keyboard.press('Escape');
+await page.waitForTimeout(200);
+const eye = page
+  .locator('.layer-row')
+  .last()
+  .getByRole('button', { name: /^Hide / });
+const lower = (await eye.getAttribute('aria-label')).replace('Hide ', '');
+
+await eye.focus();
+await page.keyboard.press('Enter');
+await page.waitForTimeout(150);
+check(
+  (await focused()) === `Show ${lower}`,
+  'Enter on a layer’s eye hides it, the keys still on the eye',
+);
+await page.keyboard.press('Enter');
+await page.waitForTimeout(150);
+check((await focused()) === `Hide ${lower}`, 'and a second Enter shows it again');
+
 // Enter in a field clicked into ends the typing: left in the field, the next shortcut was typed
 // after the colour's code
 await openPanel(page, 'Colours');

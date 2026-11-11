@@ -32,16 +32,14 @@ function rubOut(app, point, scale) {
   }
 }
 
-// A click on the board opens that view, draws a mark or adds a note, as the board is set to.
+// A press on the board draws a mark, rubs one out or adds a note, as the board is set to.
 // Returns the mark being drawn, if any.
 function press(app, { canvas, scale }, point, event) {
   const { state } = app.store;
   const mode = state.markupMode ?? 'edit';
 
+  // a view is opened by a click, not at the press: the press may be a finger about to scroll
   if (mode === 'edit') {
-    selectDirection(app, point.direction);
-    app.store.set({ mode: 'edit' });
-
     return null;
   }
 
@@ -101,6 +99,16 @@ export function bindBoardPointer(app, canvas, scale) {
     // a press off the art (a second finger on a gap) leaves the mark being drawn alone
     if (point) {
       drawing = press(app, { canvas, scale }, point, event);
+    }
+  });
+  // Opened at the press, a view was opened by the finger that came to scroll the board: the
+  // third view of a phone's board could not be brought on screen at all.
+  canvas.addEventListener('click', (event) => {
+    const point = pointOf(event);
+
+    if (point && (app.store.state.markupMode ?? 'edit') === 'edit') {
+      selectDirection(app, point.direction);
+      app.store.set({ mode: 'edit' });
     }
   });
   canvas.addEventListener('pointermove', (event) => {
