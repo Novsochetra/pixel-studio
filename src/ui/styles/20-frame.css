@@ -46,6 +46,20 @@
   scale: var(--scale-pressed);
 }
 
+/* the open project's name, and the chevron of the window it leads to */
+.wordmark-project {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--label-muted);
+}
+
+.wordmark-project svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
+}
+
 .wordmark small {
   display: block;
   /* a long name is cut short, and shorter in a narrow window: wrapped, or at its full width, it

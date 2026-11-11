@@ -17,7 +17,12 @@ function projectButton(app) {
       onclick: () => openProjectsSheet(app),
     },
     node('span.wordmark-brand', {}, 'PIXEL CLEAN'),
-    node('small', {}, `${app.store.state.project.name} ▾`),
+    node(
+      'span.wordmark-project',
+      {},
+      node('small', {}, app.store.state.project.name),
+      icon('chevron-down'),
+    ),
   );
 }
 

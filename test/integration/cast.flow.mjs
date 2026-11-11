@@ -134,8 +134,7 @@ check(
 );
 
 // a project that is not the open one had to be opened to be renamed or copied
-const wordmark = async () =>
-  (await page.locator('.wordmark small').textContent()).replace(' ▾', '').trim();
+const wordmark = async () => (await page.locator('.wordmark small').textContent()).trim();
 const leftOpen = await wordmark();
 const other = page.locator('.project-row:not([aria-current="true"])').first();
 
@@ -156,7 +155,7 @@ await page.waitForTimeout(1500);
 check((await wordmark()) === 'Renamed here copy', 'and copied from its row, the copy opened');
 
 // the project open now could not be deleted at all: another had to be opened first
-const openName = (await page.locator('.wordmark small').textContent()).replace(' ▾', '').trim();
+const openName = (await page.locator('.wordmark small').textContent()).trim();
 const rows = () => page.locator('.project-row').count();
 const had = await rows();
 
@@ -164,7 +163,7 @@ await page.locator('.project-row[aria-current="true"] .row-more').click();
 await page.getByRole('menuitem', { name: 'Delete…' }).click();
 await page.locator('.project-row .btn.danger').click();
 await page.waitForTimeout(1200);
-const nowOpen = (await page.locator('.wordmark small').textContent()).replace(' ▾', '').trim();
+const nowOpen = (await page.locator('.wordmark small').textContent()).trim();
 
 check(
   (await rows()) === had - 1 && nowOpen !== openName,
