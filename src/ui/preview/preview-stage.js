@@ -4,7 +4,7 @@ import { backgroundOf } from '../preview-background.js';
 import { cast } from '../preview-scene.js';
 import { drawScene } from './scene-draw.js';
 import { drawCentred, drawTiles } from './flat-draw.js';
-import { sceneControls } from './scene-controls.js';
+import { sceneOptions } from './scene-controls.js';
 import { frameAtTick } from '../../model/frame-play.js';
 import { kindOf, viewName } from '../../model/kinds.js';
 
@@ -125,7 +125,7 @@ export function mountPreview(container, app) {
   container.replaceChildren(
     node('div.stage-inner.preview', {}, node('div.preview-bar-place', {}, bar), canvas, note),
   );
-  const clock = { started: null, background: null, shown: null };
+  const clock = { started: null, background: null, shown: null, more: false };
 
   const paint = (time) => paintPreview(canvas, app, { clock, time });
   const loop = (time) => {
@@ -149,7 +149,7 @@ export function mountPreview(container, app) {
       { onclick: togglePlay },
       clock.started === null ? 'Play' : 'Pause',
     );
-    const own = mode === 'scene' ? sceneControls(app, set) : null;
+    const own = mode === 'scene' ? sceneOptions(app, set, clock) : null;
 
     replace(bar, animationPicker(app), play, zoomButtons(app, mode, set), own);
     note.textContent = noteText(state, mode);

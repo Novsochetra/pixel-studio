@@ -4,6 +4,12 @@ import { History } from '../../src/editor/history.js';
 import { newProject } from '../../src/model/new-project.js';
 import { withCanvasSize } from '../../src/model/canvas-size.js';
 import { renameStored } from '../../src/store/stored-project.js';
+import { applyCut } from '../../src/model/body/body.js';
+import { bodyOf } from '../../src/model/body/body-kind.js';
+import { cloneSprite, createSprite, getPixel, pack, setPixel } from '../../src/model/sprite.js';
+import { cutCharacter } from '../unit/body-helpers.js';
+
+const GREEN = pack(0, 200, 0);
 
 // a canvas of another size, or a version gone back to, started the undo history afresh: neither
 // could be undone, and nothing before it either
@@ -52,4 +58,38 @@ test('the first icon or tile of a named project takes the project’s name', () 
   assert.equal(named({ kind: 'tile', name: 'Castle floor' }), 'Castle floor');
   assert.equal(named({ kind: 'icon' }), 'Coin', 'one with no name of its own keeps the usual');
   assert.equal(named({ kind: 'character', name: 'Hero' }), 'Idle', 'an animation is not the art');
+});
+
+// A first cut gives every frame of every view a Body. What was drawn on the Body of a view not
+// cut yet was thrown away when that view was cut in its turn, with no word of it.
+test('pixels drawn on a Body before its view is cut are kept, on the layer that was cut', () => {
+  const { project, animation, source, rig } = cutCharacter();
+  const side = animation.directions.east.frames[0];
+  const body = bodyOf(side);
+  const art = side.layers.find((layer) => layer !== body);
+
+  setPixel(body.sprite, 2, 2, GREEN);
+  art.sprite = cloneSprite(source);
+  applyCut(project, animation, {
+    direction: 'east',
+    frame: 0,
+    layerKey: art.key,
+    source,
+    leftover: createSprite(160, 160),
+    rig,
+  });
+
+  assert.equal(Boolean(body.pose), true, 'the Body is posed from the cut');
+  assert.equal(getPixel(art.sprite, 2, 2), GREEN, 'and what was on it is on the art under it');
+});
+
+// a canvas made smaller left a guide line on a row the canvas no longer had: its row in Guides
+// showed a number the field would not take, and the line was drawn nowhere
+test('a guide line stays on the canvas when the canvas is made smaller', () => {
+  const project = newProject({ kind: 'character', width: 32, height: 32 });
+
+  project.guides[0].row = 30;
+  const smaller = withCanvasSize(project, { width: 16, height: 16 }, { x: 0.5, y: 0 });
+
+  assert.equal(smaller.guides[0].row, 15);
 });

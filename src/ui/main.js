@@ -37,9 +37,12 @@ async function startEditor(backend, index, { project, prefix, save, background =
   install(app, project, { prefix, save });
   app.addProject = (next, nextBackground) => addProject(app, next, nextBackground);
 
+  // A project made here or opened from a file has only the picture that came with it. One read
+  // from saved work has its picture saved beside it: taken off here, a background of one's own
+  // was gone at every load of the page.
   if (background) {
     await backend.write(app.keys.background, { url: background });
-  } else if (project.preview?.background) {
+  } else if (save === 'all' && project.preview?.background) {
     project.preview = { ...project.preview, background: false };
   }
 

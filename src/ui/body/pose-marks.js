@@ -67,7 +67,7 @@ export function drawPoseMarks(context, state, scale) {
 
   for (const piece of target.rig.pieces) {
     const [x, y] = pivotInPose(target.rig, target.body.pose, piece).point;
-    const fill = piece === picked ? cssVar('--tint') : cssVar('--chrome-raised');
+    const fill = piece === picked ? cssVar('--tint') : cssVar('--on-tint');
 
     dot(context, [x * scale, y * scale], { radius: piece === picked ? 5 : 3.5, fill });
   }

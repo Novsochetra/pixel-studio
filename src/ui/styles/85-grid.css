@@ -186,11 +186,11 @@
   font-size: 12px;
 }
 
+/* a long name (Front side) takes a second line before it is cut short */
 .grid-view {
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.15;
   color: var(--label);
   font-weight: 500;
   text-align: left;

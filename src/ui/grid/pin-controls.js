@@ -1,8 +1,9 @@
 import { node, replace } from '../dom.js';
+import { watchMore } from '../more-behind.js';
 import { restructure } from '../actions.js';
 import { PIN_NAMES, pinsOf, removePin } from '../../model/pins.js';
 import { frameAt } from '../../model/project.js';
-import { kindOf } from '../../model/kinds.js';
+import { hasBody } from '../../model/kinds.js';
 
 function pinNames(app) {
   const { state } = app.store;
@@ -40,11 +41,11 @@ function removeButton(app) {
   );
 }
 
-// pins are for what stands on its feet; `toggle` is the frames bar's own icon switch
+// pins are a character's; `toggle` is the frames bar's own icon switch
 export function pinControls(app, toggle) {
   const { state } = app.store;
 
-  if (kindOf(state.project).place !== 'feet') {
+  if (!hasBody(state.project)) {
     return null;
   }
 
@@ -78,5 +79,6 @@ export function renderPinBar(el, app) {
   } else if (el.dataset.shown !== shown) {
     el.dataset.shown = shown;
     replace(el, node('span', {}, 'Pin the'), pinNames(app), removeButton(app));
+    watchMore(el);
   }
 }

@@ -74,5 +74,6 @@ export function gamePack(project, settings, standHeight) {
       { path: 'PIXEL-CLEAN-README.txt', text: readme },
     ],
     warnings,
+    results,
   };
 }

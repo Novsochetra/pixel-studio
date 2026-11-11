@@ -84,6 +84,19 @@ check(
   parseInt(await torso.locator('.cut-size').textContent(), 10) > parseInt(torsoSize, 10) + 100,
   'a lasso round the head gives what it holds to the part picked',
 );
+await page.getByRole('button', { name: 'Paint Head' }).focus();
+await page.keyboard.press('Enter');
+check(
+  (await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))) === 'Paint Head',
+  'the keys stay on the control just used in the parts list',
+);
+await page.keyboard.press('Escape');
+check(
+  (await page.locator('.sheet .ask-question').count()) === 1,
+  'closing the cut window on corrections asks first',
+);
+await page.getByRole('button', { name: 'Keep', exact: true }).click();
+check((await page.locator('.cut-part').count()) === 13, 'and Keep goes on with them');
 await page.getByRole('button', { name: 'Guess again' }).click();
 check((await head.locator('.cut-size').textContent()) === headSize, 'Guess again starts over');
 await page.locator('.sheet').getByRole('button', { name: 'Cut into 13 parts' }).click();
@@ -92,6 +105,12 @@ check(
   (await page.locator('.layer-row', { hasText: 'Body' }).locator('.badge').textContent()) ===
     'Parts',
   'the parts are drawn on a Body layer',
+);
+await page.locator('.layer-row', { hasText: 'Body' }).locator('.layer-name').click();
+await page.waitForTimeout(150);
+check(
+  (await page.locator('.pose-bar:not([hidden])').count()) === 1,
+  'picking a layer in the list leaves the Pose tool in hand',
 );
 
 for (let i = 0; i < 2; i++) {
@@ -202,6 +221,18 @@ check(
 await page.locator('.sheet .btn.primary').click();
 await page.waitForTimeout(300);
 check((await page.locator('#pose-part').count()) === 1, 'and the frames stay posed');
+
+await page.setViewportSize({ width: 900, height: 650 });
+await page.waitForTimeout(300);
+const shortBar = await poseBar.boundingBox();
+check(shortBar.height < 60, 'in a short window the Pose bar is one row, clear of the part');
+await page.mouse.move(shortBar.x + 40, shortBar.y + shortBar.height / 2);
+await page.mouse.wheel(0, 400);
+await page.waitForTimeout(200);
+check(
+  await poseBar.evaluate((bar) => bar.scrollLeft > 0),
+  'and a mouse wheel moves along it to what waits past its edge',
+);
 
 await page.setViewportSize({ width: 390, height: 844 });
 await page.waitForTimeout(300);

@@ -147,22 +147,48 @@
   padding: 16px;
 }
 
-/* five rows of controls are half a phone's screen: they go up with the scene, and stay across */
+/* On a phone the bar stays at the top as it does at a desk, Play always in it; the scene's own
+   controls fold under one word (scene-controls.js). */
 :root[data-layout='compact'] .stage-inner.preview > :is(.preview-bar-place, .preview-note) {
   --across: calc(100vw - 32px);
 }
 
 :root[data-layout='compact'] .stage-inner.preview > .preview-bar-place {
-  position: sticky;
-  top: auto;
+  top: 8px;
 }
 
-:root[data-layout='compact'] .preview-bar {
-  padding: 0;
-  background: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  box-shadow: none;
+.preview-more > summary {
+  list-style: none;
+}
+
+.preview-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.preview-more > summary::marker {
+  content: none;
+}
+
+.preview-more > summary::after {
+  content: '▸';
+}
+
+.preview-more[open] > summary::after {
+  content: '▾';
+}
+
+/* unfolded, they take rows of their own under the first */
+.preview-more[open] {
+  flex: 1 0 100%;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.preview-more-body {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
 /* An open panel leaves the canvas room for 160 art pixels at least: on the shortest phones it
@@ -457,6 +483,28 @@
   max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
+}
+
+/* more of the row waits past its edge (segmented-reach.js): a strip of what is behind the row
+   stays at that edge, so the row reads as going on */
+:root[data-layout='compact'] .segmented[data-more='true']::after {
+  content: '';
+  position: sticky;
+  right: -2px;
+  flex: none;
+  align-self: stretch;
+  width: 22px;
+  margin-left: -22px;
+  background: linear-gradient(to right, transparent, var(--behind, var(--chrome)) 85%);
+  pointer-events: none;
+}
+
+:root[data-layout='compact'] :is(.sheet, .sheet-out) {
+  --behind: var(--sheet);
+}
+
+:root[data-layout='compact'] .stage {
+  --behind: var(--stage);
 }
 
 :root[data-layout='compact'] .segmented::-webkit-scrollbar {

@@ -29,16 +29,18 @@ function moveLayer(app, layer, shift) {
   }
 }
 
-const DRAWS = new Set([...PAINTING, 'picker']);
+// Pose and Pin act on the frame, whichever layer is picked: the tool stays as a drawing one does
+const STAYS = new Set([...PAINTING, 'picker', 'pose', 'pin']);
 
 // A layer picked in the list. With a tool that draws in hand it is the layer to draw on, and the
-// tool stays; with any other, a drag is about to move something, and it should be this layer
-// alone. A selection would keep the arrow keys on its pixels instead of on the layer just picked.
+// tool stays; with one that moves pixels, a drag is about to move something, and it should be
+// this layer alone. A selection would keep the arrow keys on its pixels instead of on the layer
+// just picked.
 export function pickLayer(app, key) {
   const { tool } = app.store.state;
 
   goTo(app, { layer: key });
-  app.store.set({ tool: DRAWS.has(tool) ? tool : 'movelayer', selection: null });
+  app.store.set({ tool: STAYS.has(tool) ? tool : 'movelayer', selection: null });
 }
 
 export function shiftCurrentLayer(app, shift) {

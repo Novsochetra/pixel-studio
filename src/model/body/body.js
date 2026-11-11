@@ -4,6 +4,7 @@ import { newId, newLayer } from '../project.js';
 import { recolourArt } from './piece-art.js';
 import { renderBody, restPose } from './rig.js';
 import { BODY_KIND, bodyOf } from './body-kind.js';
+import { paintOver } from '../layer-ops.js';
 
 const anyBody = (animation) => framesOf(animation).map(bodyOf).find(Boolean) ?? null;
 
@@ -26,11 +27,18 @@ function firstCut(entry, cut, { key, canvas }) {
   });
 
   for (const frame of posed) {
-    frame.layers.find((layer) => layer.key === cut.layerKey).sprite = cloneSprite(cut.leftover);
-    poseBody(
-      frame.layers.find((layer) => layer.key === key),
-      { rig: cut.rig, pose: restPose(), canvas },
-    );
+    const art = frame.layers.find((layer) => layer.key === cut.layerKey);
+    const body = frame.layers.find((layer) => layer.key === key);
+
+    art.sprite = cloneSprite(cut.leftover);
+
+    // A first cut gives every view a Body, and one not cut yet can be drawn on: what is there
+    // goes under the parts, onto the layer that was cut, where the pose would draw over it.
+    if (body.sprite && !body.pose) {
+      paintOver(art.sprite, body.sprite);
+    }
+
+    poseBody(body, { rig: cut.rig, pose: restPose(), canvas });
   }
 
   return posed.length;

@@ -3,8 +3,8 @@ import { newId } from '../model/project.js';
 
 export const GUIDE_RULES = {
   fixed: 'Just a line',
-  top: 'Top of the sprite',
-  bottom: 'Bottom of the sprite',
+  top: 'Top of the art',
+  bottom: 'Bottom of the art',
   'colour-top': 'Top of a colour',
 };
 

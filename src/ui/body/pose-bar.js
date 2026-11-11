@@ -1,4 +1,5 @@
 import { icon, node, replace } from '../dom.js';
+import { watchMore } from '../more-behind.js';
 import { partPose, pieceById } from '../../model/body/rig.js';
 import { tidyAngle } from '../../model/body/handle.js';
 import { viewName } from '../../model/kinds.js';
@@ -144,6 +145,7 @@ export function renderPoseBar(el, app) {
   const focused = el.contains(document.activeElement) ? document.activeElement.id : '';
 
   replace(el, barFor(app, state));
+  watchMore(el);
 
   // the part picker or angle being used keeps the keyboard when the bar is drawn again
   if (focused) {

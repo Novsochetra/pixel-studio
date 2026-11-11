@@ -1,4 +1,5 @@
 import { icon, node } from '../dom.js';
+import { askDelete } from '../ask-delete.js';
 import { changeStructure } from '../actions.js';
 
 function outfitRow(app, outfit, redraw) {
@@ -16,13 +17,21 @@ function outfitRow(app, outfit, redraw) {
     changed();
   };
 
+  // undo does not reach the outfits: the row asks before its outfit goes
+  const ask = (event) =>
+    askDelete(event.currentTarget.parentElement, {
+      question: `Remove ${outfit.name}?`,
+      word: 'Remove',
+      onDelete: remove,
+    });
+
   return node(
     'div.group',
     { style: { gap: '6px' } },
     node('input.input', { value: outfit.name, 'aria-label': 'Outfit name', onchange: rename }),
     node(
       'button.btn.quiet.icon-only',
-      { 'aria-label': `Remove ${outfit.name}`, onclick: remove },
+      { 'aria-label': `Remove ${outfit.name}`, onclick: ask },
       icon('close'),
     ),
   );

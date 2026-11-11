@@ -67,7 +67,7 @@ function partRow(job, { part, index, size }, change) {
 
   return node(
     `div.cut-part${picked ? '.picked' : ''}`,
-    { role: 'listitem' },
+    { role: 'listitem', 'data-part': part.id },
     node('button.cut-swatch', {
       style: { background: partColour(index) },
       'aria-pressed': String(picked),

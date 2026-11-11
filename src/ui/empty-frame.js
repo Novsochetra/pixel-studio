@@ -36,7 +36,7 @@ function fromPrevious(app, { direction, index }) {
 
 // The Pose tool's own bar says what an empty frame can do, and a selection's bar stands in the
 // same place: the card waits until the selection is let go. A phone's open panel leaves a canvas
-// so short that the card lay over a quarter of it.
+// so short that the card lay over a quarter of it, and its Pin bar stands where the card does.
 function staysAway(app) {
   const { state } = app.store;
 
@@ -45,7 +45,7 @@ function staysAway(app) {
     state.tool === 'pose' ||
     Boolean(state.selection) ||
     Boolean(app.playback) ||
-    (state.layout === 'compact' && Boolean(state.panel))
+    (state.layout === 'compact' && (Boolean(state.panel) || state.tool === 'pin'))
   );
 }
 

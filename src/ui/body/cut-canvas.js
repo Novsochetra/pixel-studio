@@ -61,7 +61,9 @@ function drawPivots(context, job, view) {
         0,
         Math.PI * 2,
       );
-      context.fillStyle = index === job.selected ? partColour(index) : cssVar('--chrome-raised');
+      // white under the black ring, whatever the theme: on dark chrome's own grey the dots
+      // were lost against dark art
+      context.fillStyle = index === job.selected ? partColour(index) : cssVar('--on-tint');
       context.fill();
       context.stroke();
     }

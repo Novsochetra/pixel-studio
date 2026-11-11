@@ -112,7 +112,11 @@ export function withCanvasSize(project, size, anchor) {
 
   next.canvas = canvas;
   next.markup = movedMarkup(next.markup, shift);
-  next.guides = (next.guides ?? []).map((guide) => ({ ...guide, row: guide.row + shift[1] }));
+  // a line the smaller canvas has no row for stands at its nearest edge, where it can be moved
+  next.guides = (next.guides ?? []).map((guide) => ({
+    ...guide,
+    row: Math.max(0, Math.min(canvas.height - 1, guide.row + shift[1])),
+  }));
 
   return next;
 }

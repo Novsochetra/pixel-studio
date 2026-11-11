@@ -30,8 +30,9 @@ function focusFirst(body, focusField) {
 }
 
 // focusField: a text field takes focus first, where there is a pointer; a sheet whose fields
-// are a list of names to change now and then leaves them be
-export function openSheet(title, onClose, { wide = false, focusField = true } = {}) {
+// are a list of names to change now and then leaves them be. mayClose: a window holding work that
+// closing would lose says no, and asks.
+export function openSheet(title, onClose, { wide = false, focusField = true, mayClose } = {}) {
   const restoreFocus = rememberFocus();
   const body = node(`div.sheet${wide ? '.wide' : ''}`, {
     role: 'dialog',
@@ -40,6 +41,10 @@ export function openSheet(title, onClose, { wide = false, focusField = true } = 
   });
   const backdrop = node('div.sheet-backdrop', {}, body);
   const close = () => {
+    if (mayClose && !mayClose()) {
+      return;
+    }
+
     body.classList.replace('sheet', 'sheet-out');
     leave(backdrop, 'sheet-backdrop-out');
     document.removeEventListener('keydown', onKey);

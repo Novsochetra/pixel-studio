@@ -146,17 +146,32 @@
   pointer-events: none;
 }
 
-/* A window too short for the band above the canvas: the bar is one row that scrolls, at the end
+/* More of the Pose or Pin bar waits past its edge where it is one row that scrolls
+   (more-behind.js marks it): a strip stays at that edge, so the row reads as going on. */
+:is(.pose-bar, .pin-bar)[data-more='true']::after {
+  content: '';
+  position: sticky;
+  right: -6px;
+  flex: none;
+  align-self: stretch;
+  width: 30px;
+  margin-left: -30px;
+  background: linear-gradient(to right, transparent, var(--chrome) 80%);
+  pointer-events: none;
+}
+
+/* A window too short for the band above the canvas: a bar is one row that scrolls. Wrapped to
+   three rows, the Pose bar lay over the part being posed. The selection's bar stands at the end
    of the canvas the selection is not in (selection-bar.js), so it does not lie over the pixels
    it acts on. */
 @media (max-height: 799px) {
-  :root:not([data-layout='compact']) .selection-bar {
+  :root:not([data-layout='compact']) :is(.selection-bar, .pose-bar, .pin-bar) {
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
   }
 
-  :root:not([data-layout='compact']) .selection-bar > * {
+  :root:not([data-layout='compact']) :is(.selection-bar, .pose-bar, .pin-bar) > * {
     flex: none;
   }
 

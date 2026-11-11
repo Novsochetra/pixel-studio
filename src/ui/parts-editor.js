@@ -1,4 +1,5 @@
 import { icon, node } from './dom.js';
+import { askDelete } from './ask-delete.js';
 import { changeStructure } from './actions.js';
 import { characterColors } from './character-colours.js';
 import { sharedColours } from '../palette/kits.js';
@@ -30,13 +31,21 @@ function nameAndRemove(app, part, save) {
     save();
   };
 
+  // undo does not reach the parts: the row asks before its part goes
+  const ask = (event) =>
+    askDelete(event.currentTarget.parentElement, {
+      question: `Remove ${part.name}?`,
+      word: 'Remove',
+      onDelete: remove,
+    });
+
   return node(
     'div.group',
     { style: { gap: '6px' } },
     node('input.input', { value: part.name, 'aria-label': 'Part name', onchange: rename }),
     node(
       'button.btn.quiet.icon-only',
-      { 'aria-label': `Remove ${part.name}`, title: 'Remove this part', onclick: remove },
+      { 'aria-label': `Remove ${part.name}`, title: 'Remove this part', onclick: ask },
       icon('close'),
     ),
   );

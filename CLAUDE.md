@@ -141,7 +141,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   canvas) is frosted `--material`; a bar in the frame is plain `--chrome`.
 - What says more is behind an edge (the phone's tool strip, the folders) is a strip that stays
   at that edge (`::after`, `position: sticky`), never a mask on the bar: a mask fades the bar
-  itself into the page.
+  itself into the page. A row that scrolls sideways (a bar over the canvas on a phone or in a
+  short window, a row of choices) is watched by `watchMore` (`src/ui/more-behind.js`), which
+  marks it while more waits and lets a mouse's wheel move along it.
 - What closes leaves through `leave()` (`src/ui/leave.js`) under an `-out` class
   (`.sheet-out`, `.menu-out`, `.toast-out`), so the page and the flows count it gone at once
   while it plays out: style both with `:is(.sheet, .sheet-out)`.
@@ -173,7 +175,8 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - What undo cannot bring back (a project, a folder, a saved version, a preset) asks before it
   goes, the same way everywhere: where the thing stood, a question with Delete and Keep
   (`askDelete` in `src/ui/ask-delete.js`; a project's card asks the same). What undo can bring
-  back does not ask.
+  back does not ask. A window holding work that is no step yet (the cut window's corrections)
+  asks the same way before it closes (`mayClose` in `openSheet`).
 - A whole project put in the open one's place (a canvas of another size, a version gone back to)
   is one step too (`restoreProject`, `History.recordProject`): the undo history is kept across
   it, and undo swaps the project back (`swapProject`).
@@ -184,6 +187,8 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   no view in its files (`downloadName`, `viewFileName`).
 - What is typed is checked where it is read: a number is kept to what can be (`wholeNumber`), and
   a message to a person never carries an exception's own words.
+- A control whose change draws its own panel again keeps the keys: a slider is made with
+  `slider()` (`src/ui/slider.js`), which hands the focus to the slider now in its place.
 
 ## Testing
 

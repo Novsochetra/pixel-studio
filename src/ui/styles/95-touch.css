@@ -63,6 +63,17 @@
     width: 40px;
   }
 
+  /* a finger wide, the actions take two rows in the desk's inspector: the lines between their
+     groups were left dangling at a row's end, so room parts the groups there */
+  .layer-bar {
+    column-gap: 10px;
+  }
+
+  .layer-tools {
+    padding-right: 0;
+    border-right: 0;
+  }
+
   .layer-row .btn {
     --btn-height: 36px;
     min-width: 36px;
@@ -163,16 +174,37 @@
   }
 
   .cut-part {
-    grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1.2fr) 44px repeat(3, 36px);
+    grid-template-columns: 36px minmax(0, 1fr) repeat(3, 36px);
+  }
+
+  /* one line a part where the window is wide enough for it; narrower, a part keeps the two
+     lines 87-body.css gives it */
+  @media (min-width: 861px) {
+    .cut-part {
+      grid-template-columns: 36px minmax(0, 1fr) minmax(0, 1.2fr) 44px repeat(3, 36px);
+    }
   }
 
   .cut-part .btn {
     min-width: 36px;
+    height: 36px;
   }
 
   .cut-swatch {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
+  }
+
+  /* a tablet held wide has the desk's layout and a finger's reach */
+  .btn.sheet-close {
+    --btn-height: 40px;
+
+    width: 40px;
+    font-size: 24px;
+  }
+
+  :is(.menu, .menu-out) button {
+    min-height: 40px;
   }
 
   .guide-row .btn {

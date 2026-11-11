@@ -1,6 +1,8 @@
 // The thumb of a segmented control slides to the option picked, as the arcade's does. The bars
 // are drawn again on every change, so the thumb of a control just drawn starts from where the
 // thumb of the one before it stood: remembered by the control's name.
+import { keepInReach } from './segmented-reach.js';
+
 const lastPlaces = new Map();
 const placed = new WeakMap();
 
@@ -37,6 +39,8 @@ export const slidesFrom = (from, to) =>
   Boolean(from) && from.across === to.across && from.y === to.y && from.x !== to.x;
 
 function placeThumb(control, slide) {
+  keepInReach(control);
+
   const place = placeOf(control);
   const from = control.dataset.thumb ? null : lastPlaces.get(nameOf(control));
 

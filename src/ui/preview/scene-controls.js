@@ -6,6 +6,7 @@ import { mirrorsOf } from '../../model/directions.js';
 import { gameOf } from '../../model/presets.js';
 import { inWords } from '../../model/told.js';
 import { slider } from '../slider.js';
+import { askDelete } from '../ask-delete.js';
 
 function checkbox(label, checked, onChange) {
   return node(
@@ -63,13 +64,25 @@ function backgroundButtons(app) {
     ),
     own
       ? node(
-          'button.btn.quiet',
-          { onclick: () => removeBackground(app) },
-          gameOf(project).background === 'pitch' ? 'Back to the pitch' : 'No background',
+          'span.ask-place',
+          {},
+          node(
+            'button.btn.quiet',
+            { onclick: (event) => askBackground(app, event.currentTarget.parentElement) },
+            gameOf(project).background === 'pitch' ? 'Back to the pitch' : 'No background',
+          ),
         )
       : null,
   ];
 }
+
+// the picture is taken off the project for good, and undo does not bring it back: it asks first
+const askBackground = (app, place) =>
+  askDelete(place, {
+    question: 'Remove your background?',
+    word: 'Remove',
+    onDelete: () => removeBackground(app),
+  });
 
 // how the scene shows the art: at the game's size, with the mirrored side, running, where the
 // ground is, and on which background
@@ -105,4 +118,26 @@ export function sceneControls(app, set) {
     groundSlider(app),
     backgroundButtons(app),
   ];
+}
+
+// On a phone the scene's own controls fold under one word, so the bar is short enough to stay at
+// the top with Play in it: five rows of them were half the screen, and went up out of sight when
+// the scene was scrolled to the art. kept: { more }, whether they are unfolded, across redraws.
+export function sceneOptions(app, set, kept) {
+  const controls = sceneControls(app, set);
+
+  if (app.store.state.layout !== 'compact') {
+    return controls;
+  }
+
+  const remember = (event) => {
+    kept.more = event.currentTarget.open;
+  };
+
+  return node(
+    'details.preview-more',
+    { open: kept.more, ontoggle: remember },
+    node('summary.btn.quiet', {}, 'Scene options'),
+    node('div.group.preview-more-body', {}, controls),
+  );
 }

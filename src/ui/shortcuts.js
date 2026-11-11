@@ -1,7 +1,7 @@
 import { node } from './dom.js';
 import { openSheet } from './sheet.js';
 import { keyNames } from './platform-keys.js';
-import { kindOf } from '../model/kinds.js';
+import { hasBody } from '../model/kinds.js';
 
 const GROUPS = [
   [
@@ -69,13 +69,11 @@ const GROUPS = [
   ],
 ];
 
-// pins and body parts are for what stands on its feet: their keys do nothing for a tile or an icon
-const STANDING_KEYS = new Set(['P', 'O']);
+// pins and body parts are a character's: their keys do nothing for a chest, a tile or an icon
+const BODY_KEYS = new Set(['P', 'O']);
 
 const rowsFor = (rows, project) =>
-  !project || kindOf(project).place === 'feet'
-    ? rows
-    : rows.filter(([keys]) => !STANDING_KEYS.has(keys));
+  !project || hasBody(project) ? rows : rows.filter(([keys]) => !BODY_KEYS.has(keys));
 
 export function openShortcuts(project = null) {
   const sheet = openSheet('Keyboard shortcuts', null, { wide: true });

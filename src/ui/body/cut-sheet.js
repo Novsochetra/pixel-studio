@@ -11,6 +11,9 @@ import { cutIntoParts, leftOver } from '../../model/body/cut.js';
 import { applyCut, bodyKey, rigOf } from '../../model/body/body.js';
 import { cutCanvas } from './cut-canvas.js';
 import { partsList } from './cut-list.js';
+import { brushControls } from './cut-brush.js';
+import { keepingFocus } from './cut-focus.js';
+import { corrected, mayLeave, rememberPlan } from './cut-leave.js';
 
 const isArt = (layer) => layer.kind === 'art' && hasArt({ layers: [layer] });
 
@@ -50,6 +53,16 @@ function newJob(app) {
 
 function cut(job) {
   const { app } = job;
+  const edited = job.recut && !corrected(job) ? 'unchanged' : job.recut;
+
+  job.done = true;
+
+  if (edited === 'unchanged') {
+    job.close();
+
+    return;
+  }
+
   const parts = job.plan.parts.map(({ id, name, parent, pivot }) => ({ id, name, parent, pivot }));
   const rig = cutIntoParts(job.source, job.plan.owners, parts);
   let frames = 0;
@@ -69,36 +82,7 @@ function cut(job) {
   app.store.set({ tool: 'pose', piece: null });
   job.close();
   toast(
-    `Cut into ${rig.pieces.length} parts${frames > 1 ? `, in ${frames} frames` : ''}. Drag a part to pose it; its handle turns it.`,
-  );
-}
-
-function brushControls(job, change) {
-  const choice = (label, pressed, onclick) =>
-    node('button', { 'aria-pressed': String(pressed), onclick: () => change(onclick) }, label);
-
-  const sizes = [1, 2, 4].map((size) =>
-    choice(`${size} px`, job.brush === size, () => (job.brush = size)),
-  );
-
-  return node(
-    'div.cut-brush',
-    {},
-    node(
-      'div.segmented',
-      { role: 'group', 'aria-label': 'Tool' },
-      choice('Brush', job.tool === 'brush', () => (job.tool = 'brush')),
-      choice('Lasso', job.tool === 'lasso', () => (job.tool = 'lasso')),
-    ),
-    node(
-      'div.segmented',
-      { role: 'group', 'aria-label': 'Give or take' },
-      choice('Paint', !job.erase, () => (job.erase = false)),
-      choice('Unpaint', job.erase, () => (job.erase = true)),
-    ),
-    job.tool === 'brush'
-      ? node('div.segmented', { role: 'group', 'aria-label': 'Brush size' }, sizes)
-      : null,
+    `${job.recut ? 'The cut now has' : 'Cut into'} ${rig.pieces.length} parts${frames > 1 ? `, in ${frames} frames` : ''}. Drag a part to pose it; its handle turns it.`,
   );
 }
 
@@ -120,9 +104,7 @@ function actions(job, change) {
   const painted = [...job.plan.owners].filter((owner) => owner >= 0 && job.plan.parts[owner]);
   const count = new Set(painted).size;
 
-  return node(
-    'div.sheet-actions',
-    {},
+  return [
     node('button.btn', { onclick: job.close }, 'Cancel'),
     node(
       'button.btn',
@@ -132,9 +114,9 @@ function actions(job, change) {
     node(
       'button.btn.primary',
       { onclick: () => cut(job), disabled: !count },
-      `Cut into ${count} ${count === 1 ? 'part' : 'parts'}`,
+      `${job.recut ? 'Save the cut:' : 'Cut into'} ${count} ${count === 1 ? 'part' : 'parts'}`,
     ),
-  );
+  ];
 }
 
 export function openCutSheet(app) {
@@ -148,13 +130,19 @@ export function openCutSheet(app) {
 
   const view = viewName(app.store.state.project, job.direction);
   const title = job.recut ? `Edit the cut of ${view}` : `Cut ${view} into parts`;
-  const sheet = openSheet(title, null, { wide: true, focusField: false });
+  // the window's own last child, so its buttons stay at the foot while the parts scroll
+  const foot = node('div.sheet-actions');
+  const mayClose = () => mayLeave(job, foot);
+  const sheet = openSheet(title, null, { wide: true, focusField: false, mayClose });
   const side = node('div.cut-side');
-  const foot = node('div');
-  const render = () => {
+  const note = node('p.hint');
+  const draw = () => {
     replace(side, brushControls(job, change), partsList(job, change));
-    replace(foot, node('p.hint', {}, hint(job)), actions(job, change));
+    note.textContent = hint(job);
+    foot.classList.remove('asking');
+    replace(foot, actions(job, change));
   };
+  const render = () => keepingFocus(sheet.body, draw);
   const art = cutCanvas(job, render);
   const change = (edit) => {
     edit();
@@ -163,6 +151,11 @@ export function openCutSheet(app) {
   };
 
   job.close = sheet.close;
-  sheet.body.append(node('div.cut-layout', {}, node('div.cut-art', {}, art.canvas), side), foot);
+  rememberPlan(job);
+  sheet.body.append(
+    node('div.cut-layout', {}, node('div.cut-art', {}, art.canvas), side),
+    note,
+    foot,
+  );
   render();
 }

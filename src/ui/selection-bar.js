@@ -1,4 +1,5 @@
 import { node, replace, toast } from './dom.js';
+import { markMore, watchMore } from './more-behind.js';
 import { commit, commitSelected, currentLayer } from './actions.js';
 import { liftPixels, selectionBox, transformSelected } from '../editor/selection.js';
 import { eraseSelection } from '../editor/floating.js';
@@ -100,11 +101,6 @@ const doneEnd = (app) =>
     ),
   );
 
-// where the bar is one row that scrolls, whether more of it waits behind Done
-function markMore(el) {
-  el.dataset.more = String(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
-}
-
 // Shown over the canvas while something is selected: turn, flip, copy, delete, let go.
 export function renderSelectionBar(el, app) {
   el.hidden = !app.store.state.selection;
@@ -146,6 +142,5 @@ export function renderSelectionBar(el, app) {
     doneEnd(app),
   );
   syncModes(el, app);
-  el.onscroll = () => markMore(el);
-  markMore(el);
+  watchMore(el);
 }

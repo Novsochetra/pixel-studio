@@ -1,5 +1,5 @@
 import { forHands } from './platform-keys.js';
-import { kindOf } from '../model/kinds.js';
+import { hasBody } from '../model/kinds.js';
 
 // label: what the tool does, with its keys; touch: the same said to fingers, which have no Shift
 // or Alt to hold and click nothing
@@ -88,9 +88,9 @@ const TOOLS = [
 // what picking the tool says, to keys and a pointer or to fingers
 export const toolSaid = (tool) => forHands(tool.label, tool.touch ?? tool.label);
 
-// pins and body parts are for what stands on its feet; tiles, effects and icons have none
-const STANDING_ONLY = new Set(['pin', 'pose']);
+// pins and body parts are a character's; objects, tiles, effects and icons have none
+const BODY_ONLY = new Set(['pin', 'pose']);
 
 export function toolsFor(project) {
-  return TOOLS.filter((tool) => !STANDING_ONLY.has(tool.id) || kindOf(project).place === 'feet');
+  return TOOLS.filter((tool) => !BODY_ONLY.has(tool.id) || hasBody(project));
 }

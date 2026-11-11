@@ -7,6 +7,8 @@ import { runClean } from './import/import-run.js';
 import { decodeImage } from '../io/images.js';
 import { referenceOf } from '../model/reference.js';
 import { viewName } from '../model/kinds.js';
+import { frameAt } from '../model/project.js';
+import { hasArt } from '../model/frames.js';
 import { inWords } from '../model/told.js';
 
 const NOT_AN_IMAGE = 'This file is not an image the browser can open. Try PNG, WebP or JPEG.';
@@ -42,12 +44,19 @@ function cleansAlone(state, direction, frame) {
 
 function accept(job, place) {
   const { app, direction, frame } = job;
+  const { state } = app.store;
+  const was = frameAt(state.project, { ...state.at, direction, frame });
+  const replaced = Boolean(was && hasArt(was));
 
   keepVersion(app, `Before cleaning into ${place}`);
   replaceDirectionArt(app, { direction, frame }, job.result, `Clean into ${place}`);
   app.store.set({ at: { ...app.store.state.at, direction, frame }, mode: 'edit', selection: null });
   job.close();
-  toast(`${place} updated. Undo brings the old one back.`);
+  toast(
+    replaced
+      ? `${place} updated. Undo brings the old one back.`
+      : `Cleaned into ${place}. Undo takes it out again.`,
+  );
 }
 
 function sheetBody(job, file, fields) {
@@ -82,6 +91,16 @@ function sheetBody(job, file, fields) {
 export async function openImport(app, direction, file, frame = app.store.state.at.frame) {
   const { state } = app.store;
   const place = placeName(state, direction, frame);
+  // read before the window opens: for a file that is no picture it opened anyway, on a broken
+  // picture and a Clean again that did nothing
+  const image = await decodeImage(file).catch(() => null);
+
+  if (!image) {
+    toast(NOT_AN_IMAGE);
+
+    return;
+  }
+
   const sheet = openSheet(`Clean into ${place}`, null, { wide: true });
   const alone = cleansAlone(state, direction, frame);
 
@@ -91,7 +110,7 @@ export async function openImport(app, direction, file, frame = app.store.state.a
     direction,
     frame,
     alone,
-    image: null,
+    image,
     result: null,
     close: sheet.close,
     slot: node('div', { style: { display: 'grid', gap: '12px' } }),
@@ -110,13 +129,5 @@ export async function openImport(app, direction, file, frame = app.store.state.a
 
   job.accept.addEventListener('click', () => accept(job, place));
   sheet.body.append(...sheetBody(job, file, fields));
-  job.image = await decodeImage(file).catch(() => null);
-
-  if (!job.image) {
-    job.slot.append(node('p.report', {}, NOT_AN_IMAGE));
-
-    return;
-  }
-
   runClean(job, fields.read());
 }

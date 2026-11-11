@@ -46,7 +46,7 @@ function actions(job, mapping, name) {
       { disabled: nothing, title: why, onclick: () => keepAsSwap(app, mapping, name) },
       'Keep as a colour swap',
     ),
-    node('button.btn', { onclick: download }, 'Download it'),
+    node('button.btn', { disabled: nothing, title: why, onclick: download }, 'Download it'),
     node(
       'button.btn.primary',
       { disabled: nothing, title: why, onclick: () => wear(job, mapping, name) },

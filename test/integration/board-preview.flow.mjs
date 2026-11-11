@@ -39,6 +39,20 @@ check(
   'any view can be laid over the others',
 );
 await page.screenshot({ path: `${shots}/board.png` });
+const twoArrows = async (selector) => {
+  const slider = page.locator(selector);
+  const from = Number(await slider.inputValue());
+
+  await slider.focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+
+  return (Number(await slider.inputValue()) - from) / Number(await slider.getAttribute('step'));
+};
+check(
+  Math.round(await twoArrows('#overlay-opacity')) === 2,
+  'the arrow keys go on moving the overlay’s slider after its first step',
+);
 await page.getByRole('button', { name: 'Draws a mark' }).click();
 const boardPixels = () => board.evaluate((canvas) => canvas.toDataURL().length);
 const before = await boardPixels();
@@ -119,6 +133,31 @@ await page.waitForTimeout(800);
 check(
   (await page.getByRole('button', { name: 'No background' }).count()) === 1,
   'and can have a background of its own',
+);
+
+// the picture was saved, and taken off the project again at every load of the page
+await page.waitForTimeout(1800);
+await page.reload();
+await page.waitForSelector('.preview-bar');
+await page.waitForTimeout(800);
+check(
+  (await page.getByRole('button', { name: 'No background' }).count()) === 1,
+  'which is still there when the page is loaded again',
+);
+// what undo cannot bring back asks first, as a folder or a version does
+await page.getByRole('button', { name: 'No background' }).click();
+check(
+  (await page.locator('.ask-question').textContent()) === 'Remove your background?',
+  'taking the background off asks first',
+);
+await page.getByRole('button', { name: 'Keep', exact: true }).click();
+check(
+  (await page.getByRole('button', { name: 'No background' }).count()) === 1,
+  'and Keep leaves it',
+);
+check(
+  Math.round(await twoArrows('input[aria-label="Ground line"]')) === 2,
+  'and the arrow keys go on moving the ground',
 );
 
 await newProject('Tiles', 'Floor');

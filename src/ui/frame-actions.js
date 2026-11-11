@@ -11,6 +11,7 @@ import {
 import { isFrameHidden, setFrameHidden } from '../model/frame-play.js';
 import { copyFrameToViews } from '../model/copy-frame.js';
 import { copyOfLayer } from '../model/structure.js';
+import { toast } from './dom.js';
 
 // What can be done to one frame, from its menu, its empty-frame card or the keyboard. Adding and
 // moving change every view; deleting can change one or all; the rest change this view only.
@@ -52,12 +53,15 @@ export const deleteViewFrame = (app, direction, index) =>
     removeViewFrame(animation, direction, index),
   );
 
-export const copyToOtherViews = (app, direction, index) =>
-  frameChange(app, 'Copy frame to every view', (animation) => {
+// the other views' own frames there are drawn over: it says so, and that undo has them
+export function copyToOtherViews(app, direction, index) {
+  frameChange(app, 'Copy frame to the other views', (animation) => {
     copyFrameToViews(app.store.state.project, animation, direction, index);
 
     return index;
   });
+  toast(`Frame ${index + 1} copied to the other views. Undo brings back what they had.`);
+}
 
 export const toggleFrameHidden = (app, index) =>
   frameChange(app, 'Hide frame from play', (animation) =>

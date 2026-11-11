@@ -52,9 +52,9 @@ export async function saveGamePack(state, settings) {
     files.push({ name: text.path, data: encoder.encode(text.text) });
   }
 
-  await saveFile('naga-eleven-sprites.zip', zipFiles(files));
+  await saveFile(`${named(state)}-naga-eleven-sprites.zip`, zipFiles(files));
 
-  return pack.warnings;
+  return warningsOf(pack.results, state.project);
 }
 
 // each animation as a sheet with its Aseprite-style JSON beside it
