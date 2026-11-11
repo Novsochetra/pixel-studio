@@ -76,6 +76,13 @@
   box-shadow: none;
 }
 
+/* what the number beside it is, in a bar of the selection */
+.selection-bar > .bar-word {
+  align-self: center;
+  padding-inline: 8px 2px;
+  color: var(--label-secondary);
+}
+
 /* A window tall enough keeps a band above the canvas for the bar of a selection or a pose, so the
    bar never lies over the art's first rows; a short one gives that room to the art. */
 @media (min-height: 800px) {

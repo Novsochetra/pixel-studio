@@ -40,6 +40,11 @@ await drag([10, 10], [14, 13]);
 await drag([12, 10], [18, 10]);
 const angle = await page.locator('#selection-angle').inputValue();
 
+check(
+  (await page.locator('.selection-bar').textContent()).startsWith('Turn'),
+  'the selection’s angle says what it is, where no pointer hovers it to ask',
+);
+
 await keys('Escape');
 check(
   angle === '0' && (await painted()) === 20,
@@ -180,5 +185,26 @@ await page.waitForTimeout(500);
 check(
   (await page.locator('#statusbar').textContent()).includes('frame 3 of 3'),
   'undo of a version gone back to returns to the frame that was being edited',
+);
+
+// two versions saved in one minute had the same name
+await page
+  .getByRole('button', { name: 'More', exact: true })
+  .click()
+  .catch(() => {});
+
+if (await history.count()) {
+  await history.click();
+} else {
+  await page.getByRole('button', { name: 'History' }).click();
+}
+
+await page.getByRole('button', { name: 'Save a version' }).click();
+await page.waitForTimeout(500);
+const versions = await page.locator('.version-row .view-name').allTextContents();
+
+check(
+  versions.length > 1 && new Set(versions).size === versions.length,
+  `versions saved in the same minute are told apart by name (${versions.length})`,
 );
 await finish();

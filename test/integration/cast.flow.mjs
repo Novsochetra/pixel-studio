@@ -161,6 +161,15 @@ const had = await rows();
 
 await page.locator('.project-row[aria-current="true"] .row-more').click();
 await page.getByRole('menuitem', { name: 'Delete…' }).click();
+await page.keyboard.press('Escape');
+await page.waitForTimeout(150);
+check(
+  (await page.locator('.sheet').count()) === 1 &&
+    (await page.evaluate(() => Boolean(document.activeElement?.matches('.row-more')))),
+  'Escape at a row’s question keeps Projects open, the keys on that row’s menu',
+);
+await page.locator('.project-row[aria-current="true"] .row-more').click();
+await page.getByRole('menuitem', { name: 'Delete…' }).click();
 await page.locator('.project-row .btn.danger').click();
 await page.waitForTimeout(1200);
 const nowOpen = (await page.locator('.wordmark small').textContent()).trim();

@@ -168,6 +168,8 @@ export function renderSelectionBar(el, app) {
 
   replace(
     el,
+    // a number alone, with no pointer to hover it for what it is, said nothing on a phone
+    node('span.bar-word', {}, 'Turn'),
     angleField({
       id: 'selection-angle',
       name: 'Selection angle',

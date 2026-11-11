@@ -108,6 +108,18 @@ function row(app, entry, { redraw, close }) {
 
 const NONE_YET = 'No versions yet. One is kept before every cleaning, kit or restore.';
 
+// two versions saved in one minute had the same name, and could not be told apart
+function freeName(name, taken) {
+  let number = 1;
+  const numbered = () => (number > 1 ? `${name} (${number})` : name);
+
+  while (taken.includes(numbered())) {
+    number += 1;
+  }
+
+  return numbered();
+}
+
 const nameField = (onEnter) =>
   node('input.input', {
     placeholder: 'Name this version',
@@ -131,8 +143,8 @@ export function openVersionsSheet(app) {
     replace(list, versions.length ? rows : node('p.list-note.version-none', {}, NONE_YET));
   };
   const save = async () => {
-    const named = name.value.trim() || `Version of ${when(Date.now())}`;
-
+    const taken = (await listVersions(app.backend, app.keys)).map((entry) => entry.name);
+    const named = name.value.trim() || freeName(`Version of ${when(Date.now())}`, taken);
     const kept = await keepVersion(app, named);
 
     name.value = '';

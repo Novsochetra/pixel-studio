@@ -55,6 +55,8 @@ function askDelete(job, project, row) {
     if (event.key === 'Escape') {
       event.stopPropagation();
       job.redraw();
+      // the keys go back to the row's own menu: drawn again, the row had left them on nothing
+      document.querySelector(`.project-row[data-project="${project.id}"] .row-more`)?.focus();
     }
   };
   row.querySelector('.btn:not(.danger)').focus();
