@@ -195,6 +195,11 @@
   outline-offset: -2px;
 }
 
+/* the row wears the ring: the field's own, inside it, made two */
+.list-row > .input:focus-visible {
+  box-shadow: none;
+}
+
 /* the colour a choice of colours stands at, beside its code: a code alone names no colour */
 .list-swatch {
   flex: none;

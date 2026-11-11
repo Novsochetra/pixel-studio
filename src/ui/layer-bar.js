@@ -139,7 +139,7 @@ export function layerBar(app, active) {
   const group = layersToMove(app.store.state);
 
   return node(
-    'div.layer-bar',
+    `div.layer-bar${words.rename ? '.worded' : ''}`,
     { role: 'toolbar', 'aria-label': 'Layer actions' },
     node(
       'div.layer-tools',

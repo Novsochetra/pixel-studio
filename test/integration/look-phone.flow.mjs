@@ -213,4 +213,22 @@ await page.locator('#rail [aria-label^="Select and move"]').evaluate((button) =>
 const said = await page.locator('.toast').boundingBox();
 check(said.width > 200 && said.height < 80, 'a message spreads across the screen');
 
+// Named in words, a layer's actions were a ragged pile of buttons: one alone on a line, two
+// pushed to the far side. They stand in two columns, each button as wide as the next.
+await openDock(page, 'Layers');
+const actions = await page.locator('.layer-bar .btn').evaluateAll((buttons) =>
+  buttons.map((button) => {
+    const box = button.getBoundingClientRect();
+
+    return [Math.round(box.left), Math.round(box.width)];
+  }),
+);
+
+check(
+  actions.length >= 6 &&
+    new Set(actions.map(([left]) => left)).size === 2 &&
+    new Set(actions.map(([, width]) => width)).size === 1,
+  'a layer’s actions are two columns of buttons of one width',
+);
+
 await finish();

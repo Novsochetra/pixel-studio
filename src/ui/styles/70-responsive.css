@@ -174,6 +174,26 @@
   box-shadow: var(--shadow-glass);
 }
 
+/* Named in words, under fingers, the actions are two columns of buttons of one width: wrapped
+   as they came they were a ragged pile, one alone on a line and two pushed to the far side. */
+.layer-bar.worded {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.layer-bar.worded .layer-tools {
+  display: contents;
+}
+
+.layer-bar.worded .btn {
+  justify-content: flex-start;
+  min-width: 0;
+  padding-inline: 12px;
+  background: var(--glass);
+  box-shadow: var(--shadow-glass);
+}
+
 :root[data-layout='compact'] .section {
   padding-inline: max(16px, env(safe-area-inset-left, 0px))
     max(16px, env(safe-area-inset-right, 0px));

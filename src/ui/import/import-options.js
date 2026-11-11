@@ -1,5 +1,6 @@
 import { node } from '../dom.js';
 import { told } from '../../model/told.js';
+import { fieldRow, listGroup } from '../list-group.js';
 
 function sizeChoice(keepScale) {
   return node(
@@ -74,12 +75,13 @@ export function optionFields({ matching, keepScale, onChange, onEnter }) {
     };
   };
 
-  const el = node(
-    'div.compare',
-    {},
-    size ? node('label.field', {}, node('span', {}, 'Size'), size) : null,
-    node('label.field', {}, node('span', {}, 'Height (art pixels)'), height),
-    node('label.field', {}, node('span', {}, 'Grid size, if the guess looks wrong'), cell),
+  const el = listGroup(
+    { note: 'Left as Auto, the cleaner finds both. Change one if the result looks wrong.' },
+    size ? fieldRow('Size', size) : null,
+    fieldRow('Height, in art pixels', height),
+    fieldRow('Grid size', cell, {
+      title: 'One art pixel in the picture’s own pixels, if the guess looks wrong',
+    }),
   );
 
   el.addEventListener('input', onChange);

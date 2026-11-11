@@ -5,11 +5,12 @@ import { nameSuggestions, posesToStartFrom, startAnimation } from '../../model/a
 import { kindOf } from '../../model/kinds.js';
 import { wholeNumber } from '../../model/numbers.js';
 import { numberInput } from '../number-input.js';
+import { fieldRow, listGroup } from '../list-group.js';
 
 function numberField(options) {
   const input = numberInput(options);
 
-  return { input, el: node('label.field', {}, node('span', {}, options.label), input) };
+  return { input, el: fieldRow(options.label, input) };
 }
 
 function startChoice(project, open) {
@@ -22,10 +23,7 @@ function startChoice(project, open) {
     ),
   );
 
-  return {
-    select,
-    el: node('label.field', { for: 'new-animation-start' }, node('span', {}, 'Start from'), select),
-  };
+  return { select, el: fieldRow('Start from', select) };
 }
 
 function nameField(project, item) {
@@ -41,7 +39,7 @@ function nameField(project, item) {
     input.value = name;
   };
   const chips = node(
-    'div.start-sizes',
+    'div.list-row.start-sizes',
     { role: 'group', 'aria-label': 'Names' },
     names.map((name) =>
       node('button.btn.chip', { type: 'button', onclick: () => pick(name) }, name),
@@ -51,7 +49,7 @@ function nameField(project, item) {
   return {
     input,
     fallback,
-    el: node('div', {}, node('label.field', {}, node('span', {}, 'Name'), input), chips),
+    el: listGroup({}, fieldRow('Name', input), names.length ? chips : null),
   };
 }
 
@@ -102,10 +100,9 @@ export function openNewAnimationSheet(app) {
     }
   });
 
+  // grouped rows, as the start screen's are: these were its only fields under loose labels
   sheet.body.append(
-    name.el,
-    node('div.start-row', {}, frames.el, fps.el),
-    start.el,
+    node('div.start-fields', {}, name.el, listGroup({}, frames.el, fps.el, start.el)),
     node(
       'div.sheet-actions',
       {},

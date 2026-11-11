@@ -3,6 +3,7 @@ import { openSheet } from './sheet.js';
 import { keepVersion } from './versions-sheet.js';
 import { restoreProject } from './session.js';
 import { numberInput } from './number-input.js';
+import { fieldRow, listGroup } from './list-group.js';
 import { CANVAS_LIMITS, canvasShift, withCanvasSize } from '../model/canvas-size.js';
 import { isWholeBetween, wholeNumber } from '../model/numbers.js';
 import { kindOf } from '../model/kinds.js';
@@ -55,7 +56,7 @@ export async function resizeCanvas(app, { size, anchor }) {
 function sizeField(label, id, value) {
   const input = numberInput({ id, label, ...CANVAS_LIMITS, value });
 
-  return { input, field: node('label.field', {}, node('span', {}, label), input) };
+  return { input, field: fieldRow(label.split(' (')[0], input) };
 }
 
 function anchorGrid(job, draw) {
@@ -144,13 +145,15 @@ export function openCanvasSizeSheet(app) {
 
   draw();
   sheet.body.append(
-    node(
-      'p.hint',
-      {},
-      `Now ${canvas.width}×${canvas.height}. Art outside a smaller canvas is cut off; undo puts it back.`,
+    listGroup(
+      {
+        title: 'Canvas, in art pixels',
+        note: `Now ${canvas.width}×${canvas.height}. Art outside a smaller canvas is cut off; undo puts it back.`,
+      },
+      fields.width.field,
+      fields.height.field,
+      node('div.list-row', {}, node('span.list-label.grows', {}, 'Keep the art at'), anchors),
     ),
-    node('div.compare.canvas-size-fields', {}, fields.width.field, fields.height.field),
-    node('div.field', {}, node('span', {}, 'Keep the art at'), anchors),
     node('div.sheet-actions', {}, node('button.btn', { onclick: sheet.close }, 'Cancel'), change),
   );
 }
