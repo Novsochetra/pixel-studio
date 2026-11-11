@@ -474,8 +474,17 @@
   right: 0;
   margin-left: auto;
   padding-left: 4px;
+}
+
+/* Its own ground, and what hides the bar's edge beside it, are for a bar that scrolls: on one
+   with room for everything they only cut the bar's round end off square. */
+:root[data-layout='compact']
+  .selection-bar:is([data-more='true'], [data-before='true'])
+  .selection-end {
   background: var(--material-ground);
-  /* hides what scrolls past in the bar's own edge */
+}
+
+:root[data-layout='compact'] .selection-bar[data-more='true'] .selection-end {
   box-shadow: 6px 0 0 var(--material-ground);
 }
 
