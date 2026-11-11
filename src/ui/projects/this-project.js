@@ -85,8 +85,18 @@ function renameField({ app, redraw }) {
     value: project.name,
     id: 'current-project-name',
     'aria-label': 'Project name',
-    // the keyboard's return key says the name is done, as it does for a layer's
-    onkeydown: (event) => event.key === 'Enter' && event.target.blur(),
+    // The keyboard's return key says the name is done, as it does for a layer's. Escape puts
+    // the name back and stays in the window: it kept what was typed, and closed Projects.
+    onkeydown: (event) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        event.target.value = project.name;
+      }
+
+      if (event.key === 'Enter' || event.key === 'Escape') {
+        event.target.blur();
+      }
+    },
     onchange: (event) => {
       const name = event.target.value.trim() || project.name;
 

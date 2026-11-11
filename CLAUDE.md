@@ -203,7 +203,8 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   `commitSelected`, so undo puts the selection back too. A change that changes nothing records no
   step (`History.recordStructure` says whether it did).
 - A step that moves the editor to another frame, layer or animation remembers both places
-  (`restructure` does it): undo goes back to where it was made from, redo to where it led. A
+  (`restructure` does it), and the layers picked together there (`placeOf`): undo goes back
+  to where it was made from, redo to where it led. A
   change to the project's own settings (guides, palettes) is a step too
   (`recordSetting`).
 - What undo cannot bring back (a project, a folder, a saved version, a preset) asks before it

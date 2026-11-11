@@ -87,6 +87,16 @@ await page.getByRole('button', { name: 'New character like this' }).click();
 await page.waitForTimeout(800);
 await page.fill('#current-project-name', 'Rival');
 await page.press('#current-project-name', 'Enter');
+// Escape in the name kept what was typed, and closed the whole window
+await page.locator('#current-project-name').click();
+await page.keyboard.type('zzz');
+await page.keyboard.press('Escape');
+await page.waitForTimeout(200);
+check(
+  (await page.locator('.sheet').count()) === 1 &&
+    (await page.locator('#current-project-name').inputValue()) === 'Rival',
+  'Escape in the project’s name puts the name back, and Projects stays open',
+);
 await projectsPage(page, 'All projects');
 await page.waitForTimeout(200);
 check(

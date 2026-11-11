@@ -143,9 +143,11 @@ check(
 await page.screenshot({ path: `${shots}/phone-turn-bar.png` });
 await page.locator('.dock-more').tap();
 await page.waitForTimeout(600);
+const pill = await box('.layer-turn-bar');
+
 check(
-  await page.locator('.layer-turn-bar').isHidden(),
-  'and it steps aside while a sheet is up, as the handle on the art turns them too',
+  pill.top >= (await box('.canvas-holder canvas')).bottom - 2,
+  'with a sheet up it stands under the canvas, where an angle can still be typed',
 );
 
 // A message showed at the canvas's top: with a sheet up that was over the little of the art
@@ -172,7 +174,7 @@ await page.screenshot({ path: `${shots}/phone-sheet-toast.png` });
 
 // A selection's bar lay over the canvas's first or last rows, a fifth of the art a sheet had
 // left in sight. The room under the canvas is kept for it.
-await page.setViewportSize({ width: 390, height: 664 });
+await page.setViewportSize({ width: 375, height: 568 });
 await page.waitForTimeout(500);
 await page.keyboard.press('s');
 const drawn = await box('.canvas-holder canvas');

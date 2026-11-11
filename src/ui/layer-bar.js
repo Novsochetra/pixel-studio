@@ -74,8 +74,11 @@ const mergeDownFrom = (app, active) =>
 // the layer in hand goes down onto the one below; several picked together become one
 function mergeTool(app, { active, group }, words) {
   if (group.length > 1) {
+    const can = mergeableLayers(group).length > 0;
+
     return tool('merge-down', `Merge ${namedGroup(group)} into one`, () => mergeGroup(app, group), {
-      disabled: !mergeableLayers(group).length,
+      disabled: !can,
+      title: can ? undefined : 'Only layers of art that are shown merge: show them all first',
       said: words.merge && 'Merge',
     });
   }

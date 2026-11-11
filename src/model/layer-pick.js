@@ -36,6 +36,10 @@ export function togglePick(group, active, key) {
   return { layer: key === active ? rest.at(-1) : active, picked: asGroup(rest) };
 }
 
+// Where the editor is, and the layers picked together there: what undo and redo go back to. A
+// step that changed the layer in hand left one layer picked where there had been three.
+export const placeOf = (state) => ({ ...state.at, picked: state.pickedLayers });
+
 // Moving off the group ends it, so coming back to one of its layers later picks only that layer.
 export function keptPick(picked = [], key) {
   return picked.includes(key) ? picked : [];

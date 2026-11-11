@@ -28,7 +28,36 @@ check(
   !/[▸▾×]/.test(await page.locator('#inspector').textContent()),
   'no arrow or cross is a letter of the font: they are drawn as the other pictures are',
 );
+check(
+  await page.locator('#inspector').evaluate((bar) => bar.scrollWidth <= bar.clientWidth),
+  'every row fits the inspector: a guide’s rows ran past its edge, their × out of sight',
+);
+check(
+  (await section('guides').locator('h2').getAttribute('aria-expanded')) === 'true',
+  'a section’s title says it folds, and that it is open',
+);
 await page.locator('#inspector').screenshot({ path: `${shots}/inspector.png` });
+
+// Chrome said the change again as the field went at a Tab: a guide moved was two steps to undo
+const row = section('guides').locator('.guide-at').first();
+const was = await row.inputValue();
+
+await row.click();
+await row.fill('40');
+await page.keyboard.press('Tab');
+await page.waitForTimeout(200);
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(200);
+check(
+  (await section('guides').locator('.guide-at').first().inputValue()) === was,
+  'a guide’s row typed and left with Tab is one step to undo',
+);
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(200);
+check(
+  !(await page.locator('.toast').textContent()).includes('Change'),
+  'with no second step behind it',
+);
 
 // shut at once, a section's rows vanished and the ones under it jumped up
 const open = await heightOf('outline');
@@ -66,6 +95,19 @@ check(
   (await page.locator('#statusbar').textContent()).startsWith('Side'),
   'and is the view being edited',
 );
+check(
+  await page.getByRole('button', { name: 'Add a view' }).isVisible(),
+  'with one view in sight a view can still be added',
+);
+await page.locator('.cell-add').click();
+await page.getByRole('button', { name: 'Play' }).click();
+await page.waitForTimeout(300);
+await showViews(page, 'Side only');
+check(
+  (await page.getByRole('button', { name: 'Pause' }).count()) === 1,
+  'picking the view already in sight leaves what is playing alone',
+);
+await page.getByRole('button', { name: 'Pause' }).click();
 await showViews(page, 'All views');
 check((await rows()) === every, 'All views brings the rows back');
 

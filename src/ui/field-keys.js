@@ -21,11 +21,25 @@ function rememberFields(root) {
 // drawn again, and the control Tab was going to went with the old one, leaving the keys on
 // nothing. The change is said at the key instead, so Tab goes on from the field now in its place.
 function changeBeforeTab(root, said) {
+  const toldAtTab = new WeakMap();
+
   root.addEventListener(
     'keydown',
     ({ key, target }) => {
       if (key === 'Tab' && said.has(target) && said.get(target) !== target.value) {
+        toldAtTab.set(target, target.value);
         target.dispatchEvent(new window.Event('change', { bubbles: true }));
+      }
+    },
+    true,
+  );
+  // Chrome says the change again, of its own, as the field goes: a guide renamed at a Tab was
+  // two steps to undo. What was said at the key is not said twice.
+  root.addEventListener(
+    'change',
+    (event) => {
+      if (event.isTrusted && toldAtTab.get(event.target) === event.target.value) {
+        event.stopImmediatePropagation();
       }
     },
     true,

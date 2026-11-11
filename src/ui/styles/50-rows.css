@@ -282,6 +282,8 @@
 /* each group of layer actions sits together; the ones that take away keep to the far end */
 .layer-tools {
   display: flex;
+  /* worded, on a tablet, three of them are wider than the inspector */
+  flex-wrap: wrap;
   align-items: center;
   gap: 2px;
   padding-right: 4px;

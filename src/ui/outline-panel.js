@@ -93,7 +93,8 @@ function operationRow(app, operation, colour) {
   };
 
   return actionRow(operation.short, run, {
-    value: String(count),
+    // with every frame and view on far more than this layer's pixels change: no count is said
+    value: state.outline.everywhere ? null : String(count),
     leads: false,
     'aria-label': `${operation.label} (${count} ${state.outline.everywhere ? 'in this layer' : 'here'})`,
     title: `${operation.hint}. Point at it to see them on the canvas.`,

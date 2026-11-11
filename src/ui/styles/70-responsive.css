@@ -431,11 +431,6 @@
   translate: -50%;
 }
 
-/* a panel's sheet leaves the canvas little room, and the handle on the art turns them too */
-:root[data-layout='compact'] .app[data-panel]:not([data-panel='']) .layer-turn-bar {
-  display: none;
-}
-
 /* the selection's bar stands at the end of the canvas the selection is not in (selection-bar.js) */
 :root[data-layout='compact'] .selection-bar[data-side='top'] {
   --rise-from: 0 -10px;

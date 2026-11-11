@@ -115,8 +115,8 @@ function numbersRow(state, { all, playFrame }) {
 export function gridBody(app, { all, playFrame }) {
   const { state } = app.store;
   const rows = all ? drawnDirections(currentAnimation(state)) : [state.at.direction];
+  // with one view in sight too: there was no way to add one without All views first
   const canAdd =
-    all &&
     !isSingleView(state.project) &&
     missingDirections(state.project, currentAnimation(state)).length > 0;
   const gridName = all

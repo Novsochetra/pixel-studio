@@ -15,9 +15,14 @@ function afterStructure(app, step, back) {
   app.saver.markStructure();
   // back to the frame, layer and animation the step was made from, or on to where it led:
   // the art came back, but the editor stayed on whatever was next to it
-  const place = step.place?.[back ? 'before' : 'after'] ?? app.store.state.at;
+  const { picked, ...place } = step.place?.[back ? 'before' : 'after'] ?? app.store.state.at;
 
   goToSettled(app, settleAt({ ...app.store.state, at: place }));
+
+  if (picked) {
+    app.store.set({ pickedLayers: picked });
+  }
+
   app.store.touch('animations');
 }
 

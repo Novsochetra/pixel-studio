@@ -18,9 +18,11 @@
   min-width: 0;
 }
 
-/* as tall whichever page is in sight, so the window does not change size at each turn */
+/* As tall whichever page is in sight, a longer page scrolling in it: the window changed size
+   at each turn, and the row that turns the pages moved from under the pointer. */
 :root:not([data-layout='compact']) .projects-page {
-  min-height: min(62vh, 580px);
+  height: min(62vh, 580px);
+  overflow-y: auto;
 }
 
 /* a new project is a page of its own: its fold has nothing to fold away */

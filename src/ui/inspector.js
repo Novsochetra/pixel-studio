@@ -57,6 +57,7 @@ function folding(folded) {
 
     playFold(section, () => {
       section.dataset.collapsed = String(collapsed);
+      title.setAttribute('aria-expanded', String(!collapsed));
     });
     collapsed ? folded.add(section.dataset.name) : folded.delete(section.dataset.name);
     keepSetting(FOLDED, [...folded]);
@@ -102,12 +103,23 @@ export function mountInspector(app) {
   bindCollapsing(inspector, sections);
   pullsShut(inspector, app);
 
-  return {
-    tools: () => renderToolsPanel(sections.tools, app),
-    colours: () => renderColourPanel(sections.colours, app),
-    drawing: () => renderDrawingPanel(sections.drawing, app),
-    layers: () => renderLayersPanel(sections.layers, app),
-    outline: () => renderOutlinePanel(sections.outline, app),
-    guides: () => renderGuidesPanel(sections.guides, app),
+  const panels = {
+    tools: renderToolsPanel,
+    colours: renderColourPanel,
+    drawing: renderDrawingPanel,
+    layers: renderLayersPanel,
+    outline: renderOutlinePanel,
+    guides: renderGuidesPanel,
   };
+  // each panel draws its own title: here it is told that it folds, and whether it is open
+  const drawn = (name) => () => {
+    panels[name](sections[name], app);
+
+    const title = sections[name].querySelector(':scope > h2');
+
+    title?.setAttribute('role', 'button');
+    title?.setAttribute('aria-expanded', String(sections[name].dataset.collapsed !== 'true'));
+  };
+
+  return Object.fromEntries(Object.keys(panels).map((name) => [name, drawn(name)]));
 }

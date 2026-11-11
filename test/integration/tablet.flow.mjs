@@ -129,4 +129,8 @@ check(
   `an empty frame’s card is one row at the stage’s top (${Math.round(card.height)} tall)`,
 );
 await page.screenshot({ path: `${shots}/tablet-empty-frame.png` });
+check(
+  await page.locator('#inspector').evaluate((bar) => bar.scrollWidth <= bar.clientWidth),
+  'the inspector’s rows fit it: worded, the layers’ actions ran past its edge',
+);
 await finish();

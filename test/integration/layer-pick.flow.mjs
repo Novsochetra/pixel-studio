@@ -225,6 +225,7 @@ await page.waitForTimeout(150);
 check((await rows()) === had + 2, 'Duplicate copies every layer picked together');
 await undo();
 check((await rows()) === had, 'in one undo step');
+check((await picked()) === 'Hat,Art', 'which picks again the layers that were picked');
 
 await pickTwo();
 // the Pencil draws no handle over the art

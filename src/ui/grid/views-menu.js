@@ -12,9 +12,13 @@ const onlyName = (state, direction) => `${viewName(state.project, direction)} on
 function entries(app) {
   const { state } = app.store;
   const all = showsEveryView(state);
+  // the view already being edited is not gone to again: going to it stopped what was playing
   const only = (direction) => {
     setGridAll(app, false);
-    selectDirection(app, direction);
+
+    if (direction !== state.at.direction) {
+      selectDirection(app, direction);
+    }
   };
 
   return [

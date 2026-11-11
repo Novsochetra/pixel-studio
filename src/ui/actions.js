@@ -7,7 +7,7 @@ import { refusesPaint } from './body/body-lock.js';
 import { keptSelection } from '../editor/selection-kept.js';
 import { bodyOf, isBody } from '../model/body/body-kind.js';
 import { clearPosedBody } from '../model/body/body.js';
-import { keptPick } from '../model/layer-pick.js';
+import { keptPick, placeOf } from '../model/layer-pick.js';
 
 export function currentAnimation(state) {
   return (
@@ -141,7 +141,7 @@ export function settleAt(state) {
 export function restructure(app, label, mutate) {
   const { state } = app.store;
   const before = snapshotAnimations(state.project.animations);
-  const from = { ...state.at };
+  const from = placeOf(state);
   const at = mutate(state) ?? state.at;
   const changed = app.history.recordStructure(label, before, state.project);
 
@@ -151,7 +151,7 @@ export function restructure(app, label, mutate) {
   goToSettled(app, settleAt({ ...state, at: { ...state.at, ...at } }));
 
   if (changed) {
-    app.history.keepPlace(from, { ...app.store.state.at });
+    app.history.keepPlace(from, placeOf(app.store.state));
   }
 
   app.store.touch('animations');

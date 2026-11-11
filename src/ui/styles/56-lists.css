@@ -16,6 +16,8 @@
 }
 
 .list-rows {
+  /* in a narrow column the rows are cut to it, not the column pushed wide by a field in them */
+  min-width: 0;
   border-radius: var(--radius-lg);
   background: var(--fill-quiet);
 }
@@ -121,6 +123,7 @@
   color: inherit;
   font: inherit;
   text-align: right;
+  text-overflow: ellipsis;
 }
 
 .list-note {
