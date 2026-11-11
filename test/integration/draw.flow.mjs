@@ -129,7 +129,18 @@ check(
   'a size field left empty keeps the size the canvas has',
 );
 
+// the lock took the other colours out of the panel above it: its own switch moved up from under
+// the pointer, and the next press there landed on another switch
+const lockAt = () =>
+  page.locator('#palette-lock').evaluate((lock) => Math.round(lock.getBoundingClientRect().top));
+const unlocked = await lockAt();
+
 await page.locator('#palette-lock').check();
+check(
+  (await lockAt()) === unlocked &&
+    (await page.locator('.other-colours').evaluate((others) => others.inert)),
+  'Palette lock stays where it was pressed, the other colours out of reach where they stood',
+);
 await page.getByRole('button', { name: /canvas$/ }).click();
 await page.fill('#canvas-width', '48');
 await page.fill('#canvas-height', '40');

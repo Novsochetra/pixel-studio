@@ -5,6 +5,21 @@
 }
 
 /* the way to the basic colours reads as a caption until it is pointed at */
+/* the colours the art does not have yet: its palettes and the basic ones, laid out as the panel
+   lays out its own parts; out of reach while the palette is locked */
+.other-colours {
+  display: grid;
+  gap: 10px;
+}
+
+.other-colours:empty {
+  display: none;
+}
+
+.other-colours.locked {
+  opacity: 0.35;
+}
+
 .swatches-toggle {
   --btn-height: 0px;
 

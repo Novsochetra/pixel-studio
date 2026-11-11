@@ -35,6 +35,12 @@
     min-height: 36px;
   }
 
+  /* the bar is a finger high where a finger uses it, so the canvas size in it can be pressed:
+     taller than the bar, the link's own reach was cut off at the bar's edge */
+  .statusbar {
+    padding-block: 10px;
+  }
+
   .status-link {
     position: relative;
   }
@@ -42,7 +48,12 @@
   .status-link::after {
     content: '';
     position: absolute;
-    inset: -12px -6px;
+    inset: -10px -6px;
+  }
+
+  /* a switch's row is pressed by its words too */
+  .toggle-row {
+    min-height: 40px;
   }
 
   /* the layer's actions are named in words on a phone (layer-bar.js), and a finger wide */
@@ -60,7 +71,7 @@
   .slider {
     --knob: 26px;
 
-    height: 32px;
+    height: 36px;
   }
 
   .input,

@@ -272,7 +272,9 @@
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
-  touch-action: pan-x;
+  /* a swipe that begins on a frame scrolls the frames either way; once a finger has held one
+     to move it, the drag keeps the touch to itself (frame-drag.js) */
+  touch-action: pan-x pan-y;
 }
 
 .cell canvas {

@@ -39,8 +39,14 @@ export function renderColourPanel(el, app) {
     node('h2', { tabindex: '0' }, 'Colours', node('span.mono', {}, `${colors.length}`)),
     colourWell(app, colors),
     colors.length ? swatchGroup(app, { name: "The art's colours", colors }) : null,
-    // with the palette locked, only the art's own colours are offered
-    state.paletteLock ? null : otherColours(app, colors),
+    // With the palette locked only the art's own colours are offered: the others stay where
+    // they stand, dimmed and out of reach. Taken away, everything under them moved up, the
+    // lock's own switch from under the finger that pressed it.
+    node(
+      `div.other-colours${state.paletteLock ? '.locked' : ''}`,
+      { inert: state.paletteLock, title: state.paletteLock ? 'Palette lock is on' : null },
+      otherColours(app, colors),
+    ),
     colourButtons(app),
   );
 }

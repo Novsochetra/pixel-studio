@@ -4,6 +4,7 @@ import { bounds, toHex } from '../model/sprite.js';
 import { brushField } from './brush-settings.js';
 import { slider } from './slider.js';
 import { forHands } from './platform-keys.js';
+import { toggle } from './toggle-row.js';
 
 // What "Paint only over" can be set to: any pixel, or one of the art's colours. The colour it is
 // set to stays in the list when the art no longer has it, and says so: dropped to "Any pixel"
@@ -39,21 +40,6 @@ function paintOverField(app, colors) {
       },
       options,
     ),
-  );
-}
-
-function toggle({ id, label, hint }, checked, onChange) {
-  return node(
-    'label.toggle-row',
-    { for: id },
-    node('span', {}, node('div', {}, label), node('div.hint', {}, hint)),
-    node('input.switch', {
-      type: 'checkbox',
-      id,
-      role: 'switch',
-      checked,
-      onchange: (event) => onChange(event.target.checked),
-    }),
   );
 }
 

@@ -239,6 +239,18 @@ await page.keyboard.press('Escape');
 await page.waitForTimeout(400);
 await openDock(page, 'Colours');
 
+// a swipe that began on a frame's picture scrolled the frames sideways only: with every view
+// shown, the rows below could not be reached from it
+await openDock(page, 'Frames');
+check(
+  (await page
+    .locator('.cell')
+    .first()
+    .evaluate((cell) => getComputedStyle(cell).touchAction)) === 'pan-x pan-y',
+  'a swipe that begins on a frame scrolls the frames either way',
+);
+await openDock(page, 'Frames');
+
 // Safari tells of a pinch with an event of its own, and zooms the page unless it is refused
 check(
   await page.evaluate(
