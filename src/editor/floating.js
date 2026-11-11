@@ -1,5 +1,11 @@
 import { CLEAR, getPixel, setPixel } from '../model/sprite.js';
-import { clearSelected, stampPixels } from './selection.js';
+import {
+  clearSelected,
+  liftPixels,
+  selectionBox,
+  stampPixels,
+  transformPixels,
+} from './selection.js';
 
 const inside = (sprite, { x, y }) => x >= 0 && y >= 0 && x < sprite.width && y < sprite.height;
 
@@ -39,6 +45,46 @@ export function moveFloating(sprite, selection, dx, dy) {
     sprite,
     piece.map((pixel) => ({ ...pixel, x: pixel.x + dx, y: pixel.y + dy })),
   );
+}
+
+// A selection that is moved or flipped is lifted off the art first, and floats from then on:
+// what it passes over is put back behind it. Stamped down at each arrow key, it rubbed out
+// everything on its way, and a pasted piece flipped tore a hole in what it lay on.
+export function asFloating(sprite, selection) {
+  if (selection.floating) {
+    return selection;
+  }
+
+  const piece = liftPixels(sprite, selection);
+
+  clearSelected(sprite, selection);
+
+  return floatPiece(sprite, piece);
+}
+
+// lifted pixels stay on the canvas at their first move; a piece already floating may hang over
+// its edge, as none of it is lost there
+export function moveLifted(sprite, selection, [dx, dy]) {
+  const lifted = asFloating(sprite, selection);
+  const shift = selection.floating
+    ? [dx, dy]
+    : shiftOnCanvas(lifted.floating.piece, sprite, [dx, dy]);
+
+  return moveFloating(sprite, lifted, ...shift);
+}
+
+export function flipSelection(sprite, selection, kind) {
+  const box = selectionBox(selection);
+
+  if (!box) {
+    return selection;
+  }
+
+  const { piece, under } = asFloating(sprite, selection).floating;
+
+  under.forEach(({ x, y, color }) => setPixel(sprite, x, y, color));
+
+  return floatPiece(sprite, transformPixels(piece, kind, box));
 }
 
 // The selected pixels taken away. A floating piece goes, and what lay under it is back; any other

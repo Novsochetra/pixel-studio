@@ -1,8 +1,8 @@
 import { icon, node, replace, toast } from './dom.js';
 import { markMore, watchMore } from './more-behind.js';
 import { commit, commitSelected, currentLayer } from './actions.js';
-import { liftPixels, selectionBox, transformSelected } from '../editor/selection.js';
-import { eraseSelection } from '../editor/floating.js';
+import { liftPixels, selectionBox } from '../editor/selection.js';
+import { eraseSelection, flipSelection } from '../editor/floating.js';
 import { hasKeyboard, keyNames } from './platform-keys.js';
 import { selectionAngle, turnSelectionTo } from './selection-turn.js';
 import { modeControls, syncModes } from './selection-modes.js';
@@ -15,12 +15,23 @@ const ACTIONS = [
   ['rotate-cw', 'turn-right', '90°', 'Turn the selection a quarter right'],
 ];
 
+const QUARTERS = { 'rotate-cw': 90, 'rotate-ccw': -90 };
+
+// A quarter turn is a turn like any other, drawn from the first pixels: turned as pixels were
+// moved, art that left the canvas was cut off and did not come back with the turn undone.
 function transform(app, kind, label) {
-  const layer = currentLayer(app.store.state);
-  let selection = app.store.state.selection;
+  const { state } = app.store;
+  const layer = currentLayer(state);
+  let selection = state.selection;
+
+  if (QUARTERS[kind]) {
+    turnSelectionTo(app, selectionAngle(state) + QUARTERS[kind]);
+
+    return;
+  }
 
   commitSelected(app, label, [layer], () => {
-    selection = transformSelected(layer.sprite, selection, kind);
+    selection = flipSelection(layer.sprite, selection, kind);
   });
   app.store.set({ selection });
 }

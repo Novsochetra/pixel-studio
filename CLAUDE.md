@@ -200,6 +200,15 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - What a drag on the canvas returns has `cancel()` when its work can be taken back, as a second
   finger makes the drag a pinch; without one it is ended and kept as a step. Undo and redo wait
   while a drag is under way.
+- A selection that is moved, flipped or turned is lifted off the art once and floats from then
+  on (`asFloating`, `moveLifted`, `flipSelection` in `src/editor/floating.js`; a turn's result
+  floats too): what it passes over is put back behind it. Never stamp a selection down at each
+  key or lift it from the sprite again: that rubbed out the art under it. A quarter turn is a
+  turn (`turnSelectionTo`), drawn from the first pixels, so art past the edge comes back.
+- One hidden layer is never changed unseen: `commit` refuses, and says why (`refusesPaint` in
+  `body/body-lock.js`). A change to many layers at once takes the hidden ones along.
+- A handle is taken hold of where it is drawn, reckoned from where the pointer is, not from the
+  middle of the pixel under it (`onKnob`): at a high zoom that reached into the art.
 - A step that moves the selection with the pixels (a move, a turn, a paste) is made with
   `commitSelected`, so undo puts the selection back too. A change that changes nothing records no
   step (`History.recordStructure` says whether it did).

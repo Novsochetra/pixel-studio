@@ -41,11 +41,33 @@ function scrollNear(row, position, axis) {
   }
 }
 
+// Let go far from the row, or with Escape pressed, a frame stays where it was: dropped on the
+// canvas it went to whichever end was nearer, and nothing took the drag back.
+const OFF_ROW = 48;
+
+function offRow(row, event) {
+  const box = (row.closest('.grid-scroll') ?? row).getBoundingClientRect();
+
+  return (
+    event.clientX < box.left - OFF_ROW ||
+    event.clientX > box.right + OFF_ROW ||
+    event.clientY < box.top - OFF_ROW ||
+    event.clientY > box.bottom + OFF_ROW
+  );
+}
+
 function startDrag(drag) {
   const { row, press } = drag;
 
   press.dragging = true;
   row.classList.add('sorting');
+  drag.onKey = (event) => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      endDrag(drag);
+    }
+  };
+  document.addEventListener('keydown', drag.onKey, true);
 
   try {
     row.setPointerCapture(press.pointerId);
@@ -58,6 +80,7 @@ function startDrag(drag) {
 
 function endDrag(drag) {
   clearTimeout(drag.press?.timer);
+  document.removeEventListener('keydown', drag.onKey, true);
   drag.frames().forEach((frame) => frame.classList.remove('dragging', 'drop-before', 'drop-after'));
   drag.row.classList.remove('sorting');
   drag.press = null;
@@ -95,8 +118,8 @@ function onMove(drag, event) {
 
   if (press.dragging) {
     const position = drag.axis.at(event);
-    press.slot = slotAt(drag.frames(), position, drag.axis);
-    markSlot(drag.frames(), press.from, press.slot);
+    press.slot = offRow(drag.row, event) ? null : slotAt(drag.frames(), position, drag.axis);
+    markSlot(drag.frames(), press.from, press.slot ?? press.from);
     scrollNear(drag.row, position, drag.axis);
 
     return;

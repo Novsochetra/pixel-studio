@@ -1,5 +1,6 @@
 import { CLEAR, getPixel } from '../model/sprite.js';
 import { frameAt } from '../model/project.js';
+import { compositeFrame } from '../model/composite.js';
 import { removePinNear, setPin } from '../model/pins.js';
 import { currentLayer, restructure } from './actions.js';
 import { toast } from './dom.js';
@@ -15,8 +16,15 @@ import { isPosedBody } from '../model/body/body-kind.js';
 import { startOnPart } from './body/part-draw.js';
 import { poseTool } from './body/pose-tool.js';
 
+// the colour as it shows: the layer in hand's, or under a clear pixel of it the art's below
 function pick(app, [x, y]) {
-  const color = getPixel(currentLayer(app.store.state).sprite, x, y);
+  const { state } = app.store;
+  const { width, height } = state.project.canvas;
+  const own = getPixel(currentLayer(state).sprite, x, y);
+  const color =
+    own === CLEAR
+      ? getPixel(compositeFrame(frameAt(state.project, state.at), width, height), x, y)
+      : own;
 
   if (color !== CLEAR) {
     app.store.set({
@@ -40,10 +48,10 @@ function pin(app, [x, y]) {
 }
 
 const orTurnHandle = (tool) => (app, point, event) =>
-  onTurnHandle(app, point) ? turnSelectionDrag(app, point) : tool(app, point, event);
+  onTurnHandle(app, point, event) ? turnSelectionDrag(app, point) : tool(app, point, event);
 
-function moveTool(app, point) {
-  if (onLayersHandle(app, point)) {
+function moveTool(app, point, event) {
+  if (onLayersHandle(app, point, event)) {
     return turnLayersDrag(app, point);
   }
 

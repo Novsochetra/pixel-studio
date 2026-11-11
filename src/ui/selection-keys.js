@@ -1,12 +1,6 @@
 import { commit, commitSelected, currentFrames, currentLayer, selectFrame } from './actions.js';
-import { liftPixels, moveSelected, rectSelection } from '../editor/selection.js';
-import {
-  eraseSelection,
-  floatPiece,
-  moveFloating,
-  pieceOnCanvas,
-  shiftOnCanvas,
-} from '../editor/floating.js';
+import { liftPixels, rectSelection } from '../editor/selection.js';
+import { eraseSelection, floatPiece, moveLifted, pieceOnCanvas } from '../editor/floating.js';
 import { toast } from './dom.js';
 import { shiftPickedLayers } from './layer-move.js';
 import { forHands } from './platform-keys.js';
@@ -18,13 +12,7 @@ function nudge(app, [dx, dy]) {
   let selection = app.store.state.selection;
 
   commitSelected(app, 'Move', [layer], () => {
-    selection = selection.floating
-      ? moveFloating(layer.sprite, selection, dx, dy)
-      : moveSelected(
-          layer.sprite,
-          selection,
-          ...shiftOnCanvas(liftPixels(layer.sprite, selection), layer.sprite, [dx, dy]),
-        );
+    selection = moveLifted(layer.sprite, selection, [dx, dy]);
   });
   app.store.set({ selection });
 }

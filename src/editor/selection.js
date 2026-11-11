@@ -159,6 +159,15 @@ const TRANSFORMS = {
   },
 };
 
+// pixels ([{ x, y, color }]) flipped or turned about the middle of their box
+export function transformPixels(pixels, kind, box) {
+  return pixels.map(({ x, y, color }) => {
+    const [tx, ty] = TRANSFORMS[kind](x, y, box);
+
+    return { x: tx, y: ty, color };
+  });
+}
+
 // flips or turns the selected pixels in place (about the middle of the selection); returns the
 // selection they now cover
 export function transformSelected(sprite, selection, kind) {
@@ -170,11 +179,6 @@ export function transformSelected(sprite, selection, kind) {
 
   const lifted = liftPixels(sprite, selection);
   clearSelected(sprite, selection);
-  const moved = lifted.map(({ x, y, color }) => {
-    const [tx, ty] = TRANSFORMS[kind](x, y, box);
 
-    return { x: tx, y: ty, color };
-  });
-
-  return stampPixels(sprite, moved, 0, 0);
+  return stampPixels(sprite, transformPixels(lifted, kind, box), 0, 0);
 }

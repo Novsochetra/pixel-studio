@@ -1,7 +1,14 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { CLEAR, createSprite, getPixel, pack, setPixel } from '../../src/model/sprite.js';
-import { floatPiece, moveFloating, shiftOnCanvas } from '../../src/editor/floating.js';
+import {
+  flipSelection,
+  floatPiece,
+  moveFloating,
+  moveLifted,
+  shiftOnCanvas,
+} from '../../src/editor/floating.js';
+import { applyTurn, startTurn } from '../../src/editor/selection-turn.js';
 import {
   liftPixels,
   moveSelected,
@@ -149,4 +156,89 @@ test('a fill with no colour to fill with changes nothing and ends', () => {
   assert.deepEqual(floodFill(sprite, [2, 2], undefined), []);
   assert.equal(count(sprite, CLEAR), 64);
   assert.equal(floodFill(sprite, [2, 2], RED).length, 64);
+});
+
+// each arrow key stamped the selection down where it stood: a block walked through a wall left
+// a gap in it as wide as itself
+test('a selection nudged through other art leaves that art whole', () => {
+  const sprite = createSprite(32, 16);
+
+  square(sprite, [2, 4], 4, RED);
+  square(sprite, [12, 2], 6, BLUE);
+
+  let selection = rectSelection(sprite, [2, 4], [5, 7]);
+
+  for (let i = 0; i < 20; i++) {
+    selection = moveLifted(sprite, selection, [1, 0]);
+  }
+
+  assert.equal(count(sprite, BLUE), 36);
+  assert.equal(count(sprite, RED), 16);
+  assert.equal(selectionBox(selection).left, 22);
+});
+
+test('a selection moved for the first time stays on the canvas', () => {
+  const sprite = createSprite(16, 16);
+
+  square(sprite, [2, 2], 4, RED);
+  moveLifted(sprite, rectSelection(sprite, [2, 2], [5, 5]), [-30, 0]);
+
+  assert.equal(count(sprite, RED), 16);
+});
+
+// flipped as the sprite's own pixels, a pasted piece took what lay under it along, and left a hole
+test('a pasted piece flipped, then moved off, leaves what it lay on whole', () => {
+  const sprite = createSprite(32, 16);
+
+  square(sprite, [14, 2], 12, BLUE);
+
+  const piece = [];
+
+  for (let i = 0; i < 36; i++) {
+    piece.push({ x: 16 + (i % 6), y: 4 + Math.floor(i / 6), color: RED });
+  }
+
+  const pasted = floatPiece(sprite, piece);
+  const flipped = flipSelection(sprite, pasted, 'flip-x');
+
+  assert.equal(count(sprite, RED), 36);
+  moveFloating(sprite, flipped, 0, 20);
+  assert.equal(count(sprite, BLUE), 144);
+});
+
+test('a pasted piece turned, then moved off, leaves what it lay on whole', () => {
+  const sprite = createSprite(32, 16);
+
+  square(sprite, [14, 2], 12, BLUE);
+
+  const piece = [];
+
+  for (let i = 0; i < 36; i++) {
+    piece.push({ x: 16 + (i % 6), y: 4 + Math.floor(i / 6), color: RED });
+  }
+
+  const pasted = floatPiece(sprite, piece);
+  const turned = applyTurn(sprite, startTurn(sprite, pasted), 90);
+
+  assert.equal(count(sprite, RED), 36);
+  moveFloating(sprite, turned, 0, 20);
+  assert.equal(count(sprite, BLUE), 144);
+});
+
+// turned as pixels were moved, what left the canvas was cut off and did not come back
+test('a quarter turn at the canvas edge comes back whole when it is turned back', () => {
+  const sprite = createSprite(32, 32);
+
+  for (let x = 0; x < 16; x++) {
+    setPixel(sprite, x, 0, RED);
+    setPixel(sprite, x, 1, RED);
+  }
+
+  const selection = rectSelection(sprite, [0, 0], [15, 1]);
+  const turn = startTurn(sprite, selection);
+  const there = applyTurn(sprite, turn, 90);
+
+  assert.ok(count(sprite, RED) < 32, 'part of it is past the edge');
+  applyTurn(sprite, there.turn, 0);
+  assert.equal(count(sprite, RED), 32);
 });

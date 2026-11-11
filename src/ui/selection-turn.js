@@ -19,10 +19,10 @@ function turnOf(state) {
 export const selectionAngle = (state) =>
   liveTurn(state.selection, currentLayer(state).sprite)?.angle ?? 0;
 
-export function onTurnHandle(app, point) {
+export function onTurnHandle(app, point, event) {
   const { state } = app.store;
 
-  return Boolean(state.selection) && onKnob(handleOf(state, state.zoom), point, state.zoom);
+  return Boolean(state.selection) && onKnob(handleOf(state, state.zoom), point, state.zoom, event);
 }
 
 export function turnSelectionDrag(app, start) {

@@ -27,6 +27,25 @@ function cutOut(selection, box, colourAt) {
   return { x: box.left, y: box.top, sprite };
 }
 
+// The art without the selection, and the selection's own colours. A piece floating over the art
+// is turned as the piece it is: taken from the sprite, it took what lay under it along.
+function lifted(sprite, selection) {
+  const base = cloneSprite(sprite);
+  const { floating } = selection;
+
+  if (!floating) {
+    clearSelected(base, selection);
+
+    return { base, colourAt: (x, y) => getPixel(sprite, x, y) };
+  }
+
+  const colours = new Map(floating.piece.map(({ x, y, color }) => [`${x},${y}`, color]));
+
+  floating.under.forEach(({ x, y, color }) => setPixel(base, x, y, color));
+
+  return { base, colourAt: (x, y) => colours.get(`${x},${y}`) ?? CLEAR };
+}
+
 // Each turn is drawn from the first pixels: turned pixels turned again would wear away.
 export function startTurn(sprite, selection) {
   const box = selectionBox(selection);
@@ -35,14 +54,12 @@ export function startTurn(sprite, selection) {
     return null;
   }
 
-  const base = cloneSprite(sprite);
-
-  clearSelected(base, selection);
+  const { base, colourAt } = lifted(sprite, selection);
 
   return {
     base,
     box,
-    art: cutOut(selection, box, (x, y) => getPixel(sprite, x, y)),
+    art: cutOut(selection, box, colourAt),
     shape: cutOut(selection, box, () => SHAPE),
     centre: { x: (box.left + box.right + 1) / 2, y: (box.top + box.bottom + 1) / 2 },
     angle: 0,
@@ -64,17 +81,38 @@ function turnedCells(sprite, turn, matrix) {
   });
 }
 
+// what is turned floats over the art it was lifted from: moved on, it leaves that art whole
+function floatingOf(sprite, turn, { cells, matrix }) {
+  const art = createSprite(sprite.width, sprite.height);
+  const [piece, under] = [[], []];
+
+  drawPiece(art, turn.art, matrix);
+  cells.forEach((on, i) => {
+    if (on) {
+      const [x, y] = [i % sprite.width, Math.floor(i / sprite.width)];
+
+      piece.push({ x, y, color: getPixel(art, x, y) });
+      under.push({ x, y, color: getPixel(turn.base, x, y) });
+    }
+  });
+
+  return { piece, under };
+}
+
 export function applyTurn(sprite, turn, angle) {
   const matrix = turnAbout(turn.centre, angle);
 
   sprite.pixels.set(turn.base.pixels);
   drawPiece(sprite, turn.art, matrix);
 
+  const cells = turnedCells(sprite, turn, matrix);
+
   return {
     width: sprite.width,
     height: sprite.height,
-    cells: turnedCells(sprite, turn, matrix),
+    cells,
     turn: { ...turn, angle, shown: cloneSprite(sprite) },
+    floating: floatingOf(sprite, turn, { cells, matrix }),
   };
 }
 

@@ -1,7 +1,7 @@
 import { node, replace } from './dom.js';
 import { currentFrames, currentLayer, directionSprite } from './actions.js';
 import { viewName } from '../model/kinds.js';
-import { bounds, colorCounts } from '../model/sprite.js';
+import { bounds, colorCounts, getPixel, toHex } from '../model/sprite.js';
 import { openCanvasSizeSheet } from './canvas-size-sheet.js';
 import { hasKeyboard } from './platform-keys.js';
 
@@ -11,6 +11,14 @@ export function placeText(state) {
   const frame = Math.min(state.at.frame, frames - 1) + 1;
 
   return `${viewName(state.project, state.at.direction)} · frame ${frame} of ${frames} · ${currentLayer(state).name}`;
+}
+
+// read as it is said, not when the pointer last moved: after a click it named the colour that
+// had been there
+function colourUnder(state, { x, y }) {
+  const color = getPixel(currentLayer(state).sprite, x, y);
+
+  return color ? toHex(color) : 'transparent';
 }
 
 // where you are, what the art measures, and what is under the pointer
@@ -40,7 +48,7 @@ export function renderStatus(el, app) {
         : 'empty',
     ),
     node('span', {}, `${colorCounts(sprite).length} colours`),
-    node('span', {}, cursor ? `x ${cursor.x}, y ${cursor.y} · ${cursor.color}` : ''),
+    node('span', {}, cursor ? `x ${cursor.x}, y ${cursor.y} · ${colourUnder(state, cursor)}` : ''),
     hasKeyboard() ? node('span.status-help', {}, 'Press ? for shortcuts') : null,
   );
 }

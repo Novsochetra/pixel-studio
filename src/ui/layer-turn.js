@@ -38,10 +38,10 @@ export const canTurnLayers = (state) => Boolean(handleOf(state, state.zoom));
 export const layersAngle = (state) =>
   liveLayersTurn(state.layerTurn, layersToTurn(state))?.angle ?? 0;
 
-export const onLayersHandle = (app, point) => {
+export const onLayersHandle = (app, point, event) => {
   const { state } = app.store;
 
-  return onKnob(handleOf(state, state.zoom), point, state.zoom);
+  return onKnob(handleOf(state, state.zoom), point, state.zoom, event);
 };
 
 const CUT =

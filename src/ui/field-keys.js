@@ -91,8 +91,32 @@ function leaveAtKeys(root, said) {
   );
 }
 
+// A choice picked with the pointer is done with: the keys go back to the editor. Left on the
+// pull-down, E and G changed its choice, and undo did nothing. Someone choosing with the keys
+// stays, as each arrow is a change.
+function leaveChoices(root) {
+  let pressed = null;
+
+  root.addEventListener('pointerdown', ({ target }) => (pressed = target), true);
+  root.addEventListener('keydown', () => (pressed = null), true);
+  // before the choice is acted on: the bar it is in is drawn again then, and would hand the
+  // keys to the pull-down now in its place
+  root.addEventListener(
+    'change',
+    ({ target }) => {
+      if (target.matches?.('select') && target === pressed) {
+        letGoOf(target);
+        target.blur();
+      }
+    },
+    true,
+  );
+}
+
 export function bindFieldKeys(root) {
   const said = rememberFields(root);
+
+  leaveChoices(root);
 
   changeBeforeTab(root, said);
   leaveAtKeys(root, said);

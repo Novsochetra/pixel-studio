@@ -1,14 +1,7 @@
 import { cloneSprite } from '../model/sprite.js';
-import {
-  clearSelected,
-  colourSelection,
-  isSelected,
-  liftPixels,
-  rectSelection,
-  stampPixels,
-} from '../editor/selection.js';
+import { colourSelection, isSelected, rectSelection } from '../editor/selection.js';
 import { currentLayer } from './actions.js';
-import { moveFloating, shiftOnCanvas } from '../editor/floating.js';
+import { moveLifted } from '../editor/floating.js';
 import { combineSelections, lassoPiece, lassoSelection } from '../editor/lasso-select.js';
 import { refusesPaint } from './body/body-lock.js';
 import { pickLayerAt } from './pick-layer.js';
@@ -23,18 +16,11 @@ export function moveSelection(app, start) {
   }
 
   const before = cloneSprite(layer.sprite);
-  const lifted = liftPixels(before, app.store.state.selection);
   const startMask = app.store.state.selection;
   const place = (shift) => {
     layer.sprite.pixels.set(before.pixels);
 
-    if (startMask.floating) {
-      return moveFloating(layer.sprite, startMask, ...shift);
-    }
-
-    clearSelected(layer.sprite, startMask);
-
-    return stampPixels(layer.sprite, lifted, ...shiftOnCanvas(lifted, layer.sprite, shift));
+    return moveLifted(layer.sprite, startMask, shift);
   };
 
   return {
