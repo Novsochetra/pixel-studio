@@ -88,13 +88,17 @@ function paintPreview(canvas, app, { clock, time }) {
   const shown = `${size.width}×${size.height} at ${zoom} on ${size.subject?.bottom}`;
 
   canvas.style.width = `${size.width * zoom}px`;
-  canvas.style.maxWidth = zoom === 1 ? '100%' : 'none';
+  // the sizes side by side are one picture: wider than the window, it is shown whole and
+  // smaller, as its last size started off the screen with nothing to say so
+  canvas.style.maxWidth = mode === 'centred' ? `${roomFor(canvas)}px` : fitOf(zoom);
 
   if (size.subject && clock.shown !== shown) {
     clock.shown = shown;
     showSubject(canvas, size.subject);
   }
 }
+
+const fitOf = (zoom) => (zoom === 1 ? '100%' : 'none');
 
 const playButton = (playing, onclick) =>
   node('button.btn.primary', { onclick }, playing ? 'Pause' : 'Play');

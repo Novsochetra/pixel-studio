@@ -196,6 +196,33 @@
     padding: 6px;
   }
 
+  /* one row that scrolls: on three rows, the smallest phones showed no part under the tools */
+  .cut-brush {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .cut-brush::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cut-brush > * {
+    flex: none;
+  }
+
+  .cut-brush[data-more='true']::after {
+    content: '';
+    position: sticky;
+    right: 0;
+    flex: none;
+    align-self: stretch;
+    width: 24px;
+    margin-left: -32px;
+    background: linear-gradient(to right, transparent, var(--sheet) 85%);
+    pointer-events: none;
+  }
+
   .cut-side {
     align-content: start;
     min-height: 0;

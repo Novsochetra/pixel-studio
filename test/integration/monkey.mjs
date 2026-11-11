@@ -2,7 +2,9 @@
 // page must never throw. Shared by the desktop and phone runs.
 import { createProject, isCompact, openExample, openWorkspace } from './studio.mjs';
 
-const SKIP = /Delete|Clear marks|Go back|Wear it|Apply to|Use them all|Use for|Forget|Remove/;
+// Close this panel: a phone's panel is a sheet with a way out, and shut it has no buttons to click
+const SKIP =
+  /Delete|Clear marks|Go back|Wear it|Apply to|Use them all|Use for|Forget|Remove|Close this panel/;
 // the workspace buttons are left alone, so each workspace's own panels are clicked through
 const TOOLBAR_SKIP =
   /Download|History|^\?$|PIXEL|^Edit$|Views board|On the pitch|^Preview$|^More$|^Workspace/;

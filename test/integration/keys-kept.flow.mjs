@@ -59,4 +59,41 @@ check(
 );
 check((await name.inputValue()).endsWith('x'), 'and the new name is kept');
 
+// Play draws its panel itself as it starts, and turns to Pause: the keys stay where it stood
+await page.getByRole('button', { name: 'Play', exact: true }).focus();
+await page.keyboard.press('Enter');
+await page.waitForTimeout(200);
+check((await focused()) === 'Pause', 'Enter on Play leaves the keys on Pause');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(200);
+check((await focused()) === 'Play', 'and a second Enter pauses');
+
+await openPanel(page, 'Layers');
+await page.locator('.layer-row').first().focus();
+await page.keyboard.press('F2');
+await page.keyboard.type('Sketch');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(200);
+check(
+  (await focused()) !== 'the page' &&
+    (await page.locator('.layer-name').first().textContent()) === 'Sketch',
+  'a layer named with Enter keeps the keys on its row',
+);
+
+// Enter in a field clicked into ends the typing: left in the field, the next shortcut was typed
+// after the colour's code
+await openPanel(page, 'Colours');
+await page.locator('#colour-hex').click();
+await page.locator('#colour-hex').fill('#00ff00');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(100);
+await page.keyboard.press('e');
+check(
+  (await page.inputValue('#colour-hex')) === '#00ff00' &&
+    (
+      await page.locator('#rail [aria-pressed="true"]').first().getAttribute('aria-label')
+    ).startsWith('Eraser'),
+  'after Enter in the colour’s code, E picks the Eraser and is not typed into the code',
+);
+
 await finish();

@@ -8,11 +8,17 @@ export function renameInPlace(shown, { value, label, className, onDone }) {
     value,
     'aria-label': label,
   });
-  const done = (keep) => {
+  const done = (keep, byKey = false) => {
     const name = field.value.trim();
 
     field.onblur = null;
     field.replaceWith(shown);
+
+    // the keys go back to what was named: left on nothing, the next Tab began the page again
+    if (byKey) {
+      (shown.closest('button, [tabindex]') ?? shown).focus?.();
+    }
+
     onDone(keep && name && name !== value ? name : null);
   };
 
@@ -21,7 +27,7 @@ export function renameInPlace(shown, { value, label, className, onDone }) {
 
     if (event.key === 'Enter' || event.key === 'Escape') {
       event.preventDefault();
-      done(event.key === 'Enter');
+      done(event.key === 'Enter', true);
     }
   });
   field.onblur = () => afterPress(() => done(true));

@@ -28,7 +28,8 @@ function pull(body, event) {
   };
 }
 
-export function pullToClose({ head, body, close }) {
+// grips: says whether a press on the head takes hold of it, where the head is more than a bar
+export function pullToClose({ head, body, close, grips = () => true }) {
   let drag = null;
   const stop = (event) => {
     if (!drag) {
@@ -42,7 +43,7 @@ export function pullToClose({ head, body, close }) {
   };
 
   head.addEventListener('pointerdown', (event) => {
-    if (isCompact() && !event.target.closest('button')) {
+    if (isCompact() && !event.target.closest('button') && grips(event)) {
       drag = pull(body, event);
       head.setPointerCapture(event.pointerId);
     }

@@ -1,6 +1,8 @@
 // whether more of a row waits past its right edge, and before its left one
 export function markMore(row) {
-  row.dataset.more = String(row.scrollLeft + row.clientWidth < row.scrollWidth - 1);
+  // a few pixels short of the end is the end: the strip that says more waits has a width of its
+  // own, and stayed over the last tab
+  row.dataset.more = String(row.scrollLeft + row.clientWidth < row.scrollWidth - 4);
   row.dataset.before = String(row.scrollLeft > 1);
 }
 

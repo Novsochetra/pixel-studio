@@ -112,6 +112,11 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   time from the dock (`dock.js`); the toolbar keeps one row, and what does not fit waits in the
   More menu (`toolbar-menu.js`). Something new in the inspector or the toolbar needs its place
   there too.
+- A phone held upright has the look of its own system (`71-phone-sheets.css`): the tools and the
+  dock float over the stage as bars of glass, the dock centred as a tab bar is, and a panel
+  opened from the dock is a sheet at the screen's foot, with the bar it is pulled down by and a
+  × (`panel-sheet.js`). The sheet still takes its row: the canvas is fitted in the room above
+  it, never under it. What stays put in a panel while it scrolls is painted in `--sheet` there.
 - What shows over the canvas (the selection's bar, the Pose and Pin bars, an empty frame's card,
   the place being edited) floats over it, never in the canvas's own column: a card that pushed the
   canvas down let it jump under the finger at the first pixel drawn (`touch.flow.mjs`). It stands
@@ -190,10 +195,13 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - What is typed is checked where it is read: a number is kept to what can be (`wholeNumber`), and
   a message to a person never carries an exception's own words.
 - The bars are drawn again at every change, so the page keeps the keys for someone using them
-  (`keepFocus` in `src/ui/focus.js`, round every redraw in `app.js`): the control now in the
-  place of the one used takes the focus, found by its id, its `aria-label` or its words. Give a
-  control one of those. After a click the keys stay the editor's own (`:focus-visible`), and a
-  field edited says its change before Tab moves on (`changeBeforeTab`).
+  (`keepFocus` in `src/ui/keep-focus.js`, round every redraw in `app.js`, and round a panel
+  that draws itself, as the frames do while they play): the control now in the place of the one
+  used takes the focus, found by its id, its `aria-label` or its words, or where it stood when
+  its name changes as it is used (Play to Pause). After a click the keys stay the editor's own
+  (`:focus-visible`). A field edited says its change before Tab moves on, and Enter in a field
+  clicked into, or Escape in any, gives the keys back to the editor's shortcuts
+  (`field-keys.js`).
 - A canvas is sized for the room it has, never shrunk by the stylesheet (`viewBox` in
   `src/ui/body/cut-view.js`): squashed, its art is out of shape and a press lands beside the
   finger.

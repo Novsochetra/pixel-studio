@@ -6,9 +6,8 @@ import { batchItems, placeAll } from './batch/batch-items.js';
 import { batchRow } from './batch/batch-row.js';
 import { cleanImage } from '../io/cleaner.js';
 import { decodeImage } from '../io/images.js';
-import { referenceOf } from '../model/reference.js';
+import { isPose, referenceOf } from '../model/reference.js';
 import { placementOf, viewName } from '../model/kinds.js';
-import { bounds } from '../model/sprite.js';
 import { inWords } from '../model/told.js';
 
 // characters are matched to the reference, later frames keeping their own pixel size; anything
@@ -26,7 +25,7 @@ function cleanOptions(project, item) {
 function referenceFirst(state, items) {
   const own = items.find((item) => item.direction === referenceOf(state.project));
 
-  if (bounds(referenceSprite(state)) || !own) {
+  if (isPose(referenceSprite(state)) || !own) {
     return items;
   }
 
@@ -34,7 +33,7 @@ function referenceFirst(state, items) {
 }
 
 const becomesReference = (state, item, ref) =>
-  !bounds(ref) && Boolean(item.sprite) && item.direction === referenceOf(state.project);
+  !isPose(ref) && Boolean(item.sprite) && item.direction === referenceOf(state.project);
 
 function statusText(report) {
   const scaled = report.scaled ? `, scaled ${report.scaled.fy.toFixed(2)}×` : '';
@@ -47,8 +46,9 @@ async function cleanOne(state, item, ref) {
     const result = await cleanImage(
       await decodeImage(item.file),
       { width: ref.width, height: ref.height, data: ref.pixels },
-      // an empty reference has nothing to match: the image is cleaned alone, as its kind stands
-      bounds(ref)
+      // an empty reference, or a sketch of a few pixels, has nothing to match: the image is
+      // cleaned alone, as its kind stands
+      isPose(ref)
         ? cleanOptions(state.project, item)
         : { alone: true, ...placementOf(state.project) },
     );

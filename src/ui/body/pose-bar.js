@@ -70,16 +70,17 @@ function angleControls(app, piece, pose) {
 function drawingBar(app, target) {
   const picked = pieceById(target.rig, app.store.state.piece);
 
+  const hint = node(
+    'span.hint',
+    {},
+    picked ? 'It stays on this part, in every frame.' : 'Pick the part to draw on.',
+  );
+  const back = button('Back to posing', () => app.store.set({ tool: 'pose' }));
+
   return [
     node('span', {}, 'Drawing on'),
     partPicker(app, target.rig, picked),
-    node(
-      'span.hint',
-      {},
-      picked ? 'It stays on this part, in every frame.' : 'Pick the part to draw on.',
-    ),
-    node('span.pose-gap'),
-    button('Back to posing', () => app.store.set({ tool: 'pose' })),
+    ...doFirst(app.store.state, hint, back),
   ];
 }
 

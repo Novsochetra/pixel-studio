@@ -1,4 +1,5 @@
 import { node } from './dom.js';
+import { panelGrab, pullsShut } from './panel-sheet.js';
 import { keepSetting, readSetting } from './remembered.js';
 import { renderColourPanel, renderDrawingPanel } from './colour-panel.js';
 import { renderGuidesPanel } from './guides-panel.js';
@@ -61,8 +62,9 @@ export function mountInspector(app) {
     guides: node('section.section'),
   };
 
-  inspector.replaceChildren(...Object.values(sections));
+  inspector.replaceChildren(panelGrab(app), ...Object.values(sections));
   bindCollapsing(inspector, sections);
+  pullsShut(inspector, app);
 
   return {
     colours: () => renderColourPanel(sections.colours, app),

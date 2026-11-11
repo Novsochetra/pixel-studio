@@ -163,6 +163,13 @@
   top: 8px;
 }
 
+/* the bar stands right over the art on a phone: its wide shadow greyed the art's top rows */
+:root[data-layout='compact'] .preview-bar {
+  box-shadow:
+    var(--shadow-glass),
+    0 2px 10px rgb(0 0 0 / 10%);
+}
+
 /* unfolded, they take rows of their own under the first */
 .preview-more[open] {
   flex: 1 0 100%;

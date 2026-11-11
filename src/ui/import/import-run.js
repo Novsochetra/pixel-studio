@@ -2,7 +2,7 @@ import { node, replace } from '../dom.js';
 import { previewCanvas } from '../sheet.js';
 import { referenceSprite } from '../actions.js';
 import { cleanImage } from '../../io/cleaner.js';
-import { referenceOf } from '../../model/reference.js';
+import { isPose, referenceOf } from '../../model/reference.js';
 import { placementOf, viewName } from '../../model/kinds.js';
 import { artHeight, reportText } from './import-report.js';
 import { inWords } from '../../model/told.js';
@@ -51,8 +51,8 @@ export async function runClean(job, options) {
   job.result = null;
   job.accept.disabled = true;
   replace(job.slot, node('p.report', {}, 'Cleaning… this takes a second or two.'));
-  // an empty reference has nothing to match
-  const alone = job.alone || !artHeight(ref);
+  // an empty reference, or a few pixels sketched in it, has nothing to match
+  const alone = job.alone || !isPose(ref);
   const placement = placementOf(state.project);
 
   try {
@@ -69,7 +69,7 @@ export async function runClean(job, options) {
       node(
         'p.report',
         {},
-        `This image could not be cleaned (${inWords(error, 'it could not be read')}). ${FAILED}`,
+        `This image could not be cleaned (${inWords(error, 'no subject could be told from its background')}). ${FAILED}`,
       ),
     );
   }

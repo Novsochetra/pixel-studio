@@ -14,7 +14,8 @@ import { currentLayer } from './actions.js';
 import { renderDock } from './dock.js';
 import { onLayoutChange } from './layout.js';
 import { saveOnLeaving } from './save-on-leaving.js';
-import { changeBeforeTab, keepFocus } from './focus.js';
+import { bindFieldKeys } from './field-keys.js';
+import { keepFocus } from './keep-focus.js';
 
 const WORKSPACES = { edit: mountEditStage, board: mountBoard, game: mountPreview };
 
@@ -91,7 +92,7 @@ export function mountApp(app) {
 
   app.fitCanvas();
   bindKeyboard(app);
-  changeBeforeTab(page);
+  bindFieldKeys(page);
   saveOnLeaving(app);
   bindDrop(stage, app);
   showQuickStart(document.body, app.store.state.project);

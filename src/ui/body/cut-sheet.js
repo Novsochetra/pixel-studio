@@ -1,6 +1,6 @@
 import { node, replace, toast } from '../dom.js';
 import { openSheet } from '../sheet.js';
-import { watchBelow } from '../more-behind.js';
+import { watchBelow, watchMore } from '../more-behind.js';
 import { currentAnimation, currentLayer } from '../actions.js';
 import { frameAt } from '../../model/project.js';
 import { BODY_PARTS, viewName } from '../../model/kinds.js';
@@ -109,6 +109,7 @@ function drawSide(side, job, change) {
     partsList(job, change, guessButton(job, change)),
     node('p.hint', {}, hint(job)),
   );
+  watchMore(side.querySelector('.cut-brush'));
   watchBelow(side);
   watchBelow(side.querySelector('[role="list"]'));
 }

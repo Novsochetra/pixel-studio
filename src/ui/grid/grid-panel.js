@@ -4,15 +4,19 @@ import { gridBody } from './rows.js';
 import { isPlaying, togglePlayback } from './playback.js';
 import { gridPlace, keepGridPlace } from './grid-place.js';
 import { watchMore } from '../more-behind.js';
+import { keepFocus as keepKeys } from '../keep-focus.js';
+import { panelGrab, pullsShut } from '../panel-sheet.js';
 
 const FOCUS_FOLLOWS = { '.cell': '.cell.selected', '.grid-tab': '.grid-tab[aria-selected="true"]' };
 
-// keyboard focus stays on the selected frame, or the open tab, when the panel redraws around it
+// Keyboard focus stays on the selected frame, or the open tab, when the panel redraws around it;
+// on any other control it stays where that control stood, as Play does when it turns to Pause.
+// The panel draws itself while it plays, outside the page's own redraws.
 function keepFocus(el, draw) {
   const focused = el.contains(document.activeElement) ? document.activeElement : null;
   const kind = Object.keys(FOCUS_FOLLOWS).find((selector) => focused?.closest(selector));
 
-  draw();
+  keepKeys(el, draw);
 
   if (kind) {
     el.querySelector(FOCUS_FOLLOWS[kind])?.focus();
@@ -73,6 +77,7 @@ export function mountGridPanel(app, { isShown, onPlayFrame }) {
       el.classList.toggle('folded', !gridOpen);
       replace(
         el,
+        layout === 'compact' ? panelGrab(app) : null,
         gridBar(app, { playing: shownPlaying, onPlay }),
         gridOpen ? gridBody(app, { all: gridAll, playFrame: app.playback?.frame ?? null }) : null,
       );
@@ -80,6 +85,8 @@ export function mountGridPanel(app, { isShown, onPlayFrame }) {
       keepGridPlace(el, place, editing !== shownAt);
       shownAt = editing;
     });
+
+  pullsShut(el, app);
 
   return { el, render };
 }

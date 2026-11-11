@@ -34,8 +34,9 @@ check(
   'another tab takes its place',
 );
 const dock = await page.locator('#dock').boundingBox();
+// the dock floats a little above the screen's edge, as a tab bar does
 check(
-  Math.abs(dock.y + dock.height - screen.height) < 2 &&
+  screen.height - (dock.y + dock.height) < 24 &&
     (await page.locator('.edit-scroll').boundingBox()).height > 150,
   'the dock stays at the foot of the screen, the canvas above the open panel',
 );

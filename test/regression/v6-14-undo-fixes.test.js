@@ -12,6 +12,7 @@ import { BODY_PARTS } from '../../src/model/kinds.js';
 import { guessOwners } from '../../src/model/body/guess.js';
 import { cutIntoParts, leftOver } from '../../src/model/body/cut.js';
 import { viewBox } from '../../src/ui/body/cut-view.js';
+import { isPose } from '../../src/model/reference.js';
 
 const GREEN = pack(0, 200, 0);
 
@@ -130,4 +131,24 @@ test('the art to cut is sized for the window it is in, not shrunk after', () => 
   assert.ok(phone.height * phone.scale <= 664 * 0.34, 'a phone leaves the parts their share');
   assert.ok(small.scale >= 1 && small.height * small.scale <= 568 * 0.34);
   assert.equal(desk.scale, 3);
+});
+
+// With three pixels sketched in the reference view, a picture cleaned into another view was
+// matched to a pose one pixel tall: it could not be cleaned, and the message blamed the picture.
+test('a few pixels sketched in the reference view are no pose to match a picture to', () => {
+  const sketch = createSprite(64, 64);
+  const figure = createSprite(64, 64);
+
+  for (let x = 10; x < 13; x++) {
+    setPixel(sketch, x, 10, GREEN);
+  }
+
+  for (let y = 12; y < 60; y++) {
+    setPixel(figure, 30, y, GREEN);
+  }
+
+  assert.equal(isPose(sketch), false);
+  assert.equal(isPose(createSprite(64, 64)), false);
+  assert.equal(isPose(null), false);
+  assert.equal(isPose(figure), true);
 });

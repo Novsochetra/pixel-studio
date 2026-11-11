@@ -1,0 +1,139 @@
+/* A phone held upright: the tools and the dock float over the stage as bars of glass, the dock
+   centred as a tab bar is, and a panel opened from it is a sheet at the screen's foot. */
+.panel-grab {
+  display: none;
+}
+
+@media (orientation: portrait), (min-height: 521px) {
+  :root[data-layout='compact'] .app {
+    background: var(--stage);
+  }
+
+  :root[data-layout='compact'] :is(.rail, .dock) {
+    position: relative;
+    z-index: 1;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--material);
+    -webkit-backdrop-filter: var(--blur-glass);
+    backdrop-filter: var(--blur-glass);
+    box-shadow:
+      var(--shadow-glass),
+      0 6px 18px rgb(0 0 0 / 14%);
+  }
+
+  :root[data-layout='compact'] .rail {
+    margin: 6px max(10px, env(safe-area-inset-right, 0px)) 0
+      max(10px, env(safe-area-inset-left, 0px));
+    padding: 4px 6px;
+  }
+
+  /* as wide as its tabs and no wider, in the middle of the screen */
+  :root[data-layout='compact'] .dock {
+    justify-self: center;
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: calc(100% - 20px);
+    margin: 6px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+    padding: 4px;
+  }
+
+  :root[data-layout='compact'] .dock-tab {
+    flex: 1 1 58px;
+    min-width: 44px;
+    padding: 4px 8px;
+    border-radius: var(--radius-pill);
+  }
+
+  /* The sheet's own colour goes on under the bars to the screen's foot, so they float on the
+     sheet as they do on the stage: ending above them, it read as a card between two bars. */
+  :root[data-layout='compact'] .app[data-panel]:not([data-panel=''])::after {
+    content: '';
+    grid-row: rail-start / dock-end;
+    grid-column: 1 / -1;
+    background: var(--sheet);
+  }
+
+  :root[data-layout='compact'] :is(.inspector, .grid-panel) {
+    border: 0;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    background: var(--sheet);
+    box-shadow: 0 -10px 30px rgb(0 0 0 / 14%);
+    animation: sheet-up var(--duration-sheet) var(--ease);
+  }
+
+  /* what stays put while the frames scroll under it is painted in the sheet's colour, not a
+     bar's: on a light sheet the views' names stood on grey slabs */
+  :root[data-layout='compact'] .grid-label {
+    background: var(--sheet);
+  }
+
+  :root[data-layout='compact'] .grid-tabs[data-before='true']::before {
+    background: linear-gradient(to left, transparent, var(--sheet) 85%);
+  }
+
+  :root[data-layout='compact'] .grid-tabs[data-more='true']::after {
+    background: linear-gradient(to right, transparent, var(--sheet) 85%);
+  }
+
+  /* the sheet rises once; a panel changed for another under the same sheet is simply there */
+  :root[data-layout='compact'] .section {
+    padding-top: 2px;
+    animation: none;
+  }
+
+  /* the bar the sheet is pulled down by, with the grabber that says so */
+  :root[data-layout='compact'] .panel-grab {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: block;
+    height: 30px;
+    background: var(--sheet);
+    touch-action: none;
+  }
+
+  :root[data-layout='compact'] .panel-grab::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 36px;
+    height: 5px;
+    translate: -50%;
+    border-radius: var(--radius-pill);
+    background: var(--fill-quiet);
+  }
+
+  :root[data-layout='compact'] .section > h2 {
+    touch-action: none;
+  }
+
+  /* in the frames' sheet the bar scrolls with nothing under it: bare, it leaves the sheet's
+     round corners showing */
+  :root[data-layout='compact'] .grid-panel > .panel-grab {
+    margin: -8px -12px -6px;
+    background: none;
+  }
+
+  /* small to the eye in the sheet's corner: the room round it takes the tap */
+  :root[data-layout='compact'] .btn.panel-close {
+    --btn-height: 26px;
+
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    width: 26px;
+    padding: 0;
+    background: var(--fill-quiet);
+    color: var(--label-secondary);
+    font-size: 17px;
+    line-height: 1;
+  }
+
+  :root[data-layout='compact'] .btn.panel-close::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+  }
+}
