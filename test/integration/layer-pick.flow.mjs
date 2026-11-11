@@ -206,4 +206,49 @@ check((await picked()) === 'Art', 'and a second click lets it go');
 await several.click();
 await row('Hair').click();
 check((await picked()) === 'Hair', 'switched off, a click picks one layer again');
+
+// Duplicate, Clear and Delete took only the layer being edited, with several picked together
+const rows = () => page.locator('.layer-row').count();
+const pickTwo = async () => {
+  await row('Art').click();
+  await row('Hat').click({ modifiers: ['Meta'] });
+};
+const undo = async () => {
+  await page.keyboard.press('Meta+z');
+  await page.waitForTimeout(150);
+};
+const had = await rows();
+
+await pickTwo();
+await page.getByRole('button', { name: 'Duplicate 2 layers' }).click();
+await page.waitForTimeout(150);
+check((await rows()) === had + 2, 'Duplicate copies every layer picked together');
+await undo();
+check((await rows()) === had, 'in one undo step');
+
+await pickTwo();
+// the Pencil draws no handle over the art
+await page.keyboard.press('b');
+const drawn = await pixels();
+
+await page.getByRole('button', { name: 'Clear 2 layers in this frame' }).click();
+await page.waitForTimeout(150);
+check((await pixels()) !== drawn, 'Clear empties the layers picked together');
+await undo();
+check((await pixels()) === drawn, 'and one undo brings their art back');
+await page.keyboard.press('Meta+Shift+z');
+await page.waitForTimeout(150);
+const cleared = await allAlone();
+
+check(cleared.art === cleared.hat && cleared.hair !== cleared.art, 'each of them, not one');
+
+await pickTwo();
+await page.getByRole('button', { name: 'Delete 2 layers' }).click();
+await page.waitForTimeout(150);
+check(
+  (await rows()) === had - 2 && (await picked()) === 'Hair',
+  'Delete takes every layer picked, and leaves the next one in hand',
+);
+await undo();
+check((await rows()) === had, 'and one undo brings them back');
 await finish();

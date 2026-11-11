@@ -59,6 +59,10 @@ check(
   (await page.getByRole('button', { name: /^Move:/ }).getAttribute('aria-pressed')) === 'true',
   'T picks the tool that moves a layer',
 );
+check(
+  (await canvas.evaluate((element) => getComputedStyle(element).cursor)) === 'move',
+  'and the pointer over the canvas says the art will move',
+);
 
 const before = await layerPixels();
 const whole = await pixels();

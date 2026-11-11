@@ -1,7 +1,14 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { newFrame, newLayer } from '../../src/model/project.js';
-import { groupOf, keptPick, pickRange, togglePick } from '../../src/model/layer-pick.js';
+import {
+  duplicateLayers,
+  groupOf,
+  keptPick,
+  pickRange,
+  removeLayers,
+  togglePick,
+} from '../../src/model/layer-pick.js';
 
 const SIZE = 8;
 
@@ -83,4 +90,28 @@ test('the last picked layer stays picked', () => {
 test('a group lasts while the layer being edited is in it', () => {
   assert.deepEqual(keptPick(['bottom', 'top'], 'top'), ['bottom', 'top']);
   assert.deepEqual(keptPick(['bottom', 'top'], 'middle'), []);
+});
+
+// Delete and Duplicate took the layer being edited only, with three picked together
+test('every layer picked together is deleted', () => {
+  const frame = stack();
+
+  assert.deepEqual(removeLayers({ directions: {} }, frame, ['bottom', 'top']), ['bottom', 'top']);
+  assert.deepEqual(keysOf(frame.layers), ['middle']);
+});
+
+test('a frame keeps one layer of art when all of them are picked', () => {
+  const frame = stack();
+  const gone = removeLayers({ directions: {} }, frame, ['bottom', 'middle', 'top']);
+
+  assert.equal(gone.length, 2);
+  assert.equal(frame.layers.length, 1);
+});
+
+test('each layer picked together is copied just above itself', () => {
+  const frame = stack();
+  const copies = duplicateLayers(frame, ['bottom', 'top']);
+
+  assert.equal(copies.length, 2);
+  assert.deepEqual(keysOf(frame.layers), ['bottom', copies[0], 'middle', 'top', copies[1]]);
 });

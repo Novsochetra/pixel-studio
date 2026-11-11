@@ -137,8 +137,20 @@
   /* Every sheet is as tall as the next: of their own heights, the canvas hopped and changed
      size as one panel was changed for another. Tall enough for two rows of frames on a small
      phone, and never so tall that a canvas of 160 pixels has no room above it. */
+  :root[data-layout='compact'] {
+    --sheet-height: min(50vh, 400px, 100dvh - 300px);
+    /* the row under the sheet: the tools' bar, 52px, and the air over and under it */
+    --foot-row: calc(66px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* pulled up by its bar, the sheet takes most of the screen: for a long list of frames or
+     layers, with the canvas a strip above it until the sheet is pulled back down */
+  :root[data-layout='compact']:has(.app[data-sheet='tall']) {
+    --sheet-height: min(78vh, 100dvh - 150px);
+  }
+
   :root[data-layout='compact'] :is(.inspector, .grid-panel) {
-    height: min(50vh, 400px, 100dvh - 300px);
+    height: var(--sheet-height);
     max-height: none;
     box-sizing: border-box;
     border: 0;
@@ -148,10 +160,14 @@
     animation: none;
   }
 
-  /* pulled up by its bar, the sheet takes most of the screen: for a long list of frames or
-     layers, with the canvas a strip above it until the sheet is pulled back down */
-  :root[data-layout='compact'] .app[data-sheet='tall'] :is(.inspector, .grid-panel) {
-    height: min(78vh, 100dvh - 150px);
+  /* With a sheet up a message shows across the sheet's top edge: at the canvas's top it lay
+     over the little of the art the sheet had left in sight. */
+  :root[data-layout='compact']:has(.app[data-panel]:not([data-panel=''])):not(:has(.sheet-backdrop))
+    :is(.toast, .toast-out) {
+    --toast-from: 0 12px;
+
+    top: auto;
+    bottom: calc(var(--sheet-height) + var(--foot-row) - 20px);
   }
 
   /* The sheet rises as it opens (dock.js says when). The frames and the other panels are two

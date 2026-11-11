@@ -25,6 +25,11 @@
    canvas too, and a swipe that began on one did not scroll the frames. */
 .canvas-holder canvas {
   touch-action: none;
+  cursor: crosshair;
+}
+
+.canvas-holder canvas[data-tool='move'] {
+  cursor: move;
 }
 
 .stage.dropping::after {

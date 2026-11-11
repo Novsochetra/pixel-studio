@@ -148,4 +148,26 @@ check(
   'and it steps aside while a sheet is up, as the handle on the art turns them too',
 );
 
+// A message showed at the canvas's top: with a sheet up that was over the little of the art
+// still in sight.
+await page.locator('.panel-tabs button:visible', { hasText: 'Layers' }).tap();
+await page.waitForTimeout(400);
+await page.getByRole('button', { name: 'New layer' }).tap();
+await page.waitForTimeout(300);
+await page.keyboard.press('Enter');
+await page.waitForTimeout(300);
+await page.getByRole('button', { name: /^Delete Layer/ }).tap();
+await page.waitForTimeout(150);
+await page.getByRole('button', { name: 'Undo', exact: true }).tap();
+await page.waitForTimeout(300);
+const said = await box('.toast');
+const artFoot = (await box('.canvas-holder canvas')).bottom;
+const sheetTop = (await box('#inspector')).top;
+
+check(
+  said.top >= artFoot - 12 && said.top < sheetTop,
+  `with a sheet up a message shows at the sheet’s top, not over the art (${Math.round(said.top)} under ${Math.round(artFoot)})`,
+);
+await page.screenshot({ path: `${shots}/phone-sheet-toast.png` });
+
 await finish();

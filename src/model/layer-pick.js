@@ -1,6 +1,9 @@
 // Layers picked together in the list, by key so a group carries to the next frame as the layer
 // being edited does. An empty list means only the layer being edited is picked.
 
+import { duplicateLayer } from './layer-ops.js';
+import { removeLayer } from './structure.js';
+
 const asGroup = (keys) => (keys.length > 1 ? keys : []);
 
 export function groupOf(frame, active, picked) {
@@ -36,3 +39,10 @@ export function togglePick(group, active, key) {
 export function keptPick(picked = [], key) {
   return picked.includes(key) ? picked : [];
 }
+
+// every layer of the group that can go, goes: a frame keeps one layer of art
+export function removeLayers(animation, frame, keys) {
+  return keys.filter((key) => removeLayer(animation, frame, key));
+}
+
+export const duplicateLayers = (frame, keys) => keys.map((key) => duplicateLayer(frame, key));

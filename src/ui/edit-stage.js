@@ -92,6 +92,7 @@ function renderStage(app, parts, patch) {
   }
 
   paint(canvas, app);
+  canvas.dataset.tool = app.store.state.tool;
 
   // the pointer moving only moves the brush's ring, and that is on the canvas
   if (Object.keys(patch).join() === 'cursor') {
