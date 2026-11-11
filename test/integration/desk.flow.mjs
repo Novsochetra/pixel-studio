@@ -103,6 +103,31 @@ await dropImage(page, `${images}/side.webp`);
 await cleanReport(page);
 const use = page.locator('.sheet .btn.primary');
 await page.waitForFunction(() => !document.querySelector('.sheet .btn.primary').disabled);
+// In a short window the two pictures took all of it, and what the cleaner did was under the
+// buttons at the window's foot with nothing to say there was more.
+const tall = page.viewportSize();
+
+await page.setViewportSize({ width: 1280, height: 720 });
+await page.waitForTimeout(300);
+const report = await page.locator('pre.report').boundingBox();
+const foot = await page.locator('.sheet .sheet-actions').boundingBox();
+
+check(
+  report.y + report.height <= foot.y + 1,
+  'in a short window the cleaner’s report is in sight above the buttons',
+);
+check(
+  (await page
+    .locator('.sheet')
+    .evaluate(
+      (sheet) =>
+        sheet.dataset.below ===
+        String(sheet.scrollTop + sheet.clientHeight < sheet.scrollHeight - 1),
+    )) && (await page.locator('.sheet').getAttribute('data-below')) !== null,
+  'and the window says whether more of it waits below them',
+);
+await page.setViewportSize(tall);
+await page.waitForTimeout(300);
 await page.fill('#import-height', '60');
 check(await use.isDisabled(), 'a height typed makes Use wait for a cleaning with it');
 await page.keyboard.press('Enter');

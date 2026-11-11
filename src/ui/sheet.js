@@ -4,6 +4,7 @@ import { drawChecker } from './checker.js';
 import { focusables, rememberFocus, trapTab } from './focus.js';
 import { leave } from './leave.js';
 import { pullToClose } from './sheet-pull.js';
+import { watchBelow } from './more-behind.js';
 
 function sheetHead(title, close) {
   return node(
@@ -33,6 +34,15 @@ function focusFirst(body, focusField) {
 // focusField: a text field takes focus first, where there is a pointer; a sheet whose fields
 // are a list of names to change now and then leaves them be. mayClose: a window holding work that
 // closing would lose says no, and asks.
+// Marked while more of the window waits under the buttons at its foot, which say nothing of it:
+// as its contents change, and as the browser's window does.
+function marksBelow(body) {
+  const mark = () => (body.isConnected ? watchBelow(body) : removeEventListener('resize', mark));
+
+  new MutationObserver(mark).observe(body, { childList: true, subtree: true });
+  addEventListener('resize', mark);
+}
+
 export function openSheet(title, onClose, { wide = false, focusField = true, mayClose } = {}) {
   const restoreFocus = rememberFocus();
   const body = node(`div.sheet${wide ? '.wide' : ''}`, {
@@ -74,6 +84,7 @@ export function openSheet(title, onClose, { wide = false, focusField = true, may
   document.querySelector('.toast')?.remove();
   document.body.append(backdrop);
   queueMicrotask(() => focusFirst(body, focusField));
+  marksBelow(body);
 
   return { body, close };
 }

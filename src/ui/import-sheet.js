@@ -3,7 +3,7 @@ import { openSheet } from './sheet.js';
 import { currentAnimation, referenceSprite, replaceDirectionArt } from './actions.js';
 import { keepVersion } from './versions-sheet.js';
 import { optionFields } from './import/import-options.js';
-import { runClean } from './import/import-run.js';
+import { runClean, shaped } from './import/import-run.js';
 import { scalesAfter } from './import/view-scale.js';
 import { decodeImage } from '../io/images.js';
 import { isPose, referenceOf } from '../model/reference.js';
@@ -65,10 +65,10 @@ function accept(job, place) {
 }
 
 function sheetBody(job, file, fields) {
-  const source = node('img', {
-    src: URL.createObjectURL(file),
-    alt: `The image you chose: ${file.name}`,
-  });
+  const source = shaped(
+    node('img', { src: URL.createObjectURL(file), alt: `The image you chose: ${file.name}` }),
+    job.image,
+  );
   const again = node(
     'button.btn',
     { onclick: () => job.image && cleanAgain(job, fields) },

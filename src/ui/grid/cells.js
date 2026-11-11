@@ -97,6 +97,24 @@ function hiddenMark(app, place) {
   );
 }
 
+// a right-click opens a frame's menu, as it does an animation's tab: the frame is picked first,
+// as its menu is for the frame in hand
+function menuAt(app, place, event) {
+  event.preventDefault();
+
+  if (!place.selected) {
+    selectCell(app, place.direction, place.index);
+  }
+
+  const anchor = place.selected
+    ? event.currentTarget
+    : document.querySelector('.grid-row.current .cell.selected');
+
+  if (anchor) {
+    openCellMenu(app, anchor, place.direction, place.index);
+  }
+}
+
 const cellClasses = (place, empty) =>
   [
     empty && '.empty',
@@ -131,6 +149,7 @@ export function cell(app, place) {
         place.selected
           ? openCellMenu(app, event.currentTarget, place.direction, place.index)
           : selectCell(app, place.direction, place.index),
+      oncontextmenu: (event) => menuAt(app, place, event),
       onkeydown: (event) => onCellKey(app, event, place),
     },
     thumb,

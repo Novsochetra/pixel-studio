@@ -167,6 +167,10 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   itself into the page. A row that scrolls sideways (a bar over the canvas on a phone or in a
   short window, a row of choices) is watched by `watchMore` (`src/ui/more-behind.js`), which
   marks it while more waits and lets a mouse's wheel move along it.
+- A window says when more of it waits under the buttons at its foot: a line parts them from
+  what goes on below (`marksBelow` in `sheet.js`, `data-below`). A picture in a window keeps to
+  a share of a short window's height (`shaped`, `.compare.cleaning`), so what it is shown for
+  is in sight beside it.
 - A window that holds more than one job shows them as pages, one in sight at a time, under a
   row that names them: Projects is All projects, This project and New project
   (`projects/project-pages.js`). Everything on one sheet was more than could be taken in.

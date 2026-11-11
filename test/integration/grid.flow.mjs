@@ -122,6 +122,16 @@ check(!(await page.getByRole('menu').count()), 'Escape closes it');
 await page.locator('.cell.selected').click();
 check(await page.getByRole('menu').isVisible(), 'a click on the selected frame opens its menu too');
 await page.keyboard.press('Escape');
+// a tab had a menu at a right-click and a frame had none
+await page.locator('.grid-row.current .cell').first().click({ button: 'right' });
+await page.waitForTimeout(150);
+check(
+  (await page.getByRole('menu').isVisible()) &&
+    (await page.locator('.cell.selected').getAttribute('aria-label')).includes('frame 1'),
+  'a right-click on a frame picks it and opens its menu',
+);
+await page.keyboard.press('Escape');
+await page.locator('.grid-row.current .cell').nth(4).click();
 await page.keyboard.press(',');
 await page.waitForTimeout(150);
 check(

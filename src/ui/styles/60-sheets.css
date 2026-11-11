@@ -144,6 +144,11 @@
   background: var(--sheet);
 }
 
+/* with more of the window under them, a line parts the buttons from what goes on below */
+:is(.sheet, .sheet-out)[data-below='true'] .sheet-actions:last-child {
+  box-shadow: 0 -1px 0 var(--separator);
+}
+
 /* what a window is for is said by a button a thumb cannot miss */
 .sheet-actions .btn {
   --btn-height: 36px;
@@ -186,6 +191,13 @@
   border-radius: var(--radius);
   image-rendering: pixelated;
   background: var(--well);
+}
+
+/* In a short window the cleaning window's two pictures took all of it: what the cleaner did,
+   and the fields that change it, were under the buttons at its foot. The pictures keep to a
+   share of the window's height. */
+.compare.cleaning :is(canvas, img) {
+  width: min(100%, 40vh * var(--ratio, 1));
 }
 
 /* nine places the art can stay put: the pressed one is where it is kept */

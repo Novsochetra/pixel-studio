@@ -12,8 +12,21 @@ import { inWords } from '../../model/told.js';
 const FAILED =
   'Use a PNG or WebP of one subject on a flat background (an AI image’s magenta works best).';
 
+// A picture of the cleaning window says how wide it is for its height: in a short window it
+// keeps to a share of the height (60-sheets.css), and is as wide as that makes it.
+export function shaped(picture, { width, height }) {
+  picture.style.setProperty('--ratio', String(width / height));
+
+  return picture;
+}
+
 function figure(sprite, guides, caption) {
-  return node('figure', {}, previewCanvas(sprite, guides), node('figcaption', {}, caption));
+  return node(
+    'figure',
+    {},
+    shaped(previewCanvas(sprite, guides), sprite),
+    node('figcaption', {}, caption),
+  );
 }
 
 function showResult(job, result, ref, alone) {
@@ -33,7 +46,7 @@ function showResult(job, result, ref, alone) {
   replace(
     job.slot,
     node(
-      'div.compare',
+      'div.compare.cleaning',
       {},
       alone ? null : figure(ref, project.guides, `${refName} (reference)`),
       figure(sprite, project.guides, `${viewName(project, job.direction)}, cleaned`),
