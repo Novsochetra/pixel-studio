@@ -122,6 +122,28 @@ check(
   'the colour’s button opens Colours, the sheet in its place again',
 );
 
+// Move's bar over the canvas is one field. As a bar across the screen it lay over a canvas
+// already made small by a sheet.
+await page.getByRole('button', { name: 'Close this panel' }).tap();
+await page.locator('.rail-all').tap();
+await page.waitForTimeout(500);
+await page.locator('.tool-tile', { hasText: /^Move$/ }).tap();
+await page.waitForTimeout(500);
+const turn = await box('.layer-turn-bar');
+
+check(
+  turn.width < tools.width / 2 &&
+    (await page.locator('.layer-turn-bar').textContent()).includes('Turn'),
+  'the bar that turns layers is a small pill that says what it is for',
+);
+await page.screenshot({ path: `${shots}/phone-turn-bar.png` });
+await page.locator('.dock-more').tap();
+await page.waitForTimeout(600);
+check(
+  await page.locator('.layer-turn-bar').isHidden(),
+  'and it steps aside while a sheet is up, as the handle on the art turns them too',
+);
+
 // On the views board a press opened the view under it: the finger that came to scroll the
 // board was sent to Edit, and the last view of a phone's board could not be reached.
 await page.getByRole('button', { name: 'Close this panel' }).tap();

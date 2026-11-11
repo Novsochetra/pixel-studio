@@ -1,4 +1,4 @@
-import { replace } from './dom.js';
+import { node, replace } from './dom.js';
 import { canTurnLayers, layersAngle, turnLayersTo } from './layer-turn.js';
 import { angleField } from './selection-bar.js';
 
@@ -17,6 +17,7 @@ export function renderLayerTurnBar(el, app) {
 
   replace(
     el,
+    node('span', {}, 'Turn'),
     angleField({
       id: 'layer-angle',
       name: 'Layer angle',

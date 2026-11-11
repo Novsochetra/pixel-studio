@@ -469,6 +469,21 @@
   flex: none;
 }
 
+/* The layers' bar is one field: a pill by the thumb, not a bar across the canvas. */
+:root[data-layout='compact'] .layer-turn-bar {
+  --rise-from: -50% 10px;
+
+  left: 50%;
+  right: auto;
+  width: max-content;
+  translate: -50%;
+}
+
+/* a panel's sheet leaves the canvas little room, and the handle on the art turns them too */
+:root[data-layout='compact'] .app[data-panel]:not([data-panel='']) .layer-turn-bar {
+  display: none;
+}
+
 /* the selection's bar stands at the end of the canvas the selection is not in (selection-bar.js) */
 :root[data-layout='compact'] .selection-bar[data-side='top'] {
   --rise-from: 0 -10px;

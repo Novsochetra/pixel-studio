@@ -135,7 +135,7 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   acts as the pointer lets go (`onRelease`), so the first finger of a pinch fills nothing.
 - A finger has no pointer to hover and no keys: a control's meaning cannot live only in a tooltip
   or a shortcut. What Shift or Alt does to a tool has a control too (Even shapes and Darker shades
-  in Drawing; Add, Take away and Everywhere on the selection's bar), and what a tool says when it
+  in Drawing; Add, Take away and Everywhere on the selection's bar; Pick several in Layers), and what a tool says when it
   is picked is worded for the hands that picked it (`touch` in `tool-list.js`, `forHands`). One finger on the canvas waits a moment before its tool acts
   (`touch-intent.js`), as it may be the first of a pinch.
 

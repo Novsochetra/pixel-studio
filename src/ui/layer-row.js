@@ -88,7 +88,7 @@ function secondClickOnName(entry, event) {
 function selectRow(app, entry, event) {
   if (event.shiftKey) {
     pickRangeToMove(app, entry.key);
-  } else if (event.metaKey || event.ctrlKey) {
+  } else if (event.metaKey || event.ctrlKey || app.store.state.pickSeveral) {
     togglePickToMove(app, entry.key);
   } else {
     const rename = secondClickOnName(entry, event);

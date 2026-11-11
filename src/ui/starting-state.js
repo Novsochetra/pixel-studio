@@ -16,6 +16,7 @@ const DRAWING = {
   // what holding Shift does, for hands with no Shift to hold
   shapeEven: false,
   shadeDarker: false,
+  pickSeveral: false,
   lassoMode: 'new',
 };
 

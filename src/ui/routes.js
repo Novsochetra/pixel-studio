@@ -59,7 +59,17 @@ export const ROUTES = {
     'panel',
   ],
   tools: ['tool', 'project'],
-  layers: ['at', 'project', 'layers', 'pickedLayers', 'pixels', 'frames', 'animations', 'layout'],
+  layers: [
+    'at',
+    'project',
+    'layers',
+    'pickedLayers',
+    'pickSeveral',
+    'pixels',
+    'frames',
+    'animations',
+    'layout',
+  ],
   colours: [
     'color',
     'basicColours',

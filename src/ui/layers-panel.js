@@ -7,6 +7,8 @@ import { layersToMove } from './layer-move.js';
 import { pictureStrength } from './trace-picture.js';
 import { bindFrameDrag } from './frame-drag.js';
 import { arrowsMoveArt } from './selection-keys.js';
+import { forHands, keyNames } from './platform-keys.js';
+import { toggle } from './toggle-row.js';
 
 const ONE_LAYER_HINT =
   'Like sheets of glass stacked in this frame: add one for hair or a sword to draw it without touching the rest. Duplicate the frame to take its layers along.';
@@ -27,6 +29,25 @@ function onListKey(app, event, stack) {
     goTo(app, { layer: next.key });
   }
 }
+
+// what holding ⌘ does to a click on a layer, for hands with no ⌘ to hold
+const pickSeveral = (app) =>
+  toggle(
+    {
+      id: 'pick-several',
+      label: 'Pick several',
+      hint: keyNames(
+        `Each layer ${forHands('clicked', 'tapped')} joins the others, to move or turn together${forHands(', as ⌘click does', '')}`,
+      ),
+    },
+    app.store.state.pickSeveral,
+    (on) => app.store.set({ pickSeveral: on }),
+  );
+
+const PICKED_HINT = forHands(
+  'Drag their art or use the arrow keys to move them, or the handle to turn them.',
+  'With Move in hand, drag their art to move them, or the handle to turn them.',
+);
 
 // top first, as image editors list them; a drag puts a layer anywhere in the stack
 function layerList(app, stack, active) {
@@ -80,13 +101,8 @@ export function renderLayersPanel(el, app) {
     node('h2', { tabindex: '0' }, 'Layers'),
     stack.length < 2 ? node('p.hint', {}, ONE_LAYER_HINT) : null,
     layerList(app, stack, active),
-    picked > 1
-      ? node(
-          'p.hint',
-          {},
-          `${picked} layers picked. Drag their art or use the arrow keys to move them, or the handle to turn them.`,
-        )
-      : null,
+    stack.length > 1 ? pickSeveral(app) : null,
+    picked > 1 ? node('p.hint', {}, `${picked} layers picked. ${PICKED_HINT}`) : null,
     active.kind === 'reference' ? pictureStrength(app, active) : null,
     layerBar(app, active),
   );

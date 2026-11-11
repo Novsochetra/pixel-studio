@@ -193,4 +193,17 @@ await drag([41, 30], [46, 35]);
 await page.keyboard.press('b');
 await selectFrame(page, 0);
 check((await pixels()) === firstFrame, 'a group moves only in the frame being edited');
+
+// fingers have no ⌘ or Shift to hold: a switch in Layers does what they do
+const several = page.locator('#pick-several');
+
+await row('Art').click();
+await several.click();
+await row('Hat').click();
+check((await picked()) === 'Hat,Art', 'with Pick several on, a plain click picks one more layer');
+await row('Hat').click();
+check((await picked()) === 'Art', 'and a second click lets it go');
+await several.click();
+await row('Hair').click();
+check((await picked()) === 'Hair', 'switched off, a click picks one layer again');
 await finish();
