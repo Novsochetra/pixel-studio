@@ -9,13 +9,13 @@ function moveMenu(job, project, anchor) {
   const index = job.app.index;
   const at = folderOf(index, project.id);
   const folderItem = (folder) => [
-    folder.id === at ? `✓ ${folder.name}` : folder.name,
+    folder.name,
     () => moveProject(job, project, folder),
-    { disabled: folder.id === at },
+    { checked: folder.id === at },
   ];
 
   openMenu(anchor, [
-    ['No folder', () => moveProject(job, project, null), { disabled: !at }],
+    ['No folder', () => moveProject(job, project, null), { checked: !at }],
     ...foldersByName(index).map(folderItem),
     null,
     ['New folder…', () => moveToNewFolder(job, project)],
@@ -36,7 +36,10 @@ export function rowMenu(job, project, { anchor, onOpen, onDelete, onRename, onDu
       ? ['Delete… (the only project stays)', () => {}, { disabled: true }]
       : ['Delete…', onDelete, { danger: true }];
 
-    openMenu(anchor, [move, null, remove], { onError });
+    // its name, its copies and its file are on a page of their own
+    const more = ['Rename, duplicate, save…', () => job.turnTo('this')];
+
+    openMenu(anchor, [more, move, null, remove], { onError });
 
     return;
   }

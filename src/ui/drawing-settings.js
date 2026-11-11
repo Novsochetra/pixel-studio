@@ -147,7 +147,7 @@ export function drawingSettings(app, colors) {
     );
 
   return [
-    node('h2', { tabindex: '0' }, 'Drawing'),
+    node('h2', { tabindex: '0' }, 'Brush'),
     brushField(app),
     listGroup({}, SWITCHES.map(switched)),
     lockGroup(app, colors),

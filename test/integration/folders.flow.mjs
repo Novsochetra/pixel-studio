@@ -39,7 +39,7 @@ const row = (name) =>
 const moveWithMenu = async (project, folder) => {
   await page.getByRole('button', { name: `More for ${project}` }).click();
   await page.getByRole('menuitem', { name: 'Move to folder…' }).click();
-  await page.getByRole('menuitem', { name: folder, exact: true }).click();
+  await page.getByRole('menuitemcheckbox', { name: folder, exact: true }).click();
   await page.waitForTimeout(200);
 };
 

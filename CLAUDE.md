@@ -139,7 +139,7 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   acts as the pointer lets go (`onRelease`), so the first finger of a pinch fills nothing.
 - A finger has no pointer to hover and no keys: a control's meaning cannot live only in a tooltip
   or a shortcut. What Shift or Alt does to a tool has a control too (Even shapes and Darker shades
-  in Drawing; Add, Take away and Everywhere on the selection's bar; Pick several in Layers), and what a tool says when it
+  in Brush; Add, Take away and Everywhere on the selection's bar; Pick several in Layers), and what a tool says when it
   is picked is worded for the hands that picked it (`touch` in `tool-list.js`, `forHands`). One finger on the canvas waits a moment before its tool acts
   (`touch-intent.js`), as it may be the first of a pinch.
 
@@ -166,8 +166,8 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   (`projects/project-pages.js`). Everything on one sheet was more than could be taken in.
 - What is listed is a list as a phone has them. Things of one kind (the projects, the layers)
   are rows under one another: a picture, a name, a line about it, and what marks the one in
-  hand. What a thing is and what can be done with it (This project, the inspector's Drawing,
-  Outline and Guide lines) is grouped rows on a rounded ground, a heading above and a note
+  hand. What a thing is and what can be done with it (This project, the inspector's Brush,
+  Outline and Guides) is grouped rows on a rounded ground, a heading above and a note
   below (`list-group.js`, `56-lists.css`): `valueRow` says something, `fieldRow` ends in a
   field or a choice, `switchRow` in a switch, and an `actionRow` is pressed, in the tint, with
   a count at its end or the chevron of a window it leads to. A row's words are few: what a

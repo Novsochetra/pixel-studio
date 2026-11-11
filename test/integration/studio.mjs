@@ -185,7 +185,7 @@ export async function chooseFiles(page, click, files) {
   await (await chooser).setFiles(files);
 }
 
-// Layers, Outline and Guide lines start folded; a click on the title opens one
+// Layers, Outline and Guides start folded; a click on the title opens one
 export async function openPanel(page, name) {
   const section = page.locator('.section', { has: page.locator('h2', { hasText: name }) });
 

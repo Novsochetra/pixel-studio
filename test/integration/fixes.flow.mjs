@@ -74,7 +74,7 @@ check(
 );
 
 // Palette lock on a blank canvas left the pencil with no colour, and Fill then never ended
-await openPanel(page, 'Drawing');
+await openPanel(page, 'Brush');
 await page.locator('#palette-lock').check();
 await page.locator('#palette-lock').uncheck();
 await tool('Fill');

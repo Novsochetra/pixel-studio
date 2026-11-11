@@ -373,6 +373,9 @@
   right: 16px;
   bottom: calc(40px + env(safe-area-inset-bottom, 0px));
   width: fit-content;
+  /* a long name in a message wraps: on one line it ran the width of a wide window */
+  max-width: min(560px, calc(100% - 32px));
+  text-align: center;
   margin-inline: auto;
   background: var(--material);
   -webkit-backdrop-filter: var(--blur-glass);

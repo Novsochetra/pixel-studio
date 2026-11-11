@@ -1,11 +1,11 @@
-// The brush: its size and shape in the Drawing panel and on [ and ], what the pencil and eraser
+// The brush: its size and shape in the Brush panel and on [ and ], what the pencil and eraser
 // paint with it, and its ring under the pointer.
 import { openStudio } from './harness.mjs';
 import { openExample, openPanel } from './studio.mjs';
 
 const { page, check, finish, shots } = await openStudio();
 await openExample(page);
-await openPanel(page, 'Drawing');
+await openPanel(page, 'Brush');
 const canvas = page.getByLabel('Pixel canvas');
 const art = await canvas.boundingBox();
 const [artWidth] = (await page.locator('#statusbar span').nth(1).textContent())

@@ -142,6 +142,7 @@ export function openProjectsSheet(app) {
   sheet.body.append(book.nav, ...Object.values(book.pages));
   job.redraw();
   job.showStart = () => showStart(job, book);
+  job.turnTo = book.goTo;
   job.showStart();
 
   // with many projects, finding one by name is the quickest way in; a phone's keyboard would

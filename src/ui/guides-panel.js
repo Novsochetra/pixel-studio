@@ -1,4 +1,4 @@
-import { node, replace } from './dom.js';
+import { node, replace, toast } from './dom.js';
 import { referenceSprite } from './actions.js';
 import { changeGuides } from './guide-changes.js';
 import { guideRow } from './guide-row.js';
@@ -21,13 +21,18 @@ function matchReference(app) {
   const { state } = app.store;
   const ref = referenceSprite(state);
 
+  let moved = 0;
+
   changeGuides(app, 'Match guides', (guides) =>
     guides.forEach((guide) => {
-      const row = ref ? measureGuide(ref, guide) : null;
+      const row = (ref ? measureGuide(ref, guide) : null) ?? guide.row;
 
-      guide.row = row ?? guide.row;
+      moved += row === guide.row ? 0 : 1;
+      guide.row = row;
     }),
   );
+  // pressed with every guide in place it did nothing, and said nothing
+  toast(moved ? `${moved} ${moved === 1 ? 'guide' : 'guides'} moved` : 'Every guide is in place');
 }
 
 // a row of its own, not a switch in the title: a phone's sheet shows no title to hold it
@@ -49,7 +54,7 @@ export function renderGuidesPanel(el, app) {
 
   replace(
     el,
-    node('h2', { tabindex: '0' }, 'Guide lines'),
+    node('h2', { tabindex: '0' }, 'Guides'),
     showSwitch(app),
     state.project.guides.map((guide) => guideRow(app, guide)),
     listGroup(

@@ -213,7 +213,7 @@ input[type='number']::-webkit-outer-spin-button {
   height: 24px;
   margin: 0;
   border-radius: 12px;
-  background: color-mix(in srgb, var(--label-muted), transparent 45%);
+  background: color-mix(in srgb, var(--label-muted), transparent 30%);
   position: relative;
   cursor: pointer;
   flex: none;
@@ -287,7 +287,8 @@ input[type='number']::-webkit-outer-spin-button {
 }
 
 .chip[data-state='ok'] {
-  color: var(--ok);
+  /* small words on a fill: the green alone was too pale to read there */
+  color: color-mix(in srgb, var(--ok), var(--label) 30%);
 }
 
 .chip[data-state='off'] {

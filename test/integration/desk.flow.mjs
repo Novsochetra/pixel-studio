@@ -16,7 +16,7 @@ await openExample(page);
 const said = () => page.locator('.toast').textContent();
 
 // a guide removed could not be brought back: undo took back a stroke of the art instead
-await openPanel(page, 'Guide lines');
+await openPanel(page, 'Guides');
 const guides = () => page.locator('.guide-row').count();
 const had = await guides();
 await page.getByRole('button', { name: 'Remove Top of hair' }).click();
