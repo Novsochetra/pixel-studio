@@ -43,14 +43,28 @@ function actions(job, mapping, name) {
     node('button.btn', { onclick: job.close }, 'Close'),
     node(
       'button.btn',
-      { disabled: nothing, title: why, onclick: () => keepAsSwap(app, mapping, name) },
-      'Keep as a colour swap',
+      {
+        disabled: nothing,
+        title: why ?? 'Keep these colours as a swap to use again',
+        'aria-label': 'Keep as a colour swap',
+        onclick: () => keepAsSwap(app, mapping, name),
+      },
+      'Keep as a swap',
     ),
-    node('button.btn', { disabled: nothing, title: why, onclick: download }, 'Download it'),
+    node(
+      'button.btn',
+      { disabled: nothing, title: why, 'aria-label': 'Download it', onclick: download },
+      'Download',
+    ),
     node(
       'button.btn.primary',
-      { disabled: nothing, title: why, onclick: () => wear(job, mapping, name) },
-      'Wear it (every frame and view)',
+      {
+        disabled: nothing,
+        title: why ?? 'On every frame and view',
+        'aria-label': 'Wear it (every frame and view)',
+        onclick: () => wear(job, mapping, name),
+      },
+      'Wear it',
     ),
   );
 }

@@ -147,7 +147,7 @@ export function openCanvasSizeSheet(app) {
     node(
       'p.hint',
       {},
-      `Now ${canvas.width}×${canvas.height}. Every view, frame and layer takes the new size; art left outside a smaller canvas is cut off. Undo puts it back, and the project as it is now is kept in History first.`,
+      `Now ${canvas.width}×${canvas.height}. Art outside a smaller canvas is cut off; undo puts it back.`,
     ),
     node('div.compare.canvas-size-fields', {}, fields.width.field, fields.height.field),
     node('div.field', {}, node('span', {}, 'Keep the art at'), anchors),

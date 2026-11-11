@@ -1,4 +1,4 @@
-import { node, replace, toast } from './dom.js';
+import { icon, node, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
 import {
   deleteVersion,
@@ -61,33 +61,52 @@ function deleteButton(app, entry, redraw) {
   };
   const ask = () => askDelete(place, { question: 'Delete this version?', onDelete: remove });
 
-  place.append(node('button.btn.quiet', { onclick: ask }, 'Delete'));
+  place.append(
+    node(
+      'button.btn.quiet.icon-only',
+      { onclick: ask, title: 'Delete this version', 'aria-label': 'Delete' },
+      icon('trash'),
+    ),
+  );
 
   return place;
 }
 
 function row(app, entry, { redraw, close }) {
+  const goBack = () => restore(app, entry, close);
+
   return node(
-    'div.version-row',
+    'div.list-row.version-row',
     {},
     node(
-      'div',
+      'div.version-text',
       {},
       node('div.view-name', {}, entry.name),
       node('div.view-meta', {}, `${when(entry.savedAt)} · ${kb(entry.size)}`),
     ),
     node(
       'div.group',
-      { style: { gap: '4px' } },
-      node('button.btn', { onclick: () => restore(app, entry, close) }, 'Go back to this'),
-      node('button.btn.quiet', { onclick: () => download(app, entry) }, 'Download'),
+      { style: { gap: '2px' } },
+      node(
+        'button.btn.quiet.version-back',
+        { onclick: goBack, 'aria-label': 'Go back to this' },
+        'Go back',
+      ),
+      node(
+        'button.btn.quiet.icon-only',
+        {
+          onclick: () => download(app, entry),
+          title: 'Download this version',
+          'aria-label': 'Download',
+        },
+        icon('download'),
+      ),
       deleteButton(app, entry, redraw),
     ),
   );
 }
 
-const NONE_YET =
-  'No versions yet. One is kept before every cleaning, kit or restore, and whenever you save one here.';
+const NONE_YET = 'No versions yet. One is kept before every cleaning, kit or restore.';
 
 const nameField = (onEnter) =>
   node('input.input', {
@@ -99,7 +118,7 @@ const nameField = (onEnter) =>
 
 export function openVersionsSheet(app) {
   const sheet = openSheet('History');
-  const list = node('div.view-list');
+  const list = node('div.list-rows.version-list');
   const name = nameField(() => save());
   const where =
     app.backend.kind === 'none'
@@ -109,7 +128,7 @@ export function openVersionsSheet(app) {
     const versions = await listVersions(app.backend, app.keys);
     const rows = versions.map((entry) => row(app, entry, { redraw, close: sheet.close }));
 
-    replace(list, versions.length ? rows : node('p.hint', {}, NONE_YET));
+    replace(list, versions.length ? rows : node('p.list-note.version-none', {}, NONE_YET));
   };
   const save = async () => {
     const named = name.value.trim() || `Version of ${when(Date.now())}`;
@@ -123,17 +142,13 @@ export function openVersionsSheet(app) {
 
   sheet.body.append(
     node(
-      'p.hint',
-      {},
-      `A version is the whole project: every view, animation, layer, palette and guide. ${where}`,
-    ),
-    node(
       'div.version-save',
       {},
       name,
       node('button.btn.primary', { onclick: save }, 'Save a version'),
     ),
     list,
+    node('p.list-note', {}, `A version is the whole project. ${where}`),
   );
   redraw();
 }

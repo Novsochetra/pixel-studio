@@ -118,16 +118,11 @@ h4.start-heading {
   padding: 0;
 }
 
-.start-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 8px;
-}
-
-.start-sizes {
-  display: flex;
+/* the usual sizes, a row under the width and height they set */
+.list-row.start-sizes {
   flex-wrap: wrap;
   gap: 4px;
+  padding-block: 8px;
 }
 
 .start-fields [hidden] {

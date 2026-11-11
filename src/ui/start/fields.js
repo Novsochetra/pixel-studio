@@ -4,6 +4,7 @@ import { defaultName } from '../../model/presets.js';
 import { isWholeBetween, wholeNumber } from '../../model/numbers.js';
 import { numberInput } from '../number-input.js';
 import { CANVAS_LIMITS } from '../../model/canvas-size.js';
+import { fieldRow, listGroup } from '../list-group.js';
 
 const SIZES = [16, 24, 32, 48, 64, 96, 128, 160];
 
@@ -12,10 +13,6 @@ const sizeOr = (text, usual) => wholeNumber(text.trim(), { ...CANVAS_LIMITS, fal
 // Empty takes the size the kind comes with; anything typed is a size a canvas can have. 0 and
 // −5 were quietly made that size too, where 5 was refused: now each is told the same.
 const sizeCanBe = (text) => !text.trim() || isWholeBetween(text, CANVAS_LIMITS);
-
-function field(label, control) {
-  return node('label.field', {}, node('span', {}, label), control);
-}
 
 function controls() {
   return {
@@ -69,22 +66,27 @@ function laidOut({ name, width, height, scale }, sizes, directionsField) {
   return node(
     'div.start-fields',
     {},
-    field('Name', name),
-    node(
-      'div.start-row',
-      {},
-      field('Width (art pixels)', width),
-      field('Height', height),
-      field('Big copy scale', scale),
+    listGroup({}, fieldRow('Name', name)),
+    listGroup(
+      { title: 'Canvas, in art pixels' },
+      fieldRow('Width', width),
+      fieldRow('Height', height),
+      node(
+        'div.list-row.start-sizes',
+        { role: 'group', 'aria-label': 'Common sizes' },
+        sizes.buttons,
+      ),
+      fieldRow('Big copy scale', scale, {
+        title: 'How many screen pixels each art pixel is in the big copy a download holds',
+      }),
     ),
-    node('div.start-sizes', { role: 'group', 'aria-label': 'Common sizes' }, sizes.buttons),
     directionsField,
   );
 }
 
 export function projectFields() {
   const { name, width, height, scale, directions } = controls();
-  const directionsField = field('Directions', directions);
+  const directionsField = listGroup({}, fieldRow('Directions', directions));
   const sizes = sizeButtons(width, height);
   let usual = { width: 64, height: 64 };
   const el = laidOut({ name, width, height, scale }, sizes, directionsField);

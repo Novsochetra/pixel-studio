@@ -168,6 +168,33 @@
   cursor: pointer;
 }
 
+/* a field or a choice put in a row as it is made elsewhere: bare, its value at the row's end */
+.list-row > .input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background-color: transparent;
+  text-align: right;
+}
+
+.list-row > select.input {
+  padding-right: 20px;
+  background-image: none;
+  color: var(--label-secondary);
+  text-align-last: right;
+}
+
+.list-row > select.input + svg {
+  margin-left: -24px;
+  pointer-events: none;
+}
+
+.list-row:has(> .input:focus-visible) {
+  outline: 2px solid var(--tint);
+  outline-offset: -2px;
+}
+
 /* the colour a choice of colours stands at, beside its code: a code alone names no colour */
 .list-swatch {
   flex: none;

@@ -89,12 +89,12 @@ export function openShortcuts(project = null) {
 
   sheet.body.append(
     node(
-      'div.compare',
-      { style: { gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))' } },
+      'div.shortcut-groups',
+      {},
       groupsFor(project).map(([title, rows]) =>
         node(
-          'div',
-          { style: { display: 'grid', gap: '6px', alignContent: 'start' } },
+          'div.shortcut-group',
+          {},
           node('h2.eyebrow', {}, title),
           rowsFor(rows, project).map(([keys, what]) =>
             node('div.shortcut', {}, node('kbd', {}, keyNames(keys)), node('span', {}, what)),
