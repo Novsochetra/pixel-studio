@@ -1,6 +1,14 @@
-import { turnAbout } from '../model/body/affine.js';
+import { applyTo, turnAbout } from '../model/body/affine.js';
 import { drawPiece } from '../model/body/place.js';
-import { bounds, cloneSprite, cropped, samePixels, unionBounds } from '../model/sprite.js';
+import {
+  CLEAR,
+  bounds,
+  cloneSprite,
+  cropped,
+  getPixel,
+  samePixels,
+  unionBounds,
+} from '../model/sprite.js';
 import { handleAround } from './selection-turn.js';
 
 function artBox(layers) {
@@ -48,6 +56,31 @@ export function applyLayersTurn(layers, turn, angle) {
   const shown = new Map(layers.map((layer) => [layer.id, cloneSprite(layer.sprite)]));
 
   return { ...turn, angle, shown };
+}
+
+function landsOutside(piece, matrix, canvas) {
+  const { sprite } = piece;
+
+  for (let i = 0; i < sprite.width * sprite.height; i += 1) {
+    const [x, y] = [i % sprite.width, Math.floor(i / sprite.width)];
+
+    if (getPixel(sprite, x, y) !== CLEAR) {
+      const [landX, landY] = applyTo(matrix, [piece.x + x + 0.5, piece.y + y + 0.5]);
+
+      if (landX < 0 || landY < 0 || landX >= canvas.width || landY >= canvas.height) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// whether a turn to `angle` carries any of the art past the canvas's edge, where it is cut off
+export function turnCutsArt(turn, angle, canvas) {
+  const matrix = turnAbout(turn.centre, angle);
+
+  return [...turn.pieces.values()].some((piece) => piece && landsOutside(piece, matrix, canvas));
 }
 
 // a turn goes on only over the pixels it left: an edit, an undo or another frame ends it

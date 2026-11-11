@@ -1,4 +1,5 @@
 import { commit } from './actions.js';
+import { toast } from './dom.js';
 import { layersToMove } from './layer-move.js';
 import { HANDLE_GAP, dragAngle, drawHandle, onKnob } from './turn-handle.js';
 import {
@@ -6,6 +7,7 @@ import {
   layersHandle,
   liveLayersTurn,
   startLayersTurn,
+  turnCutsArt,
 } from '../editor/layers-turn.js';
 import { isPosedBody } from '../model/body/body-kind.js';
 import { tidyAngle } from '../model/body/handle.js';
@@ -42,6 +44,16 @@ export const onLayersHandle = (app, point) => {
   return onKnob(handleOf(state, state.zoom), point, state.zoom);
 };
 
+const CUT =
+  'Part of the art is past the canvas’s edge now, and is cut off there. Turn it back, or move it in from the edge first.';
+
+// Move says when there is no room: a turn that cut the art at the edge said nothing
+function saysIfCut(state, turn) {
+  if (turn && turnCutsArt(turn, turn.angle, state.project.canvas)) {
+    toast(CUT);
+  }
+}
+
 export function turnLayersDrag(app, start) {
   const { state } = app.store;
   const layers = layersToTurn(state);
@@ -65,6 +77,8 @@ export function turnLayersDrag(app, start) {
         app.saver.markLayers(layers.map((layer) => layer.id));
         app.store.touch('pixels');
       }
+
+      saysIfCut(app.store.state, app.store.state.layerTurn);
     },
   };
 }
@@ -80,6 +94,7 @@ export function turnLayersTo(app, angle) {
       layerTurn = applyLayersTurn(layers, turn, tidyAngle(angle));
     });
     app.store.set({ layerTurn });
+    saysIfCut(app.store.state, layerTurn);
   }
 }
 

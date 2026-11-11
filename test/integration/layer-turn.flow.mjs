@@ -139,6 +139,17 @@ check((await angle.inputValue()) === '20', 'an angle typed and left with Tab tur
 await undo();
 check((await picture()) === beforeTab, 'in one undo step');
 
+// Move says when there is no room; a turn cut the art at the canvas's edge and said nothing
+await page.keyboard.press('Escape');
+await drag([80, 80], [4, 4]);
+await setAngle(90);
+check(
+  (await page.locator('.toast').allTextContents()).join().includes('cut off'),
+  'a turn that carries art past the canvas’s edge says it is cut there',
+);
+await undo();
+await undo();
+
 // A short window has no band above the canvas: the bar lay over the art's head and over the
 // handle, which then could not be taken hold of.
 await page.setViewportSize({ width: 1100, height: 700 });

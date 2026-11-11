@@ -5,6 +5,7 @@ import {
   layersHandle,
   liveLayersTurn,
   startLayersTurn,
+  turnCutsArt,
 } from '../../src/editor/layers-turn.js';
 import { newLayer } from '../../src/model/project.js';
 import {
@@ -125,4 +126,26 @@ test('near an edge the handle stays on the canvas', () => {
   const { knob } = layersHandle([layer], null, { canvas: CANVAS, gap: 5 });
 
   assert.deepEqual(knob, [20.5, 0.5]);
+});
+
+// Move says when there is no room; a turn cut the art at the edge and said nothing
+test('a turn that carries art past the canvas’s edge is known to cut it', () => {
+  const along = Array.from({ length: 21 }, (_, i) => [10 + i, 0]);
+  const turn = startLayersTurn([layerWith(RED, along)]);
+
+  assert.equal(turnCutsArt(turn, 0, CANVAS), false);
+  assert.equal(turnCutsArt(turn, 90, CANVAS), true);
+});
+
+test('a turn well inside the canvas cuts nothing', () => {
+  const turn = startLayersTurn([
+    layerWith(RED, [
+      [18, 20],
+      [19, 20],
+      [20, 20],
+      [21, 20],
+    ]),
+  ]);
+
+  assert.equal(turnCutsArt(turn, 45, CANVAS), false);
 });
