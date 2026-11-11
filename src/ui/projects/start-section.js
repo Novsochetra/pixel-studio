@@ -44,7 +44,7 @@ export async function startSection(job) {
 
   return node(
     'details.start-section',
-    { open: app.index.list.length < 2 },
+    {},
     node('summary', {}, 'New project', node('span.start-where', {}, whereNewGoes(job))),
     chooser,
     node(

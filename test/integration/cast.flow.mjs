@@ -2,7 +2,7 @@
 // (kept across visits, and made for projects saved before pictures were), and the line-up.
 import { readFileSync } from 'node:fs';
 import { openStudio } from './harness.mjs';
-import { download, openExample, showAllViews, waitSaved } from './studio.mjs';
+import { download, openExample, projectsPage, showAllViews, waitSaved } from './studio.mjs';
 import { isPng } from './files.mjs';
 
 const { page, check, finish, shots } = await openStudio();
@@ -36,6 +36,7 @@ check(
     (await pictures())[0].picture,
   'the open project shows its picture, above and on its card',
 );
+await projectsPage(page, 'This project');
 await page.getByRole('button', { name: 'New character like this' }).click();
 await page.waitForTimeout(800);
 check(

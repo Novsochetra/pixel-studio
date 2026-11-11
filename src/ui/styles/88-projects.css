@@ -4,6 +4,34 @@
   gap: 14px;
 }
 
+/* the window's three pages, one in sight at a time (project-pages.js) */
+.projects-nav {
+  justify-self: start;
+  max-width: 100%;
+}
+
+.projects-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* as tall whichever page is in sight, so the window does not change size at each turn */
+:root:not([data-layout='compact']) .projects-page {
+  min-height: min(62vh, 580px);
+}
+
+/* a new project is a page of its own: its fold has nothing to fold away */
+.projects-page > .start-section {
+  margin-top: 0;
+}
+
+.projects-page > .start-section > summary {
+  display: none;
+}
+
 .project-picture {
   flex: none;
   width: 48px;

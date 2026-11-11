@@ -32,18 +32,28 @@
 }
 
 /* Over the canvas on a phone too, at its foot: a card in the canvas's own column pushed the
-   canvas down, and let it jump up under the finger at the first pixel drawn. */
+   canvas down, and let it jump up under the finger at the first pixel drawn. There it is one
+   row, a capsule as the bar under it is: what the frame is, and the one thing to do with it. A
+   title over a wide button in a box read as a notice, not as a way in. */
 :root[data-layout='compact'] .empty-frame {
   --rise-from: -50% 10px;
 
   top: auto;
   bottom: 8px;
-  gap: 6px;
-  padding: 8px;
-  font-size: 13px;
+  flex-wrap: nowrap;
+  /* from its first word: centred, a row wider than the screen had its start out of reach */
+  justify-content: flex-start;
+  gap: 10px;
+  max-width: calc(100% - 16px);
+  padding: 5px 5px 5px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-/* the buttons say what can be done: the line of advice would hide a small canvas, and the
+/* the button says what can be done: the line of advice would hide a small canvas, and the
    frames' own bar has the onion skin */
 :root[data-layout='compact'] .empty-frame .hint,
 :root[data-layout='compact'] .empty-frame .btn.quiet {
@@ -51,17 +61,16 @@
 }
 
 :root[data-layout='compact'] .empty-frame > div {
-  flex: 1 0 100%;
-  text-align: center;
+  flex: none;
 }
 
-@media (max-height: 700px) {
-  :root[data-layout='compact'] .empty-frame > div {
-    display: none;
-  }
+:root[data-layout='compact'] .empty-frame::-webkit-scrollbar {
+  display: none;
 }
 
 :root[data-layout='compact'] .empty-frame .btn {
-  --btn-height: 40px;
-  padding-inline: 8px;
+  --btn-height: 38px;
+
+  flex: none;
+  padding-inline: 12px 14px;
 }

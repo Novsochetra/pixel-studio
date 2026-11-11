@@ -42,6 +42,12 @@
     border-radius: 50%;
   }
 
+  /* the letter of a tool's key is for a desk's rail: in a narrow window's bar it lay on the
+     round tools */
+  :root[data-layout='compact'] .rail .btn[data-key]::after {
+    display: none;
+  }
+
   /* beside the bar, two buttons as tall as it is: the colour in hand, and the panels */
   :root[data-layout='compact'] .dock {
     align-items: center;
@@ -120,6 +126,12 @@
     border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
     background: var(--sheet);
     box-shadow: 0 -10px 30px rgb(0 0 0 / 14%);
+    animation: none;
+  }
+
+  /* The sheet rises as it opens (dock.js says when). The frames and the other panels are two
+     sheets, one in the stage: risen again at each change of panel, the sheet seemed to blink. */
+  :root[data-layout='compact'] .app[data-rises='true'] :is(.inspector, .grid-panel) {
     animation: sheet-up var(--duration-sheet) var(--ease);
   }
 

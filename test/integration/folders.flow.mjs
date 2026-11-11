@@ -3,7 +3,7 @@
 // is open, and all of it is kept across a visit; a search looks through every folder; a folder's
 // line-up; renaming and removing a folder, whose projects stay.
 import { openStudio } from './harness.mjs';
-import { createProject, openExample } from './studio.mjs';
+import { createProject, openExample, projectsPage } from './studio.mjs';
 
 const { page, check, finish, shots } = await openStudio();
 const openProjects = async () => {
@@ -45,6 +45,22 @@ const moveWithMenu = async (project, folder) => {
 
 await openExample(page);
 await openProjects();
+// One sheet held the open project's buttons, the search, the folders, the cards and the new
+// project's form: more than could be taken in. It is three pages, one in sight at a time.
+check(
+  (await page.locator('.projects-nav button').count()) === 3 &&
+    (await page.locator('.project-card').first().isVisible()) &&
+    !(await page.locator('#current-project-name').isVisible()) &&
+    !(await page.locator('.start-chooser').isVisible()),
+  'the Projects window opens on every project, the open one and a new one on pages of their own',
+);
+await projectsPage(page, 'This project');
+check(
+  (await page.locator('#current-project-name').isVisible()) &&
+    !(await page.locator('.project-card').first().isVisible()),
+  'This project is the open one’s name and what can be done with it',
+);
+await projectsPage(page, 'All projects');
 check(
   JSON.stringify(await folders()) === '["All projects"]',
   'with no folders the column holds every project only',
@@ -66,10 +82,12 @@ check(
   (await contents('Naga Eleven')) === '["Sochetra"]',
   'a project dragged onto a folder goes in',
 );
+await projectsPage(page, 'This project');
 await page.getByRole('button', { name: 'New character like this' }).click();
 await page.waitForTimeout(800);
 await page.fill('#current-project-name', 'Rival');
 await page.press('#current-project-name', 'Enter');
+await projectsPage(page, 'All projects');
 await page.waitForTimeout(200);
 check(
   (await contents('Naga Eleven')) === '["Rival","Sochetra"]',

@@ -61,6 +61,8 @@ export function renderDock(el, app) {
 
   // another panel opens at its top, not where the last one was scrolled to
   if (frame.dataset.panel !== (open ?? '')) {
+    // the sheet rises when it opens; a panel changed for another is the same sheet, still up
+    frame.dataset.rises = String(!frame.dataset.panel);
     frame.dataset.panel = open ?? '';
     frame.querySelectorAll('.inspector, .inspector > .section').forEach((part) => {
       part.scrollTop = 0;

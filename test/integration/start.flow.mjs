@@ -1,17 +1,15 @@
 // The first visit and every kind of project: the start screen, what each kind sets up, presets,
 // and the example.
 import { openStudio } from './harness.mjs';
-import { createProject, frameLabels, showAllViews, status } from './studio.mjs';
+import { createProject, frameLabels, projectsPage, showAllViews, status } from './studio.mjs';
 
 const { page, check, finish, shots } = await openStudio();
 const workspaces = () =>
   page.locator('#toolbar .segmented[aria-label="Workspace"] button').allTextContents();
 const openProjects = async () => {
   await page.locator('button.wordmark').click();
-  await page.waitForSelector('.sheet .start-section');
-  await page.locator('.sheet .start-section').evaluate((details) => {
-    details.open = true;
-  });
+  await page.waitForSelector('.sheet .start-section', { state: 'attached' });
+  await projectsPage(page, 'New project');
 };
 
 check(await page.locator('.start-screen').isVisible(), 'a first visit opens on the start screen');
@@ -107,8 +105,10 @@ check(
 
 await openProjects();
 check((await page.locator('.project-card').count()) === 4, 'every project made is listed');
+await projectsPage(page, 'This project');
 await page.getByRole('button', { name: 'Save as a preset' }).click();
 await page.waitForTimeout(400);
+await projectsPage(page, 'New project');
 check(
   (await page
     .locator('.sheet')

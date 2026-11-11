@@ -149,6 +149,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   itself into the page. A row that scrolls sideways (a bar over the canvas on a phone or in a
   short window, a row of choices) is watched by `watchMore` (`src/ui/more-behind.js`), which
   marks it while more waits and lets a mouse's wheel move along it.
+- A window that holds more than one job shows them as pages, one in sight at a time, under a
+  row that names them: Projects is All projects, This project and New project
+  (`projects/project-pages.js`). Everything on one sheet was more than could be taken in.
 - What closes leaves through `leave()` (`src/ui/leave.js`) under an `-out` class
   (`.sheet-out`, `.menu-out`, `.toast-out`), so the page and the flows count it gone at once
   while it plays out: style both with `:is(.sheet, .sheet-out)`.

@@ -51,6 +51,11 @@ check(
   (await open()) === 'layers' && (await page.locator('.section[data-name="layers"]').isVisible()),
   'the row at the sheet’s top picks another panel',
 );
+// the frames and the other panels are two sheets: risen again at each change, the sheet blinked
+check(
+  (await page.locator('.app').getAttribute('data-rises')) === 'false',
+  'and the sheet stays up as the panel changes: it rises only when it opens',
+);
 await page.screenshot({ path: `${shots}/phone-sheet.png` });
 
 await page.getByRole('button', { name: 'Close this panel' }).tap();

@@ -9,6 +9,7 @@ import { startSection, whereNewGoes } from './start-section.js';
 import { changeList } from './change-list.js';
 import { castPictures } from './cast-pictures.js';
 import { openLineUp } from './line-up-sheet.js';
+import { projectPages } from './project-pages.js';
 import { EVERY_PROJECT, knownPlace } from '../../store/browse.js';
 import { addFolder, folderOf } from '../../store/folders.js';
 
@@ -98,29 +99,14 @@ function browsing(job, body) {
   };
 }
 
-function newProjectOpener(body) {
-  return () => {
-    const section = body.querySelector('.start-section');
-
-    if (section) {
-      section.open = true;
-      section.scrollIntoView({ block: 'start', behavior: 'smooth' });
-      section.querySelector('[role="radio"][tabindex="0"]')?.focus({ preventScroll: true });
-    }
-  };
-}
-
-// New project, drawn again when the presets it offers change: open if it was
-async function showStart(job, body) {
+// New project, drawn again when the presets it offers change. Opened, it is the page in sight:
+// the page is turned to by opening it.
+async function showStart(job, book) {
   const section = await startSection(job);
-  const before = body.querySelector('.start-section');
 
-  if (before) {
-    section.open = before.open;
-    before.replaceWith(section);
-  } else {
-    body.append(section);
-  }
+  section.addEventListener('toggle', () => section.open && book.goTo('new'));
+  section.open = !book.pages.new.hidden;
+  book.pages.new.replaceChildren(section);
 }
 
 export function openProjectsSheet(app) {
@@ -133,8 +119,19 @@ export function openProjectsSheet(app) {
     view: startingView(app.index),
   };
 
+  // the new project's form is open on its own page and shut off it
+  const book = projectPages(
+    { all: [browseBar(job), parts.browser], this: [parts.current] },
+    (page) => {
+      const section = sheet.body.querySelector('.start-section');
+
+      if (section) {
+        section.open = page === 'new';
+      }
+    },
+  );
+
   Object.assign(job, drawing(job, { ...parts, body: sheet.body }), browsing(job, sheet.body), {
-    startNew: newProjectOpener(sheet.body),
     // one sheet at a time: two open sheets would both close on one Escape
     lineUp: (entries) => {
       sheet.close();
@@ -142,9 +139,9 @@ export function openProjectsSheet(app) {
     },
   });
   sheet.body.classList.add('projects-sheet');
-  sheet.body.append(parts.current, browseBar(job), parts.browser);
+  sheet.body.append(book.nav, ...Object.values(book.pages));
   job.redraw();
-  job.showStart = () => showStart(job, sheet.body);
+  job.showStart = () => showStart(job, book);
   job.showStart();
 
   // with many projects, finding one by name is the quickest way in; a phone's keyboard would

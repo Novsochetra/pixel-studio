@@ -63,6 +63,5 @@ export function browseBar(job) {
       icon('upload'),
       'Open a project file…',
     ),
-    node('button.btn.primary', { onclick: job.startNew }, icon('plus'), 'New project'),
   );
 }

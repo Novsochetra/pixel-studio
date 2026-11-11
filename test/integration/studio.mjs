@@ -244,3 +244,10 @@ export async function forgetSavedWork(page, url) {
   await page.goto(url);
   await page.waitForSelector('.start-screen');
 }
+
+// the Projects window is three pages: All projects, This project, New project
+export async function projectsPage(page, name) {
+  // a window just closed is still leaving, as .sheet-out: only the open one's row is meant
+  await page.locator('.sheet .projects-nav button', { hasText: name }).click();
+  await page.waitForTimeout(150);
+}

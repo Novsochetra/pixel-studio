@@ -7,6 +7,7 @@ import {
   frameAction,
   openPanel,
   openWorkspace,
+  projectsPage,
   selectFrame,
   status,
   waitSaved,
@@ -166,6 +167,7 @@ await page.keyboard.press('Meta+Shift+z');
 
 // a project name with no Latin letters made a file called ".json"
 await page.locator('button.wordmark').click();
+await projectsPage(page, 'This project');
 await page.fill('#current-project-name', 'សុជាតិ');
 await page.keyboard.press('Enter');
 await page.keyboard.press('Escape');
