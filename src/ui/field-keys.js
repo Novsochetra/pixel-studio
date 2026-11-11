@@ -113,6 +113,12 @@ function leaveChoices(root) {
   );
 }
 
+// for a window that draws itself again as one of its fields changes: Tab goes on from the field
+// now in the place of the one typed in
+export function tabSaysChange(root) {
+  changeBeforeTab(root, rememberFields(root));
+}
+
 export function bindFieldKeys(root) {
   const said = rememberFields(root);
 

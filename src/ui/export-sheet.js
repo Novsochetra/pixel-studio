@@ -18,6 +18,8 @@ import { mirrorsOf } from '../model/directions.js';
 import { placementOf } from '../model/kinds.js';
 import { inWords } from '../model/told.js';
 import { listGroup } from './list-group.js';
+import { keepFocus } from './keep-focus.js';
+import { tabSaysChange } from './field-keys.js';
 
 function warn(warnings) {
   if (warnings.length) {
@@ -133,7 +135,9 @@ export function openExportSheet(app) {
       custom: choice.preset === 'custom' ? choice.settings : null,
     };
     app.saver.markStructure();
-    drawExport(slot, job);
+    // the window is drawn again at each change: the keys stay with the control that made it,
+    // where a width typed and Tab pressed left them on the page behind
+    keepFocus(slot, () => drawExport(slot, job));
   };
   job.run = (save) =>
     save(state, { ...choice.settings, includeMirrored: choice.includeMirrored }).then(
@@ -142,5 +146,6 @@ export function openExportSheet(app) {
     );
 
   sheet.body.append(slot);
+  tabSaysChange(slot);
   drawExport(slot, job);
 }

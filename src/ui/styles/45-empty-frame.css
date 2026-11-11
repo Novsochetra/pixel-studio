@@ -72,3 +72,26 @@
 :root[data-layout='compact'] .empty-frame .btn {
   padding-inline: 12px 14px;
 }
+
+/* A window too short for the band above the canvas has room beside the canvas instead: there
+   the bar is a small card in the stage's corner. Across the top it lay over the art's first
+   rows, and a press on them met its button. */
+@media (max-height: 799px) {
+  :root:not([data-layout='compact']) .empty-frame {
+    --rise-from: 0 -10px;
+
+    top: 12px;
+    left: 12px;
+    translate: none;
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 216px;
+    padding: 12px;
+    border-radius: var(--radius-card);
+    white-space: normal;
+  }
+
+  :root:not([data-layout='compact']) .empty-frame .btn {
+    justify-content: center;
+  }
+}

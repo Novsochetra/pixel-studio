@@ -106,7 +106,8 @@ export async function openImport(app, direction, file, frame = app.store.state.a
     return;
   }
 
-  const sheet = openSheet(`Clean into ${place}`, null, { wide: true });
+  // not opened on its first field: in a short window that is under the buttons at its foot
+  const sheet = openSheet(`Clean into ${place}`, null, { wide: true, focusField: false });
   const alone = cleansAlone(state, direction, frame);
 
   // a later frame of an animation is another pose: by default it keeps its own height

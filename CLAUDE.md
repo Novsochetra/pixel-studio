@@ -224,8 +224,14 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   change to the project's own settings (guides, palettes) is a step too
   (`recordSetting`).
 - A project keeps its undo steps while another is looked at (`historyOf` in `session.js`, the
-  last three opened): opened again, it had none. Read again from saved work, the steps up to a
-  whole-project swap are let go (`History.sinceReread`), as they hold the project from before.
+  last three opened): opened again, it had none. Read again from saved work, a step that swaps
+  whole projects is pointed at the project now open (`History.openOn`).
+- A save's documents go to the browser's store together and are committed as they are asked
+  for (`committed`, `writeAll` in `backends.js`). As the page is left, what the save would write
+  is kept first in `localStorage` (`left-unsaved.js`, `Saver.waiting`) and put into the saved
+  work on the next visit: a tab closed a moment after a stroke lost the stroke, as a page that
+  is gone never hears its write was done. `leaving.flow.mjs` closes the tab and loads the page
+  again within that moment.
 - What undo cannot bring back (a project, a folder, a saved version, a preset) asks before it
   goes, the same way everywhere: where the thing stood, a question with Delete and Keep
   (`askDelete` in `src/ui/ask-delete.js`; a project's card asks the same). What undo can bring

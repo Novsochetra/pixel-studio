@@ -3,7 +3,7 @@ import { liftPixels, rectSelection } from '../editor/selection.js';
 import { eraseSelection, floatPiece, moveLifted, pieceOnCanvas } from '../editor/floating.js';
 import { toast } from './dom.js';
 import { shiftPickedLayers } from './layer-move.js';
-import { forHands } from './platform-keys.js';
+import { forHands, keyNames } from './platform-keys.js';
 
 const ARROWS = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] };
 
@@ -65,6 +65,9 @@ function copy(app, cut) {
   if (cut) {
     commit(app, 'Cut', [layer], () => eraseSelection(layer.sprite, state.selection));
   }
+
+  // the Copy button says so: the keys copied without a word, and nothing showed they had
+  toast(keyNames(`${cut ? 'Cut' : 'Copied'}. Paste it in any frame with ⌘V.`));
 }
 
 function eraseSelected(app) {
@@ -81,6 +84,8 @@ function stepFrame(app, step) {
   selectFrame(app, (state.at.frame + step + count) % count);
 }
 
+const letGo = (app) => app.store.set({ selection: null });
+
 const COMMAND_KEYS = {
   a: { when: () => true, run: selectAll },
   c: { when: (state) => state.selection, run: (app) => copy(app, false) },
@@ -91,7 +96,12 @@ const COMMAND_KEYS = {
 const PLAIN_KEYS = {
   delete: { when: (state) => state.selection, run: eraseSelected },
   backspace: { when: (state) => state.selection, run: eraseSelected },
-  escape: { when: (state) => state.selection, run: (app) => app.store.set({ selection: null }) },
+  escape: { when: (state) => state.selection, run: letGo },
+  // as Done is: not with the keys on a control, whose own key Enter is
+  enter: {
+    when: (state) => state.selection && document.activeElement === document.body,
+    run: letGo,
+  },
   ',': { when: () => true, run: (app) => stepFrame(app, -1) },
   '.': { when: () => true, run: (app) => stepFrame(app, 1) },
 };

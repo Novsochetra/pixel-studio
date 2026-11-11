@@ -4,6 +4,7 @@ import { keepVersion } from './versions-sheet.js';
 import { restoreProject } from './session.js';
 import { numberInput } from './number-input.js';
 import { fieldRow, listGroup } from './list-group.js';
+import { keepFocus } from './keep-focus.js';
 import { CANVAS_LIMITS, canvasShift, withCanvasSize } from '../model/canvas-size.js';
 import { isWholeBetween, wholeNumber } from '../model/numbers.js';
 import { kindOf } from '../model/kinds.js';
@@ -135,7 +136,8 @@ export function openCanvasSizeSheet(app) {
   };
   const job = { anchor: firstAnchor(app.store.state.project) };
   const anchors = node('div');
-  const draw = () => replace(anchors, anchorGrid(job, draw));
+  // drawn again as one is picked: the keys stay on the one picked
+  const draw = () => keepFocus(anchors, () => replace(anchors, anchorGrid(job, draw)));
   const change = node('button.btn.primary', {}, 'Change the size');
   const apply = () => changeSize(app, { fields, job, sheet }, change);
   const onEnter = (event) => event.key === 'Enter' && apply();

@@ -35,7 +35,7 @@ const GROUPS = [
       ['Arrows', 'Nudge 1 px (Shift: 10 px)'],
       ['⌘C  ⌘X  ⌘V', 'Copy, cut, paste (works across frames)'],
       ['Delete', 'Erase the selection'],
-      ['Esc', 'Let go'],
+      ['Esc, Enter', 'Let go'],
       ['⌘A', 'Select everything'],
     ],
   ],

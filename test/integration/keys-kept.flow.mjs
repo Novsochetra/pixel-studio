@@ -144,4 +144,36 @@ check(
   'when nothing is left to undo, the keys do not go to Redo',
 );
 
+// A window that draws itself again at each change dropped the keys onto the page behind it:
+// a frame width typed and Tab pressed, and the next number could not be typed.
+const fieldId = () => page.evaluate(() => document.activeElement?.id);
+
+await page.getByRole('button', { name: 'Download' }).click();
+await page.getByRole('menuitem', { name: /Sprite sheet/ }).click();
+await page.waitForTimeout(400);
+await page.locator('#frame-width').focus();
+await page.keyboard.press('ControlOrMeta+a');
+await page.keyboard.type('70');
+await page.keyboard.press('Tab');
+check(
+  (await fieldId()) === 'frame-height' && (await page.inputValue('#frame-width')) === '70',
+  'in the sprite sheet’s window, Tab after a width typed goes on to the height',
+);
+await page.keyboard.type('110');
+await page.keyboard.press('Tab');
+check((await fieldId()) === 'anchor-x', 'and on from there');
+await page.keyboard.press('Escape');
+await page.waitForTimeout(400);
+
+await page.locator('.status-link').click();
+await page.waitForTimeout(400);
+await page.getByRole('button', { name: 'Top left' }).focus();
+await page.keyboard.press('Tab');
+await page.keyboard.press('Space');
+check(
+  (await focused()).startsWith('Top'),
+  'the place picked for the art in Canvas size keeps the keys',
+);
+await page.keyboard.press('Escape');
+
 await finish();
