@@ -17,6 +17,7 @@ import { gameOf } from '../model/presets.js';
 import { mirrorsOf } from '../model/directions.js';
 import { placementOf } from '../model/kinds.js';
 import { inWords } from '../model/told.js';
+import { listGroup } from './list-group.js';
 
 function warn(warnings) {
   if (warnings.length) {
@@ -40,7 +41,7 @@ function startingChoice(state) {
   };
 }
 
-function frameFields(state, choice, set) {
+function frameFields(state, choice, { set, toggle }) {
   const anchor = placementOf(state.project).place === 'feet' ? 'Feet' : 'Anchor';
   const { settings } = choice;
   const fields = [
@@ -50,12 +51,12 @@ function frameFields(state, choice, set) {
     [`${anchor} y in frame`, 'anchorY', 'anchor-y'],
   ];
 
-  return node(
-    'div.compare',
-    { style: { gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' } },
+  return listGroup(
+    { title: 'Each frame, in art pixels' },
     fields.map(([label, key, id]) =>
       numberField(label, settings[key], id, (value) => set({ [key]: value })),
     ),
+    toggle,
   );
 }
 
@@ -100,8 +101,7 @@ function drawExport(slot, job) {
   replace(
     slot,
     presetButtons(state, choice, pick),
-    frameFields(state, choice, edit),
-    mirrors ? toggle : null,
+    frameFields(state, choice, { set: edit, toggle: mirrors ? toggle : null }),
     node('div', { style: { overflowX: 'auto' } }, sheetPreview(result)),
     summary(result, animation, state),
     gamePack ? manifestBlock(result, choice.settings) : null,

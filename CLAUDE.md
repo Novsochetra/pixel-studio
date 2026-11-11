@@ -223,6 +223,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   to where it was made from, redo to where it led. A
   change to the project's own settings (guides, palettes) is a step too
   (`recordSetting`).
+- A project keeps its undo steps while another is looked at (`historyOf` in `session.js`, the
+  last three opened): opened again, it had none. Read again from saved work, the steps up to a
+  whole-project swap are let go (`History.sinceReread`), as they hold the project from before.
 - What undo cannot bring back (a project, a folder, a saved version, a preset) asks before it
   goes, the same way everywhere: where the thing stood, a question with Delete and Keep
   (`askDelete` in `src/ui/ask-delete.js`; a project's card asks the same). What undo can bring

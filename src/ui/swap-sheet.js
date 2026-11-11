@@ -163,7 +163,8 @@ export function openSwapSheet(app) {
       node('p.hint', {}, NO_PALETTE),
       addPalette(job),
       starterPalettes(job),
-      reduceButton(job),
+      // in a row of its own, at its own width: alone in the window's column it was a bar across it
+      node('div.group', {}, reduceButton(job)),
     );
     app.store.set({ swapPreview: null });
   };

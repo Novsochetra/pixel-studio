@@ -74,6 +74,24 @@ function listOpenProject(index, project, prefix) {
   index.current = project.id;
 }
 
+const KEPT_HISTORIES = 3;
+
+// A project keeps its undo steps for the visit: looked away from and opened again it had none,
+// and what was done before could not be taken back. The last few opened keep theirs.
+function historyOf(app, id) {
+  app.histories ??= new Map();
+  const history = app.histories.get(id) ?? new History(app.findLayer);
+
+  app.histories.delete(id);
+  app.histories.set(id, history);
+
+  for (const oldest of [...app.histories.keys()].slice(0, -KEPT_HISTORIES)) {
+    app.histories.delete(oldest);
+  }
+
+  return history;
+}
+
 // Makes `project` the open one: its own undo history and its own saver. { prefix, save, keepView }:
 // save as startSaving takes it; keepView keeps the zoom, tools and place being edited.
 export function install(app, project, { prefix, save = 'nothing', keepView = false }) {
@@ -82,7 +100,7 @@ export function install(app, project, { prefix, save = 'nothing', keepView = fal
   const stored = app.keys?.prefix === prefix ? app.saver?.stored : null;
   const view = keepView ? viewKept(app.store.state, project) : keptView(project);
   app.keys = keysFor(prefix);
-  app.history = new History(app.findLayer);
+  app.history = historyOf(app, project.id);
   startSaving(app, project, save, stored);
   listOpenProject(app.index, project, prefix);
   const saveStatus = save === 'all' ? 'pending' : 'saved';
@@ -100,6 +118,8 @@ export async function openProject(app, entry) {
   project.id ??= entry.id;
 
   install(app, fillMissingSprites(project), { prefix: entry.prefix });
+  app.history.sinceReread();
+  app.store.touch('project');
   await saveProjectList(app.backend, app.index);
 }
 

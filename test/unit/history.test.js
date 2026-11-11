@@ -45,3 +45,49 @@ test('a deleted frame comes back with undo, and older pixel undos still land', (
   history.redo(project);
   assert.equal(getPixel(animation().directions.south.frames[0].layers[0].sprite, 3, 3), RED);
 });
+
+test('read again from saved work, a project keeps the steps made since a whole project took its place', () => {
+  const project = newProject();
+  const find = (id) => [...allLayers(project)].find(({ layer }) => layer.id === id)?.layer ?? null;
+  const history = new History(find);
+  const layer = project.animations[0].directions.south.frames[0].layers[0];
+  const draw = (label, x) => {
+    const before = cloneSprite(layer.sprite);
+
+    setPixel(layer.sprite, x, 0, RED);
+    history.record(label, [{ layer, before }]);
+  };
+
+  draw('first', 0);
+  history.recordProject('Canvas size', { before: project, after: project });
+  draw('second', 1);
+  draw('third', 2);
+  history.undo(project);
+  history.sinceReread();
+
+  assert.equal(history.nextUndo, 'second', 'the steps since are kept');
+  history.undo(project);
+  assert.equal(history.canUndo, false, 'the swap, and what came before it, are let go');
+  history.redo(project);
+  history.redo(project);
+  assert.equal(getPixel(layer.sprite, 2, 0), RED, 'and what was undone is still redone');
+});
+
+test('a whole project waiting to be redone is let go with what would follow it', () => {
+  const project = newProject();
+  const find = (id) => [...allLayers(project)].find(({ layer }) => layer.id === id)?.layer ?? null;
+  const history = new History(find);
+  const layer = project.animations[0].directions.south.frames[0].layers[0];
+  const before = cloneSprite(layer.sprite);
+
+  setPixel(layer.sprite, 0, 0, RED);
+  history.record('first', [{ layer, before }]);
+  history.recordProject('Canvas size', { before: project, after: project });
+  history.recordSetting('Reference view', 'reference', 'south', 'east');
+  history.undo(project);
+  history.undo(project);
+  history.sinceReread();
+
+  assert.equal(history.canRedo, false);
+  assert.equal(history.nextUndo, 'first');
+});

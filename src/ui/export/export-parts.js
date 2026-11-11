@@ -2,12 +2,11 @@ import { node, toast } from '../dom.js';
 import { drawChecker } from '../checker.js';
 import { afterPress } from '../after-press.js';
 import { saveFrames, saveGamePack, saveGifs, saveSheetsWithJson } from '../export-files.js';
+import { actionRow, fieldRow, listGroup, switchRow } from '../list-group.js';
 
 export function numberField(label, value, id, onChange) {
-  return node(
-    'label.field',
-    { for: id },
-    node('span', {}, label),
+  return fieldRow(
+    label,
     node('input.input.mono', {
       id,
       type: 'number',
@@ -86,42 +85,21 @@ const FORMATS = [
 // every animation in a format any engine reads, and the game pack when the game has one
 export function formatButtons(run, gamePack) {
   const buttons = FORMATS.map(([save, label, title]) =>
-    node('button.btn', { title, onclick: () => run(save) }, label),
+    actionRow(label, () => run(save), { title }),
   );
   const pack = gamePack
-    ? node(
-        'button.btn',
-        {
-          title: "Every animation at the repo's paths, with the SPRITES manifest",
-          onclick: () => run(saveGamePack),
-        },
-        'Naga Eleven game pack',
-      )
+    ? actionRow('Naga Eleven game pack', () => run(saveGamePack), {
+        title: "Every animation at the repo's paths, with the SPRITES manifest",
+      })
     : null;
 
-  return node(
-    'div.field',
-    {},
-    node('span', {}, 'Every animation, for any engine'),
-    node('div.group', { style: { gap: '6px', flexWrap: 'wrap' } }, buttons, pack),
-  );
+  return listGroup({ title: 'Every animation, for any engine' }, buttons, pack);
 }
 
 export function mirroredToggle(on, { gamePack, onChange }) {
   const hint = gamePack
     ? 'Off: the game mirrors them itself (mirrorOf), like run and kick'
-    : 'Off: flip them in your game; on: drawn into the sheet';
+    : 'Off: flip them in your game. On: drawn into the sheet';
 
-  return node(
-    'label.toggle-row',
-    { for: 'mirrored' },
-    node('span', {}, node('div', {}, 'Add the mirrored rows'), node('div.hint', {}, hint)),
-    node('input.switch', {
-      type: 'checkbox',
-      role: 'switch',
-      id: 'mirrored',
-      checked: on,
-      onchange: (event) => onChange(event.target.checked),
-    }),
-  );
+  return switchRow('Add the mirrored rows', { id: 'mirrored', checked: on, hint }, onChange);
 }
