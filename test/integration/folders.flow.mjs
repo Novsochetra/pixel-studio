@@ -54,7 +54,14 @@ check(
     !(await page.locator('.start-chooser').isVisible()),
   'the Projects window opens on every project, the open one and a new one on pages of their own',
 );
+const tabsAt = async () => (await page.locator('.sheet .projects-nav').boundingBox()).y;
+const tabsOnAll = await tabsAt();
+
 await projectsPage(page, 'This project');
+check(
+  Math.abs((await tabsAt()) - tabsOnAll) < 1,
+  'the row that turns the pages stays where it is as a longer page is turned to',
+);
 check(
   (await page.locator('#current-project-name').isVisible()) &&
     !(await page.locator('.project-row').first().isVisible()),

@@ -39,7 +39,7 @@ function angleControls(app, piece, pose) {
     node(
       'button.btn.quiet.icon-only',
       { 'aria-label': `Turn ${piece.name} ${STEP}° left`, onclick: () => turnTo(angle - STEP) },
-      '⟲',
+      icon('turn-left'),
     ),
     node(
       'label.pose-angle',
@@ -56,7 +56,7 @@ function angleControls(app, piece, pose) {
     node(
       'button.btn.quiet.icon-only',
       { 'aria-label': `Turn ${piece.name} ${STEP}° right`, onclick: () => turnTo(angle + STEP) },
-      '⟳',
+      icon('turn-right'),
     ),
     button('Reset part', () => setPart(app, piece, null), `${piece.name} back as it was cut`),
     button(

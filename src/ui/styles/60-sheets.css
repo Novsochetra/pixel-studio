@@ -257,6 +257,12 @@
   align-items: center;
 }
 
+.map-row > svg {
+  width: 16px;
+  height: 16px;
+  color: var(--label-muted);
+}
+
 .map-row .swatch {
   width: 22px;
   height: 22px;

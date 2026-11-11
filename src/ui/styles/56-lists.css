@@ -168,6 +168,20 @@
   cursor: pointer;
 }
 
+/* the colour a choice of colours stands at, beside its code: a code alone names no colour */
+.list-swatch {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+  border: 1px solid var(--separator);
+  border-radius: 5px;
+}
+
+.list-swatch + .list-select {
+  flex: 0 1 auto;
+}
+
 /* over the choice's own end: a press there opens the choice */
 .list-select + svg {
   margin-left: -24px;

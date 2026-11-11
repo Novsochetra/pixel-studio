@@ -14,12 +14,14 @@ export function listGroup({ title = null, note = null }, ...rows) {
 export const valueRow = (label, value) =>
   node('div.list-row', {}, node('span.list-label', {}, label), node('span.list-value', {}, value));
 
-// a row with a control at its end: a field, or a choice, which shows the chevron of a menu
-export const fieldRow = (label, control, { title = null } = {}) =>
+// A row with a control at its end: a field, or a choice, which shows the chevron of a menu.
+// `swatch` is the colour a choice of colours stands at, shown beside its code.
+export const fieldRow = (label, control, { title = null, swatch = null } = {}) =>
   node(
     'label.list-row',
     { title },
     node('span.list-label', {}, label),
+    swatch ? node('span.list-swatch', { style: { background: swatch } }) : null,
     control,
     control.matches('select') ? icon('chevron-down') : null,
   );

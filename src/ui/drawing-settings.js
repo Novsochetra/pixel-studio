@@ -39,7 +39,10 @@ function paintOverField(app, colors) {
       },
       options,
     ),
-    { title: 'Paint only over pixels of one colour' },
+    {
+      title: 'Paint only over pixels of one colour',
+      swatch: state.paintOver === null ? null : toHex(state.paintOver),
+    },
   );
 }
 

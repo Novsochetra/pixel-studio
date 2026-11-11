@@ -147,7 +147,7 @@ await page.mouse.move(art.x + art.width * 0.4, art.y + art.height * 0.3);
 await page.mouse.down();
 await page.mouse.move(art.x + art.width * 0.6, art.y + art.height * 0.5, { steps: 4 });
 await page.mouse.up();
-await page.getByRole('button', { name: 'Flip ↔' }).click();
+await page.getByRole('button', { name: 'Flip the selection left to right' }).click();
 await page.keyboard.press('ControlOrMeta+z');
 await page.keyboard.press('ControlOrMeta+Shift+z');
 await page.waitForTimeout(300);

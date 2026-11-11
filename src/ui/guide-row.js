@@ -60,6 +60,7 @@ function colourField(app, guide, update) {
         node('option', { value: String(option), selected: guide.colour === option }, toHex(option)),
       ),
     ),
+    { swatch: Number.isFinite(guide.colour) ? toHex(guide.colour) : null },
   );
 }
 

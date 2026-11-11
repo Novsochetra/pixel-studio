@@ -12,7 +12,8 @@ const remember = () => keepSetting(SEEN, true);
 
 const CLEAN = {
   keys: 'drop an AI image on the canvas, or into a frame below it.',
-  fingers: 'open Frames and put an AI image into a frame from its ⋯ menu.',
+  fingers:
+    'open the frames (the round button at the foot, then Frames) and put an AI image into a frame from its ⋯ menu.',
 };
 
 const FIX = {

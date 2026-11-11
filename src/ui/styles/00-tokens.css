@@ -60,6 +60,9 @@
   --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-segment: cubic-bezier(0.3, 0.8, 0.2, 1);
   --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* the chevron of a choice, drawn as icon() draws its own, in a grey read on both themes: a
+     picture in a stylesheet cannot take the colour of the words beside it */
+  --chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   --scale-pressed: 0.96;
   --dim-pressed: 0.85;
   color-scheme: dark;

@@ -1,4 +1,4 @@
-import { node, toast } from '../dom.js';
+import { icon, node, toast } from '../dom.js';
 import { changeStructure } from '../actions.js';
 import { characterColors, characterCounts } from '../character-colours.js';
 import { newId } from '../../model/project.js';
@@ -40,7 +40,7 @@ export function mappingRows(state, palette, mapping, onChange) {
       {},
       node('span.swatch', { style: { background: toHex(color) }, 'aria-hidden': 'true' }),
       node('span.mono', {}, toHex(color), node('span.hint', {}, ` · ${counts.get(color)} px`)),
-      node('span', { 'aria-hidden': 'true' }, '→'),
+      icon('arrow-right'),
       targetPicker(palette, mapping[color], (target) => onChange(color, target)),
     ),
   );

@@ -18,11 +18,15 @@
   min-width: 0;
 }
 
-/* As tall whichever page is in sight, a longer page scrolling in it: the window changed size
-   at each turn, and the row that turns the pages moved from under the pointer. */
+/* At least as tall whichever page is in sight, and hung from the top of the screen: centred,
+   the window moved at each turn to a longer page, and the row that turns the pages went from
+   under the pointer. */
 :root:not([data-layout='compact']) .projects-page {
-  height: min(62vh, 580px);
-  overflow-y: auto;
+  min-height: min(62vh, 580px);
+}
+
+:root:not([data-layout='compact']) .projects-sheet:is(.sheet, .sheet-out) {
+  align-self: start;
 }
 
 /* a new project is a page of its own: its fold has nothing to fold away */

@@ -24,7 +24,9 @@ function label(app, direction) {
       { onclick: () => selectDirection(app, direction), title: `Edit ${name}` },
       name,
     ),
-    star ? node('span.grid-star', { title: 'Every other view is matched to this one' }, '★') : null,
+    star
+      ? node('span.grid-star', { title: 'Every other view is matched to this one' }, icon('star'))
+      : null,
     node(
       'button.btn.quiet.grid-view-more',
       {

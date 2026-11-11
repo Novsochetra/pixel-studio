@@ -74,7 +74,10 @@ function colourField(app, colour) {
         node('option', { value: String(option), selected: option === colour }, toHex(option)),
       ),
     ),
-    { title: 'The outline’s colour, found on the edge of the art' },
+    {
+      title: 'The outline’s colour, found on the edge of the art',
+      swatch: colour === null ? null : toHex(colour),
+    },
   );
 }
 

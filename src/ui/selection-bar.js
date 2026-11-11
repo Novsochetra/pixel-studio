@@ -1,4 +1,4 @@
-import { node, replace, toast } from './dom.js';
+import { icon, node, replace, toast } from './dom.js';
 import { markMore, watchMore } from './more-behind.js';
 import { commit, commitSelected, currentLayer } from './actions.js';
 import { liftPixels, selectionBox, transformSelected } from '../editor/selection.js';
@@ -7,11 +7,12 @@ import { hasKeyboard, keyNames } from './platform-keys.js';
 import { selectionAngle, turnSelectionTo } from './selection-turn.js';
 import { modeControls, syncModes } from './selection-modes.js';
 
+// what each does, the picture and word it wears, and what it is called
 const ACTIONS = [
-  ['flip-x', 'Flip ↔', 'Flip the selection left to right'],
-  ['flip-y', 'Flip ↕', 'Flip the selection upside down'],
-  ['rotate-ccw', '⟲ 90°', 'Turn the selection a quarter left'],
-  ['rotate-cw', '⟳ 90°', 'Turn the selection a quarter right'],
+  ['flip-x', 'flip-h', 'Flip', 'Flip the selection left to right'],
+  ['flip-y', 'flip-v', 'Flip', 'Flip the selection upside down'],
+  ['rotate-ccw', 'turn-left', '90°', 'Turn the selection a quarter left'],
+  ['rotate-cw', 'turn-right', '90°', 'Turn the selection a quarter right'],
 ];
 
 function transform(app, kind, label) {
@@ -114,6 +115,17 @@ const doneEnd = (app) =>
     ),
   );
 
+function actionButton(app, [kind, picture, word, title]) {
+  const act = () => transform(app, kind, title.split(' the')[0]);
+
+  return node(
+    'button.btn.quiet',
+    { title, 'aria-label': title, onclick: act },
+    icon(picture),
+    word,
+  );
+}
+
 // Shown over the canvas while something is selected: turn, flip, copy, delete, let go.
 export function renderSelectionBar(el, app) {
   el.hidden = !app.store.state.selection;
@@ -153,9 +165,7 @@ export function renderSelectionBar(el, app) {
       turnTo: (degrees) => turnSelectionTo(app, degrees),
       now: () => selectionAngle(app.store.state),
     }),
-    ACTIONS.map(([kind, label, title]) =>
-      button(title, () => transform(app, kind, title.split(' the')[0]), label),
-    ),
+    ACTIONS.map((action) => actionButton(app, action)),
     button(keyNames('Copy (⌘C); paste in any frame with ⌘V'), () => copySelected(app), 'Copy'),
     button('Erase the selected pixels (Delete)', () => eraseSelected(app), 'Delete'),
     modeControls(app),
