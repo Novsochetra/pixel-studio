@@ -30,7 +30,8 @@ function freeLayerName(frame) {
   return `Layer ${number}`;
 }
 
-// the new layer's name is ready to type, as an image editor has it
+// The new layer's name is ready to type, as an image editor has it. Not under fingers: the
+// keyboard came up over the art the layer was made to draw on, and Rename is a button there.
 function newLayer(app, active) {
   const name = freeLayerName(frameOf(app.store.state));
   let key = null;
@@ -39,7 +40,10 @@ function newLayer(app, active) {
 
     return { layer: key };
   });
-  renameRow(app, { key, name });
+
+  if (hasKeyboard()) {
+    renameRow(app, { key, name });
+  }
 }
 
 // An icon button; its name shows on hover and is read out. A phone has no hover: there the

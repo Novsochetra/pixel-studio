@@ -49,6 +49,21 @@ function title(job, folder) {
   return folder?.name ?? PLACES[place];
 }
 
+// "All projects" is the page's own name and the place picked just above: said a third time over
+// the list it only took room, so there the heading is the count alone.
+function named(job, folder) {
+  const searching = Boolean(job.view.query.trim());
+
+  if (!searching && job.view.place === EVERY_PROJECT) {
+    return null;
+  }
+
+  return [
+    searching ? icon('search') : icon(folder ? 'folder' : 'tile'),
+    node('h4.place-title', {}, title(job, folder)),
+  ];
+}
+
 export function placeHead(job, entries) {
   const folder = job.app.index.folders.find((each) => each.id === job.view.place);
   const searching = Boolean(job.view.query.trim());
@@ -57,8 +72,7 @@ export function placeHead(job, entries) {
   return node(
     'div.place-head',
     {},
-    searching ? icon('search') : icon(folder ? 'folder' : 'tile'),
-    node('h4.place-title', {}, title(job, folder)),
+    named(job, folder),
     node('span.view-meta', {}, counted(entries.length)),
     node(
       'div.group.place-actions',

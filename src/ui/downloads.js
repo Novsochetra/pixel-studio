@@ -103,20 +103,24 @@ function menuItems(app) {
   // art with one view has no views to zip together or to set side by side
   const single = isSingleView(state.project);
 
+  // Each says what kind of file it is: "Icon · 32×32 for editing" named the view, which a
+  // newcomer does not know, and nowhere said PNG or GIF.
+  const png = single ? 'PNG' : `${label} as PNG`;
+
   return [
-    ['Sprite sheet for the game…', async () => openExportSheet(app)],
+    ['Sprite sheet and GIFs for the game…', async () => openExportSheet(app)],
     ['Prompt and reference for an AI image…', async () => openChatgptSheet(app)],
     null,
-    [`${label} · ${width}×${height} for editing`, () => saveView(app, 1)],
-    ...(scale > 1 ? [[`${label} · ${big}, transparent`, () => saveView(app, scale)]] : []),
-    [`${label} · ${big} on the checkerboard`, () => saveView(app, scale, true)],
+    [`${png} · ${width}×${height}, for editing`, () => saveView(app, 1)],
+    ...(scale > 1 ? [[`${png} · ${big}, transparent`, () => saveView(app, scale)]] : []),
+    [`${png} · ${big} on the checkerboard`, () => saveView(app, scale, true)],
     null,
-    [`${single ? label : 'All views'} · zip with both sizes`, () => saveAllViews(app)],
+    [single ? 'Both sizes · zip' : 'All views · zip with both sizes', () => saveAllViews(app)],
     ...(single
       ? []
       : [['All views side by side · PNG with guide lines', () => saveSideBySide(app)]]),
     null,
-    ['Save project file (.json)', () => saveProject(app)],
+    ['Save project file, to keep editing (.json)', () => saveProject(app)],
     ['Open a project file…', () => openProjectFile(app)],
   ];
 }

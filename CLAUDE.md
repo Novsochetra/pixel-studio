@@ -142,6 +142,12 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   in Brush; Add, Take away and Everywhere on the selection's bar; Pick several in Layers), and what a tool says when it
   is picked is worded for the hands that picked it (`touch` in `tool-list.js`, `forHands`). One finger on the canvas waits a moment before its tool acts
   (`touch-intent.js`), as it may be the first of a pinch.
+- Two fingers tapped together on the canvas undo the last step and three bring it again
+  (`finger-tap.js`, `stage-taps.js`): Undo is at the top of a phone's screen, a hand away from
+  the art.
+- Under fingers (`95-touch.css`, `pointer: coarse`) nothing pressed is smaller than 40px, or has
+  room round it that takes the press, and no words are smaller than 12px. Something new that is
+  pressed or read is held to both there.
 
 ## The look
 
@@ -228,6 +234,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - The view a project is left on (view, frame, tool, colour) is kept for the next visit
   (`view-kept.js`): something new in the state that is how the editor is showing things joins
   `VIEW` there.
+- A picture cleaned onto a canvas too small for it is made smaller, and the window says so and
+  offers the canvas it keeps its own pixels on (`canvasToKeep`, `import/keep-size.js`): never
+  shrunk without a word.
 - A download carries the project's name (`fileSlug(project.name)`), and art with one view names
   no view in its files (`downloadName`, `viewFileName`).
 - What is typed is checked where it is read: a number is kept to what can be (`wholeNumber`), and

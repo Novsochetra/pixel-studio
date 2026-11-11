@@ -41,7 +41,7 @@ await drag([12, 10], [18, 10]);
 const angle = await page.locator('#selection-angle').inputValue();
 
 check(
-  (await page.locator('.selection-bar').textContent()).startsWith('Turn'),
+  (await page.locator('.selection-bar').textContent()).includes('Turn'),
   'the selection’s angle says what it is, where no pointer hovers it to ask',
 );
 

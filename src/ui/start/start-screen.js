@@ -37,8 +37,9 @@ export function showStartScreen({ presets, failed, handlers }) {
         'Turn AI pixel art into true pixel art, then edit, animate and export it for your game.',
       ),
       failed ? node('p.start-warning', { role: 'alert' }, FAILED) : null,
-      chooser,
+      // before the form, which is longer than a phone's screen: they were under all of it
       moreWays(handlers),
+      chooser,
     ),
   );
 

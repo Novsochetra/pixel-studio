@@ -133,8 +133,24 @@ h4.start-heading {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding-top: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--separator);
+}
+
+/* On a phone the form is longer than the screen: Create stays at the screen's foot, in reach
+   whichever kind is picked. It was a screen and a half below the kinds. */
+:root[data-layout='compact'] .start-chooser .sheet-actions {
+  position: sticky;
+  bottom: calc(-24px - env(safe-area-inset-bottom, 0px));
+  z-index: 1;
+  margin: 0 -16px calc(-24px - env(safe-area-inset-bottom, 0px));
+  padding: 10px 16px calc(34px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--separator);
+  background: var(--bg);
+}
+
+:root[data-layout='compact'] :is(.sheet, .sheet-out) .start-chooser .sheet-actions {
+  background: var(--sheet);
 }
 
 /* the ways in that make nothing new are the arcade's glass pills; Create is its Play */

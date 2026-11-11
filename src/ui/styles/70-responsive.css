@@ -431,6 +431,15 @@
   translate: -50%;
 }
 
+/* the two flips are told apart by their pictures: their one word, said twice, took the room */
+:root[data-layout='compact'] .selection-bar .action-word {
+  display: none;
+}
+
+:root[data-layout='compact'] .selection-bar .btn:has(.action-word) {
+  padding-inline: 10px;
+}
+
 /* the selection's bar stands at the end of the canvas the selection is not in (selection-bar.js) */
 :root[data-layout='compact'] .selection-bar[data-side='top'] {
   --rise-from: 0 -10px;
@@ -445,9 +454,9 @@
   right: 0;
   margin-left: auto;
   padding-left: 4px;
-  background: var(--chrome);
+  background: var(--material-ground);
   /* hides what scrolls past in the bar's own edge */
-  box-shadow: 6px 0 0 var(--chrome);
+  box-shadow: 6px 0 0 var(--material-ground);
 }
 
 /* three choices side by side are wider than a phone: the row scrolls, where wrapped inside its

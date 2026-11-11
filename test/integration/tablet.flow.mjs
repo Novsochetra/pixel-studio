@@ -46,14 +46,11 @@ await page.waitForTimeout(200);
 if (fingersOnly) {
   const said = await page.locator('.toast').textContent();
 
-  // Paste was nowhere on the desk's bar, while Copy said to look in the More menu
-  await page.locator('.selection-bar').getByRole('button', { name: 'Done' }).tap();
-  await page.getByRole('button', { name: 'More', exact: true }).tap();
-  await page.waitForTimeout(300);
-  const paste = page.getByRole('menuitem', { name: 'Paste' });
+  // Paste was in a menu at the top of the screen: it is beside Copy, where Copy says it is
+  const paste = page.locator('.selection-bar').getByRole('button', { name: 'Paste' });
 
   check(
-    said.includes('More menu') && (await paste.count()) === 1 && (await paste.isEnabled()),
+    said.includes('beside it') && (await paste.count()) === 1 && (await paste.isEnabled()),
     'what was copied can be pasted without keys, where Copy said it could',
   );
   await paste.tap();

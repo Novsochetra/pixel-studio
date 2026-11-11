@@ -41,7 +41,8 @@ any game. Everything runs in the browser; the build makes one self-contained HTM
 
 The whole editor works with fingers. The canvas fills the screen; the tools sit in a strip under it
 and the dock at the bottom opens one panel at a time: Frames, Colours, Brush, Layers, Outline,
-Guides. One finger draws, two pan and pinch. The top bar keeps the project's name (Projects), undo
+Guides. One finger draws, two pan and pinch; a tap with two fingers undoes a step and a tap with
+three brings it back. The top bar keeps the project's name (Projects), undo
 and redo, a More menu (fit the canvas, the pixel grid, canvas size, saved versions) and Download.
 On its side, the tools and panels stand beside the canvas. A small tablet gets the same layout; a
 wider one gets the desktop's. A window rides up from the bottom edge and is pulled down by its bar

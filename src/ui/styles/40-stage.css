@@ -178,7 +178,7 @@
   right: 100%;
   bottom: 0;
   width: 30px;
-  background: linear-gradient(to right, transparent, var(--chrome) 70%);
+  background: linear-gradient(to right, transparent, var(--material-ground) 70%);
   pointer-events: none;
 }
 
@@ -250,6 +250,6 @@
     right: 0;
     margin-left: auto;
     padding-left: 4px;
-    background: var(--chrome);
+    background: var(--material-ground);
   }
 }

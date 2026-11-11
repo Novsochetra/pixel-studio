@@ -4,6 +4,7 @@ import { commit, commitSelected, currentLayer } from './actions.js';
 import { liftPixels, selectionBox } from '../editor/selection.js';
 import { eraseSelection, flipSelection } from '../editor/floating.js';
 import { hasKeyboard, keyNames } from './platform-keys.js';
+import { paste } from './selection-keys.js';
 import { selectionAngle, turnSelectionTo } from './selection-turn.js';
 import { modeControls, syncModes } from './selection-modes.js';
 
@@ -45,7 +46,7 @@ function copySelected(app) {
   toast(
     hasKeyboard()
       ? keyNames('Copied. Paste it in any frame with ⌘V.')
-      : `Copied. Paste is in ${state.layout === 'wide' ? 'the bar at the top' : 'the More menu'}, in any frame.`,
+      : `Copied. Paste is beside it; in another frame it is in ${state.layout === 'wide' ? 'the bar at the top' : 'the More menu'}.`,
   );
 }
 
@@ -133,9 +134,19 @@ function actionButton(app, [kind, picture, word, title]) {
     'button.btn.quiet',
     { title, 'aria-label': title, onclick: act },
     icon(picture),
-    word,
+    // the two flips are told apart by their pictures, where one word said twice takes the room
+    word === 'Flip' ? node('span.action-word', {}, word) : word,
   );
 }
+
+// What is done most stands first, where a phone's bar shows it without a swipe: Copy and Delete
+// were past its edge, behind the angle. Paste is beside Copy where there are no keys for it: it
+// was in a menu at the top of the screen.
+const copyAndDelete = (app) => [
+  button(keyNames('Copy (⌘C); paste in any frame with ⌘V'), () => copySelected(app), 'Copy'),
+  hasKeyboard() ? null : button('Paste what was copied, in this frame', () => paste(app), 'Paste'),
+  button('Erase the selected pixels (Delete)', () => eraseSelected(app), 'Delete'),
+];
 
 // Shown over the canvas while something is selected: turn, flip, copy, delete, let go.
 export function renderSelectionBar(el, app) {
@@ -168,6 +179,8 @@ export function renderSelectionBar(el, app) {
 
   replace(
     el,
+    copyAndDelete(app),
+    ACTIONS.map((action) => actionButton(app, action)),
     // a number alone, with no pointer to hover it for what it is, said nothing on a phone
     node('span.bar-word', {}, 'Turn'),
     angleField({
@@ -178,9 +191,6 @@ export function renderSelectionBar(el, app) {
       turnTo: (degrees) => turnSelectionTo(app, degrees),
       now: () => selectionAngle(app.store.state),
     }),
-    ACTIONS.map((action) => actionButton(app, action)),
-    button(keyNames('Copy (⌘C); paste in any frame with ⌘V'), () => copySelected(app), 'Copy'),
-    button('Erase the selected pixels (Delete)', () => eraseSelected(app), 'Delete'),
     modeControls(app),
     doneEnd(app),
   );

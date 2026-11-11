@@ -57,8 +57,8 @@
     background: var(--chrome-raised);
     box-shadow:
       var(--shadow-glass),
-      -8px 0 10px -2px var(--chrome),
-      8px 0 0 4px var(--chrome);
+      -8px 0 10px -2px var(--material-ground),
+      8px 0 0 4px var(--material-ground);
   }
 
   /* the letter of a tool's key is for a desk's rail: in a narrow window's bar it lay on the

@@ -19,7 +19,7 @@
 
   /* a finger high in whichever bar it stands */
   .segmented button {
-    min-height: 36px;
+    min-height: 40px;
     padding: 8px 12px;
   }
 
@@ -83,18 +83,19 @@
   }
 
   .layer-row .btn {
-    --btn-height: 36px;
-    min-width: 36px;
+    --btn-height: 40px;
+    min-width: 40px;
   }
 
   .slider {
     --knob: 26px;
 
-    height: 36px;
+    height: 40px;
   }
 
   .input,
-  select.input {
+  select.input,
+  .list-select {
     box-sizing: border-box;
     min-height: 40px;
   }
@@ -148,7 +149,7 @@
   }
 
   .grid-tab {
-    min-height: 36px;
+    min-height: 40px;
   }
 
   .swatches {
@@ -157,7 +158,7 @@
   }
 
   .btn.chip {
-    --btn-height: 36px;
+    --btn-height: 40px;
     padding-inline: 12px;
   }
 
@@ -221,6 +222,54 @@
 
   .rail .btn[data-key]::after {
     display: none;
+  }
+
+  /* what a thumb presses is a finger high everywhere: these were a pointer's size */
+  .sheet-actions .btn,
+  .anchor-grid .btn,
+  :root[data-layout='compact'] .btn.panel-close {
+    --btn-height: 40px;
+  }
+
+  :root[data-layout='compact'] .btn.panel-close {
+    width: 40px;
+  }
+
+  .anchor-grid {
+    grid-template-columns: repeat(3, 40px);
+  }
+
+  .guide-row .btn.icon-only {
+    --btn-height: 40px;
+
+    width: 40px;
+  }
+
+  .grid-view-more {
+    position: relative;
+  }
+
+  /* narrow beside a view's name, and pressed from the room round it */
+  .grid-view-more::after {
+    content: '';
+    position: absolute;
+    inset: 0 -4px;
+  }
+
+  /* held at arm's length, the small print of a desk is too small to read */
+  .hint,
+  .field > span,
+  .list-hint,
+  .chip,
+  .badge,
+  .view-meta,
+  .place-count,
+  .folders-head,
+  .swatches-toggle,
+  .stage-place,
+  .grid-number,
+  .grid-label small {
+    font-size: 12px;
   }
 }
 

@@ -13,13 +13,19 @@ function isEmptyFrame(state) {
   return Boolean(frame) && !hasArt(frame) && !hiddenArt(state, state.at.direction).length;
 }
 
-// the next pose from the one before: a copy to change, or that pose faded behind to draw over
+// The next pose from the one before: a copy to change, or that pose faded behind to draw over.
+// The copy comes first, and is the bar's main button: an animation's next frame is the last one
+// changed, and at the bar's end it was cut off on every phone.
 function fromPrevious(app, { direction, index }) {
+  const name = `Start from frame ${index}`;
+  const short = app.store.state.layout === 'compact';
+
   return [
     node(
-      'button.btn',
-      { onclick: () => startFromPrevious(app, direction, index) },
-      `Start from frame ${index}`,
+      'button.btn.primary',
+      { 'aria-label': name, onclick: () => startFromPrevious(app, direction, index) },
+      icon('duplicate'),
+      short ? `Copy frame ${index}` : name,
     ),
     app.store.state.onion
       ? null
@@ -67,19 +73,24 @@ export function renderEmptyFrame(el, app) {
   const name = frames.length > 1 ? `Frame ${index + 1} of ${view}` : view;
   const previous = index > 0 && hasArt(frames[index - 1]);
 
+  const short = state.layout === 'compact';
+
   replace(
     el,
     // on a phone the place over the canvas names the frame
-    node('strong', {}, state.layout === 'compact' ? 'Empty frame' : `${name} is empty`),
+    node('strong', {}, short ? 'Empty frame' : `${name} is empty`),
+    previous ? fromPrevious(app, { direction, index }) : null,
     node(
-      'button.btn.primary',
-      { onclick: () => imageIntoFrame(app, direction, index) },
+      `button.btn${previous ? '' : '.primary'}`,
+      {
+        'aria-label': 'Image into this frame…',
+        onclick: () => imageIntoFrame(app, direction, index),
+      },
       icon('upload'),
-      'Image into this frame…',
+      short ? 'Image…' : 'Image into this frame…',
     ),
     rigOf(currentAnimation(state), direction)
       ? node('button.btn', { onclick: () => poseHere(app) }, icon('pose'), 'Pose the parts')
       : null,
-    previous ? fromPrevious(app, { direction, index }) : null,
   );
 }
