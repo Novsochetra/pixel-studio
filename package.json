@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "test": "node --test test/unit/*.test.js test/regression/*.test.js tools/*/test/*.test.js",
     "test:flows": "bash test/run-all.sh",
+    "mcp": "node tools/mcp/server.js",
     "check": "bash test/run-all.sh"
   },
   "devDependencies": {

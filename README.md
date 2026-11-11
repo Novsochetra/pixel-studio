@@ -116,6 +116,7 @@ to the phone's layout on a real one before calling it done.
   calls to functions that were never imported
 - `test/unit/`, `test/integration/`, `test/regression/`: see `CLAUDE.md`
 - `tools/claude-hooks/`: shows Claude Code each comment an edit adds (`.claude/settings.json`)
+- `tools/mcp/`: the MCP server Claude Code edits project files through (see below)
 - `docs/`: plans and design notes
 
 ## The command-line cleaner
@@ -125,3 +126,31 @@ to the phone's layout on a real one before calling it done.
 ```bash
 python3 tools/pixel_clean.py side.webp --like front.png
 ```
+
+## For Claude Code: the MCP server
+
+`tools/mcp/server.js` lets Claude Code make and change the studio's project files itself: the file
+"Save as file" writes and "Open a project file…" opens. It is plain Node with nothing to install,
+and `.mcp.json` at the repo's root names it, so Claude Code offers it when started in this folder
+(it asks once before using a project's servers). To use it from another folder:
+
+```bash
+claude mcp add pixel-studio -- node /path/to/pixel-studio/tools/mcp/server.js
+```
+
+Its tools:
+
+| Tool               | What it does                                                              |
+| ------------------ | ------------------------------------------------------------------------- |
+| `describe_project` | the kind, canvas, animations, views, frames, layers and colours of a file |
+| `read_frame`       | a frame as a picture to look at and as a grid of letters to edit from     |
+| `new_project`      | a new file: character, object, tiles, effect or icon                      |
+| `set_pixels`       | draws on a layer: single pixels, or rows of letters with their colours    |
+| `add_frame`        | a new frame in every view, empty or a copy to change                      |
+| `add_layer`        | a new layer of art on a frame                                             |
+| `add_animation`    | a new animation with the project's views                                  |
+| `clean_image`      | an AI-made "pixel art" PNG cleaned to true pixels on a frame              |
+| `export_sheet`     | an animation as a sprite sheet PNG                                        |
+
+Ask Claude Code, for example, to "make a 32×32 icon of a gem in `gem.json` and export its sheet",
+then open `gem.json` in the studio to go on by hand.

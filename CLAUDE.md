@@ -14,6 +14,7 @@ any game. One page, built from `src/` by `build/build.py`. The rules are the fig
 | `npm run format` | Prettier, writes files                                                   |
 | `npm test`       | the unit and regression tests, and the tests of `tools/` (`node --test`) |
 | `npm run build`  | `dist/index.html`; the build refuses import cycles and missing exports   |
+| `npm run mcp`    | the MCP server Claude Code edits project files through (`.mcp.json`)     |
 
 ## Coding
 
@@ -235,6 +236,16 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   finger.
 - What a shortcut does has a control where there are no keys (`hasKeyboard`), at every layout: a
   tablet held wide has the desk's bar and a finger's hands (Paste in its More menu or its bar).
+
+## The MCP server
+
+`tools/mcp/` is a server of tools for Claude Code (`.mcp.json` names it): it reads and writes the
+project file "Save as file" writes, with the studio's own plain logic (`src/model`, `src/clean`,
+`src/export`), so what it makes opens in the studio. It needs nothing installed: the protocol
+(`protocol.js`) and PNG (`png.js`) are written out, as the page's code cannot use the browser's
+canvas there. A tool is `{ name, description, inputSchema, run }`; `run` returns what to say, and
+throws a sentence when it cannot, which the caller is told as the tool's result. A new thing a
+project can hold that Claude Code should reach gets a tool, and a test in `tools/mcp/test/`.
 
 ## Testing
 
