@@ -43,3 +43,13 @@ test('a saved project is renamed where it is saved, and in the list', async () =
   assert.equal(entry.name, 'Striker');
   assert.equal(await renameStored(backend, { id: '2', prefix: 'p-2-' }, 'Ghost'), false);
 });
+
+// a set of icons named Gem began with an icon called Coin, and its files were coin.png
+test('the first icon or tile of a named project takes the project’s name', () => {
+  const named = (options) => newProject(options).animations[0].name;
+
+  assert.equal(named({ kind: 'icon', name: 'Gem' }), 'Gem');
+  assert.equal(named({ kind: 'tile', name: 'Castle floor' }), 'Castle floor');
+  assert.equal(named({ kind: 'icon' }), 'Coin', 'one with no name of its own keeps the usual');
+  assert.equal(named({ kind: 'character', name: 'Hero' }), 'Idle', 'an animation is not the art');
+});

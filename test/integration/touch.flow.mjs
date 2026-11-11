@@ -183,11 +183,11 @@ await page.waitForTimeout(300);
 await page.locator('.tab-more').tap();
 await page.getByRole('menuitem', { name: 'Rename' }).tap();
 await page.locator('.tab-rename').fill('Dash');
-await page.locator('.grid-tab', { hasText: 'Coin' }).tap();
+await page.locator('.grid-tab', { hasText: 'Gem' }).tap();
 await page.waitForTimeout(900);
 check(
-  (await page.locator('.grid-tab').allTextContents()).join() === 'Coin,Dash' &&
-    (await page.locator('.grid-tab[aria-selected="true"]').textContent()) === 'Coin',
+  (await page.locator('.grid-tab').allTextContents()).join() === 'Gem,Dash' &&
+    (await page.locator('.grid-tab[aria-selected="true"]').textContent()) === 'Gem',
   'a tap on another tab keeps the name typed and opens that tab, in one tap',
 );
 

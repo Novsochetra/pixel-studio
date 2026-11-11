@@ -17,8 +17,32 @@
     min-width: 40px;
   }
 
+  /* a finger high in whichever bar it stands */
   .segmented button {
+    min-height: 36px;
     padding: 8px 12px;
+  }
+
+  /* a switch is small to the eye and a finger's size to the touch */
+  .switch::before {
+    content: '';
+    position: absolute;
+    inset: -8px -4px;
+  }
+
+  /* a section folds by its title */
+  .section h2 {
+    min-height: 36px;
+  }
+
+  .status-link {
+    position: relative;
+  }
+
+  .status-link::after {
+    content: '';
+    position: absolute;
+    inset: -12px -6px;
   }
 
   /* the layer's actions are named in words on a phone (layer-bar.js), and a finger wide */
@@ -70,7 +94,7 @@
   }
 
   /* beside a view's name, in a column a phone keeps narrow: a finger high, not as wide */
-  .grid-view-more {
+  :root[data-layout='compact'] .grid-view-more {
     width: 32px;
   }
 

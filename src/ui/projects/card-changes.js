@@ -1,6 +1,7 @@
 import { node, replace, toast } from '../dom.js';
 import { addProject } from '../session.js';
 import { saveProjectList } from '../../store/projects.js';
+import { folderOf, moveToFolder } from '../../store/folders.js';
 import { readStored, renameStored } from '../../store/stored-project.js';
 import { readProjectFile, projectFileText } from '../../store/project-file.js';
 import { inWords } from '../../model/told.js';
@@ -56,7 +57,13 @@ export async function duplicateStored(job, project) {
       name: `${project.name} copy`,
     };
 
-    await addProject(job.app, copy, stored.background);
+    const { app } = job;
+    const folder = folderOf(app.index, project.id);
+
+    await addProject(app, copy, stored.background);
+    // beside the one it was made from: a new project joins the open one's folder otherwise
+    moveToFolder(app.index, app.store.state.project.id, folder);
+    await saveProjectList(app.backend, app.index);
     toast(`Made "${copy.name}" and opened it`);
     job.redraw();
   } catch (error) {

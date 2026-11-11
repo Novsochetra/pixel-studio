@@ -239,6 +239,14 @@ await page.keyboard.press('Escape');
 await page.waitForTimeout(400);
 await openDock(page, 'Colours');
 
+// Safari tells of a pinch with an event of its own, and zooms the page unless it is refused
+check(
+  await page.evaluate(
+    () => !document.dispatchEvent(new window.Event('gesturestart', { cancelable: true })),
+  ),
+  'Safari’s own pinch of the page is refused',
+);
+
 // a message is as wide as its words, not half the screen
 await openWorkspace(page, 'Edit');
 await page.locator('#rail [aria-label^="Select and move"]').evaluate((button) => button.click());

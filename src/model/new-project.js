@@ -44,8 +44,21 @@ const carried = (preset) => ({
   preview: preset.preview ? { ...structuredClone(preset.preview), background: false } : null,
 });
 
+// What a project of icons or tiles holds is the art itself, one to a tab: the first takes the
+// name the project was given. Named Gem, it began with an icon called Coin, and its files were
+// coin.png. An animation (Idle, Walk) is not the art, and keeps its own name.
+function firstName(project, preset) {
+  const isArt = (KINDS[preset.kind]?.itemName ?? 'animation') !== 'animation';
+
+  return isArt && project.name !== defaultName(preset) ? project.name : preset.names?.[0];
+}
+
 function firstAnimation(project, preset, { animation: name, directions }) {
-  const animation = newAnimation(name ?? preset.names?.[0] ?? 'Idle', project.canvas, directions);
+  const animation = newAnimation(
+    name ?? firstName(project, preset) ?? 'Idle',
+    project.canvas,
+    directions,
+  );
 
   animation.fps = preset.fps ?? animation.fps;
 
