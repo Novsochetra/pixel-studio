@@ -1,9 +1,16 @@
 import { icon, node } from './dom.js';
 import { currentAnimation, restructure } from './actions.js';
-import { clearLayers, deleteGroup, duplicateGroup, namedGroup } from './layer-group-actions.js';
+import {
+  clearLayers,
+  deleteGroup,
+  duplicateGroup,
+  mergeGroup,
+  namedGroup,
+} from './layer-group-actions.js';
 import { layersToMove } from './layer-move.js';
 import { addLayer } from '../model/structure.js';
 import { layerBelow, mergeDown } from '../model/layer-ops.js';
+import { mergeableLayers } from '../model/layer-pick.js';
 import { frameAt } from '../model/project.js';
 import { renameRow } from './layer-row.js';
 import { addPicture } from './trace-picture.js';
@@ -64,6 +71,21 @@ const mergeDownFrom = (app, active) =>
     layer: mergeDown(currentAnimation(draft), frameOf(draft), active.key),
   }));
 
+// the layer in hand goes down onto the one below; several picked together become one
+function mergeTool(app, { active, group }, words) {
+  if (group.length > 1) {
+    return tool('merge-down', `Merge ${namedGroup(group)} into one`, () => mergeGroup(app, group), {
+      disabled: !mergeableLayers(group).length,
+      said: words.merge && 'Merge',
+    });
+  }
+
+  return tool('merge-down', 'Merge down into the layer below', () => mergeDownFrom(app, active), {
+    disabled: !layerBelow(frameOf(app.store.state), active.key),
+    said: words.merge,
+  });
+}
+
 // what changes the layers picked: a name (on a phone), a copy, a merge of the one in hand
 function changeTools(app, { active, group }, words) {
   const many = group.length > 1;
@@ -83,10 +105,7 @@ function changeTools(app, { active, group }, words) {
       () => duplicateGroup(app, group),
       { said: words.duplicate },
     ),
-    tool('merge-down', 'Merge down into the layer below', () => mergeDownFrom(app, active), {
-      disabled: !layerBelow(frameOf(app.store.state), active.key),
-      said: words.merge,
-    }),
+    mergeTool(app, { active, group }, words),
   );
 }
 

@@ -1,10 +1,13 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { newFrame, newLayer } from '../../src/model/project.js';
+import { getPixel, pack, setPixel } from '../../src/model/sprite.js';
 import {
   duplicateLayers,
   groupOf,
   keptPick,
+  mergeLayers,
+  mergeableLayers,
   pickRange,
   removeLayers,
   togglePick,
@@ -114,4 +117,31 @@ test('each layer picked together is copied just above itself', () => {
 
   assert.equal(copies.length, 2);
   assert.deepEqual(keysOf(frame.layers), ['bottom', copies[0], 'middle', 'top', copies[1]]);
+});
+
+// Merge down took the layer being edited and the one under it, whichever were picked
+test('the layers picked together merge into the lowest of them, as they show', () => {
+  const frame = stack();
+  const [bottom, , top] = frame.layers;
+  const [red, blue] = [pack(255, 0, 0), pack(0, 0, 255)];
+
+  setPixel(bottom.sprite, 1, 1, red);
+  setPixel(bottom.sprite, 2, 2, red);
+  setPixel(top.sprite, 2, 2, blue);
+
+  assert.equal(mergeLayers({ directions: {} }, frame, ['top', 'bottom']), 'bottom');
+  assert.deepEqual(keysOf(frame.layers), ['bottom', 'middle']);
+  assert.equal(getPixel(bottom.sprite, 1, 1), red);
+  assert.equal(getPixel(bottom.sprite, 2, 2), blue);
+});
+
+test('a hidden layer or a picture to trace keeps a group from merging', () => {
+  const frame = stack();
+
+  assert.equal(mergeableLayers(frame.layers).length, 3);
+  frame.layers[1].visible = false;
+  assert.equal(mergeableLayers(frame.layers).length, 0);
+  frame.layers[1].visible = true;
+  frame.layers[2].kind = 'reference';
+  assert.equal(mergeableLayers(frame.layers).length, 0);
 });

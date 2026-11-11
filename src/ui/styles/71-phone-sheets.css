@@ -170,6 +170,29 @@
     bottom: calc(var(--sheet-height) + var(--foot-row) - 20px);
   }
 
+  /* With a sheet up, the room it leaves is the canvas's and, under it, a bar's: the bar of a
+     selection, a pose or a pin stands at the stage's foot whichever end the selection is at,
+     and the canvas is fitted above the room kept for it. Over the canvas, the bar hid a fifth of
+     the little art still in sight. The canvas is held by its margins, which give way when it
+     has no room to spare. */
+  :root[data-layout='compact'] .app[data-panel]:not([data-panel='']) .stage-inner.edit {
+    justify-content: flex-start;
+    padding-block: 4px 52px;
+  }
+
+  :root[data-layout='compact'] .app[data-panel]:not([data-panel='']) .canvas-holder {
+    margin-block: auto;
+  }
+
+  :root[data-layout='compact']
+    .app[data-panel]:not([data-panel=''])
+    :is(.selection-bar, .selection-bar[data-side='top'], .pose-bar, .pin-bar) {
+    --rise-from: 0 10px;
+
+    top: auto;
+    bottom: 4px;
+  }
+
   /* The sheet rises as it opens (dock.js says when). The frames and the other panels are two
      sheets, one in the stage: risen again at each change of panel, the sheet seemed to blink. */
   :root[data-layout='compact'] .app[data-rises='true'] :is(.inspector, .grid-panel) {

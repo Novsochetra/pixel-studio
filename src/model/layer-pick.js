@@ -1,8 +1,9 @@
 // Layers picked together in the list, by key so a group carries to the next frame as the layer
 // being edited does. An empty list means only the layer being edited is picked.
 
-import { duplicateLayer } from './layer-ops.js';
-import { removeLayer } from './structure.js';
+import { duplicateLayer, paintOver } from './layer-ops.js';
+import { forgetCutsWithoutBody, removeLayer } from './structure.js';
+import { isBody } from './body/body-kind.js';
 
 const asGroup = (keys) => (keys.length > 1 ? keys : []);
 
@@ -46,3 +47,21 @@ export function removeLayers(animation, frame, keys) {
 }
 
 export const duplicateLayers = (frame, keys) => keys.map((key) => duplicateLayer(frame, key));
+
+const mergeable = (layer) =>
+  layer.visible && layer.kind !== 'reference' && !isBody(layer) && Boolean(layer.sprite);
+
+// The group as it can merge, or none of it: a hidden layer would come into view or drop out of
+// it, a picture to trace is not art, and a Body is drawn from its parts.
+export const mergeableLayers = (group) => (group.length > 1 && group.every(mergeable) ? group : []);
+
+// The layers picked together become the lowest of them, painted as they show. Returns its key.
+export function mergeLayers(animation, frame, keys) {
+  const [lowest, ...above] = frame.layers.filter((layer) => keys.includes(layer.key));
+
+  above.forEach((layer) => paintOver(lowest.sprite, layer.sprite));
+  frame.layers = frame.layers.filter((layer) => !above.includes(layer));
+  forgetCutsWithoutBody(animation);
+
+  return lowest.key;
+}

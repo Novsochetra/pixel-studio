@@ -1,6 +1,6 @@
 import { toast } from './dom.js';
 import { commit, currentAnimation, currentLayer, restructure } from './actions.js';
-import { duplicateLayers, removeLayers } from '../model/layer-pick.js';
+import { duplicateLayers, mergeLayers, removeLayers } from '../model/layer-pick.js';
 import { frameAt } from '../model/project.js';
 
 const frameOf = (state) => frameAt(state.project, state.at);
@@ -22,6 +22,14 @@ export function duplicateGroup(app, group) {
 
   restructure(app, group.length > 1 ? 'Duplicate layers' : 'Duplicate layer', (draft) => ({
     layer: duplicateLayers(frameOf(draft), keys).at(-1),
+  }));
+}
+
+export function mergeGroup(app, group) {
+  const keys = group.map((layer) => layer.key);
+
+  restructure(app, `Merge ${group.length} layers`, (draft) => ({
+    layer: mergeLayers(currentAnimation(draft), frameOf(draft), keys),
   }));
 }
 

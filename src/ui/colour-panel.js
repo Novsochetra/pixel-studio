@@ -1,33 +1,26 @@
-import { node, icon, replace } from './dom.js';
+import { node, replace } from './dom.js';
 import { characterColors } from './character-colours.js';
 import { colourWell } from './colour-well.js';
 import { otherColours, swatchGroup } from './colour-groups.js';
 import { drawingSettings } from './drawing-settings.js';
+import { actionRow, listGroup } from './list-group.js';
 import { openSwapSheet } from './swap-sheet.js';
 import { openOutfitsSheet } from './outfits-sheet.js';
 import { gameOf } from '../model/presets.js';
 import { kindOf } from '../model/kinds.js';
 
-function colourButtons(app) {
+// each leads to a window of its own, as its row's chevron says
+function colourWindows(app) {
   const { project } = app.store.state;
+  const outfits = gameOf(project).teamKits ? 'Team kits' : 'Outfits';
+  const leadsTo = (name, open) =>
+    actionRow(name, () => open(app), { leads: true, 'aria-label': `${name}…` });
 
-  return node(
-    'div.group',
-    { style: { gap: '6px' } },
-    node(
-      'button.btn',
-      { style: { flex: '1' }, onclick: () => openSwapSheet(app) },
-      icon('swap'),
-      'Swap colours…',
-    ),
+  return listGroup(
+    {},
+    leadsTo('Swap colours', openSwapSheet),
     // outfits recolour a character's or an object's parts; tiles, effects and icons have none
-    kindOf(project).place === 'feet'
-      ? node(
-          'button.btn',
-          { style: { flex: '1' }, onclick: () => openOutfitsSheet(app) },
-          gameOf(project).teamKits ? 'Team kits…' : 'Outfits…',
-        )
-      : null,
+    kindOf(project).place === 'feet' ? leadsTo(outfits, openOutfitsSheet) : null,
   );
 }
 
@@ -47,7 +40,7 @@ export function renderColourPanel(el, app) {
       { inert: state.paletteLock, title: state.paletteLock ? 'Palette lock is on' : null },
       otherColours(app, colors),
     ),
-    colourButtons(app),
+    colourWindows(app),
   );
 }
 

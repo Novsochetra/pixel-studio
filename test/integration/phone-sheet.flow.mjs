@@ -170,4 +170,31 @@ check(
 );
 await page.screenshot({ path: `${shots}/phone-sheet-toast.png` });
 
+// A selection's bar lay over the canvas's first or last rows, a fifth of the art a sheet had
+// left in sight. The room under the canvas is kept for it.
+await page.setViewportSize({ width: 390, height: 664 });
+await page.waitForTimeout(500);
+await page.keyboard.press('s');
+const drawn = await box('.canvas-holder canvas');
+const across = (share) => drawn.left + drawn.width * share;
+const down = (share) => drawn.top + drawn.height * share;
+
+await touch('touchStart', [[across(0.2), down(0.2)]]);
+
+for (let i = 1; i <= 8; i++) {
+  await touch('touchMove', [[across(0.2 + 0.07 * i), down(0.2 + 0.07 * i)]]);
+  await page.waitForTimeout(20);
+}
+
+await touch('touchEnd', []);
+await page.waitForTimeout(500);
+const bar = await box('.selection-bar');
+const under = await box('.canvas-holder canvas');
+
+check(
+  bar.top >= under.bottom - 2 && bar.bottom <= (await box('#inspector')).top + 1,
+  `with a sheet up the selection’s bar stands under the canvas, not over it (${Math.round(bar.top)} under ${Math.round(under.bottom)})`,
+);
+await page.screenshot({ path: `${shots}/phone-sheet-selection.png` });
+
 await finish();

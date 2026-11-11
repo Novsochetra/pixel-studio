@@ -120,6 +120,8 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   its whole top: up makes it tall (`data-sheet='tall'`), down brings it back, then shuts it.
   The sheet still takes its row: the canvas is fitted in the room above it, never under it;
   only a sheet pulled tall, for a long list, lies over the canvas until it is pulled back.
+  With a sheet up the room under the canvas is kept for the bar of a selection, a pose or a
+  pin, and a message shows across the sheet's top edge: neither lies over the art.
   What stays put in a panel while it scrolls is painted in `--sheet` there. On its side the
   phone keeps a tab for each panel at the screen's edge.
 - The phone's bar shows its tools as bare pictures, a few at a time: All tools, at its end,

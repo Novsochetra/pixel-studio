@@ -251,4 +251,18 @@ check(
 );
 await undo();
 check((await rows()) === had, 'and one undo brings them back');
+
+// Merge down took the layer in hand and the one under it, whichever were picked
+await pickTwo();
+await page.keyboard.press('b');
+const apart = await pixels();
+
+await page.getByRole('button', { name: 'Merge 2 layers into one' }).click();
+await page.waitForTimeout(150);
+check(
+  (await rows()) === had - 1 && (await picked()) === 'Art',
+  'Merge makes one layer of the layers picked together',
+);
+await undo();
+check((await rows()) === had && (await pixels()) === apart, 'and one undo parts them again');
 await finish();
