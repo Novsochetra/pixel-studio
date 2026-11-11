@@ -3,6 +3,7 @@ import { openSheet } from './sheet.js';
 import { allArtLayers } from './actions.js';
 import { recolourLayers } from './body/recolour.js';
 import { viewsToFit } from './views-side-by-side.js';
+import { characterColors } from './character-colours.js';
 import { partsEditor } from './parts-editor.js';
 import { keepVersion } from './versions-sheet.js';
 import { downloadOutfit, keepAsSwap } from './outfit-files.js';
@@ -104,6 +105,10 @@ function drawOutfits(job) {
 
   replace(
     job.slot,
+    // on an empty frame the three previews were blank, with nothing to say why
+    characterColors(state).length
+      ? null
+      : node('p.hint', {}, 'Nothing is drawn yet: an outfit recolours the art, so draw it first.'),
     choiceControls(app, choice, change),
     node(
       'div',

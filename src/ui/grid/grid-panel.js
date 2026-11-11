@@ -28,7 +28,8 @@ function keepFocus(el, draw) {
 // or tab name being used out from under the pointer.
 function markPlayFrame(el, frame) {
   for (const cells of el.querySelectorAll('.grid-cells')) {
-    const columns = cells.querySelectorAll(':scope > .cell:not(.mirror), :scope > .grid-number');
+    // a mirrored side plays too: its row stood still while the others were marked
+    const columns = cells.querySelectorAll(':scope > .cell, :scope > .grid-number');
 
     columns.forEach((column, index) => column.classList.toggle('playing', index === frame));
   }

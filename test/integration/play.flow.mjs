@@ -86,6 +86,10 @@ check(
 );
 const shape = await canvasShape();
 check(shape > 1.5, `with All views, play shows every view side by side (${shape.toFixed(2)} wide)`);
+check(
+  (await page.locator('.cell.mirror.playing').count()) > 0,
+  'and the mirrored side’s row is marked as it plays, like the others',
+);
 await page.screenshot({ path: `${shots}/play-all-views.png` });
 const art = await page.evaluate(() => document.querySelector('.cell canvas').toDataURL());
 await canvas.click({ position: { x: 20, y: 40 } });

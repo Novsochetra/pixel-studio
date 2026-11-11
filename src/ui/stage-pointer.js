@@ -162,6 +162,18 @@ export function bindPointer(canvas, app, stage) {
     view.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
   const finish = (event) => release(app, view, event);
 
+  // a drag whose work can be taken back is, by Escape (keyboard.js)
+  app.cancelDrag = () => {
+    const taken = Boolean(view.session?.cancel);
+
+    if (taken) {
+      view.session.cancel();
+      view.session = null;
+      app.dragging = false;
+    }
+
+    return taken;
+  };
   ownTouches(canvas);
   bindBeside(view, { place, press: (event) => press(app, view, event), finish });
   canvas.addEventListener('pointerdown', (event) => {

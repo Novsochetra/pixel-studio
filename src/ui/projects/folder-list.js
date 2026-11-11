@@ -3,7 +3,8 @@ import { folderDropTarget } from './drag-to-folder.js';
 import { moveProject } from './change-list.js';
 import { EVERY_PROJECT, NO_FOLDER, countsByPlace, foldersMatching } from '../../store/browse.js';
 
-const ICONS = { [EVERY_PROJECT]: 'tile', [NO_FOLDER]: 'picture' };
+// what is in no folder lies loose in a tray: a picture's icon said nothing of folders
+const ICONS = { [EVERY_PROJECT]: 'tile', [NO_FOLDER]: 'tray' };
 
 function dropInto(job, place) {
   return (id) => {

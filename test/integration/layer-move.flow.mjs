@@ -67,6 +67,14 @@ check(
 const before = await layerPixels();
 const whole = await pixels();
 
+// Escape did nothing to a drag under way: only letting go, then undo, took it back
+await press([5, 5]);
+await page.mouse.move(...at(45, 30), { steps: 8 });
+await page.keyboard.press('Escape');
+await page.mouse.up();
+await page.waitForTimeout(150);
+check((await pixels()) === whole, 'Escape takes back a layer’s drag under way');
+
 await press([5, 5]);
 await page.mouse.move(...at(45, 30), { steps: 8 });
 check((await pixels()) !== whole, 'a drag shows the layer moving');

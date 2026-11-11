@@ -93,11 +93,19 @@ function plainKey(app, event, key) {
   }
 }
 
+// Escape takes back what is being dragged on the canvas, as a second finger does
+const takesDragBack = (app, key) =>
+  key === 'escape' && Boolean(app.dragging) && Boolean(app.cancelDrag?.());
+
 function onKey(app, event) {
   const command = event.metaKey || event.ctrlKey;
   const key = event.key.toLowerCase();
 
-  if (handlePoseKey(app, event, key) || handleSelectionKey(app, event, key, command)) {
+  if (takesDragBack(app, key) || handlePoseKey(app, event, key)) {
+    return;
+  }
+
+  if (handleSelectionKey(app, event, key, command)) {
     return;
   }
 
