@@ -103,7 +103,7 @@ check(
 );
 
 await openProjects();
-check((await page.locator('.project-card').count()) === 4, 'every project made is listed');
+check((await page.locator('.project-row').count()) === 4, 'every project made is listed');
 await projectsPage(page, 'This project');
 await page.getByRole('button', { name: 'Save as a preset' }).click();
 await page.waitForTimeout(400);

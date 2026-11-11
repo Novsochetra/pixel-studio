@@ -1,14 +1,14 @@
 // a type of its own, so text or files dragged in from elsewhere are not taken for a project
 const PROJECT = 'application/x-pixel-clean-project';
 
-export function draggableProject(card, id) {
-  card.draggable = true;
-  card.addEventListener('dragstart', (event) => {
+export function draggableProject(row, id) {
+  row.draggable = true;
+  row.addEventListener('dragstart', (event) => {
     event.dataTransfer.setData(PROJECT, id);
     event.dataTransfer.effectAllowed = 'move';
-    card.classList.add('dragging');
+    row.classList.add('dragging');
   });
-  card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  row.addEventListener('dragend', () => row.classList.remove('dragging'));
 }
 
 export function folderDropTarget(target, onDrop) {

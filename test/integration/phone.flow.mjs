@@ -110,7 +110,7 @@ check(await inSight('.grid-tab[aria-selected="true"]'), 'with many tabs, the ope
 check((await inSight('.tab-more')) && (await inSight('.grid-tab-add')), 'and so are its ⋯ and +');
 
 await page.locator('button.wordmark').click();
-await page.waitForSelector('.project-card');
+await page.waitForSelector('.project-row');
 await page.getByRole('button', { name: 'New folder', exact: true }).click();
 await page.locator('.folder-name-field').fill('Naga Eleven');
 await page.keyboard.press('Enter');

@@ -1,6 +1,6 @@
 import { node } from '../dom.js';
 import { placeHead } from './place-head.js';
-import { projectCard } from './project-card.js';
+import { projectRow } from './project-row.js';
 import { EVERY_PROJECT, projectsIn } from '../../store/browse.js';
 
 const UNREADABLE =
@@ -26,7 +26,7 @@ function emptyHint({ app, view }, entries) {
   return entries.length ? null : node('p.hint', {}, EMPTY_FOLDER);
 }
 
-// inside one folder, its name on every card would only repeat the heading
+// inside one folder, its name on every row would only repeat the heading
 function folderNameOf({ app, view }) {
   const names = new Map(app.index.folders.map((folder) => [folder.id, folder.name]));
   const mixed = view.place === EVERY_PROJECT || Boolean(view.query.trim());
@@ -34,7 +34,7 @@ function folderNameOf({ app, view }) {
   return (entry) => (mixed ? names.get(entry.folder) : null);
 }
 
-export function projectGrid(job) {
+export function projectList(job) {
   const entries = projectsIn(job.app.index, job.view);
   const folderName = folderNameOf(job);
 
@@ -44,9 +44,9 @@ export function projectGrid(job) {
     placeHead(job, entries),
     entries.length
       ? node(
-          'div.project-grid',
-          {},
-          entries.map((entry) => projectCard(job, { entry, folderName: folderName(entry) })),
+          'div.project-list',
+          { role: 'list' },
+          entries.map((entry) => projectRow(job, { entry, folderName: folderName(entry) })),
         )
       : null,
     emptyHint(job, entries),

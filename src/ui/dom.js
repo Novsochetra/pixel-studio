@@ -84,6 +84,8 @@ const PATHS = {
   more: 'M5 12h.01M12 12h.01M19 12h.01',
   'chevron-down': 'M6 9l6 6 6-6',
   'chevron-up': 'M6 15l6-6 6 6',
+  'chevron-right': 'M9 6l6 6-6 6',
+  check: 'M5 12.5l4.5 4.5L19 7.5',
   close: 'M6 6l12 12M18 6L6 18',
   swap: 'M7 7h11l-3-3M17 17H6l3 3',
   wand: 'M4 20L15 9M14 4v3M19 9h-3M17.5 5.5l-2 2M9 4l.5 1.5M20 14l-1.5-.5',

@@ -25,7 +25,7 @@ function moveMenu(job, project, anchor) {
 const onError = (error) =>
   toast(inWords(error, 'That could not be done just now. Try again in a moment.'));
 
-export function cardMenu(job, project, { anchor, onOpen, onDelete, onRename, onDuplicate }) {
+export function rowMenu(job, project, { anchor, onOpen, onDelete, onRename, onDuplicate }) {
   const move = ['Move to folder…', () => moveMenu(job, project, anchor)];
 
   // The project open now goes like any other, another taking its place in the editor; the last

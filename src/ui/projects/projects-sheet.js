@@ -1,10 +1,10 @@
 import { node, replace } from '../dom.js';
 import { openSheet } from '../sheet.js';
 import { readSetting, keepSetting } from '../remembered.js';
-import { currentRow } from './current-row.js';
+import { thisProject } from './this-project.js';
 import { browseBar } from './browse-bar.js';
 import { folderList } from './folder-list.js';
-import { projectGrid } from './project-grid.js';
+import { projectList } from './project-list.js';
 import { startSection, whereNewGoes } from './start-section.js';
 import { changeList } from './change-list.js';
 import { castPictures } from './cast-pictures.js';
@@ -48,7 +48,7 @@ function drawing(job, { current, browser, body }) {
   const show = () => {
     job.view.place = knownPlace(job.app.index, job.view.place);
     lastPlace = job.view.place;
-    replace(browser, folderList(job), projectGrid(job));
+    replace(browser, folderList(job), projectList(job));
     keepInSight(browser.querySelector('.folder-name-field, .place[aria-current="true"]'));
 
     const where = body.querySelector('.start-where');
@@ -66,7 +66,7 @@ function drawing(job, { current, browser, body }) {
   return {
     show,
     redraw: () => {
-      replace(current, currentRow(job));
+      replace(current, thisProject(job));
       show();
     },
   };

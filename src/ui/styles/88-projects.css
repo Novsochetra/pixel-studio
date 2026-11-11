@@ -1,4 +1,4 @@
-/* The projects browser: the open project, the folders down the side, every project as a card. */
+/* The projects browser: the open project, the folders down the side, every project as a row. */
 .projects-sheet:is(.sheet, .sheet-out) {
   width: min(1080px, 100%);
   gap: 14px;
@@ -42,24 +42,20 @@
   image-rendering: pixelated;
 }
 
+/* This project: its picture over grouped lists, a column a line of words can be read across */
 .current-project {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 14px;
+  display: grid;
+  gap: 22px;
+  width: min(560px, 100%);
+  margin-inline: auto;
+  padding-block: 4px 14px;
+}
+
+.current-project > .project-picture {
+  justify-self: center;
+  width: 88px;
+  height: 88px;
   border-radius: var(--radius-lg);
-  background: var(--fill-quiet);
-}
-
-.current-project .project-picture {
-  width: 72px;
-  height: 72px;
-  background: var(--chrome);
-}
-
-.project-text {
-  flex: 1;
-  min-width: 0;
 }
 
 .browse-bar {
@@ -110,7 +106,7 @@
 }
 
 /* what can be done with the open project, and with a file: the arcade's glass pills */
-:is(.current-project, .browse-bar) .btn.quiet {
+.browse-bar .btn.quiet {
   background: var(--glass);
   box-shadow: var(--shadow-glass);
 }
@@ -269,47 +265,56 @@
   padding: 14px;
 }
 
-.project-grid {
+.project-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   align-content: start;
-  gap: 12px;
-  padding: 14px;
 }
 
-.project-card {
+.project-row {
   position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   min-width: 0;
-  border: 1px solid var(--separator);
-  border-radius: var(--radius-lg);
-  background: var(--chrome-raised);
-  transition:
-    scale var(--duration-press) var(--ease-spring),
-    border-color var(--duration-normal) var(--ease-standard);
+  min-height: 68px;
+  padding-right: 8px;
+  transition: background var(--duration-fast) var(--ease-standard);
 }
 
-.project-card:has(.card-open:active) {
-  scale: var(--scale-pressed);
+/* the line between two rows starts where their names do, as a phone's lists draw it */
+.project-row + .project-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 80px;
+  height: 1px;
+  background: var(--separator);
 }
 
-.project-card[aria-current='true'] {
-  border-color: var(--tint);
-  box-shadow:
-    0 0 0 1px var(--tint),
-    0 0 0 4px var(--tint-quiet);
+.project-row:has(.row-open:active) {
+  background: var(--fill-quiet);
 }
 
-.project-card.dragging {
+/* a tap leaves no hover behind on a touch screen */
+@media (hover: hover) {
+  .project-row:hover {
+    background: var(--fill-quiet);
+  }
+}
+
+.project-row.dragging {
   opacity: 0.4;
 }
 
-.card-open {
-  display: grid;
-  gap: 2px;
-  width: 100%;
-  padding: 8px 8px 10px;
+.row-open {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 8px 6px 8px 14px;
   border: 0;
-  border-radius: inherit;
   background: none;
   color: inherit;
   font: inherit;
@@ -317,79 +322,90 @@
   cursor: pointer;
 }
 
-.card-open .project-picture {
-  width: 100%;
-  height: 112px;
-  margin-bottom: 6px;
-  /* a drag that starts on the picture moves the card, not a copy of the image */
+.row-open:focus-visible {
+  outline: 2px solid var(--tint);
+  outline-offset: -2px;
+  border-radius: var(--radius);
+}
+
+.row-open .project-picture {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius);
+  /* a drag that starts on the picture moves the row, not a copy of the image */
   pointer-events: none;
 }
 
-/* a tap leaves no hover behind on a touch screen */
-@media (hover: hover) {
-  .project-card:hover {
-    border-color: color-mix(in srgb, var(--tint), transparent 40%);
-  }
+.row-text {
+  flex: 1;
+  display: grid;
+  gap: 1px;
+  min-width: 0;
 }
 
-.card-name,
-.card-open .view-meta {
+.row-name,
+.row-text .view-meta {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.card-name {
+.row-name {
+  font-size: 15px;
   font-weight: 600;
 }
 
-.card-folder {
+.row-folder {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.card-folder svg {
+.row-folder svg {
   flex: none;
   width: 12px;
   height: 12px;
 }
 
-.card-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: var(--tint);
-  color: var(--on-tint);
-}
-
-.btn.card-more {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: var(--chrome-raised);
-  box-shadow: var(--lift);
-}
-
-.card-ask {
-  padding: 14px 10px 8px;
+/* the open project is ticked, as the choice in hand is in a phone's lists */
+.row-now {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--tint-text);
+  font-size: 12px;
   font-weight: 600;
 }
 
-/* a card asking for its project's new name (card-changes.js) */
-.card-ask .input {
+.row-now svg {
+  width: 18px;
+  height: 18px;
+}
+
+.row-ask {
+  flex: 1 1 200px;
+  min-width: 0;
+  margin: 0;
+  padding: 14px;
+  font-weight: 600;
+}
+
+/* a row asking for its project's new name (row-changes.js) */
+.row-ask .input {
   display: block;
   width: 100%;
+  max-width: 320px;
   margin-top: 6px;
   box-sizing: border-box;
   font-weight: 400;
 }
 
-.card-answers {
+.row-answers {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 0 10px 12px;
+  padding: 10px 6px 10px 14px;
 }
 
 .btn.danger {
@@ -453,18 +469,7 @@
     overflow: visible;
   }
 
-  .project-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 8px;
-    padding: 10px;
-  }
-
-  .card-open .project-picture {
-    height: 88px;
-  }
-
-  .current-project .project-picture {
-    width: 56px;
-    height: 56px;
+  .row-now span {
+    display: none;
   }
 }

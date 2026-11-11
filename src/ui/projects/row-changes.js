@@ -20,25 +20,25 @@ async function renameTo(job, project, name) {
   job.redraw();
 }
 
-// A project that is not the open one is named on its own card, which asks for the name where it
+// A project that is not the open one is named on its own row, which asks for the name where it
 // stood: it had to be opened first, only to be called something else.
-export function renameOnCard(job, project, card) {
+export function renameOnRow(job, project, row) {
   const field = node('input.input', { value: project.name, 'aria-label': 'Project name' });
   const save = () => renameTo(job, project, field.value.trim()).catch(job.redraw);
 
-  card.draggable = false;
+  row.draggable = false;
   replace(
-    card,
-    node('label.card-ask', {}, 'Name', field),
+    row,
+    node('label.row-ask', {}, 'Name', field),
     node(
-      'div.card-answers',
+      'div.row-answers',
       {},
       node('button.btn.primary', { onclick: save }, 'Rename'),
       node('button.btn', { onclick: job.redraw }, 'Cancel'),
     ),
   );
-  card.onkeydown = (event) => {
-    // Enter and Esc answer the card: Esc does not go on to close Projects
+  row.onkeydown = (event) => {
+    // Enter and Esc answer the row: Esc does not go on to close Projects
     if (event.key === 'Enter' || event.key === 'Escape') {
       event.stopPropagation();
       event.key === 'Enter' ? save() : job.redraw();

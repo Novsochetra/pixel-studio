@@ -8,15 +8,15 @@ import { isPng } from './files.mjs';
 const { page, check, finish, shots } = await openStudio();
 const openProjects = async () => {
   await page.locator('button.wordmark').click();
-  await page.waitForSelector('.project-card');
+  await page.waitForSelector('.project-row');
   await page.waitForTimeout(600);
 };
 const pictures = () =>
-  page.locator('.project-card').evaluateAll((cards) =>
-    cards
-      .map((card) => ({
-        name: card.querySelector('.card-name').textContent,
-        picture: card.querySelector('img.project-picture') !== null,
+  page.locator('.project-row').evaluateAll((rows) =>
+    rows
+      .map((row) => ({
+        name: row.querySelector('.row-name').textContent,
+        picture: row.querySelector('img.project-picture') !== null,
       }))
       .sort((first, second) => first.name.localeCompare(second.name)),
   );
@@ -34,7 +34,7 @@ await openProjects();
 check(
   (await page.locator('.current-project img.project-picture').count()) === 1 &&
     (await pictures())[0].picture,
-  'the open project shows its picture, above and on its card',
+  'the open project shows its picture, above and on its row',
 );
 await projectsPage(page, 'This project');
 await page.getByRole('button', { name: 'New character like this' }).click();
@@ -137,37 +137,37 @@ check(
 const wordmark = async () =>
   (await page.locator('.wordmark small').textContent()).replace(' ▾', '').trim();
 const leftOpen = await wordmark();
-const other = page.locator('.project-card:not([aria-current="true"])').first();
+const other = page.locator('.project-row:not([aria-current="true"])').first();
 
-await other.locator('.card-more').click();
+await other.locator('.row-more').click();
 await page.getByRole('menuitem', { name: 'Rename', exact: true }).click();
-await page.locator('.project-card input').fill('Renamed here');
+await page.locator('.project-row input').fill('Renamed here');
 await page.keyboard.press('Enter');
 await page.waitForTimeout(600);
 check(
-  (await page.locator('.card-name').allTextContents()).includes('Renamed here') &&
+  (await page.locator('.row-name').allTextContents()).includes('Renamed here') &&
     (await wordmark()) === leftOpen &&
     (await page.locator('.sheet').count()) === 1,
-  'a project that is not open is renamed on its card, the open one left as it is',
+  'a project that is not open is renamed on its row, the open one left as it is',
 );
-await page.locator('.project-card', { hasText: 'Renamed here' }).locator('.card-more').click();
+await page.locator('.project-row', { hasText: 'Renamed here' }).locator('.row-more').click();
 await page.getByRole('menuitem', { name: 'Duplicate', exact: true }).click();
 await page.waitForTimeout(1500);
-check((await wordmark()) === 'Renamed here copy', 'and copied from its card, the copy opened');
+check((await wordmark()) === 'Renamed here copy', 'and copied from its row, the copy opened');
 
 // the project open now could not be deleted at all: another had to be opened first
 const openName = (await page.locator('.wordmark small').textContent()).replace(' ▾', '').trim();
-const cards = () => page.locator('.project-card').count();
-const had = await cards();
+const rows = () => page.locator('.project-row').count();
+const had = await rows();
 
-await page.locator('.project-card[aria-current="true"] .card-more').click();
+await page.locator('.project-row[aria-current="true"] .row-more').click();
 await page.getByRole('menuitem', { name: 'Delete…' }).click();
-await page.locator('.project-card .btn.danger').click();
+await page.locator('.project-row .btn.danger').click();
 await page.waitForTimeout(1200);
 const nowOpen = (await page.locator('.wordmark small').textContent()).replace(' ▾', '').trim();
 
 check(
-  (await cards()) === had - 1 && nowOpen !== openName,
+  (await rows()) === had - 1 && nowOpen !== openName,
   'the open project is deleted like any other, and another opens in its place',
 );
 await finish();

@@ -1,8 +1,8 @@
 import { icon, node, replace, toast } from '../dom.js';
 import { deleteProject, openProject } from '../session.js';
 import { laterPicture, projectPicture } from './project-picture.js';
-import { cardMenu } from './card-menu.js';
-import { duplicateStored, renameOnCard } from './card-changes.js';
+import { rowMenu } from './row-menu.js';
+import { duplicateStored, renameOnRow } from './row-changes.js';
 import { draggableProject } from './drag-to-folder.js';
 import { describeEntry } from '../../model/presets.js';
 import { inWords } from '../../model/told.js';
@@ -10,7 +10,7 @@ import { inWords } from '../../model/told.js';
 const when = (time) =>
   time ? new Date(time).toLocaleDateString(undefined, { dateStyle: 'medium' }) : '';
 
-function openCard(job, project) {
+function openRow(job, project) {
   if (project.isOpen) {
     job.close();
 
@@ -26,61 +26,65 @@ function openCard(job, project) {
   );
 }
 
-// asked on the card itself, which stays where it was, so the click that asks is near the answer
-function askDelete(job, project, card) {
+// asked on the row itself, which stays where it was, so the click that asks is near the answer
+function askDelete(job, project, row) {
   const remove = () =>
     deleteProject(job.app, project.id).then(job.redraw, () =>
       toast(`${project.name} could not be deleted. Try again in a moment.`),
     );
 
-  card.draggable = false;
+  row.draggable = false;
   replace(
-    card,
+    row,
     node(
-      'p.card-ask',
+      'p.row-ask',
       {},
       project.isOpen
         ? `Delete ${project.name} for good? Another project opens in its place.`
         : `Delete ${project.name} for good?`,
     ),
     node(
-      'div.card-answers',
+      'div.row-answers',
       {},
       node('button.btn.danger', { onclick: remove }, 'Delete'),
       node('button.btn', { onclick: job.redraw }, 'Keep'),
     ),
   );
   // Esc answers the question: it does not go on to close Projects
-  card.onkeydown = (event) => {
+  row.onkeydown = (event) => {
     if (event.key === 'Escape') {
       event.stopPropagation();
       job.redraw();
     }
   };
-  card.querySelector('.btn:not(.danger)').focus();
+  row.querySelector('.btn:not(.danger)').focus();
 }
 
-function cardText(project, folderName) {
-  return [
-    node('span.card-name', {}, project.name),
-    node('span.view-meta.card-about', {}, describeEntry(project.entry)),
-    node('span.view-meta', {}, when(project.entry.updatedAt)),
-    folderName ? node('span.view-meta.card-folder', {}, icon('folder'), folderName) : null,
-  ];
+// what it is and when it was last worked on, on one line as a phone's lists have it
+function rowText(project, folderName) {
+  const about = [describeEntry(project.entry), when(project.entry.updatedAt)].filter(Boolean);
+
+  return node(
+    'span.row-text',
+    {},
+    node('span.row-name', {}, project.name),
+    node('span.view-meta.row-about', {}, about.join(' · ')),
+    folderName ? node('span.view-meta.row-folder', {}, icon('folder'), folderName) : null,
+  );
 }
 
-function moreButton(job, project, card) {
+function moreButton(job, project, row) {
   const more = (event) =>
-    cardMenu(job, project, {
+    rowMenu(job, project, {
       anchor: event.currentTarget,
-      onOpen: () => openCard(job, project),
-      onDelete: () => askDelete(job, project, card),
-      onRename: () => renameOnCard(job, project, card),
+      onOpen: () => openRow(job, project),
+      onDelete: () => askDelete(job, project, row),
+      onRename: () => renameOnRow(job, project, row),
       onDuplicate: () => duplicateStored(job, project),
     });
 
   return node(
-    'button.btn.quiet.icon-only.card-more',
+    'button.btn.quiet.icon-only.row-more',
     {
       'aria-label': `More for ${project.name}`,
       title: project.isOpen
@@ -92,33 +96,34 @@ function moreButton(job, project, card) {
   );
 }
 
-export function projectCard(job, { entry, folderName }) {
+export function projectRow(job, { entry, folderName }) {
   const isOpen = entry.id === job.app.store.state.project.id;
   const name = isOpen ? job.app.store.state.project.name : entry.name;
   const project = { entry, id: entry.id, name, isOpen };
   const picture = isOpen
     ? projectPicture(job.pictures.ofOpen())
     : laterPicture(job.pictures.of(entry));
-  const card = node('div.project-card', {
+  const row = node('div.project-row', {
+    role: 'listitem',
     'data-project': entry.id,
     'aria-current': isOpen ? 'true' : null,
   });
 
   replace(
-    card,
+    row,
     node(
-      'button.card-open',
+      'button.row-open',
       {
         title: isOpen ? `${name} is open now` : `Open ${name}`,
-        onclick: () => openCard(job, project),
+        onclick: () => openRow(job, project),
       },
       picture,
-      isOpen ? node('span.badge.card-badge', {}, 'Open now') : null,
-      cardText(project, folderName),
+      rowText(project, folderName),
+      isOpen ? node('span.row-now', {}, icon('check'), node('span', {}, 'Open now')) : null,
     ),
-    moreButton(job, project, card),
+    moreButton(job, project, row),
   );
-  draggableProject(card, entry.id);
+  draggableProject(row, entry.id);
 
-  return card;
+  return row;
 }

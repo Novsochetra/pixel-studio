@@ -8,7 +8,7 @@ const PAGES = [
 
 // The window is three pages, one in sight at a time: every project, the one that is open, and a
 // new one. All three on one sheet, the open project's buttons, the search, the folders, the
-// cards and the new project's form were more than anyone could take in at a glance.
+// rows and the new project's form were more than anyone could take in at a glance.
 // parts: { all, this, new }, what each page holds; onTurn(id) is told the page now in sight
 export function projectPages(parts, onTurn = () => {}) {
   const pages = Object.fromEntries(

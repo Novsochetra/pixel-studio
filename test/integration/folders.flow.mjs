@@ -8,7 +8,7 @@ import { createProject, openExample, projectsPage } from './studio.mjs';
 const { page, check, finish, shots } = await openStudio();
 const openProjects = async () => {
   await page.locator('button.wordmark').click();
-  await page.waitForSelector('.project-card');
+  await page.waitForSelector('.project-row');
   await page.waitForTimeout(400);
 };
 const place = (name) =>
@@ -19,7 +19,7 @@ const goTo = async (name) => {
   await place(name).click();
   await page.waitForTimeout(150);
 };
-const shown = () => page.locator('.project-card .card-name').allTextContents();
+const shown = () => page.locator('.project-row .row-name').allTextContents();
 const contents = async (name) => {
   await goTo(name);
 
@@ -32,9 +32,9 @@ const newFolder = async (name) => {
   await page.keyboard.press('Enter');
   await page.waitForTimeout(200);
 };
-const card = (name) =>
-  page.locator('.project-card').filter({
-    has: page.locator('.card-name', { hasText: new RegExp(`^${name}$`) }),
+const row = (name) =>
+  page.locator('.project-row').filter({
+    has: page.locator('.row-name', { hasText: new RegExp(`^${name}$`) }),
   });
 const moveWithMenu = async (project, folder) => {
   await page.getByRole('button', { name: `More for ${project}` }).click();
@@ -45,11 +45,11 @@ const moveWithMenu = async (project, folder) => {
 
 await openExample(page);
 await openProjects();
-// One sheet held the open project's buttons, the search, the folders, the cards and the new
+// One sheet held the open project's buttons, the search, the folders, the rows and the new
 // project's form: more than could be taken in. It is three pages, one in sight at a time.
 check(
   (await page.locator('.projects-nav button').count()) === 3 &&
-    (await page.locator('.project-card').first().isVisible()) &&
+    (await page.locator('.project-row').first().isVisible()) &&
     !(await page.locator('#current-project-name').isVisible()) &&
     !(await page.locator('.start-chooser').isVisible()),
   'the Projects window opens on every project, the open one and a new one on pages of their own',
@@ -57,7 +57,7 @@ check(
 await projectsPage(page, 'This project');
 check(
   (await page.locator('#current-project-name').isVisible()) &&
-    !(await page.locator('.project-card').first().isVisible()),
+    !(await page.locator('.project-row').first().isVisible()),
   'This project is the open one’s name and what can be done with it',
 );
 await projectsPage(page, 'All projects');
@@ -76,7 +76,7 @@ check(
   'the new folder opens, saying how to put projects in it',
 );
 await goTo('All projects');
-await card('Sochetra').dragTo(place('Naga Eleven'));
+await row('Sochetra').dragTo(place('Naga Eleven'));
 await page.waitForTimeout(200);
 check(
   (await contents('Naga Eleven')) === '["Sochetra"]',
@@ -93,6 +93,32 @@ check(
   (await contents('Naga Eleven')) === '["Rival","Sochetra"]',
   'a new character made like the open one joins its folder',
 );
+
+// As cards the projects were a wall of pictures. They are a list, as a phone's are: one row
+// under another, the open one ticked.
+const rowBoxes = await page
+  .locator('.project-row')
+  .evaluateAll((rows) => rows.map((each) => each.getBoundingClientRect().toJSON()));
+
+check(
+  rowBoxes.length === 2 &&
+    rowBoxes[1].top >= rowBoxes[0].bottom - 1 &&
+    rowBoxes[1].left === rowBoxes[0].left &&
+    rowBoxes[0].height < 90,
+  'the projects are a list, one row under another',
+);
+check(
+  (await page.locator('.project-row[aria-current="true"] .row-now').count()) === 1 &&
+    (await page.locator('.row-now').count()) === 1,
+  'and the open one is ticked',
+);
+await projectsPage(page, 'This project');
+check(
+  (await page.locator('.current-project .list-row').count()) >= 8 &&
+    (await page.getByRole('button', { name: /^Canvas/ }).textContent()).includes('160×160'),
+  'This project is a list too: what it is, then what can be done with it',
+);
+await projectsPage(page, 'All projects');
 
 await newFolder('Pitch');
 await page.getByRole('button', { name: 'New project', exact: true }).click();
@@ -138,7 +164,7 @@ await page.locator('.projects-search').fill('riv');
 await page.waitForTimeout(200);
 check(
   JSON.stringify(await shown()) === '["Rival"]' &&
-    (await card('Rival').locator('.card-folder').textContent()) === 'Enemies' &&
+    (await row('Rival').locator('.row-folder').textContent()) === 'Enemies' &&
     JSON.stringify(await folders()) === '["All projects","Not in a folder","Enemies"]',
   'a search from any folder finds a project in another, and names its folder',
 );

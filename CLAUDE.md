@@ -160,6 +160,13 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - A window that holds more than one job shows them as pages, one in sight at a time, under a
   row that names them: Projects is All projects, This project and New project
   (`projects/project-pages.js`). Everything on one sheet was more than could be taken in.
+- What a window lists is a list as a phone has them. Things of one kind (the projects) are
+  rows under one another: a picture, a name, a line about it, and what marks the one in hand
+  at the row's end (`projects/project-row.js`). What a thing is and what can be done with it
+  (This project) is grouped rows on a rounded ground, a heading above and a note below
+  (`projects/list-group.js`, `56-lists.css`): a row that says something has its value at its
+  end, a row that does something is in the tint, and one that leads to another window ends
+  in a chevron.
 - What closes leaves through `leave()` (`src/ui/leave.js`) under an `-out` class
   (`.sheet-out`, `.menu-out`, `.toast-out`), so the page and the flows count it gone at once
   while it plays out: style both with `:is(.sheet, .sheet-out)`.
