@@ -68,7 +68,7 @@ function hint(job) {
     ? `Pixels left unpainted go back to ${stays} in this frame.`
     : `Pixels left unpainted stay on ${stays}.`;
 
-  return `Paint each part with the brush, or draw a loop round it with the lasso: L and R are as the picture shows them. The dots are where parts turn: drag one to move it. ${unpainted}`;
+  return `Paint each part, or loop it with the lasso; L and R are the picture's left and right. Drag a dot to move where a part turns. ${unpainted}`;
 }
 
 // the first guess again, from the proportions: with the parts it starts over, not with the window

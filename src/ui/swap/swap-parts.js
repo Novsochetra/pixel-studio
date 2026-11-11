@@ -112,7 +112,9 @@ export function reduceButton(job) {
     job.draw();
   };
 
-  return node('button.btn', { onclick: reduce }, 'Make an 8-colour palette from the art');
+  const name = 'Make an 8-colour palette from the art';
+
+  return node('button.btn', { title: name, 'aria-label': name, onclick: reduce }, 'From the art');
 }
 
 export function previewToggle(job, mapping) {

@@ -88,16 +88,15 @@ function mappingHeader(job, palette, changed) {
 }
 
 function applyButtons(job, mapping) {
+  const applies = ([where, title, word], primary = '') =>
+    node(`button.btn${primary}`, { title, onclick: () => apply(job, mapping, where) }, word);
+
   return node(
     'div.sheet-actions',
     {},
     node('button.btn', { onclick: job.close }, 'Cancel'),
-    node('button.btn', { onclick: () => apply(job, mapping, 'view') }, 'Apply to this frame'),
-    node(
-      'button.btn.primary',
-      { onclick: () => apply(job, mapping, 'all') },
-      'Apply to every frame and view',
-    ),
+    applies(['view', 'Only the frame being edited', 'Apply to frame']),
+    applies(['all', 'Every frame and view', 'Apply to all'], '.primary'),
   );
 }
 

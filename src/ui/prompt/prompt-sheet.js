@@ -103,7 +103,7 @@ function draw(slot, state, ask, { close, redraw }) {
     node(
       'p.hint',
       {},
-      `Attach the reference sheet (${sheet.width}×${sheet.height}, ${scale}× pixels) and paste the prompt. Then bring the AI's answer back to be cleaned: ${forHands('drop it on the canvas, or use', 'use')} Image into this frame.`,
+      `Attach the sheet (${sheet.width}×${sheet.height}, ${scale}× pixels) and paste the prompt. Bring the AI's answer back with Image into this frame${forHands(', or drop it on the canvas', '')}.`,
     ),
     ask.task === 'frame' ? poseField(state, ask, box) : null,
     box,
