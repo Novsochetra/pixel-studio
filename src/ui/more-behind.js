@@ -23,3 +23,13 @@ export function watchMore(row) {
   row.onwheel = alongWith(row);
   markMore(row);
 }
+
+// a list that scrolls down is marked while more of it waits below, for the strip at its foot
+export function watchBelow(list) {
+  const mark = () => {
+    list.dataset.below = String(list.scrollTop + list.clientHeight < list.scrollHeight - 1);
+  };
+
+  list.onscroll = mark;
+  mark();
+}

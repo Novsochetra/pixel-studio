@@ -1,4 +1,5 @@
 import { node, replace, toast } from './dom.js';
+import { watchBelow } from './more-behind.js';
 import { openSheet } from './sheet.js';
 import { allArtLayers } from './actions.js';
 import { recolourLayers } from './body/recolour.js';
@@ -127,6 +128,7 @@ function drawMapping(job, palette) {
     ),
     applyButtons(job, mapping),
   );
+  watchBelow(job.slot.querySelector('.map-table'));
   showPreview(job, mapping);
 }
 

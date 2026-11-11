@@ -1,5 +1,6 @@
 import { node, replace, toast } from '../dom.js';
 import { openSheet } from '../sheet.js';
+import { watchBelow } from '../more-behind.js';
 import { currentAnimation, currentLayer } from '../actions.js';
 import { frameAt } from '../../model/project.js';
 import { BODY_PARTS, viewName } from '../../model/kinds.js';
@@ -100,6 +101,18 @@ function actions(job) {
   ];
 }
 
+// the tools, the parts and the advice: the column that scrolls on a phone, beside the art on a desk
+function drawSide(side, job, change) {
+  replace(
+    side,
+    brushControls(job, change),
+    partsList(job, change, guessButton(job, change)),
+    node('p.hint', {}, hint(job)),
+  );
+  watchBelow(side);
+  watchBelow(side.querySelector('[role="list"]'));
+}
+
 export function openCutSheet(app) {
   const job = newJob(app);
 
@@ -118,12 +131,7 @@ export function openCutSheet(app) {
   const side = node('div.cut-side');
   const paints = node('p.hint.cut-paints');
   const draw = () => {
-    replace(
-      side,
-      brushControls(job, change),
-      partsList(job, change, guessButton(job, change)),
-      node('p.hint', {}, hint(job)),
-    );
+    drawSide(side, job, change);
     paints.textContent = strokeSays(job);
     foot.classList.remove('asking');
     replace(foot, actions(job));

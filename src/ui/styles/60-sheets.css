@@ -238,6 +238,18 @@
   padding-right: 4px;
 }
 
+/* More of a list waits below (more-behind.js marks it): a strip of the window's own colour
+   stays at its foot. Ending on a whole row, the list read as ending there. */
+:is(.map-table, .cut-side, .cut-parts [role='list'])[data-below='true']::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  height: 22px;
+  margin-top: -22px;
+  background: linear-gradient(to bottom, transparent, var(--sheet) 90%);
+  pointer-events: none;
+}
+
 .map-row {
   display: grid;
   grid-template-columns: 22px 1fr 16px auto;
