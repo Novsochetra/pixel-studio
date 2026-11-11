@@ -2,6 +2,8 @@ import { CLEAR, cloneSprite, getPixel, setPixel, toHex } from '../model/sprite.j
 import { brushPixels, canPaint, floodFill, linePoints, replaceColor } from '../editor/paint.js';
 import { shadeFamilies, shiftShade } from '../palette/families.js';
 import { Stroke } from '../editor/stroke.js';
+import { topLayerAt } from '../model/layer-ops.js';
+import { frameAt } from '../model/project.js';
 import { characterColors } from './character-colours.js';
 import { commit, currentLayer } from './actions.js';
 import { toast } from './dom.js';
@@ -92,7 +94,14 @@ export function replace(app, [x, y]) {
   let count = 0;
 
   if (from === CLEAR) {
-    toast('Pick the colour to replace on the canvas: there is none on a clear pixel.');
+    // what shows there may be another layer's: "a clear pixel" was not what the person saw
+    const shown = topLayerAt(frameAt(state.project, state.at), [x, y]);
+
+    toast(
+      shown
+        ? `That colour is on ${shown.name}, not on ${layer.name}: pick ${shown.name} in Layers to replace it.`
+        : 'Pick the colour to replace on the canvas: there is none on a clear pixel.',
+    );
 
     return null;
   }

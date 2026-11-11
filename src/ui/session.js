@@ -149,16 +149,22 @@ export function swapProject(app, project) {
 
 // An earlier version of the open project, or the project on a canvas of another size, takes its
 // place as one step: undo puts the project back as it was. view: what the editor shows
-// differently with the new one (the mirror line on a canvas whose left edge moved).
+// differently with the new one (the mirror line on a canvas whose left edge moved). The frame
+// being edited is kept with each side of the step: undo went back to the project, on frame 1.
 export async function restoreProject(app, project, { label, view = {} }) {
   await saveBeforeLeaving(app);
   const { state } = app.store;
   const before = state.project;
   const shown = Object.fromEntries(Object.keys(view).map((key) => [key, state[key]]));
+  const was = { ...shown, at: { ...state.at } };
 
   project.id = before.id;
   swapProject(app, fillMissingSprites(project));
   app.store.set(view);
-  app.history.recordProject(label, { before, after: project }, { before: shown, after: view });
+  app.history.recordProject(
+    label,
+    { before, after: project },
+    { before: was, after: { ...view, at: { ...app.store.state.at } } },
+  );
   app.store.touch('project');
 }

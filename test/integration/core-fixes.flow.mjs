@@ -89,6 +89,15 @@ check(
   'the Colour picker takes the colour that shows, whichever layer it is on',
 );
 
+// what showed there was another layer's red: "there is none on a clear pixel" was not so
+await keys('r');
+await page.mouse.click(...(await at(13, 5)));
+await page.waitForTimeout(150);
+check(
+  (await said()).includes('That colour is on Art'),
+  'Replace colour on another layer’s pixel says which layer the colour is on',
+);
+
 // a selection's edits, a paste and a flip changed a hidden layer unseen
 await page.getByRole('button', { name: 'Hide Top', exact: true }).click();
 const before = await painted();
@@ -147,4 +156,29 @@ await page.mouse.move(cell.x + 150, cell.y - 300, { steps: 5 });
 await page.mouse.up();
 await page.waitForTimeout(200);
 check((await order()).join() === first.join(), 'and a frame let go far from its row stays put');
+
+// undo of a version gone back to brought the project back, on frame 1
+await page.locator('.grid-row.current .cell').nth(2).click();
+await page
+  .getByRole('button', { name: 'More', exact: true })
+  .click()
+  .catch(() => {});
+const history = page.getByRole('menuitem', { name: /History/ });
+
+if (await history.count()) {
+  await history.click();
+} else {
+  await page.getByRole('button', { name: 'History' }).click();
+}
+
+await page.getByRole('button', { name: 'Save a version' }).click();
+await page.waitForTimeout(500);
+await page.getByRole('button', { name: 'Go back to this' }).first().click();
+await page.waitForTimeout(800);
+await keys('Meta+z');
+await page.waitForTimeout(500);
+check(
+  (await page.locator('#statusbar').textContent()).includes('frame 3 of 3'),
+  'undo of a version gone back to returns to the frame that was being edited',
+);
 await finish();

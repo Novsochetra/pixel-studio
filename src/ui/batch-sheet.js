@@ -83,7 +83,7 @@ function hintText(state) {
 
   const reference = viewName(state.project, referenceOf(state.project)).toLowerCase();
 
-  return `Each image is matched to the ${reference} view. Names with side, back or front pick their view; ${fill}`;
+  return `Each image is cleaned to match the ${reference} view. A name with side, back or front says its view, and one that says none goes to the next view; ${fill}`;
 }
 
 // Several AI images at once, each cleaned into its own view and frame, placed together in one step.
