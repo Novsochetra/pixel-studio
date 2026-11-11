@@ -43,6 +43,9 @@ function bindDrag(handle, panel, sizer) {
   };
 
   handle.addEventListener('pointerdown', (event) => {
+    // Safari begins a selection at the press, then drags the frames' pictures it reaches: the
+    // moves stopped coming, and the line stayed held
+    event.preventDefault();
     handle.setPointerCapture(event.pointerId);
     handle.classList.add('dragging');
     drag = { startY: event.clientY, startHeight: panel.offsetHeight };

@@ -12,12 +12,9 @@ const dragBy = async (distance) => {
   const x = box.x + box.width / 2;
   const y = box.y + box.height / 2;
 
-  // kept inside the window: Safari's engine is sent no move from beyond its edge
-  const end = Math.max(1, Math.min(page.viewportSize().height - 2, y + distance));
-
   await page.mouse.move(x, y);
   await page.mouse.down();
-  await page.mouse.move(x, end, { steps: 6 });
+  await page.mouse.move(x, y + distance, { steps: 6 });
   await page.mouse.up();
   await page.waitForTimeout(150);
 };
@@ -56,8 +53,14 @@ check(Math.abs((await panelHeight()) - dragged) <= 1, 'the height is kept for th
 await dragBy(-2000);
 check((await canvasRoom()) >= 119, 'the frames can never take all of the canvas');
 
+// Safari took a press on the line for the start of a selection, and the drag down over the
+// frames for a drag of their pictures: the line stopped following, and stayed held
 await dragBy(2000);
 check((await panelHeight()) <= 121, 'and can shrink only as far as a row still fits');
+check(
+  !(await handle.evaluate((line) => line.classList.contains('dragging'))),
+  'and the line is let go of when the drag ends',
+);
 
 await handle.focus();
 const before = await panelHeight();
