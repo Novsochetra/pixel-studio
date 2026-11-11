@@ -46,11 +46,12 @@ export async function startSection(job) {
     'details.start-section',
     {},
     node('summary', {}, 'New project', node('span.start-where', {}, whereNewGoes(job))),
-    chooser,
+    // before the form, as on the start screen: Create stays at the window's foot, and lay over it
     node(
       'button.btn.quiet',
       { onclick: async () => opened(await sampleProject()) },
       'Try the example character',
     ),
+    chooser,
   );
 }

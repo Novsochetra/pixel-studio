@@ -117,8 +117,8 @@ kbd {
   border-radius: 2px;
 }
 
-/* while the first-visit card shows, the empty-frame card waits at the bottom, out from under it */
+/* While the first-visit card shows, the empty frame's bar waits: moved to the stage's foot, out
+   from under the card, it lay over the canvas's last rows and took the first stroke there. */
 body:has(.quick-start) .empty-frame {
-  top: auto;
-  bottom: 12px;
+  display: none;
 }

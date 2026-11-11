@@ -7,7 +7,7 @@ import { layersToMove } from './layer-move.js';
 import { pictureStrength } from './trace-picture.js';
 import { bindFrameDrag } from './frame-drag.js';
 import { arrowsMoveArt } from './selection-keys.js';
-import { forHands, keyNames } from './platform-keys.js';
+import { forHands, hasKeyboard, keyNames } from './platform-keys.js';
 import { listGroup, switchRow } from './list-group.js';
 
 const ONE_LAYER_HINT = 'Add a layer for hair or a sword, to draw it without touching the rest.';
@@ -83,6 +83,16 @@ function layerList(app, stack, active) {
   return list;
 }
 
+// a finger's drag scrolls the list, so a layer is held before it is dragged: nothing said so
+const HOLD_HINT = 'Hold a layer, then drag it, to move it up or down.';
+
+// what a list of more than one layer has under it
+const forSeveral = (app, picked) => [
+  hasKeyboard() ? null : node('p.hint', {}, HOLD_HINT),
+  pickSeveral(app),
+  picked > 1 ? node('p.hint', {}, `${picked} layers picked. ${PICKED_HINT}`) : null,
+];
+
 export function renderLayersPanel(el, app) {
   const { state } = app.store;
 
@@ -103,8 +113,7 @@ export function renderLayersPanel(el, app) {
     node('h2', { tabindex: '0' }, 'Layers'),
     stack.length < 2 ? node('p.hint', {}, ONE_LAYER_HINT) : null,
     layerList(app, stack, active),
-    stack.length > 1 ? pickSeveral(app) : null,
-    picked > 1 ? node('p.hint', {}, `${picked} layers picked. ${PICKED_HINT}`) : null,
+    stack.length > 1 ? forSeveral(app, picked) : null,
     active.kind === 'reference' ? pictureStrength(app, active) : null,
     layerBar(app, active),
   );

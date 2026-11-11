@@ -95,7 +95,8 @@
 
   .input,
   select.input,
-  .list-select {
+  .list-select,
+  .list-field {
     box-sizing: border-box;
     min-height: 40px;
   }

@@ -137,6 +137,26 @@ h4.start-heading {
   border-bottom: 1px solid var(--separator);
 }
 
+/* The form is longer than a tablet's screen held wide, or a short window: Create stays at its
+   foot, in sight whichever kind is picked. */
+.start-chooser .sheet-actions {
+  position: sticky;
+  /* over the room at the screen's foot too: what scrolled past showed under the button there */
+  bottom: -32px;
+  z-index: 1;
+  margin-bottom: -32px;
+  padding-block: 10px 42px;
+  border-top: 1px solid var(--separator);
+  background: var(--bg);
+}
+
+:is(.sheet, .sheet-out) .start-chooser .sheet-actions {
+  bottom: -24px;
+  margin-bottom: -24px;
+  padding-bottom: 34px;
+  background: var(--sheet);
+}
+
 /* On a phone the form is longer than the screen: Create stays at the screen's foot, in reach
    whichever kind is picked. It was a screen and a half below the kinds. */
 :root[data-layout='compact'] .start-chooser .sheet-actions {

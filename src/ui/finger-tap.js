@@ -10,17 +10,18 @@ export function fingerTap() {
   let still = true;
 
   return {
-    // a finger lands, or moves
+    // a finger lands, or moves; true for the first finger of a touch
     at({ pointerId, clientX: x, clientY: y, timeStamp }) {
       const from = down.get(pointerId);
+      const first = !from && !down.size;
 
       if (from) {
         still &&= Math.hypot(x - from.x, y - from.y) < SLOP_PX;
 
-        return;
+        return false;
       }
 
-      if (!down.size) {
+      if (first) {
         began = timeStamp;
         most = 0;
         still = true;
@@ -28,6 +29,8 @@ export function fingerTap() {
 
       down.set(pointerId, { x, y });
       most = Math.max(most, down.size);
+
+      return first;
     },
 
     // how many tapped, said once as the last of them lifts; 0 while one is still down

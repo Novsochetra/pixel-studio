@@ -238,4 +238,15 @@ check(
   'undo puts the canvas back as it was',
 );
 
+// A view with no pose to match yet is cleaned on its own too: the window offered to match a
+// reference's height that was not there, and not the canvas the picture needed.
+await selectView(page, 'Side');
+await dropImage(page, side, 'side.webp');
+await cleanReport(page);
+check(
+  (await offer.count()) === 1 && (await page.locator('#import-size').count()) === 0,
+  'a side view with no front to match is offered the canvas too, and no height to match',
+);
+await page.getByRole('button', { name: 'Cancel' }).click();
+
 await finish();

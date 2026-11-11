@@ -113,6 +113,12 @@ check(
   !(await page.getByRole('button', { name: 'Naga Eleven game pack' }).count()),
   'there is no game pack without a game',
 );
+// one animation seen from one side is one GIF: it came in a zip, to be taken out again
+const oneGif = await saved(button('Animated GIFs'), 'wall.gif');
+check(
+  oneGif.name === 'wall.gif' && isGif(readFileSync(oneGif.path)),
+  `a single GIF downloads as itself, under the project’s name (${oneGif.name})`,
+);
 await page.keyboard.press('Escape');
 
 await page.locator('button.wordmark').click();

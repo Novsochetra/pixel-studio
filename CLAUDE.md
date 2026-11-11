@@ -144,7 +144,7 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   (`touch-intent.js`), as it may be the first of a pinch.
 - Two fingers tapped together on the canvas undo the last step and three bring it again
   (`finger-tap.js`, `stage-taps.js`): Undo is at the top of a phone's screen, a hand away from
-  the art.
+  the art. Fingers that zoomed the canvas a step were a pinch, and undo nothing.
 - Under fingers (`95-touch.css`, `pointer: coarse`) nothing pressed is smaller than 40px, or has
   room round it that takes the press, and no words are smaller than 12px. Something new that is
   pressed or read is held to both there.
@@ -234,6 +234,11 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - The view a project is left on (view, frame, tool, colour) is kept for the next visit
   (`view-kept.js`): something new in the state that is how the editor is showing things joins
   `VIEW` there.
+- What runs at every move of the pointer is kept small on the largest canvas (512×512): the
+  checkerboard is one tile repeated (`checker.js`), a pass over a sprite's pixels or a
+  selection's cells is a plain loop, and an inspector section folded shut draws its title alone
+  when its rows cost a pass over the art (`outline-panel.js`). `big-canvas.flow.mjs` counts what
+  a move draws, so it says the same on a slow machine.
 - A picture cleaned onto a canvas too small for it is made smaller, and the window says so and
   offers the canvas it keeps its own pixels on (`canvasToKeep`, `import/keep-size.js`): never
   shrunk without a word.

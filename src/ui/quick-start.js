@@ -14,13 +14,26 @@ const CLEAN = {
   keys: 'drop an AI image on the canvas, or into a frame below it.',
   fingers:
     'tap the round button at the foot, then Frames, and put an AI image into a frame from its ⋯ menu.',
+  // a tablet held wide has the frames under its canvas: there is no round button to tap
+  tablet: 'put an AI image into a frame under the canvas, from its ⋯ menu.',
 };
+
+const WITH_FINGERS =
+  'draw with one finger, pinch with two to zoom and move. A tap with two fingers undoes a step.';
 
 const FIX = {
   keys: keyNames('touch up pixels with the pencil (B) and eraser (E). ⌘Z undoes your steps.'),
-  fingers:
-    'draw with one finger, pinch with two to zoom and move. A tap with two fingers undoes a step.',
+  fingers: WITH_FINGERS,
+  tablet: WITH_FINGERS,
 };
+
+function handsNow() {
+  if (hasKeyboard()) {
+    return 'keys';
+  }
+
+  return document.documentElement.dataset.layout === 'compact' ? 'fingers' : 'tablet';
+}
 
 const steps = (project, hands) => [
   [
@@ -55,9 +68,7 @@ export function showQuickStart(stage, project) {
     node(
       'ol',
       {},
-      steps(project, hasKeyboard() ? 'keys' : 'fingers').map(([title, text]) =>
-        node('li', {}, node('b', {}, title), text),
-      ),
+      steps(project, handsNow()).map(([title, text]) => node('li', {}, node('b', {}, title), text)),
     ),
     node(
       'div.group',

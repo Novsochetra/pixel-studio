@@ -18,6 +18,17 @@ test('two fingers down and up together are a tap of two, said as the last lifts'
   assert.equal(tap.lifted(up(2, 140)), 2);
 });
 
+test('the first finger of a touch is told apart, for what is kept from before it', () => {
+  const tap = fingerTap();
+
+  assert.equal(tap.at(at(1, 100, 100, 0)), true);
+  assert.equal(tap.at(at(2, 160, 100, 20)), false);
+  assert.equal(tap.at(at(1, 102, 100, 30)), false, 'a move is no landing');
+  tap.lifted(up(1, 100));
+  tap.lifted(up(2, 110));
+  assert.equal(tap.at(at(1, 100, 100, 500)), true);
+});
+
 test('three fingers are a tap of three', () => {
   const tap = fingerTap();
 

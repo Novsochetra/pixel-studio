@@ -13,6 +13,10 @@ const encoder = new TextEncoder();
 // a download says whose it is: sprite-sheets.zip from two projects were told apart by nothing
 const named = (state) => fileSlug(state.project.name, 'project');
 
+// an icon or a tile that has the project's own name is not named twice: gem.gif, not gem-gem.gif
+const ownedName = (state, file) =>
+  file.startsWith(named(state)) ? file : `${named(state)}-${file}`;
+
 const warningsOf = (results, project) =>
   results.flatMap((result) =>
     result.warnings.map((warning) => `${result.name}: ${saidWarning(project, result, warning)}`),
@@ -120,7 +124,15 @@ export async function saveGifs(state, settings) {
     }
   }
 
-  await saveFile(`${named(state)}-animations-gif.zip`, zipFiles(files));
+  // one animation seen from one side is one GIF: in a zip it had to be taken out again, which a
+  // phone makes a chore
+  if (files.length === 1) {
+    const gif = new Blob([files[0].data], { type: 'image/gif' });
+
+    await saveFile(ownedName(state, files[0].name), gif);
+  } else {
+    await saveFile(`${named(state)}-animations-gif.zip`, zipFiles(files));
+  }
 
   return warningsOf(results, state.project);
 }

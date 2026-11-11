@@ -1,12 +1,12 @@
 import { node, toast } from './dom.js';
 import { openSheet } from './sheet.js';
-import { currentAnimation, replaceDirectionArt } from './actions.js';
+import { currentAnimation, referenceSprite, replaceDirectionArt } from './actions.js';
 import { keepVersion } from './versions-sheet.js';
 import { optionFields } from './import/import-options.js';
 import { runClean } from './import/import-run.js';
 import { scalesAfter } from './import/view-scale.js';
 import { decodeImage } from '../io/images.js';
-import { referenceOf } from '../model/reference.js';
+import { isPose, referenceOf } from '../model/reference.js';
 import { viewName } from '../model/kinds.js';
 import { frameAt } from '../model/project.js';
 import { hasArt } from '../model/frames.js';
@@ -33,14 +33,16 @@ function placeName(state, direction, frame) {
 
 // Characters match every picture to the reference pose (the reference view's first frame of the
 // first animation that has it); that pose itself, and anything that is not a character, is
-// cleaned on its own and placed as its kind stands.
+// cleaned on its own and placed as its kind stands. So is a picture with no pose to match yet (an
+// empty reference, or a few pixels sketched in it): the window offered to match a height that
+// was not there, and not the canvas the picture needed.
 function cleansAlone(state, direction, frame) {
   const { project } = state;
   const firstWithIt = project.animations.find((animation) => animation.directions[direction]);
-  const isPose =
+  const isThePose =
     direction === referenceOf(project) && frame === 0 && firstWithIt === currentAnimation(state);
 
-  return isPose || project.kind !== 'character';
+  return isThePose || project.kind !== 'character' || !isPose(referenceSprite(state));
 }
 
 function accept(job, place) {
