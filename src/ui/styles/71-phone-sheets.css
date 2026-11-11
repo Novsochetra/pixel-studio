@@ -28,21 +28,45 @@
     padding: 4px 6px;
   }
 
-  /* as wide as its tabs and no wider, in the middle of the screen */
+  /* in the middle of the screen, short of its edges, each tab wide enough for its mark to be
+     a pill round its word */
   :root[data-layout='compact'] .dock {
     justify-self: center;
     box-sizing: border-box;
-    width: fit-content;
-    max-width: calc(100% - 20px);
+    width: min(100% - 16px, 372px);
     margin: 6px 0 calc(8px + env(safe-area-inset-bottom, 0px));
-    padding: 4px;
+    gap: 4px;
+    padding: 4px 6px;
   }
 
   :root[data-layout='compact'] .dock-tab {
-    flex: 1 1 58px;
-    min-width: 44px;
-    padding: 4px 8px;
+    position: relative;
+    isolation: isolate;
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 1px;
+    padding: 4px 2px;
+  }
+
+  :root[data-layout='compact'] .dock-tab :is(svg, .dock-swatch) {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* The open tab's mark is lower than the tab and as wide, with room between it and the next:
+     as tall as the tab, tab against tab, it was nearly a circle and not the pill a tab bar
+     marks its tab with. */
+  :root[data-layout='compact'] .dock-tab[aria-pressed='true'] {
+    background: none;
+  }
+
+  :root[data-layout='compact'] .dock-tab[aria-pressed='true']::before {
+    content: '';
+    position: absolute;
+    inset: 4px 0;
+    z-index: -1;
     border-radius: var(--radius-pill);
+    background: var(--tint-quiet);
   }
 
   /* The sheet's own colour goes on under the bars to the screen's foot, so they float on the
