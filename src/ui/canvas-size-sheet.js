@@ -20,12 +20,12 @@ const ANCHORS = [
 ].map(([label, x, y]) => ({ label, x, y }));
 
 // what stands on its feet keeps them on the ground; anything else keeps its middle
-const firstAnchor = (project) =>
+export const firstAnchor = (project) =>
   ANCHORS.find(({ label }) => label === (kindOf(project).place === 'feet' ? 'Bottom' : 'Centre'));
 
 // Resolves to whether the canvas changed. Undo brings cut-off art back until the page is closed;
 // the version kept first brings it back after that, so with none kept the canvas is left as it is.
-async function resize(app, { size, anchor }) {
+export async function resizeCanvas(app, { size, anchor }) {
   const { project } = app.store.state;
   const [across] = canvasShift(project.canvas, size, anchor);
   const kept = await keepVersion(app, `Before the canvas became ${size.width}×${size.height}`);
@@ -115,7 +115,7 @@ async function changeSize(app, { fields, job, sheet }, button) {
   if (size.width !== canvas.width || size.height !== canvas.height) {
     button.disabled = true;
     button.textContent = 'Changing the size…';
-    await resize(app, { size, anchor: job.anchor }).catch(() =>
+    await resizeCanvas(app, { size, anchor: job.anchor }).catch(() =>
       toast('The canvas size could not be changed. Try again in a moment.'),
     );
   }

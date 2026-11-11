@@ -99,7 +99,8 @@ export function cleanAlone(imageData, canvas, options = {}) {
   const unchanged = Math.abs(scaleBy.fy - 1) <= 1e-9 && Math.abs(scaleBy.fx - 1) <= 0.01;
   const sprite = unchanged ? analyzed : scaled(analyzed, own, scaleBy, options.place === 'fill');
   const placed = place(sprite, canvas, options);
-  const scaledBy = unchanged ? null : { ...scaleBy, drawnHeight: own.bottom - own.top };
+  const drawn = { drawnHeight: own.bottom - own.top, drawnWidth: own.right - own.left };
+  const scaledBy = unchanged ? null : { ...scaleBy, ...drawn };
 
   return { ...placed, report: report(analyzed, placed, scaledBy) };
 }

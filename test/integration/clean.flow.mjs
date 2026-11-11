@@ -194,4 +194,48 @@ check(
 );
 await page.keyboard.press('Escape');
 
+// A picture too large for the canvas was made smaller without a word, and its detail went with
+// it. The window says so, and offers the canvas the art keeps its own pixels on.
+await page.locator('button.wordmark').click();
+await page.locator('.start-section').evaluate((details) => {
+  details.open = true;
+});
+await createProject(page, { kind: 'Character', name: 'Tall', width: 32 });
+await dropImage(page, `${images}/front.png`, 'tall.png');
+check(
+  (await cleanReport(page)).includes('to fit the canvas'),
+  'a picture larger than its canvas is made smaller to fit',
+);
+const offer = page.locator('#import-grow');
+const offered = (await offer.textContent().catch(() => '')).match(/(\d+)×(\d+)/);
+
+check(Boolean(offered), 'and the window offers the canvas it would keep its size on');
+await page.screenshot({ path: `${shots}/clean-smaller.png` });
+await offer.click();
+await page
+  .waitForFunction(
+    () => document.querySelector('pre.report')?.textContent.includes('pixel size'),
+    null,
+    { timeout: 25000 },
+  )
+  .catch(() => null);
+check(
+  (await cleanReport(page)).includes('Kept its own colours and pixel size'),
+  'cleaned again on that canvas, the art keeps every pixel',
+);
+check((await offer.count()) === 0, 'and nothing more is offered');
+await page.getByRole('button', { name: 'Use for Front' }).click();
+check(
+  (await page.locator('#statusbar').textContent()).includes(
+    `${offered?.[1]}×${offered?.[2]} canvas`,
+  ),
+  'the canvas is the size that was offered',
+);
+await page.keyboard.press('ControlOrMeta+z');
+await page.keyboard.press('ControlOrMeta+z');
+check(
+  (await page.locator('#statusbar').textContent()).includes('32×32 canvas'),
+  'undo puts the canvas back as it was',
+);
+
 await finish();

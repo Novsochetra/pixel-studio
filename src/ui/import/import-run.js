@@ -6,6 +6,7 @@ import { isPose, referenceOf } from '../../model/reference.js';
 import { placementOf, viewName } from '../../model/kinds.js';
 import { artHeight, reportText } from './import-report.js';
 import { cleanAtViewScale, scaleOf } from './view-scale.js';
+import { keepSizeOffer } from './keep-size.js';
 import { inWords } from '../../model/told.js';
 
 const FAILED =
@@ -37,6 +38,7 @@ function showResult(job, result, ref, alone) {
       alone ? null : figure(ref, project.guides, `${refName} (reference)`),
       figure(sprite, project.guides, `${viewName(project, job.direction)}, cleaned`),
     ),
+    keepSizeOffer(job, result.report, () => runClean(job, job.asked)),
     node('pre.report', {}, text),
   );
   job.result = sprite;
@@ -50,6 +52,7 @@ export async function runClean(job, options) {
   const ref = referenceSprite(state);
 
   // what was cleaned before is not what is being asked for now
+  job.asked = options;
   job.result = null;
   job.accept.disabled = true;
   replace(job.slot, node('p.report', {}, 'Cleaning… this takes a second or two.'));
