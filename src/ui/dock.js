@@ -3,6 +3,8 @@ import { openPanel, panelsFor } from './panels.js';
 import { panelHead } from './panel-sheet.js';
 import { toHex } from '../model/sprite.js';
 
+const OWN_WAY_IN = ['colours', 'tools'];
+
 // the colour in hand shows on its tab, so it is in sight with every panel shut
 const tabMark = (panel, state) =>
   panel.id === 'colours'
@@ -28,9 +30,10 @@ function tab(app, panel, open) {
 // the colour, and this one for every other panel. It opens the one used last; the sheet's own
 // row picks another.
 function moreButton(app, panels, open) {
-  const others = panels.filter((panel) => panel.id !== 'colours');
+  // the colour has its own button, and the tools their bar: neither is what this one comes back to
+  const others = panels.filter((panel) => !OWN_WAY_IN.includes(panel.id));
   const last = others.find((panel) => panel.id === app.lastPanel) ?? others[0];
-  const shown = Boolean(open) && open !== 'colours';
+  const shown = Boolean(open) && !OWN_WAY_IN.includes(open);
 
   return node(
     'button.dock-more',
@@ -55,7 +58,7 @@ export function renderDock(el, app) {
 
   el.hidden = !panels.length;
 
-  if (open && open !== 'colours') {
+  if (open && !OWN_WAY_IN.includes(open)) {
     app.lastPanel = open;
   }
 
@@ -64,6 +67,8 @@ export function renderDock(el, app) {
     // the sheet rises when it opens; a panel changed for another is the same sheet, still up
     frame.dataset.rises = String(!frame.dataset.panel);
     frame.dataset.panel = open ?? '';
+    // a sheet pulled tall is tall for that visit: the next one opens at its own height
+    frame.dataset.sheet = open ? (frame.dataset.sheet ?? '') : '';
     frame.querySelectorAll('.inspector, .inspector > .section').forEach((part) => {
       part.scrollTop = 0;
     });

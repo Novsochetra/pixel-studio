@@ -85,6 +85,9 @@ const TOOLS = [
   { id: 'pose', label: 'Pose the body parts: drag a part, or its handle to turn it', key: 'o' },
 ];
 
+// the tool's name alone, without how it is used: "Line" of "Line: drag from end to end"
+export const toolName = (tool) => tool.label.split(/[:(]/)[0].trim();
+
 // what picking the tool says, to keys and a pointer or to fingers
 export const toolSaid = (tool) => forHands(tool.label, tool.touch ?? tool.label);
 

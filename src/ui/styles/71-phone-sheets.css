@@ -42,6 +42,25 @@
     border-radius: 50%;
   }
 
+  /* Where the tools go on out of sight stands the way to all of them, by name: it takes the
+     place of the strip that only said there were more. */
+  :root[data-layout='compact'] .rail::after {
+    display: none;
+  }
+
+  :root[data-layout='compact'] .rail .btn.rail-all {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    display: inline-flex;
+    margin-left: auto;
+    background: var(--chrome-raised);
+    box-shadow:
+      var(--shadow-glass),
+      -8px 0 10px -2px var(--chrome),
+      8px 0 0 4px var(--chrome);
+  }
+
   /* the letter of a tool's key is for a desk's rail: in a narrow window's bar it lay on the
      round tools */
   :root[data-layout='compact'] .rail .btn[data-key]::after {
@@ -129,6 +148,12 @@
     animation: none;
   }
 
+  /* pulled up by its bar, the sheet takes most of the screen: for a long list of frames or
+     layers, with the canvas a strip above it until the sheet is pulled back down */
+  :root[data-layout='compact'] .app[data-sheet='tall'] :is(.inspector, .grid-panel) {
+    height: min(78vh, 100dvh - 150px);
+  }
+
   /* The sheet rises as it opens (dock.js says when). The frames and the other panels are two
      sheets, one in the stage: risen again at each change of panel, the sheet seemed to blink. */
   :root[data-layout='compact'] .app[data-rises='true'] :is(.inspector, .grid-panel) {
@@ -205,9 +230,11 @@
     background: var(--fill-quiet);
   }
 
+  /* the row scrolls sideways by itself; a finger moved up or down on it pulls the sheet */
   :root[data-layout='compact'] .panel-tabs {
     flex: 1;
     min-width: 0;
+    touch-action: pan-x;
   }
 
   /* in the frames' sheet the bar scrolls with nothing under it: bare, it leaves the sheet's

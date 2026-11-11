@@ -77,11 +77,24 @@ function viewButtons(app) {
   ];
 }
 
+// At the end of a phone's bar, where the tools go on out of sight: every tool with its name.
+// The stylesheet shows it only there.
+const allTools = (app) =>
+  node(
+    'button.btn.quiet.rail-all',
+    {
+      'aria-label': 'All tools',
+      title: 'Every tool, with its name',
+      onclick: () => app.store.set({ panel: 'tools' }),
+    },
+    icon('grid'),
+  );
+
 export function renderRail(el, app) {
   const { state } = app.store;
   const tools = toolsFor(state.project).map((tool) => toolButton(app, tool));
 
-  replace(el, tools, node('hr'), viewButtons(app));
+  replace(el, tools, node('hr'), viewButtons(app), allTools(app));
 
   // A tool picked from elsewhere (a layer's row, a key) may be past the edge of a phone's strip.
   // Only a change of tool moves the strip: Symmetry, at its far end, stays under the finger.

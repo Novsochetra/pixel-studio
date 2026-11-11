@@ -1,6 +1,7 @@
 // what a phone opens as a sheet, and the workspaces each belongs to: frames and the brush are for
 // drawing
 const PANELS = [
+  { id: 'tools', label: 'Tools', iconName: 'pencil', modes: ['edit'] },
   { id: 'frames', label: 'Frames', iconName: 'frames', modes: ['edit'] },
   { id: 'colours', label: 'Colours', modes: ['edit', 'board'] },
   { id: 'brush', label: 'Brush', iconName: 'brush', modes: ['edit'] },

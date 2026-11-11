@@ -14,7 +14,6 @@ const box = (selector) =>
 
     return { left, right, top, bottom, width, height, radius: parseFloat(borderRadius) };
   });
-const screen = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
 const open = () => page.locator('.app').getAttribute('data-panel');
 const picked = () => page.locator('.panel-tabs button[aria-pressed="true"]:visible').textContent();
 const tools = await box('#rail');
@@ -65,19 +64,55 @@ check((await open()) === '', 'its × shuts it');
 await page.locator('.dock-more').tap();
 await page.waitForTimeout(700);
 check((await open()) === 'layers', 'the panels button opens the panel used last');
-const grab = await box('#inspector .panel-grab');
-const [x, y] = [screen.width - 70, grab.top + 6];
+// from the row of names, where a thumb takes hold: only the grabber's own strip took the pull
+const pullBy = async (distance) => {
+  const row = await box('#inspector .panel-tabs');
+  const [x, y] = [row.left + 30, row.top + row.height / 2];
 
-await touch('touchStart', [[x, y]]);
+  await touch('touchStart', [[x, y]]);
 
-for (let i = 1; i <= 10; i++) {
-  await touch('touchMove', [[x, y + i * 16]]);
-  await page.waitForTimeout(30);
-}
+  for (let i = 1; i <= 10; i++) {
+    await touch('touchMove', [[x, y + (distance * i) / 10]]);
+    await page.waitForTimeout(30);
+  }
 
-await touch('touchEnd', []);
+  await touch('touchEnd', []);
+  await page.waitForTimeout(400);
+};
+const height = async () => (await box('#inspector')).height;
+const usual = await height();
+
+await pullBy(-120);
+check(
+  (await height()) > usual + 100 && (await open()) === 'layers',
+  'pulled up by its top, the sheet is taller, for a long list',
+);
+await pullBy(120);
+check(
+  Math.abs((await height()) - usual) < 2 && (await open()) === 'layers',
+  'pulled down, a tall sheet is its own height again',
+);
+await pullBy(120);
+check((await open()) === '', 'and pulled down once more, it shuts');
+
+// the bar shows five tools as bare pictures: the far ones were a blind swipe away
+await page.getByRole('button', { name: 'All tools' }).tap();
+await page.waitForTimeout(600);
+const named = await page.locator('.tool-tile').allTextContents();
+
+check(
+  (await open()) === 'tools' && named.includes('Lasso') && named.includes('Pencil'),
+  'All tools, at the end of the bar, shows every tool with its name',
+);
+await page.locator('.tool-tile', { hasText: 'Lasso' }).tap();
 await page.waitForTimeout(400);
-check((await open()) === '', 'pulled down by its bar, the sheet shuts');
+check(
+  (await open()) === '' &&
+    (
+      await page.locator('#rail [aria-pressed="true"]').first().getAttribute('aria-label')
+    ).startsWith('Lasso'),
+  'a tool picked there is in hand, the sheet out of the canvas’s way',
+);
 
 await page.locator('.dock-tab[data-panel="colours"]').tap();
 await page.waitForTimeout(700);

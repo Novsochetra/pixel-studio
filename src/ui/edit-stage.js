@@ -54,6 +54,8 @@ const showsInGrid = (patch) => {
   return !patch.stroke && (!keys.length || keys.some((key) => GRID_KEYS.includes(key)));
 };
 
+const TIGHT = { across: 16, down: 16 };
+
 // the zoom at which the canvas fits the part of the stage above the frames
 export function fitZoom(stage, sprite) {
   const area = stage.querySelector('.edit-scroll') ?? stage;
@@ -61,12 +63,17 @@ export function fitZoom(stage, sprite) {
   const padding = getComputedStyle(area.querySelector('.stage-inner') ?? area);
   const across = parseFloat(padding.paddingLeft) + parseFloat(padding.paddingRight);
   const down = parseFloat(padding.paddingTop) + parseFloat(padding.paddingBottom);
-  const room = Math.min(
-    (area.clientWidth - across) / sprite.width,
-    (area.clientHeight - down) / sprite.height,
-  );
+  const roomWith = (edge) =>
+    Math.min(
+      (area.clientWidth - edge.across) / sprite.width,
+      (area.clientHeight - edge.down) / sprite.height,
+    );
+  const fit = Math.floor(roomWith({ across, down }));
 
-  return Math.max(1, Math.min(24, Math.floor(room)));
+  // A canvas that fits only once or twice has the most to gain from a whole step more: it takes
+  // the step when it still stands clear of the stage's edges. A tablet held wide left a 160
+  // pixel canvas at 100%, with room for 200% but for the stage's own margins.
+  return Math.max(1, Math.min(24, fit < 3 ? Math.floor(roomWith(TIGHT)) : fit));
 }
 
 function renderStage(app, { canvas, bar, poseBar, pinBar, place, empty, grid }, patch) {

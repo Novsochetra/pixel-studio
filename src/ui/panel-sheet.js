@@ -1,6 +1,5 @@
 import { node } from './dom.js';
 import { openPanel, panelsFor } from './panels.js';
-import { pullToClose } from './sheet-pull.js';
 
 function panelTabs(app) {
   const { state } = app.store;
@@ -38,16 +37,71 @@ export function panelHead(app) {
 
 export const panelGrab = (app) => node('div.panel-grab', {}, panelHead(app));
 
-// pulled down by its bar, the panel shuts as a window does
+const STARTS = 8;
+const TURNS = 48;
+
+// a press that became a pull must not also press the button it began on
+const swallow = (event) => {
+  event.stopPropagation();
+  event.preventDefault();
+};
+
+// How far the finger has pulled, and what that does when it lets go: down shuts the sheet, or
+// brings a tall one back to its height; up makes it tall.
+function pulled(panel, app, distance) {
+  const frame = panel.closest('.app');
+  const tall = frame.dataset.sheet === 'tall';
+
+  if (distance < -TURNS) {
+    frame.dataset.sheet = 'tall';
+  } else if (distance > TURNS && tall) {
+    frame.dataset.sheet = '';
+  } else if (distance > TURNS) {
+    app.store.set({ panel: null });
+  }
+}
+
+// The sheet is pulled by its top: the grabber, the row of names, the room round them. It starts
+// once the finger has moved up or down, so a tap on a name or on × is still a tap; only the
+// grabber's own strip took the pull before, and nothing made the sheet taller.
 export function pullsShut(panel, app) {
-  pullToClose({
-    head: panel,
-    body: panel,
-    grips: (event) => Boolean(event.target.closest('.panel-grab')),
-    close: () => {
-      // the panel is kept for the next time it opens: it must not open where it was pulled to
+  let pull = null;
+  const end = (event) => {
+    if (pull?.moving) {
       panel.style.translate = '';
-      app.store.set({ panel: null });
-    },
+      pulled(panel, app, event.type === 'pointerup' ? event.clientY - pull.y : 0);
+      // the click of this press comes before the timer does
+      setTimeout(() => panel.removeEventListener('click', swallow, true));
+    }
+
+    pull = null;
+  };
+
+  panel.addEventListener('pointerdown', (event) => {
+    const compact = document.documentElement.dataset.layout === 'compact';
+
+    if (compact && event.target.closest('.panel-grab')) {
+      pull = { y: event.clientY, x: event.clientX, moving: false };
+    }
   });
+  panel.addEventListener('pointermove', (event) => {
+    if (!pull) {
+      return;
+    }
+
+    const [down, across] = [event.clientY - pull.y, Math.abs(event.clientX - pull.x)];
+
+    if (!pull.moving && Math.abs(down) > STARTS && Math.abs(down) > across) {
+      pull.moving = true;
+      panel.setPointerCapture(event.pointerId);
+      panel.addEventListener('click', swallow, true);
+    }
+
+    if (pull.moving) {
+      // down, the sheet follows the finger; up, it waits to be let go
+      panel.style.translate = `0 ${Math.max(0, down)}px`;
+    }
+  });
+  panel.addEventListener('pointerup', end);
+  panel.addEventListener('pointercancel', end);
 }

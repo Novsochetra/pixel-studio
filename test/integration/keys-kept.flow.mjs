@@ -117,4 +117,31 @@ check(
   'after Enter in the colour’s code, E picks the Eraser and is not typed into the code',
 );
 
+// Escape left some fields with what was typed and others with what they held
+await page.locator('#fps').focus();
+const rate = await page.inputValue('#fps');
+
+await page.keyboard.type('7');
+await page.keyboard.press('Escape');
+await page.waitForTimeout(150);
+check(
+  (await page.inputValue('#fps')) === rate && (await focused()) === 'the page',
+  'Escape leaves a field with what it held',
+);
+
+// with nothing left to undo, the keys went to Redo: the next Enter did the opposite
+await page.locator('.cell-add').first().click();
+await page.waitForTimeout(200);
+await page.getByRole('button', { name: 'Undo' }).focus();
+
+for (let i = 0; i < 12 && (await focused()).startsWith('Undo'); i++) {
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(100);
+}
+
+check(
+  !(await focused()).startsWith('Redo'),
+  'when nothing is left to undo, the keys do not go to Redo',
+);
+
 await finish();

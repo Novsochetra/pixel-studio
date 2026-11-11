@@ -56,6 +56,7 @@ export const ROUTES = {
     'lassoMode',
     'panel',
   ],
+  tools: ['tool', 'project'],
   layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations', 'layout'],
   colours: [
     'color',

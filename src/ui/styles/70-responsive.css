@@ -195,6 +195,7 @@
 
 :root[data-layout='compact'] .app:is([data-panel=''], [data-panel='frames']) .inspector,
 :root[data-layout='compact'] .app:not([data-panel='frames']) .grid-panel,
+:root[data-layout='compact'] .app[data-panel='tools'] .section:not([data-name='tools']),
 :root[data-layout='compact'] .app[data-panel='colours'] .section:not([data-name='colours']),
 :root[data-layout='compact'] .app[data-panel='brush'] .section:not([data-name='drawing']),
 :root[data-layout='compact'] .app[data-panel='layers'] .section:not([data-name='layers']),

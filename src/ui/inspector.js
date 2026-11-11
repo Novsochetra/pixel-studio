@@ -5,6 +5,7 @@ import { renderColourPanel, renderDrawingPanel } from './colour-panel.js';
 import { renderGuidesPanel } from './guides-panel.js';
 import { renderLayersPanel } from './layers-panel.js';
 import { renderOutlinePanel } from './outline-panel.js';
+import { renderToolsPanel } from './tools-panel.js';
 
 const FOLDED = 'pixel-clean-folded';
 // what is used on every visit stays open; the rest waits one click away
@@ -55,6 +56,7 @@ function bindCollapsing(inspector, sections) {
 export function mountInspector(app) {
   const inspector = document.getElementById('inspector');
   const sections = {
+    tools: node('section.section'),
     colours: node('section.section'),
     drawing: node('section.section'),
     layers: node('section.section'),
@@ -67,6 +69,7 @@ export function mountInspector(app) {
   pullsShut(inspector, app);
 
   return {
+    tools: () => renderToolsPanel(sections.tools, app),
     colours: () => renderColourPanel(sections.colours, app),
     drawing: () => renderDrawingPanel(sections.drawing, app),
     layers: () => renderLayersPanel(sections.layers, app),

@@ -59,6 +59,16 @@ function nowAt(place, root) {
   const within = (place.region && document.getElementById(place.region)) || root;
   const controls = focusables(within);
   const named = controls.filter((control) => isNamed(control, place));
+
+  // Still there, but switched off (Undo, with nothing left to undo): the keys go to no other
+  // control. On its neighbour, the next Enter did the opposite of the last.
+  if (
+    !named.length &&
+    [...within.querySelectorAll(':disabled')].some((off) => isNamed(off, place))
+  ) {
+    return null;
+  }
+
   const inPlace = place.steps.reduce((at, step) => at?.children[step], within);
   const stood = controls.includes(inPlace) && inPlace.tagName === place.tag ? inPlace : null;
 
