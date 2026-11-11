@@ -6,6 +6,7 @@ import { stopPlayback } from './grid/playback.js';
 import { playsAllViews } from './play-all-views.js';
 import { touchIntent } from './touch-intent.js';
 import { bindBeside } from './stage-beside.js';
+import { withTaps } from './stage-taps.js';
 import { getPixel, toHex } from '../model/sprite.js';
 
 export function pixelAt(canvas, event, scale) {
@@ -137,7 +138,7 @@ function follow(app, view, event) {
   }
 
   if (view.touches.has(event.pointerId)) {
-    view.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    view.place(event);
   }
 
   view.intent?.moved(event);
@@ -158,9 +159,12 @@ function follow(app, view, event) {
 
 export function bindPointer(canvas, app, stage) {
   const view = { canvas, stage, touches: new Map(), session: null, intent: null };
-  const place = (event) =>
-    view.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
-  const finish = (event) => release(app, view, event);
+  const { place, finish } = withTaps(app, {
+    place: (event) => view.touches.set(event.pointerId, { x: event.clientX, y: event.clientY }),
+    finish: (event) => release(app, view, event),
+  });
+
+  view.place = place;
 
   // a drag whose work can be taken back is, by Escape (keyboard.js)
   app.cancelDrag = () => {

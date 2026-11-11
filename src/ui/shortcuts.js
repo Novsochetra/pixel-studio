@@ -59,6 +59,7 @@ const GROUPS = [
       ['⌘scroll, or pinch', 'Zoom around the pointer'],
       ['Space + drag, middle drag', 'Pan'],
       ['Two fingers', 'Pan and pinch on a touch screen'],
+      ['Tap with two fingers, with three', 'Undo, redo on a touch screen'],
     ],
   ],
   [

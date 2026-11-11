@@ -13,19 +13,19 @@ const remember = () => keepSetting(SEEN, true);
 const CLEAN = {
   keys: 'drop an AI image on the canvas, or into a frame below it.',
   fingers:
-    'open the frames (the round button at the foot, then Frames) and put an AI image into a frame from its ⋯ menu.',
+    'tap the round button at the foot, then Frames, and put an AI image into a frame from its ⋯ menu.',
 };
 
 const FIX = {
   keys: keyNames('touch up pixels with the pencil (B) and eraser (E). ⌘Z undoes your steps.'),
   fingers:
-    'draw with one finger, pinch with two to zoom and move. The arrows at the top undo your steps.',
+    'draw with one finger, pinch with two to zoom and move. A tap with two fingers undoes a step.',
 };
 
 const steps = (project, hands) => [
   [
     'Clean: ',
-    `${CLEAN[hands]} ${isSingleView(project) ? 'Every frame' : 'Every view and frame'} is fitted to the first: same pixel size, place, colours. Projects (top left) holds the rest of your art.`,
+    `${CLEAN[hands]} ${isSingleView(project) ? 'Every frame' : 'Every view and frame'} is fitted to the first: same pixel size, place and colours.`,
   ],
   ['Fix: ', FIX[hands]],
   ['Use: ', 'Download gives PNGs at both sizes, sprite sheets and GIFs for your game.'],
@@ -71,5 +71,6 @@ export function showQuickStart(stage, project) {
   stage.append(card);
   document.addEventListener('keydown', onKey);
   document.addEventListener('pointerdown', onPress, true);
-  gotIt.focus();
+  // without scrolling to it: on a short screen the card opened at its last step, its first cut off
+  gotIt.focus({ preventScroll: true });
 }

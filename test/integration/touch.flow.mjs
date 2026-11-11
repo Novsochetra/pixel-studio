@@ -108,6 +108,23 @@ await page.waitForTimeout(100);
 await pinch(60);
 check((await painted()).length === 11, 'two fingers with Fill in hand fill nothing');
 check((await zoom()) > after.width / 32, 'they zoom the canvas in');
+
+// Undo is at the top of the screen, a hand away from the art: fingers tapped together on the
+// canvas take the last step back, or bring it again.
+const tapTogether = async (count) => {
+  const middle = [stage.x + stage.width / 2, stage.y + stage.height / 2];
+  const points = [-40, 0, 40].slice(0, count).map((across) => [middle[0] + across, middle[1]]);
+
+  await touch('touchStart', points.slice(0, 1));
+  await touch('touchStart', points);
+  await touch('touchEnd', []);
+  await page.waitForTimeout(300);
+};
+
+await tapTogether(2);
+check((await painted()).length === 0, 'two fingers tapped on the canvas undo the last step');
+await tapTogether(3);
+check((await painted()).length === 11, 'three bring it back, and Fill in hand fills nothing');
 await pinch(-30);
 await page.getByRole('button', { name: 'More', exact: true }).click();
 await page.getByRole('menuitem', { name: 'Fit the canvas' }).click();
