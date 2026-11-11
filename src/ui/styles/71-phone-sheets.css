@@ -139,7 +139,7 @@
      phone, and never so tall that a canvas of 160 pixels, and a bar under it, have no room
      above it. */
   :root[data-layout='compact'] {
-    --sheet-height: min(50vh, 400px, 100dvh - 334px);
+    --sheet-height: min(50vh, 400px, 100dvh - 340px);
     /* the row under the sheet: the tools' bar, 52px, and the air over and under it */
     --foot-row: calc(66px + env(safe-area-inset-bottom, 0px));
   }
@@ -180,7 +180,7 @@
      has no room to spare. */
   :root[data-layout='compact'] .app[data-panel]:not([data-panel='']) .stage-inner.edit {
     justify-content: flex-start;
-    padding-block: 2px 56px;
+    padding-block: 8px 56px;
   }
 
   :root[data-layout='compact'] .app[data-panel]:not([data-panel='']) .canvas-holder {

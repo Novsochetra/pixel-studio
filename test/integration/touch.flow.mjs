@@ -225,7 +225,7 @@ const fitted = await box();
 
 await spread(
   [fitted.x + fitted.width / 2, fitted.y + fitted.height / 2],
-  [0, fitted.height / 2 + 8],
+  [0, fitted.height / 2 + 5],
 );
 check(
   (await page.evaluate(() => window.visualViewport.scale)) === 1 &&
