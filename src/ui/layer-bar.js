@@ -5,6 +5,7 @@ import { duplicateLayer, layerBelow, layerBeside, mergeDown } from '../model/lay
 import { frameAt } from '../model/project.js';
 import { renameRow } from './layer-row.js';
 import { addPicture } from './trace-picture.js';
+import { hasKeyboard } from './platform-keys.js';
 
 export const frameOf = (state) => frameAt(state.project, state.at);
 
@@ -61,9 +62,9 @@ function tool(iconName, name, onclick, { disabled = false, title = name, said = 
   );
 }
 
-// the words the actions wear on a phone, none where a pointer can hover for them
+// the words the actions wear under fingers, none where a pointer can hover for them
 const wordsFor = (app) =>
-  app.store.state.layout === 'compact'
+  app.store.state.layout === 'compact' || !hasKeyboard()
     ? {
         picture: 'Trace',
         rename: 'Rename',

@@ -69,13 +69,8 @@ export function renderEmptyFrame(el, app) {
 
   replace(
     el,
-    node(
-      'div',
-      {},
-      // a phone's card is one row with the buttons: the place over the canvas names the frame
-      node('strong', {}, state.layout === 'compact' ? 'Empty frame' : `${name} is empty`),
-      node('div.hint', {}, 'Drop an AI image on the canvas, or draw on it.'),
-    ),
+    // on a phone the place over the canvas names the frame
+    node('strong', {}, state.layout === 'compact' ? 'Empty frame' : `${name} is empty`),
     node(
       'button.btn.primary',
       { onclick: () => imageIntoFrame(app, direction, index) },

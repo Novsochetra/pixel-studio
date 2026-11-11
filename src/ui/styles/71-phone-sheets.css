@@ -186,6 +186,8 @@
   /* the sheet rises once; a panel changed for another under the same sheet is simply there */
   :root[data-layout='compact'] .section {
     flex: 1 1 auto;
+    /* from the top, each row its own height: stretched, one layer's row filled a tall sheet */
+    align-content: start;
     min-height: 0;
     padding-top: 4px;
     overflow-y: auto;

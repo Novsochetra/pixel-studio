@@ -46,6 +46,8 @@ function eraseSelected(app) {
 
 // now(): the angle the art stands at, read again once a typed angle has been taken
 export function angleField({ id, name, title, angle, turnTo, now = () => angle }) {
+  let told = String(angle);
+
   return node(
     'label.pose-angle',
     { title },
@@ -57,8 +59,16 @@ export function angleField({ id, name, title, angle, turnTo, now = () => angle }
       value: String(angle),
       // what was typed is shown as the angle it came to: 1000 is 80 short of three turns
       onchange: (event) => {
-        turnTo(Number(event.target.value) || 0);
-        event.target.value = String(now());
+        // At a Tab the change is said at the key, and Chrome says it again as the bar is drawn
+        // anew with the field still in hand: turned twice, the art was worn by the second.
+        if (event.target.value === told) {
+          return;
+        }
+
+        told = event.target.value;
+        turnTo(Number(told) || 0);
+        told = String(now());
+        event.target.value = told;
       },
       // Enter and Esc give the keys back to the editor: left in the field, undo and the tools'
       // keys were typed into it, and Esc let nothing go

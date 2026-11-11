@@ -147,7 +147,7 @@ export function mountEditStage(container, app) {
   const layout = node('div.edit-layout', {}, area, grid.el);
 
   container.replaceChildren(layout);
-  mountGridResizer(layout, grid.el);
+  mountGridResizer(layout, grid.el, () => app.store.state.project.canvas.height + TIGHT.down);
   bindPointer(canvas, app, scroller);
   bindWheelZoom(scroller, canvas, app);
   keepFitted(app, scroller, canvas);

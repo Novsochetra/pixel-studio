@@ -84,6 +84,29 @@
   padding: 8px;
 }
 
+/* With no band above the canvas (a short window, a canvas fitted tight) the layers' bar, one
+   field, stands in the corner at the stage's foot: at the top it lay over the art's head and
+   the handle that turns it. */
+@media (max-height: 799px) {
+  :root:not([data-layout='compact']) .layer-turn-bar {
+    --rise-from: 0 10px;
+
+    top: auto;
+    bottom: 12px;
+    left: 12px;
+    translate: none;
+  }
+}
+
+:root:not([data-layout='compact']) .edit-area:has(.stage-inner.tight) .layer-turn-bar {
+  --rise-from: 0 10px;
+
+  top: auto;
+  bottom: 12px;
+  left: 12px;
+  translate: none;
+}
+
 /* where the editor is, said over the canvas's corner on a phone, which has no status bar */
 .stage-place {
   display: none;

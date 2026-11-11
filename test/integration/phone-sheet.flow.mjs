@@ -87,6 +87,10 @@ check(
   (await height()) > usual + 100 && (await open()) === 'layers',
   'pulled up by its top, the sheet is taller, for a long list',
 );
+check(
+  (await box('.layer-row')).height < 60,
+  'and its rows keep their own height: one layer’s row was stretched down the tall sheet',
+);
 await pullBy(120);
 check(
   Math.abs((await height()) - usual) < 2 && (await open()) === 'layers',

@@ -4,7 +4,8 @@ import { fittedGridHeight, keepGridHeight, readGridHeight } from './grid-height.
 const KEY_STEP = 16;
 const KEY_DIRECTION = { ArrowUp: 1, ArrowDown: -1 };
 
-function panelSizer({ layout, panel, handle }) {
+function panelSizer({ layout, panel, handle, canvasNeeds }) {
+  const fitted = (height) => fittedGridHeight(height, layout.clientHeight, canvasNeeds());
   let wanted = readGridHeight();
 
   // the wanted height outlives a smaller window, so the frames grow back with it
@@ -12,9 +13,7 @@ function panelSizer({ layout, panel, handle }) {
     if (wanted === null) {
       panel.style.removeProperty('--grid-height');
     } else {
-      const height = fittedGridHeight(wanted, layout.clientHeight);
-
-      panel.style.setProperty('--grid-height', `${height}px`);
+      panel.style.setProperty('--grid-height', `${fitted(wanted)}px`);
     }
 
     const share = (100 * panel.offsetHeight) / (layout.clientHeight || 1);
@@ -25,7 +24,7 @@ function panelSizer({ layout, panel, handle }) {
   return {
     show,
     set(height) {
-      wanted = height === null ? null : fittedGridHeight(height, layout.clientHeight);
+      wanted = height === null ? null : fitted(height);
       show();
     },
     keep: () => keepGridHeight(wanted),
@@ -75,7 +74,8 @@ function bindKeys(handle, panel, sizer) {
   });
 }
 
-export function mountGridResizer(layout, panel) {
+// canvasNeeds(): the height the canvas takes at its own size, which the frames leave it
+export function mountGridResizer(layout, panel, canvasNeeds) {
   const handle = node('div.grid-resizer', {
     role: 'separator',
     tabIndex: 0,
@@ -83,7 +83,7 @@ export function mountGridResizer(layout, panel) {
     'aria-label': 'Resize the frames',
     'aria-orientation': 'horizontal',
   });
-  const sizer = panelSizer({ layout, panel, handle });
+  const sizer = panelSizer({ layout, panel, handle, canvasNeeds });
   const observer = new ResizeObserver(() => {
     if (handle.isConnected) {
       sizer.show();

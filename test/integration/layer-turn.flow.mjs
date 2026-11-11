@@ -126,4 +126,29 @@ await page.keyboard.press('t');
 check(await page.locator('#selection-angle').isVisible(), 'which T keeps while it is selected');
 await page.keyboard.press('Escape');
 check(await angle.isVisible(), 'and letting go brings back the angle of the layer');
+
+// At a Tab the field said its change, and Chrome said it again as the bar was drawn anew: the
+// art was turned twice, in two steps, and worn by the second.
+const beforeTab = await picture();
+
+await angle.click();
+await angle.fill('20');
+await page.keyboard.press('Tab');
+await page.waitForTimeout(200);
+check((await angle.inputValue()) === '20', 'an angle typed and left with Tab turns the layer once');
+await undo();
+check((await picture()) === beforeTab, 'in one undo step');
+
+// A short window has no band above the canvas: the bar lay over the art's head and over the
+// handle, which then could not be taken hold of.
+await page.setViewportSize({ width: 1100, height: 700 });
+await page.waitForTimeout(400);
+const art = await canvas.boundingBox();
+const bar = await page.locator('.layer-turn-bar').boundingBox();
+
+check(
+  bar.y >= art.y + art.height / 2 && bar.x + bar.width <= art.x + art.width / 4,
+  'in a short window the bar stands in a corner at the canvas’s foot, clear of the handle',
+);
+await page.screenshot({ path: `${shots}/layer-turn-short.png` });
 await finish();

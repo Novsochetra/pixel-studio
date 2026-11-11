@@ -51,12 +51,14 @@ await page.waitForTimeout(400);
 check(Math.abs((await panelHeight()) - dragged) <= 1, 'the height is kept for the next visit');
 
 await dragBy(-2000);
-check((await canvasRoom()) >= 119, 'the frames can never take all of the canvas');
+// with 120 left the example's 160 rows, at 100%, had their feet under the frames
+check((await canvasRoom()) >= 175, 'the frames leave the canvas room for all of it at 100%');
+check(await artAboveFrames(), 'so the art is in sight however tall the frames are dragged');
 
 // Safari took a press on the line for the start of a selection, and the drag down over the
 // frames for a drag of their pictures: the line stopped following, and stayed held
 await dragBy(2000);
-check((await panelHeight()) <= 121, 'and can shrink only as far as a row still fits');
+check((await panelHeight()) <= 161, 'and can shrink only as far as a row still fits');
 check(
   !(await handle.evaluate((line) => line.classList.contains('dragging'))),
   'and the line is let go of when the drag ends',

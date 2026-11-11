@@ -118,7 +118,8 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   is a sheet at the screen's foot, and the row at the sheet's top names it and picks another
   (`panel-sheet.js`, the panels themselves in `panels.js`), beside a ×. The sheet is pulled by
   its whole top: up makes it tall (`data-sheet='tall'`), down brings it back, then shuts it.
-  The sheet still takes its row: the canvas is fitted in the room above it, never under it.
+  The sheet still takes its row: the canvas is fitted in the room above it, never under it;
+  only a sheet pulled tall, for a long list, lies over the canvas until it is pulled back.
   What stays put in a panel while it scrolls is painted in `--sheet` there. On its side the
   phone keeps a tab for each panel at the screen's edge.
 - The phone's bar shows its tools as bare pictures, a few at a time: All tools, at its end,

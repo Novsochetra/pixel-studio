@@ -2,12 +2,15 @@ import { keepSetting, readSetting } from '../remembered.js';
 
 const GRID_HEIGHT = 'pixel-clean-grid-height';
 
-// enough for the tabs and one row of frames on one side, and to still draw on the other
-const LEAST_FOR_FRAMES = 120;
+// enough for the bar and one whole row of frames on one side, and to still draw on the other
+const LEAST_FOR_FRAMES = 160;
 const LEAST_FOR_CANVAS = 120;
 
-export function fittedGridHeight(wanted, roomHeight) {
-  const most = Math.max(LEAST_FOR_FRAMES, roomHeight - LEAST_FOR_CANVAS);
+// canvasNeeds: the canvas at its own size, the least zoom there is. A canvas taller than half
+// the room is scrolled anyway, and does not keep the frames small.
+export function fittedGridHeight(wanted, roomHeight, canvasNeeds = 0) {
+  const forCanvas = Math.max(LEAST_FOR_CANVAS, Math.min(canvasNeeds, roomHeight / 2));
+  const most = Math.max(LEAST_FOR_FRAMES, roomHeight - forCanvas);
 
   return Math.round(Math.min(most, Math.max(LEAST_FOR_FRAMES, wanted)));
 }

@@ -110,4 +110,23 @@ check(
 );
 
 await page.screenshot({ path: `${shots}/tablet-wide.png` });
+
+// The card over an empty frame wrapped to two rows here, over the canvas's first rows: a finger
+// that came to draw there met its buttons.
+const done = page.locator('.selection-bar').getByRole('button', { name: 'Done' });
+
+if (await done.isVisible()) {
+  await done.tap();
+}
+
+await page.locator('.cell-add').tap();
+await page.waitForTimeout(400);
+const card = await page.locator('.empty-frame').boundingBox();
+const stageTop = (await page.locator('.edit-scroll').boundingBox()).y;
+
+check(
+  card.height <= 52 && card.y + card.height <= stageTop + 60,
+  `an empty frame’s card is one row at the stage’s top (${Math.round(card.height)} tall)`,
+);
+await page.screenshot({ path: `${shots}/tablet-empty-frame.png` });
 await finish();
