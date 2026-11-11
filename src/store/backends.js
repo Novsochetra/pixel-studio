@@ -63,6 +63,24 @@ function request(operation) {
   });
 }
 
+// A change to the saved documents, committed as it is asked for. Left to the browser, a write is
+// committed once the page has heard it was done: a page being left (a tab closed, a reload a
+// moment after a stroke) never hears, and the write was thrown away with the stroke in it.
+function committed(database, change) {
+  const transaction = database.transaction('docs', 'readwrite');
+  const done = new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+
+  change(transaction.objectStore('docs'));
+  // Safari before 15 has no commit of its own: there the browser's is waited for, as before
+  transaction.commit?.();
+
+  return done;
+}
+
 async function browserBackend() {
   try {
     const open = indexedDB.open('pixel-clean-studio', 1);
@@ -80,8 +98,11 @@ async function browserBackend() {
         return new Map(keys.map((key, i) => [key, values[i]]));
       },
       read: async (key) => (await request(store('readonly').get(key))) ?? null,
-      write: (key, data) => request(store('readwrite').put(data, key)),
-      remove: (key) => request(store('readwrite').delete(key)),
+      write: (key, data) => committed(database, (docs) => docs.put(data, key)),
+      // a save's documents together: all of them are kept, or none
+      writeAll: (entries) =>
+        committed(database, (docs) => entries.forEach(([key, data]) => docs.put(data, key))),
+      remove: (key) => committed(database, (docs) => docs.delete(key)),
     };
   } catch {
     return null;

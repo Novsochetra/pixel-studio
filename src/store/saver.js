@@ -17,6 +17,7 @@ export class Saver {
     this.stored = new Set();
     this.timer = null;
     this.failed = false;
+    this.writing = [];
     this.running = Promise.resolve();
   }
 
@@ -89,6 +90,52 @@ export class Saver {
     this.project = null;
   }
 
+  layerDoc(layer) {
+    return [this.keys.layer(layer.id), { png: spriteDataUrl(layer.sprite) }];
+  }
+
+  projectDoc(project) {
+    return [
+      this.keys.project,
+      { json: JSON.stringify(projectStructure(project)), savedAt: Date.now() },
+    ];
+  }
+
+  // what a save would write now, with nothing marked as written: for the page to keep by
+  // another way as it is left (left-unsaved.js)
+  waiting() {
+    const { project } = this;
+
+    // a save under way is not in the saved work yet either
+    if (!project || (!this.dirty.size && !this.structureDirty)) {
+      return this.writing;
+    }
+
+    const dirty = [...allLayers(project)]
+      .map(({ layer }) => layer)
+      .filter((layer) => this.dirty.has(layer.id) && layer.sprite);
+
+    return [
+      ...this.writing.filter(([key]) => key !== this.keys.project),
+      ...dirty.map((layer) => this.layerDoc(layer)),
+      this.projectDoc(project),
+    ];
+  }
+
+  // Together where the backend can (this browser's own store): asked for in one go, a save
+  // started as the page is left is whole, where one document at a time only the first was begun.
+  async write(docs) {
+    if (this.backend.writeAll && docs.length) {
+      await this.backend.writeAll(docs);
+
+      return;
+    }
+
+    for (const [key, data] of docs) {
+      await this.backend.write(key, data);
+    }
+  }
+
   async flush(project) {
     const layers = [...allLayers(project)].map(({ layer }) => layer);
     const dirty = layers.filter((layer) => this.dirty.has(layer.id) && layer.sprite);
@@ -100,18 +147,17 @@ export class Saver {
     try {
       this.onStatus('saving');
 
-      for (const layer of dirty) {
-        await this.backend.write(this.keys.layer(layer.id), { png: spriteDataUrl(layer.sprite) });
-        this.stored.add(layer.id);
-      }
+      const docs = dirty.map((layer) => this.layerDoc(layer));
 
       if (this.structureDirty || dirty.length || gone.length) {
         this.structureDirty = false;
-        await this.backend.write(this.keys.project, {
-          json: JSON.stringify(projectStructure(project)),
-          savedAt: Date.now(),
-        });
+        docs.push(this.projectDoc(project));
       }
+
+      this.writing = docs;
+      await this.write(docs);
+      this.writing = [];
+      dirty.forEach((layer) => this.stored.add(layer.id));
 
       for (const id of gone) {
         await this.backend.remove(this.keys.layer(id));
@@ -122,6 +168,7 @@ export class Saver {
       this.onStatus('saved');
       await this.onSaved(project);
     } catch (error) {
+      this.writing = [];
       this.failed = true;
       dirty.forEach((layer) => this.dirty.add(layer.id));
       this.structureDirty = true;

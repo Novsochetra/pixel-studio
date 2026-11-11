@@ -8,6 +8,7 @@ import { sampleProject } from './sample.js';
 import { showStartScreen } from './start/start-screen.js';
 import { showOpening } from './opening-screen.js';
 import { openBackend } from '../store/backends.js';
+import { browserStorage, restoreLeftUnsaved } from '../store/left-unsaved.js';
 import { readIndex } from '../store/projects.js';
 import { deletePreset, readPresets } from '../store/presets.js';
 import { prefixFor } from '../store/keys.js';
@@ -89,6 +90,9 @@ function startScreenHandlers(backend, index, closeScreen) {
 
 async function openWork() {
   const backend = await openBackend();
+
+  // before anything is read: a stroke the last visit left unsaved is in the work it opens
+  await restoreLeftUnsaved(browserStorage(), backend).catch(() => false);
   const index = await readIndex(backend);
   const opened = await firstProject(backend, index);
 
