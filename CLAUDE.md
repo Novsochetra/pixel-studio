@@ -118,7 +118,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   on `.edit-area`, beside the scroller and not in it: inside, a canvas zoomed in carried the
   selection's Done off the screen.
 - Two fingers never zoom the page (`touch-action` on `html`): they zoom the canvas, on the art or
-  on the stage beside it (`stage-beside.js`). A tool that acts at a press (Fill, Replace colour)
+  on the stage beside it (`stage-beside.js`). While they hold it the canvas is moved and sized as
+  a picture (`pinch.js`), and drawn again once, at the whole zoom nearest, when they let go:
+  nothing in the store changes at a finger's move, as drawing the stage each time lagged. A tool that acts at a press (Fill, Replace colour)
   acts as the pointer lets go (`onRelease`), so the first finger of a pinch fills nothing.
 - A finger has no pointer to hover and no keys: a control's meaning cannot live only in a tooltip
   or a shortcut. What Shift or Alt does to a tool has a control too (Even shapes and Darker shades

@@ -57,6 +57,16 @@
     0 10px 30px rgb(0 0 0 / 14%);
 }
 
+/* held by two fingers, the canvas is moved and sized as a picture (pinch.js), from its corner;
+   let go, it glides to the place it is drawn at */
+.canvas-holder {
+  transform-origin: 0 0;
+}
+
+.canvas-holder.settling {
+  transition: transform var(--duration-normal) var(--ease-standard);
+}
+
 .canvas-holder.playing-views {
   box-shadow: none;
 }

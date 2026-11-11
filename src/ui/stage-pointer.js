@@ -1,6 +1,7 @@
 import { currentLayer } from './actions.js';
 import { startTool } from './tools.js';
-import { panSession, twoFingerSession } from './navigate.js';
+import { panSession } from './navigate.js';
+import { twoFingerSession } from './pinch.js';
 import { stopPlayback } from './grid/playback.js';
 import { playsAllViews } from './play-all-views.js';
 import { touchIntent } from './touch-intent.js';
@@ -26,7 +27,7 @@ function fingersSession(app, { canvas, stage, touches, session }) {
   // that cannot take its work back keeps it, as one undo step, saved like any other.
   session?.cancel ? session.cancel() : session?.end?.();
 
-  return twoFingerSession(app, stage, canvas, touches);
+  return twoFingerSession(app, { stage, canvas }, touches);
 }
 
 // What a press starts: a two-finger pan and pinch, a pan (middle button, or space held), or the
@@ -80,17 +81,22 @@ function press(app, view, event) {
   }
 }
 
-function release(app, view, event) {
-  // a finger lifted before its tool began was a tap: the tool acts where it landed. One the
-  // browser took away (a system gesture) was never meant for the art.
+// a finger lifted before its tool began was a tap: the tool acts where it landed. One the
+// browser took away (a system gesture) was never meant for the art.
+function settleIntent(view, event) {
   if (event.type === 'pointercancel') {
     view.intent?.drop();
     view.intent = null;
   } else {
     view.intent?.begin();
   }
+}
 
+function release(app, view, event) {
+  settleIntent(view, event);
   view.touches.delete(event.pointerId);
+  // one of two fingers lifted: the canvas they held takes its place now, not when the other lifts
+  view.session?.settle?.();
 
   if (view.touches.size !== 1) {
     const ended = Boolean(view.session);
@@ -125,6 +131,31 @@ function clearSaid(app) {
   }
 }
 
+function follow(app, view, event) {
+  if (playsAllViews(app)) {
+    return;
+  }
+
+  if (view.touches.has(event.pointerId)) {
+    view.touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  }
+
+  view.intent?.moved(event);
+
+  // two fingers hold the canvas: there is no pixel under a pointer to show, and drawing the
+  // stage again at each move is what made the canvas lag behind them
+  if (view.touches.size > 1) {
+    view.session?.move?.();
+
+    return;
+  }
+
+  const point = pixelAt(view.canvas, event, app.store.state.zoom);
+
+  showCursor(app, point);
+  view.session?.move?.(point, event);
+}
+
 export function bindPointer(canvas, app, stage) {
   const view = { canvas, stage, touches: new Map(), session: null, intent: null };
   const place = (event) =>
@@ -157,21 +188,7 @@ export function bindPointer(canvas, app, stage) {
 
     press(app, view, event);
   });
-  canvas.addEventListener('pointermove', (event) => {
-    if (playsAllViews(app)) {
-      return;
-    }
-
-    if (view.touches.has(event.pointerId)) {
-      place(event);
-    }
-
-    view.intent?.moved(event);
-
-    const point = pixelAt(canvas, event, app.store.state.zoom);
-    showCursor(app, point);
-    view.session?.move?.(point, event);
-  });
+  canvas.addEventListener('pointermove', (event) => follow(app, view, event));
   canvas.addEventListener('pointerleave', () => app.store.set({ cursor: null }));
   canvas.addEventListener('pointerup', finish);
   canvas.addEventListener('pointercancel', finish);

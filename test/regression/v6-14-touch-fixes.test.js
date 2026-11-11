@@ -16,6 +16,7 @@ import { fittedView } from '../../src/ui/view-kept.js';
 import { buildSheet } from '../../src/export/sheet.js';
 import { frameFiles } from '../../src/export/formats.js';
 import { downloadName } from '../../src/ui/file-name.js';
+import { heldAt } from '../../src/ui/pinch.js';
 
 const RED = pack(255, 0, 0);
 
@@ -222,4 +223,28 @@ test('art shrunk for a small picture keeps a line one pixel thin', () => {
 
   assert.equal(small.width, 104);
   assert.equal(drawn.every(Boolean), true, 'the line crosses the whole picture');
+});
+
+// Two fingers moved the canvas by scrolling it and sized it in whole zooms, drawing it again at
+// every move: it lagged and jumped. Held, it is placed so the pixel under the fingers stays there.
+test('a canvas held by two fingers keeps the pixel under them, at any size between zooms', () => {
+  const start = {
+    box: { left: 100, top: 200 },
+    zoom: 4,
+    spread: 100,
+    grip: { x: 40, y: 20 },
+  };
+  const fingers = new Map([
+    [1, { x: 170, y: 260 }],
+    [2, { x: 320, y: 260 }],
+  ]);
+  const held = heldAt(start, fingers);
+  const underFingers = {
+    x: start.box.left + held.x + start.grip.x * held.scale,
+    y: start.box.top + held.y + start.grip.y * held.scale,
+  };
+
+  assert.equal(held.zoom, 6, 'half as wide again is half as big again, not the next whole zoom');
+  assert.deepEqual(underFingers, { x: 245, y: 260 });
+  assert.equal(heldAt({ ...start, spread: 1 }, fingers).zoom, 24, 'and no bigger than it can be');
 });

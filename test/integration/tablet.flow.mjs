@@ -68,5 +68,46 @@ if (fingersOnly) {
   );
 }
 
+// Two fingers scrolled the canvas and sized it in whole zooms, drawing it again at every move:
+// it lagged behind them and jumped. Held, it is moved as a picture and drawn once they let go.
+const held = () =>
+  canvas.evaluate((art) => ({
+    moved: art.parentElement.style.transform,
+    drawn: art.style.width,
+    shown: art.getBoundingClientRect().width,
+  }));
+const [midX, midY] = await at(16, 16);
+const before = await held();
+
+await touch('touchStart', [
+  [midX - 40, midY],
+  [midX + 40, midY],
+]);
+
+for (let i = 1; i <= 8; i++) {
+  await touch('touchMove', [
+    [midX - 40 - i * 3, midY + i * 2],
+    [midX + 40 + i * 3, midY + i * 2],
+  ]);
+  await page.waitForTimeout(20);
+}
+
+const during = await held();
+
+check(
+  during.moved.includes('scale') &&
+    during.drawn === before.drawn &&
+    during.shown > before.shown * 1.4,
+  'two fingers size the canvas as they spread, between whole zooms, without drawing it again',
+);
+await touch('touchEnd', []);
+await page.waitForTimeout(500);
+const after = await held();
+
+check(
+  after.moved === '' && parseFloat(after.drawn) === Math.round(after.shown),
+  'and let go, it is drawn once at the whole zoom nearest',
+);
+
 await page.screenshot({ path: `${shots}/tablet-wide.png` });
 await finish();

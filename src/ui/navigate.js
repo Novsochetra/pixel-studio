@@ -1,8 +1,8 @@
 // Moving around the canvas: space-drag or middle-drag pans, ⌘/Ctrl + scroll or a trackpad pinch
 // zooms around the pointer, two fingers on a touch screen pan and pinch.
 
-const MIN_ZOOM = 1;
-const MAX_ZOOM = 24;
+export const MIN_ZOOM = 1;
+export const MAX_ZOOM = 24;
 
 // zoom to `zoom` keeping the art pixel under the screen point [clientX, clientY] where it is;
 // view: { stage, canvas }, the scrolling stage and the canvas in it
@@ -61,38 +61,6 @@ export function panSession(stage, event) {
     move(_, moveEvent) {
       stage.scrollLeft = start.left - (moveEvent.clientX - start.x);
       stage.scrollTop = start.top - (moveEvent.clientY - start.y);
-    },
-  };
-}
-
-// two touches: pan by their midpoint, zoom by their spread
-export function twoFingerSession(app, stage, canvas, touches) {
-  const points = () => [...touches.values()];
-  const mid = () =>
-    points().reduce((sum, point) => ({ x: sum.x + point.x / 2, y: sum.y + point.y / 2 }), {
-      x: 0,
-      y: 0,
-    });
-  const spread = () => Math.hypot(points()[0].x - points()[1].x, points()[0].y - points()[1].y);
-  const start = {
-    mid: mid(),
-    spread: spread(),
-    zoom: app.store.state.zoom,
-    left: stage.scrollLeft,
-    top: stage.scrollTop,
-  };
-
-  return {
-    move() {
-      if (touches.size < 2) {
-        return;
-      }
-
-      const now = mid();
-      zoomAround(app, { stage, canvas }, start.zoom * (spread() / start.spread), [now.x, now.y]);
-      stage.scrollLeft -= now.x - (this.last?.x ?? start.mid.x);
-      stage.scrollTop -= now.y - (this.last?.y ?? start.mid.y);
-      this.last = now;
     },
   };
 }
