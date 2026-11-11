@@ -1,4 +1,4 @@
-import { node } from './dom.js';
+import { icon, node } from './dom.js';
 import { CLEAR, fromHex, toHex } from '../model/sprite.js';
 import { BASIC_COLOURS } from '../art/drawing-palette.js';
 
@@ -39,7 +39,8 @@ function basicColours(app, colors) {
     node(
       'button.btn.swatches-toggle',
       { 'aria-expanded': String(shown), onclick: () => app.store.set({ basicColours: !shown }) },
-      shown ? 'Basic colours ▾' : 'Basic colours ▸',
+      'Basic colours',
+      icon(shown ? 'chevron-down' : 'chevron-right'),
     ),
     shown ? swatchGroup(app, { name: 'Basic colours', colors: BASIC_COLOURS.map(fromHex) }) : null,
   ];

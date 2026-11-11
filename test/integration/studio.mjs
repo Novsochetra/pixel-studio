@@ -75,14 +75,19 @@ export async function shutDock(page) {
   }
 }
 
-export async function showAllViews(page) {
-  const all = page.getByRole('button', { name: 'All views' });
+// which views have their frames in sight: 'All views', or 'Front only'. An animation with one
+// view has no choice to make.
+export async function showViews(page, name) {
+  const pick = page.locator('.views-pick');
 
-  if (await all.count()) {
-    await all.click();
+  if (await pick.count()) {
+    await pick.click();
+    await page.getByRole('menuitemcheckbox', { name, exact: true }).click();
     await page.waitForTimeout(200);
   }
 }
+
+export const showAllViews = (page) => showViews(page, 'All views');
 
 // the frames of the view being edited, as "1", "2 · empty"
 export async function frameLabels(page) {

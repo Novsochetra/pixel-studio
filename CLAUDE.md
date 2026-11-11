@@ -161,13 +161,21 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - A window that holds more than one job shows them as pages, one in sight at a time, under a
   row that names them: Projects is All projects, This project and New project
   (`projects/project-pages.js`). Everything on one sheet was more than could be taken in.
-- What a window lists is a list as a phone has them. Things of one kind (the projects) are
-  rows under one another: a picture, a name, a line about it, and what marks the one in hand
-  at the row's end (`projects/project-row.js`). What a thing is and what can be done with it
-  (This project) is grouped rows on a rounded ground, a heading above and a note below
-  (`projects/list-group.js`, `56-lists.css`): a row that says something has its value at its
-  end, a row that does something is in the tint, and one that leads to another window ends
-  in a chevron.
+- What is listed is a list as a phone has them. Things of one kind (the projects, the layers)
+  are rows under one another: a picture, a name, a line about it, and what marks the one in
+  hand. What a thing is and what can be done with it (This project, the inspector's Drawing,
+  Outline and Guide lines) is grouped rows on a rounded ground, a heading above and a note
+  below (`list-group.js`, `56-lists.css`): `valueRow` says something, `fieldRow` ends in a
+  field or a choice, `switchRow` in a switch, and an `actionRow` is pressed, in the tint, with
+  a count at its end or the chevron of a window it leads to. A row's words are few: what a
+  switch does is its `hint`, which a pointer hovers for and a touch screen shows under the
+  name. No loose buttons with sentences on them, no paragraph under a control.
+- Pictures are the stroke icons of `icon()` (`dom.js`), chevrons and the × among them: never
+  a letter or a triangle from the font, which sits in another weight beside them. A fold's
+  chevron turns as it opens, and an inspector section's height is led open and shut
+  (`playFold` in `inspector.js`).
+- Which views show their frames is one button that names them (`grid/views-menu.js`): "All
+  views", or "Front only". An animation with one view has no such button.
 - What closes leaves through `leave()` (`src/ui/leave.js`) under an `-out` class
   (`.sheet-out`, `.menu-out`, `.toast-out`), so the page and the flows count it gone at once
   while it plays out: style both with `:is(.sheet, .sheet-out)`.

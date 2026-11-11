@@ -1,4 +1,4 @@
-import { node } from './dom.js';
+import { icon, node } from './dom.js';
 import { PANELS, openPanel } from './panels.js';
 
 function panelTabs(app) {
@@ -30,7 +30,7 @@ export function panelHead(app) {
     node(
       'button.btn.quiet.panel-close',
       { 'aria-label': 'Close this panel', onclick: () => app.store.set({ panel: null }) },
-      '×',
+      icon('close'),
     ),
   ];
 }

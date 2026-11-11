@@ -60,13 +60,23 @@ summary::-webkit-details-marker {
   display: none;
 }
 
+/* a chevron in the line of the page's other pictures, which turns as its fold opens */
 summary::before {
-  content: '▸';
-  font-family: var(--font-ui);
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 9px 1px 3px;
+  border: solid var(--label-secondary);
+  border-width: 0 1.7px 1.7px 0;
+  border-radius: 1px;
+  rotate: -45deg;
+  transition: rotate var(--duration-normal) var(--ease-standard);
 }
 
 details[open] > summary::before {
-  content: '▾';
+  margin-bottom: 3px;
+  rotate: 45deg;
 }
 
 /* a scroll bar is a thin quiet line, not a gutter of its own */

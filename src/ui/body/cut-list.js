@@ -82,7 +82,7 @@ function partRow(job, { part, index, size }, change) {
     node(
       'button.btn.quiet.icon-only',
       { 'aria-label': `Remove ${part.name}`, onclick: remove },
-      '×',
+      icon('close'),
     ),
   );
 }

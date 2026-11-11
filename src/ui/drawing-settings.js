@@ -4,7 +4,7 @@ import { bounds, toHex } from '../model/sprite.js';
 import { brushField } from './brush-settings.js';
 import { slider } from './slider.js';
 import { forHands } from './platform-keys.js';
-import { toggle } from './toggle-row.js';
+import { fieldRow, listGroup, switchRow } from './list-group.js';
 
 // What "Paint only over" can be set to: any pixel, or one of the art's colours. The colour it is
 // set to stays in the list when the art no longer has it, and says so: dropped to "Any pixel"
@@ -27,19 +27,19 @@ function paintOverField(app, colors) {
     node('option', { value, selected: String(state.paintOver ?? '') === value }, label),
   );
 
-  return node(
-    'label.field',
-    {},
-    node('span', {}, 'Paint only over'),
+  return fieldRow(
+    'Paint over',
     node(
-      'select.input',
+      'select.list-select',
       {
         id: 'paint-over',
+        'aria-label': 'Paint only over',
         onchange: (event) =>
           app.store.set({ paintOver: event.target.value ? Number(event.target.value) : null }),
       },
       options,
     ),
+    { title: 'Paint only over pixels of one colour' },
   );
 }
 
@@ -115,7 +115,7 @@ const SWITCHES = [
   },
 ];
 
-export function drawingSettings(app, colors) {
+function lockGroup(app, colors) {
   const { state } = app.store;
   const lock = (on) =>
     app.store.set({
@@ -124,25 +124,41 @@ export function drawingSettings(app, colors) {
       color: on && colors.length && !colors.includes(state.color) ? colors[0] : state.color,
     });
 
-  return [
-    node('h2', { tabindex: '0' }, 'Drawing'),
-    brushField(app),
-    // the key a switch stands in for is named only where there are keys
-    SWITCHES.map((item) =>
-      toggle({ ...item, hint: item.hint + forHands(item.keys ?? '', '') }, state[item.key], (on) =>
-        app.store.set({ [item.key]: on }),
-      ),
-    ),
-    toggle(
-      { id: 'palette-lock', label: 'Palette lock', hint: "Draw only with the art's colours" },
-      state.paletteLock,
+  return listGroup(
+    {},
+    switchRow(
+      'Palette lock',
+      { id: 'palette-lock', checked: state.paletteLock, hint: "Draw only with the art's colours" },
       lock,
     ),
     paintOverField(app, colors),
-    toggle(
-      { id: 'symmetry', label: 'Symmetry', hint: 'Draw one half, the other side mirrors' },
-      state.symmetry.on,
-      (on) => app.store.set({ symmetry: { ...state.symmetry, on } }),
+  );
+}
+
+export function drawingSettings(app, colors) {
+  const { state } = app.store;
+  const switched = ({ key, id, label, hint, keys = '' }) =>
+    // the key a switch stands in for is named only where there are keys
+    switchRow(label, { id, checked: state[key], hint: hint + forHands(keys, '') }, (on) =>
+      app.store.set({ [key]: on }),
+    );
+
+  return [
+    node('h2', { tabindex: '0' }, 'Drawing'),
+    brushField(app),
+    listGroup({}, SWITCHES.map(switched)),
+    lockGroup(app, colors),
+    listGroup(
+      {},
+      switchRow(
+        'Symmetry',
+        {
+          id: 'symmetry',
+          checked: state.symmetry.on,
+          hint: 'Draw one half, the other side mirrors',
+        },
+        (on) => app.store.set({ symmetry: { ...state.symmetry, on } }),
+      ),
     ),
     state.symmetry.on ? mirrorField(app) : null,
   ];

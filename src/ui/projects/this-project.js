@@ -5,7 +5,7 @@ import { addProject } from '../session.js';
 import { saveProject } from '../downloads.js';
 import { openCanvasSizeSheet } from '../canvas-size-sheet.js';
 import { projectPicture } from './project-picture.js';
-import { actionRow, listGroup, valueRow } from './list-group.js';
+import { actionRow, listGroup, valueRow } from '../list-group.js';
 import { describeProject, defaultName } from '../../model/presets.js';
 import { presetFromProject } from '../../model/preset-from-project.js';
 import { blankCopy } from '../../model/cast.js';

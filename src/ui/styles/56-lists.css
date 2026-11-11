@@ -16,9 +16,20 @@
 }
 
 .list-rows {
-  overflow: hidden;
   border-radius: var(--radius-lg);
   background: var(--fill-quiet);
+}
+
+/* The ends of the group round its first and last rows: cut to the group's shape instead, a
+   group in a sheet too short for it was squeezed to a sliver. */
+.list-rows > :first-child {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+.list-rows > :last-child {
+  border-bottom-right-radius: inherit;
+  border-bottom-left-radius: inherit;
 }
 
 .list-row {
@@ -117,4 +128,83 @@
   padding-inline: 16px;
   color: var(--label-muted);
   font-size: 12px;
+}
+
+.list-label.grows {
+  flex: 1;
+}
+
+/* what a row's switch does: said under its name where no pointer can hover for it */
+.list-hint {
+  display: none;
+  color: var(--label-muted);
+  font-size: 11px;
+}
+
+@media (hover: none) {
+  .list-hint {
+    display: block;
+  }
+}
+
+/* a choice at a row's end: its value in the row's own type, under the chevron the row draws */
+.list-select {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 20px 6px 0;
+  border: 0;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  color: var(--label-secondary);
+  font: inherit;
+  text-align: right;
+  text-align-last: right;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+/* over the choice's own end: a press there opens the choice */
+.list-select + svg {
+  margin-left: -24px;
+  pointer-events: none;
+}
+
+.list-row:has(.list-select:focus-visible) {
+  outline: 2px solid var(--tint);
+  outline-offset: -2px;
+}
+
+.list-action:disabled {
+  color: var(--label-muted);
+  cursor: default;
+}
+
+.list-action:disabled:hover {
+  background: none;
+}
+
+/* In the inspector the rows stand on the bar's own grey: a raised ground, and closer rows. */
+.inspector .list-rows {
+  background: var(--chrome-raised);
+}
+
+.section .list-row {
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 12px;
+}
+
+.section .list-row + .list-row::before {
+  left: 12px;
+}
+
+.section .list-note {
+  padding-inline: 12px;
+}
+
+/* a phone's sheet is the raised colour itself: there the rows are a quiet fill */
+:root[data-layout='compact'] .inspector .list-rows {
+  background: var(--fill-quiet);
 }

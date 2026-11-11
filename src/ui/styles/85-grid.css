@@ -488,3 +488,16 @@
     width: 104px;
   }
 }
+
+/* which views have their frames in sight (views-menu.js): a word and the chevron of a menu */
+.views-pick {
+  flex: none;
+  gap: 4px;
+  padding-inline: 12px 8px;
+}
+
+.views-pick svg {
+  width: 14px;
+  height: 14px;
+  color: var(--label-muted);
+}

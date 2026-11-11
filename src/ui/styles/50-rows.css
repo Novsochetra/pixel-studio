@@ -90,6 +90,53 @@
   opacity: 0.5;
 }
 
+/* the layers are one list on a raised ground, a line between two rows, the one in hand in the
+   tint with its name in bold */
+.layer-list {
+  gap: 0;
+  border-radius: var(--radius-lg);
+  background: var(--chrome-raised);
+}
+
+.layer-list .layer-row:first-child {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+.layer-list .layer-row:last-child {
+  border-bottom-right-radius: inherit;
+  border-bottom-left-radius: inherit;
+}
+
+.layer-list .layer-row {
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 0;
+}
+
+.layer-list .layer-row + .layer-row {
+  border-top: 1px solid var(--separator);
+}
+
+.layer-list .layer-row[aria-current='true'] {
+  background: var(--tint-quiet);
+}
+
+.layer-row[aria-current='true'] .layer-name {
+  font-weight: 600;
+}
+
+/* inside the row, where the rows above and below do not lie over it */
+.layer-list .layer-row:focus-visible {
+  outline-offset: -3px;
+}
+
+:root[data-layout='compact'] .layer-list {
+  background: var(--fill-quiet);
+}
+
 .layer-row .eye.off {
   color: var(--warn);
 }
@@ -230,8 +277,6 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-  padding-top: 8px;
-  border-top: 1px solid var(--separator);
 }
 
 /* each group of layer actions sits together; the ones that take away keep to the far end */

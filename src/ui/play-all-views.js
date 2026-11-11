@@ -1,5 +1,6 @@
 import { currentAnimation } from './actions.js';
 import { cssVar, drawChecker, drawSprite, sizeCanvas } from './draw.js';
+import { showsEveryView } from './grid/views-menu.js';
 import { isSingleView, viewName } from '../model/kinds.js';
 import { bounds, unionBounds } from '../model/sprite.js';
 import { CAPTION, GAP, playLayout } from '../views/play-layout.js';
@@ -8,13 +9,13 @@ import { playedSprite, playedViews } from '../views/played-views.js';
 const AIR = 2;
 const CORNER = 10;
 
-// with All views on, Play shows every view moving together, the mirrored sides as the game flips them
+// with every view in sight, Play shows every view moving together, the mirrored sides as the game flips them
 export function playsAllViews(app) {
   const { state } = app.store;
 
   return (
     Boolean(app.playback) &&
-    state.gridAll &&
+    showsEveryView(state) &&
     !isSingleView(state.project) &&
     playedViews(state.project, currentAnimation(state)).length > 1
   );

@@ -11,23 +11,28 @@ import {
 } from '../editor/outline.js';
 import { toHex } from '../model/sprite.js';
 import { characterColors } from './character-colours.js';
+import { actionRow, fieldRow, listGroup, switchRow } from './list-group.js';
 
+// `label` names the step in the history; `short` is the row's own word for it
 const OPERATIONS = [
   {
     id: 'thin',
     label: 'Thin a doubled outline',
+    short: 'Thin doubled lines',
     run: thinOutline,
     hint: 'Outer outline pixels that only back onto more outline',
   },
   {
     id: 'gaps',
     label: 'Close gaps in the outline',
+    short: 'Close gaps',
     run: closeGaps,
     hint: 'Edge pixels between two outline pixels',
   },
   {
     id: 'add',
     label: 'Add an outline around everything',
+    short: 'Add an outline',
     run: addOutline,
     hint: 'One pixel outside the whole shape',
   },
@@ -60,71 +65,60 @@ function colourField(app, colour) {
     app.store.touch('outline');
   };
 
-  return node(
-    'label.field',
-    { for: 'outline-colour' },
-    node('span', {}, 'Outline colour (found on the edge)'),
+  return fieldRow(
+    'Colour',
     node(
-      'select.input.mono',
-      { id: 'outline-colour', onchange: choose },
+      'select.list-select.mono',
+      { id: 'outline-colour', 'aria-label': 'Outline colour', onchange: choose },
       characterColors(state).map((option) =>
         node('option', { value: String(option), selected: option === colour }, toHex(option)),
       ),
     ),
+    { title: 'The outline’s colour, found on the edge of the art' },
   );
 }
 
-// an operation's button, saying how many pixels it would change here; hovering shows them
-function operationButton(app, operation, colour) {
+// An operation's row, with how many pixels it would change in this layer at its end; pointing at
+// it shows them on the canvas. With every frame and view on, far more than these change.
+function operationRow(app, operation, colour) {
   const { state } = app.store;
   const { count, points } =
     colour === null
       ? { count: 0, points: [] }
       : previewOutline(currentLayer(state).sprite, operation.run, colour);
   const highlight = (shown) => () => app.store.set({ highlight: shown });
+  const run = () => {
+    app.store.set({ highlight: null });
+    apply(app, operation, colour);
+  };
 
-  return node(
-    'button.btn',
-    {
-      title: `${operation.hint}. Hover to see them on the canvas.`,
-      disabled: !count && !state.outline.everywhere,
-      onclick: () => {
-        app.store.set({ highlight: null });
-        apply(app, operation, colour);
-      },
-      onmouseenter: highlight(points),
-      onmouseleave: highlight(null),
-      onfocus: highlight(points),
-      onblur: highlight(null),
-    },
-    // with every frame and view on, far more than these change: the count is this layer's
-    `${operation.label} (${count} ${state.outline.everywhere ? 'in this layer' : 'here'})`,
-  );
+  return actionRow(operation.short, run, {
+    value: String(count),
+    leads: false,
+    'aria-label': `${operation.label} (${count} ${state.outline.everywhere ? 'in this layer' : 'here'})`,
+    title: `${operation.hint}. Point at it to see them on the canvas.`,
+    disabled: !count && !state.outline.everywhere,
+    onmouseenter: highlight(points),
+    onmouseleave: highlight(null),
+    onfocus: highlight(points),
+    onblur: highlight(null),
+  });
 }
 
 function everywhereToggle(app) {
   const { state } = app.store;
-  const change = (event) => {
-    state.outline = { ...state.outline, everywhere: event.target.checked };
-    app.store.touch('outline');
-  };
 
-  return node(
-    'label.toggle-row',
-    { for: 'outline-everywhere' },
-    node(
-      'span',
-      {},
-      node('div', {}, 'Every frame and view'),
-      node('div.hint', {}, 'Off: only the layer you are editing'),
-    ),
-    node('input.switch', {
-      type: 'checkbox',
-      role: 'switch',
+  return switchRow(
+    'Every frame and view',
+    {
       id: 'outline-everywhere',
       checked: state.outline.everywhere,
-      onchange: change,
-    }),
+      hint: 'Off: only the layer you are editing',
+    },
+    (everywhere) => {
+      state.outline = { ...state.outline, everywhere };
+      app.store.touch('outline');
+    },
   );
 }
 
@@ -142,8 +136,10 @@ export function renderOutlinePanel(el, app) {
   replace(
     el,
     node('h2', { tabindex: '0' }, 'Outline'),
-    colourField(app, colour),
-    OPERATIONS.map((operation) => operationButton(app, operation, colour)),
-    everywhereToggle(app),
+    listGroup({}, colourField(app, colour), everywhereToggle(app)),
+    listGroup(
+      {},
+      OPERATIONS.map((operation) => operationRow(app, operation, colour)),
+    ),
   );
 }

@@ -14,6 +14,38 @@ const FOLDED_AT_FIRST = ['outline', 'guides'];
 // on a phone the dock opens and shuts a panel: its title folds nothing
 const foldsFromTitle = () => document.documentElement.dataset.layout !== 'compact';
 
+// The fold plays out, the section's height led from where it was to where it will be: shut at
+// once, its rows vanished and the sections under it jumped up.
+function playFold(section, change) {
+  const from = section.offsetHeight;
+
+  change();
+
+  const to = section.offsetHeight;
+  const done = (event) => {
+    if (!event || (event.target === section && event.propertyName === 'height')) {
+      section.removeEventListener('transitionend', done);
+      section.classList.remove('folding');
+      section.style.height = '';
+    }
+  };
+
+  section.classList.add('folding');
+  section.style.height = `${from}px`;
+
+  // nothing moves for someone who asked for less motion, and then no transition ends
+  if (from === to || parseFloat(getComputedStyle(section).transitionDuration) === 0) {
+    done();
+
+    return;
+  }
+
+  section.addEventListener('transitionend', done);
+  // read between the two heights, or the browser sees only the last
+  void section.offsetHeight;
+  section.style.height = `${to}px`;
+}
+
 function folding(folded) {
   return (title) => {
     if (!foldsFromTitle()) {
@@ -23,7 +55,9 @@ function folding(folded) {
     const section = title.parentElement;
     const collapsed = section.dataset.collapsed !== 'true';
 
-    section.dataset.collapsed = String(collapsed);
+    playFold(section, () => {
+      section.dataset.collapsed = String(collapsed);
+    });
     collapsed ? folded.add(section.dataset.name) : folded.delete(section.dataset.name);
     keepSetting(FOLDED, [...folded]);
   };

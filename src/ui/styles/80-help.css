@@ -58,8 +58,14 @@ kbd {
   justify-self: start;
 }
 
-:root:not([data-layout='compact']) .section[data-collapsed='true'] > :not(h2) {
+/* still in sight while the fold plays out (inspector.js) */
+:root:not([data-layout='compact']) .section[data-collapsed='true']:not(.folding) > :not(h2) {
   display: none;
+}
+
+.section.folding {
+  overflow: hidden;
+  transition: height var(--duration-normal) var(--ease-standard);
 }
 
 .section > h2 {
@@ -73,14 +79,23 @@ kbd {
   margin-left: auto;
 }
 
+/* a chevron in the line of the page's other pictures, which turns as its section folds */
 .section > h2::before {
-  content: '▾';
-  margin-right: 6px;
-  font-family: var(--font-ui);
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin: 0 9px 2px 3px;
+  border: solid var(--label-secondary);
+  border-width: 0 1.7px 1.7px 0;
+  border-radius: 1px;
+  rotate: 45deg;
+  transition: rotate var(--duration-normal) var(--ease-standard);
 }
 
 .section[data-collapsed='true'] > h2::before {
-  content: '▸';
+  margin-bottom: 0;
+  rotate: -45deg;
 }
 
 .section > h2:focus-visible {

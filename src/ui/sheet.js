@@ -1,4 +1,4 @@
-import { node } from './dom.js';
+import { icon, node } from './dom.js';
 import { drawChecker, drawGuide, drawSprite } from './draw.js';
 import { focusables, rememberFocus, trapTab } from './focus.js';
 import { leave } from './leave.js';
@@ -12,7 +12,7 @@ function sheetHead(title, close) {
     node(
       'button.btn.quiet.sheet-close',
       { 'aria-label': 'Close window', title: 'Close (Esc)', onclick: () => close() },
-      '×',
+      icon('close'),
     ),
   );
 }

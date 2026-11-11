@@ -4,9 +4,9 @@ import { chooseFiles } from '../choose-file.js';
 import { openBatchSheet } from '../batch-sheet.js';
 import { animationTabs } from './tabs.js';
 import { pinControls } from './pin-controls.js';
-import { setGridAll, setGridOpen } from './all-views.js';
+import { setGridOpen } from './all-views.js';
+import { viewsMenu } from './views-menu.js';
 import { togglePlayback } from './playback.js';
-import { isSingleView } from '../../model/kinds.js';
 import { wholeNumber } from '../../model/numbers.js';
 
 // a finger has no pointer to hover for what a bare picture means: switched, it says
@@ -31,25 +31,6 @@ function toggle(app, { key, iconName, label, title, said = title }) {
       onclick: () => switched(app, { key, label, said }, !pressed),
     },
     icon(iconName),
-  );
-}
-
-function viewSwitch(app) {
-  const all = app.store.state.gridAll;
-
-  return node(
-    'div.segmented',
-    { role: 'group', 'aria-label': 'Rows' },
-    [
-      [false, 'This view'],
-      [true, 'All views'],
-    ].map(([value, label]) =>
-      node(
-        'button',
-        { 'aria-pressed': String(all === value), onclick: () => setGridAll(app, value) },
-        label,
-      ),
-    ),
   );
 }
 
@@ -107,15 +88,12 @@ function foldButton(app) {
 }
 
 export function gridBar(app, { playing, onPlay }) {
-  const { state } = app.store;
-
   return node(
     'div.grid-bar',
     {},
     animationTabs(app),
     node('span.spacer'),
-    // a character always has more to show: its other views, the mirrored side, a view to add
-    isSingleView(state.project) ? null : viewSwitch(app),
+    viewsMenu(app),
     node(
       'button.btn.quiet.icon-toggle',
       {

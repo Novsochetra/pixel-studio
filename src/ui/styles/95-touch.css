@@ -176,11 +176,6 @@
     height: 36px;
   }
 
-  /* a switch is pressed by its words too: the row is a finger high */
-  .switch-label {
-    min-height: 40px;
-  }
-
   .cut-part {
     grid-template-columns: 36px minmax(0, 1fr) repeat(3, 36px);
   }

@@ -1,7 +1,7 @@
 // Body parts: cutting a view into parts, posing them (moving, turning, keys), plain pixels and
 // back, the pose kept on the next visit, a new cut, and the cut sheet on a phone.
 import { openStudio } from './harness.mjs';
-import { openExample } from './studio.mjs';
+import { openExample, showViews } from './studio.mjs';
 
 const { page, check, finish, shots } = await openStudio();
 const canvas = page.locator('.canvas-holder canvas');
@@ -36,7 +36,7 @@ async function drag(from, by, { shift = false } = {}) {
 }
 
 await openExample(page);
-await page.getByRole('button', { name: 'This view' }).click();
+await showViews(page, 'Front only');
 await page.keyboard.press('o');
 await page.waitForTimeout(150);
 check((await poseBar.textContent()).includes('not cut into parts'), 'the Pose tool offers a cut');

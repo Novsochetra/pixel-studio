@@ -1,7 +1,14 @@
 // Watching an animation: a frame hidden from play, every view playing side by side, and the
 // frames folded away to give the canvas the room.
 import { openStudio } from './harness.mjs';
-import { frameAction, frameLabels, openExample, selectFrame, showAllViews } from './studio.mjs';
+import {
+  frameAction,
+  frameLabels,
+  openExample,
+  selectFrame,
+  showAllViews,
+  showViews,
+} from './studio.mjs';
 
 const { page, check, finish, shots } = await openStudio();
 const canvas = page.locator('.canvas-holder canvas');
@@ -34,7 +41,7 @@ const framesPlayed = () =>
   );
 
 await openExample(page);
-await page.getByRole('button', { name: 'This view' }).click();
+await showViews(page, 'Front only');
 await page.locator('.cell-add').click();
 await page.locator('.cell-add').click();
 await page.waitForTimeout(200);

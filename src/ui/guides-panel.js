@@ -2,6 +2,7 @@ import { node, replace } from './dom.js';
 import { referenceSprite } from './actions.js';
 import { changeGuides } from './guide-changes.js';
 import { guideRow } from './guide-row.js';
+import { actionRow, listGroup, switchRow } from './list-group.js';
 import { measureGuide, newGuide } from '../views/guides.js';
 import { viewName } from '../model/kinds.js';
 import { referenceOf } from '../model/reference.js';
@@ -29,25 +30,18 @@ function matchReference(app) {
   );
 }
 
-function heading(app) {
-  const show = node('input.switch', {
-    type: 'checkbox',
-    role: 'switch',
-    id: 'show-guides',
-    checked: app.store.state.showGuides,
-    onchange: (event) => app.store.set({ showGuides: event.target.checked }),
-  });
-
-  return node(
-    'h2',
-    { tabindex: '0' },
-    'Guide lines',
-    node('label.group.switch-label', { for: 'show-guides' }, 'Show', show),
+// a row of its own, not a switch in the title: a phone's sheet shows no title to hold it
+const showSwitch = (app) =>
+  listGroup(
+    {},
+    switchRow(
+      'Show on the canvas',
+      { id: 'show-guides', checked: app.store.state.showGuides },
+      (on) => app.store.set({ showGuides: on }),
+    ),
   );
-}
 
-const ABOUT =
-  'A guide that marks the top or bottom of the art, or the top of a colour, checks every view and says how many rows off it is.';
+const ABOUT = 'A guide on the art’s top, its bottom or a colour checks every view.';
 
 export function renderGuidesPanel(el, app) {
   const { state } = app.store;
@@ -55,21 +49,15 @@ export function renderGuidesPanel(el, app) {
 
   replace(
     el,
-    heading(app),
+    node('h2', { tabindex: '0' }, 'Guide lines'),
+    showSwitch(app),
     state.project.guides.map((guide) => guideRow(app, guide)),
-    node(
-      'div.group',
-      { style: { gap: '6px' } },
-      node('button.btn', { onclick: () => addGuide(app) }, 'Add guide'),
-      node(
-        'button.btn',
-        {
-          onclick: () => matchReference(app),
-          title: `Move each checked guide to where the ${reference} view has it`,
-        },
-        `Match the ${reference}`,
-      ),
+    listGroup(
+      { note: ABOUT },
+      actionRow('Add guide', () => addGuide(app)),
+      actionRow(`Match the ${reference}`, () => matchReference(app), {
+        title: `Move each checked guide to where the ${reference} view has it`,
+      }),
     ),
-    node('p.hint', {}, ABOUT),
   );
 }

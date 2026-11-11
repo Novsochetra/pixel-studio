@@ -29,6 +29,12 @@
   box-shadow: none;
   color: var(--label-muted);
   font-size: 11px;
+  gap: 2px;
+}
+
+.swatches-toggle svg {
+  width: 12px;
+  height: 12px;
 }
 
 .swatches-toggle:hover {
@@ -218,13 +224,6 @@ input[type='number']::-webkit-outer-spin-button {
   transition: background var(--duration-normal) var(--ease-standard);
 }
 
-/* a switch with its word beside it, in a title or a bar */
-.switch-label {
-  gap: 8px;
-  font-weight: 400;
-  cursor: pointer;
-}
-
 .switch::after {
   content: '';
   position: absolute;
@@ -257,18 +256,30 @@ input[type='number']::-webkit-outer-spin-button {
   translate: 16px;
 }
 
-.guide-row {
-  display: grid;
-  grid-template-columns: 1fr 64px auto;
-  gap: 6px;
-  align-items: center;
+/* a guide is a group of rows: its name and the row it is on, what it marks, how each view stands */
+.list-field.guide-name {
+  font-weight: 600;
+  text-align: left;
 }
 
-.guide-checks {
-  grid-column: 1 / -1;
-  display: flex;
+.list-field.guide-at {
+  flex: none;
+  width: 52px;
+  color: var(--label-secondary);
+}
+
+.guide-row .btn.icon-only {
+  --btn-height: 28px;
+
+  width: 28px;
+  margin-right: -6px;
+}
+
+.list-row.guide-checks {
   flex-wrap: wrap;
   gap: 4px;
+  min-height: 0;
+  padding-block: 8px;
 }
 
 .chip {

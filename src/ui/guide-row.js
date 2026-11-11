@@ -1,4 +1,4 @@
-import { node } from './dom.js';
+import { icon, node } from './dom.js';
 import { changeGuides } from './guide-changes.js';
 import { characterColors } from './character-colours.js';
 import { GUIDE_RULES } from '../views/guides.js';
@@ -6,6 +6,7 @@ import { guideChips } from './guide-chips.js';
 import { toHex } from '../model/sprite.js';
 import { wholeNumber } from '../model/numbers.js';
 import { afterPress } from './after-press.js';
+import { fieldRow } from './list-group.js';
 
 function checks(app, guide) {
   const { state } = app.store;
@@ -14,7 +15,7 @@ function checks(app, guide) {
     return null;
   }
 
-  return node('div.guide-checks', {}, guideChips(state, guide));
+  return node('div.list-row.guide-checks', {}, guideChips(state, guide));
 }
 
 // A change to a guide, made after the press that took the focus from its field: the panel is
@@ -22,49 +23,51 @@ function checks(app, guide) {
 const updater = (app, guide) => (patch) =>
   afterPress(() => changeGuides(app, `Change ${guide.name}`, () => Object.assign(guide, patch)));
 
-function ruleFields(app, guide) {
-  const update = updater(app, guide);
-  const rule = node(
-    'select.input',
-    {
-      'aria-label': `What ${guide.name} marks`,
-      id: `guide-rule-${guide.id}`,
-      onchange: (event) => update({ rule: event.target.value }),
-    },
-    Object.entries(GUIDE_RULES).map(([value, label]) =>
-      node('option', { value, selected: guide.rule === value }, label),
+function ruleField(guide, update) {
+  return fieldRow(
+    'Marks',
+    node(
+      'select.list-select',
+      {
+        'aria-label': `What ${guide.name} marks`,
+        id: `guide-rule-${guide.id}`,
+        onchange: (event) => update({ rule: event.target.value }),
+      },
+      Object.entries(GUIDE_RULES).map(([value, label]) =>
+        node('option', { value, selected: guide.rule === value }, label),
+      ),
     ),
   );
-  const colours = characterColors(app.store.state);
-  const colour =
-    guide.rule === 'colour-top'
-      ? node(
-          'select.input.mono',
-          {
-            'aria-label': `Colour ${guide.name} follows`,
-            id: `guide-colour-${guide.id}`,
-            onchange: (event) =>
-              update({ colour: event.target.value === '' ? null : Number(event.target.value) }),
-          },
-          node('option', { value: '' }, 'Pick a colour'),
-          colours.map((option) =>
-            node(
-              'option',
-              { value: String(option), selected: guide.colour === option },
-              toHex(option),
-            ),
-          ),
-        )
-      : null;
+}
 
-  return [rule, colour];
+function colourField(app, guide, update) {
+  if (guide.rule !== 'colour-top') {
+    return null;
+  }
+
+  return fieldRow(
+    'Colour',
+    node(
+      'select.list-select.mono',
+      {
+        'aria-label': `Colour ${guide.name} follows`,
+        id: `guide-colour-${guide.id}`,
+        onchange: (event) =>
+          update({ colour: event.target.value === '' ? null : Number(event.target.value) }),
+      },
+      node('option', { value: '' }, 'Pick a colour'),
+      characterColors(app.store.state).map((option) =>
+        node('option', { value: String(option), selected: guide.colour === option }, toHex(option)),
+      ),
+    ),
+  );
 }
 
 // the row the line is on: a whole row of the canvas, whatever is typed
 function rowField(project, guide, update) {
   const last = project.canvas.height - 1;
 
-  return node('input.input.mono', {
+  return node('input.list-field.mono.guide-at', {
     type: 'number',
     min: '0',
     max: String(last),
@@ -76,7 +79,7 @@ function rowField(project, guide, update) {
   });
 }
 
-// one guide: its name, row and rule, and how far off each view is
+// one guide, a group of its own: its name and row, what it marks, and how far off each view is
 export function guideRow(app, guide) {
   const { project } = app.store.state;
   const update = updater(app, guide);
@@ -84,23 +87,26 @@ export function guideRow(app, guide) {
     changeGuides(app, `Remove ${guide.name}`, (guides) => guides.splice(guides.indexOf(guide), 1));
 
   return node(
-    'div.guide-row',
+    'div.list-rows.guide-row',
     {},
-    node('input.input', {
-      value: guide.name,
-      'aria-label': 'Guide name',
-      id: `guide-name-${guide.id}`,
-      onchange: (event) => update({ name: event.target.value || 'Guide' }),
-    }),
-    rowField(project, guide, update),
     node(
-      'button.btn.quiet',
-      { 'aria-label': `Remove ${guide.name}`, title: 'Remove guide', onclick: remove },
-      '×',
+      'div.list-row',
+      {},
+      node('input.list-field.guide-name', {
+        value: guide.name,
+        'aria-label': 'Guide name',
+        id: `guide-name-${guide.id}`,
+        onchange: (event) => update({ name: event.target.value || 'Guide' }),
+      }),
+      rowField(project, guide, update),
+      node(
+        'button.btn.quiet.icon-only',
+        { 'aria-label': `Remove ${guide.name}`, title: 'Remove guide', onclick: remove },
+        icon('close'),
+      ),
     ),
-    ...ruleFields(app, guide).map((field) =>
-      field ? node('div', { style: { gridColumn: '1 / -1', display: 'grid' } }, field) : null,
-    ),
+    ruleField(guide, update),
+    colourField(app, guide, update),
     checks(app, guide),
   );
 }

@@ -8,10 +8,9 @@ import { pictureStrength } from './trace-picture.js';
 import { bindFrameDrag } from './frame-drag.js';
 import { arrowsMoveArt } from './selection-keys.js';
 import { forHands, keyNames } from './platform-keys.js';
-import { toggle } from './toggle-row.js';
+import { listGroup, switchRow } from './list-group.js';
 
-const ONE_LAYER_HINT =
-  'Like sheets of glass stacked in this frame: add one for hair or a sword to draw it without touching the rest. Duplicate the frame to take its layers along.';
+const ONE_LAYER_HINT = 'Add a layer for hair or a sword, to draw it without touching the rest.';
 
 // ↑ and ↓ pick the layer above or below, as in an image editor's list
 function onListKey(app, event, stack) {
@@ -32,16 +31,19 @@ function onListKey(app, event, stack) {
 
 // what holding ⌘ does to a click on a layer, for hands with no ⌘ to hold
 const pickSeveral = (app) =>
-  toggle(
-    {
-      id: 'pick-several',
-      label: 'Pick several',
-      hint: keyNames(
-        `Each layer ${forHands('clicked', 'tapped')} joins the others, to move or turn together${forHands(', as ⌘click does', '')}`,
-      ),
-    },
-    app.store.state.pickSeveral,
-    (on) => app.store.set({ pickSeveral: on }),
+  listGroup(
+    {},
+    switchRow(
+      'Pick several',
+      {
+        id: 'pick-several',
+        checked: app.store.state.pickSeveral,
+        hint: keyNames(
+          `Each layer ${forHands('clicked', 'tapped')} joins the others, to move or turn together${forHands(', as ⌘click does', '')}`,
+        ),
+      },
+      (on) => app.store.set({ pickSeveral: on }),
+    ),
   );
 
 const PICKED_HINT = forHands(
@@ -53,7 +55,7 @@ const PICKED_HINT = forHands(
 function layerList(app, stack, active) {
   const group = layersToMove(app.store.state);
   const list = node(
-    'div.view-list',
+    'div.view-list.layer-list',
     {
       role: 'listbox',
       'aria-label': 'Layers, top first',
