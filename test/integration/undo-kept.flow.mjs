@@ -66,4 +66,36 @@ await page.waitForTimeout(400);
 await page.keyboard.press('ControlOrMeta+z');
 check((await painted()) === 0, 'the other project kept its own step, not the first one’s');
 
+// Undo went no further back than a canvas size once another project had been looked at, though
+// the size's own message says undo puts it back.
+const size = async () =>
+  (await page.locator('#statusbar').textContent()).match(/(\d+)×\d+ canvas/)?.[1];
+
+await stroke(4);
+await page.locator('.status-link').click();
+await page.fill('#canvas-width', '24');
+await page.fill('#canvas-height', '24');
+await page.locator('#canvas-height').press('Enter');
+await page.waitForSelector('.sheet', { state: 'detached' });
+await page.waitForTimeout(400);
+check((await size()) === '24', 'the canvas is made larger');
+
+await openProjects();
+await page.locator('.project-row', { hasText: 'Gem' }).locator('.row-open').click();
+await page.waitForSelector('.sheet', { state: 'detached' });
+await page.waitForTimeout(400);
+await openProjects();
+await page.locator('.project-row', { hasText: 'Key' }).locator('.row-open').click();
+await page.waitForSelector('.sheet', { state: 'detached' });
+await page.waitForTimeout(400);
+await page.keyboard.press('ControlOrMeta+z');
+await page.waitForTimeout(400);
+check((await size()) === '16', 'looked away from and opened again, undo still takes the size back');
+await page.keyboard.press('ControlOrMeta+z');
+check((await painted()) === 0, 'and the stroke before it');
+await page.keyboard.press('ControlOrMeta+Shift+z');
+await page.keyboard.press('ControlOrMeta+Shift+z');
+await page.waitForTimeout(400);
+check((await size()) === '24', 'and redo makes it larger again');
+
 await finish();

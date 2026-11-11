@@ -46,48 +46,60 @@ test('a deleted frame comes back with undo, and older pixel undos still land', (
   assert.equal(getPixel(animation().directions.south.frames[0].layers[0].sprite, 3, 3), RED);
 });
 
-test('read again from saved work, a project keeps the steps made since a whole project took its place', () => {
-  const project = newProject();
-  const find = (id) => [...allLayers(project)].find(({ layer }) => layer.id === id)?.layer ?? null;
-  const history = new History(find);
-  const layer = project.animations[0].directions.south.frames[0].layers[0];
-  const draw = (label, x) => {
-    const before = cloneSprite(layer.sprite);
+test('read again from saved work, a step that swapped whole projects swaps to the one now open', () => {
+  const small = newProject({ width: 8, height: 8 });
+  const grown = newProject({ width: 16, height: 16 });
+  const history = new History(() => null);
 
-    setPixel(layer.sprite, x, 0, RED);
-    history.record(label, [{ layer, before }]);
-  };
+  history.openOn(small);
+  history.recordProject('Canvas size', { before: small, after: grown });
+  history.openOn(grown);
+  history.recordSetting('Reference view', 'reference', 'south', 'east');
 
-  draw('first', 0);
-  history.recordProject('Canvas size', { before: project, after: project });
-  draw('second', 1);
-  draw('third', 2);
-  history.undo(project);
-  history.sinceReread();
+  const reread = newProject({ width: 16, height: 16 });
 
-  assert.equal(history.nextUndo, 'second', 'the steps since are kept');
-  history.undo(project);
-  assert.equal(history.canUndo, false, 'the swap, and what came before it, are let go');
-  history.redo(project);
-  history.redo(project);
-  assert.equal(getPixel(layer.sprite, 2, 0), RED, 'and what was undone is still redone');
+  history.openOn(reread, true);
+  history.undo(reread);
+
+  const swap = history.undo(reread);
+
+  assert.equal(swap.label, 'Canvas size', 'undo still goes back past the swap');
+  assert.equal(swap.before, small);
+  assert.equal(swap.after, reread, 'and redo leads to the project that was read again');
 });
 
-test('a whole project waiting to be redone is let go with what would follow it', () => {
-  const project = newProject();
-  const find = (id) => [...allLayers(project)].find(({ layer }) => layer.id === id)?.layer ?? null;
-  const history = new History(find);
-  const layer = project.animations[0].directions.south.frames[0].layers[0];
-  const before = cloneSprite(layer.sprite);
+test('a swap waiting to be redone is pointed at the project read again too', () => {
+  const small = newProject({ width: 8, height: 8 });
+  const grown = newProject({ width: 16, height: 16 });
+  const history = new History(() => null);
 
-  setPixel(layer.sprite, 0, 0, RED);
-  history.record('first', [{ layer, before }]);
-  history.recordProject('Canvas size', { before: project, after: project });
-  history.recordSetting('Reference view', 'reference', 'south', 'east');
-  history.undo(project);
-  history.undo(project);
-  history.sinceReread();
+  history.openOn(small);
+  history.recordProject('Canvas size', { before: small, after: grown });
+  history.openOn(grown);
+  history.undo(grown);
+  history.openOn(small);
 
-  assert.equal(history.canRedo, false);
-  assert.equal(history.nextUndo, 'first');
+  const reread = newProject({ width: 8, height: 8 });
+
+  history.openOn(reread, true);
+
+  const swap = history.redo(reread);
+
+  assert.equal(swap.before, reread);
+  assert.equal(swap.after, grown);
+});
+
+test('a project that takes another’s place in the same visit repoints nothing', () => {
+  const small = newProject({ width: 8, height: 8 });
+  const grown = newProject({ width: 16, height: 16 });
+  const history = new History(() => null);
+
+  history.openOn(small);
+  history.recordProject('Canvas size', { before: small, after: grown });
+  history.openOn(grown);
+
+  const swap = history.undo(grown);
+
+  assert.equal(swap.before, small);
+  assert.equal(swap.after, grown);
 });

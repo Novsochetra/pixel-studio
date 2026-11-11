@@ -3,6 +3,7 @@ import { settleAt } from './actions.js';
 import { afterSave } from './after-save.js';
 import { History } from '../editor/history.js';
 import { Saver } from '../store/saver.js';
+import { browserStorage, dropLeftUnsaved } from '../store/left-unsaved.js';
 import { loadProject } from '../store/load.js';
 import { keysFor, prefixFor } from '../store/keys.js';
 import { deleteProjectData, forget, saveProjectList, upsertEntry } from '../store/projects.js';
@@ -43,7 +44,14 @@ function startSaving(app, project, save, stored) {
   app.portrait = undefined;
   app.saver = new Saver(
     app.backend,
-    (status) => app.store.set({ saveStatus: status }),
+    (status) => {
+      app.store.set({ saveStatus: status });
+
+      // what was kept as the page was hidden is in the saved work now
+      if (status === 'saved') {
+        dropLeftUnsaved(browserStorage());
+      }
+    },
     app.keys,
     (saved) => afterSave(app, saved),
   );
@@ -94,13 +102,14 @@ function historyOf(app, id) {
 
 // Makes `project` the open one: its own undo history and its own saver. { prefix, save, keepView }:
 // save as startSaving takes it; keepView keeps the zoom, tools and place being edited.
-export function install(app, project, { prefix, save = 'nothing', keepView = false }) {
+export function install(app, project, { prefix, save = 'nothing', keepView = false, reread }) {
   // the same project rewritten (a version restored): the old saver knows which layers are stored,
   // so the ones the restored project lacks get removed
   const stored = app.keys?.prefix === prefix ? app.saver?.stored : null;
   const view = keepView ? viewKept(app.store.state, project) : keptView(project);
   app.keys = keysFor(prefix);
   app.history = historyOf(app, project.id);
+  app.history.openOn(project, reread);
   startSaving(app, project, save, stored);
   listOpenProject(app.index, project, prefix);
   const saveStatus = save === 'all' ? 'pending' : 'saved';
@@ -117,9 +126,7 @@ export async function openProject(app, entry) {
 
   project.id ??= entry.id;
 
-  install(app, fillMissingSprites(project), { prefix: entry.prefix });
-  app.history.sinceReread();
-  app.store.touch('project');
+  install(app, fillMissingSprites(project), { prefix: entry.prefix, reread: true });
   await saveProjectList(app.backend, app.index);
 }
 

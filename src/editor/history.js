@@ -27,9 +27,6 @@ function setRig(project, change, side) {
   }
 }
 
-const lastWhole = (steps) =>
-  steps.reduce((last, step, i) => (step.kind === 'project' ? i : last), -1);
-
 // Undo steps are pixel changes to some layers (found again by id, so a step still works after
 // frames or layers were rebuilt), a change to the animations themselves, or a project setting.
 export class History {
@@ -172,11 +169,18 @@ export class History {
     return this.done.at(-1)?.label ?? null;
   }
 
-  // The project was read again from saved work. A step that swaps whole projects holds the ones
-  // from before, which the steps recorded since no longer change: it is let go with all before
-  // it, as is one waiting to be redone with all that would follow it.
-  sinceReread() {
-    this.done.splice(0, lastWhole(this.done) + 1);
-    this.undone.splice(0, lastWhole(this.undone) + 1);
+  // The project the steps act on. Read again from saved work (`reread`) it is another object
+  // than the one the steps knew, so a step that swaps whole projects is pointed at this one where
+  // it held that one: undo went no further back than a canvas size once another project had
+  // been looked at.
+  openOn(project, reread = false) {
+    const swaps = [...this.done, ...this.undone].filter((step) => step.kind === 'project');
+
+    for (const step of reread ? swaps : []) {
+      step.before = step.before === this.open ? project : step.before;
+      step.after = step.after === this.open ? project : step.after;
+    }
+
+    this.open = project;
   }
 }
