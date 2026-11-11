@@ -3,6 +3,7 @@ import { gridBar } from './grid-bar.js';
 import { gridBody } from './rows.js';
 import { isPlaying, togglePlayback } from './playback.js';
 import { gridPlace, keepGridPlace } from './grid-place.js';
+import { watchMore } from '../more-behind.js';
 
 const FOCUS_FOLLOWS = { '.cell': '.cell.selected', '.grid-tab': '.grid-tab[aria-selected="true"]' };
 
@@ -28,16 +29,21 @@ function markPlayFrame(el, frame) {
   }
 }
 
-// the strip is drawn anew each time, scrolled to its start: the open tab is brought back in sight
+// The strip is drawn anew each time, scrolled to its start: the open tab is brought back in
+// sight, and the strip marked while tabs wait past either end of it.
 function showOpenTab(el) {
   const strip = el.querySelector('.grid-tabs');
   const open = strip?.querySelector('.grid-tab[aria-selected="true"]');
 
-  if (!open || strip.scrollWidth <= strip.clientWidth) {
+  if (!open) {
     return;
   }
 
-  strip.scrollLeft = Math.max(0, open.offsetLeft + open.offsetWidth - strip.clientWidth);
+  if (strip.scrollWidth > strip.clientWidth) {
+    strip.scrollLeft = Math.max(0, open.offsetLeft + open.offsetWidth - strip.clientWidth);
+  }
+
+  watchMore(strip);
 }
 
 export function mountGridPanel(app, { isShown, onPlayFrame }) {

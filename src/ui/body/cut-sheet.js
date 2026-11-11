@@ -1,19 +1,18 @@
 import { node, replace, toast } from '../dom.js';
 import { openSheet } from '../sheet.js';
-import { currentAnimation, currentLayer, restructure } from '../actions.js';
-import { cloneSprite } from '../../model/sprite.js';
+import { currentAnimation, currentLayer } from '../actions.js';
 import { frameAt } from '../../model/project.js';
 import { BODY_PARTS, viewName } from '../../model/kinds.js';
 import { hasArt } from '../../model/frames.js';
 import { planFromRig, planFromTemplate } from '../../model/body/cut-plan.js';
 import { guessOwners } from '../../model/body/guess.js';
-import { cutIntoParts, leftOver } from '../../model/body/cut.js';
-import { applyCut, bodyKey, rigOf } from '../../model/body/body.js';
+import { cutSource, leftoverLayer, rigOf } from '../../model/body/body.js';
 import { cutCanvas } from './cut-canvas.js';
 import { partsList } from './cut-list.js';
+import { makeCut } from './cut-apply.js';
 import { brushControls } from './cut-brush.js';
 import { keepingFocus } from './cut-focus.js';
-import { corrected, mayLeave, rememberPlan } from './cut-leave.js';
+import { mayLeave, rememberPlan } from './cut-leave.js';
 
 const isArt = (layer) => layer.kind === 'art' && hasArt({ layers: [layer] });
 
@@ -45,61 +44,48 @@ function newJob(app) {
     return null;
   }
 
-  const source = cloneSprite(layer.sprite);
+  const source = cutSource(frameAt(state.project, state.at), layer);
   const plan = planFromTemplate(source, BODY_PARTS);
 
   return withTopPicked({ ...place, plan, source, layer, recut: false });
 }
 
-function cut(job) {
-  const { app } = job;
-  const edited = job.recut && !corrected(job) ? 'unchanged' : job.recut;
-
-  job.done = true;
-
-  if (edited === 'unchanged') {
-    job.close();
-
-    return;
+// under the art, what the next stroke does: the list of parts may be scrolled away from it
+function strokeSays(job) {
+  if (job.erase) {
+    return 'Unpaints whichever part it crosses';
   }
 
-  const parts = job.plan.parts.map(({ id, name, parent, pivot }) => ({ id, name, parent, pivot }));
-  const rig = cutIntoParts(job.source, job.plan.owners, parts);
-  let frames = 0;
-
-  restructure(app, job.recut ? 'Edit the cut' : 'Cut into parts', (draft) => {
-    const animation = currentAnimation(draft);
-    const cutOf = { direction: job.direction, frame: job.frame, rig, source: job.source };
-
-    frames = applyCut(draft.project, animation, {
-      ...cutOf,
-      layerKey: job.layer?.key,
-      leftover: leftOver(job.source, job.plan.owners),
-    });
-
-    return { layer: bodyKey(animation) };
-  });
-  app.store.set({ tool: 'pose', piece: null });
-  job.close();
-  toast(
-    `${job.recut ? 'The cut now has' : 'Cut into'} ${rig.pieces.length} parts${frames > 1 ? `, in ${frames} frames` : ''}. Drag a part to pose it; its handle turns it.`,
-  );
+  return `Paints ${job.plan.parts[job.selected]?.name ?? 'a part'}`;
 }
 
 function hint(job) {
+  const { state } = job.app.store;
+  const frame = frameAt(state.project, { ...state.at, direction: job.direction, frame: job.frame });
+  const stays = leftoverLayer(frame, job.layer?.key)?.name ?? 'the art';
   const unpainted = job.recut
-    ? 'Pixels left unpainted are taken off the body.'
-    : `Pixels left unpainted stay on ${job.layer.name}.`;
+    ? `Pixels left unpainted go back to ${stays} in this frame.`
+    : `Pixels left unpainted stay on ${stays}.`;
 
   return `Paint each part with the brush, or draw a loop round it with the lasso: L and R are as the picture shows them. The dots are where parts turn: drag one to move it. ${unpainted}`;
 }
 
-function actions(job, change) {
+// the first guess again, from the proportions: with the parts it starts over, not with the window
+function guessButton(job, change) {
   const guess = () =>
     change(() => {
       job.plan.owners = guessOwners(job.source, job.plan.parts);
       job.plan.parts.forEach((part) => (part.pivot = null));
     });
+
+  return node(
+    'button.btn.quiet',
+    { onclick: guess, title: 'Guess the parts again from the proportions' },
+    'Guess again',
+  );
+}
+
+function actions(job) {
   // parts with pixels painted for them: a part removed takes its pixels out of the count
   const painted = [...job.plan.owners].filter((owner) => owner >= 0 && job.plan.parts[owner]);
   const count = new Set(painted).size;
@@ -107,13 +93,8 @@ function actions(job, change) {
   return [
     node('button.btn', { onclick: job.close }, 'Cancel'),
     node(
-      'button.btn',
-      { onclick: guess, title: 'Guess the parts again from the proportions' },
-      'Guess again',
-    ),
-    node(
       'button.btn.primary',
-      { onclick: () => cut(job), disabled: !count },
+      { onclick: () => makeCut(job), disabled: !count },
       `${job.recut ? 'Save the cut:' : 'Cut into'} ${count} ${count === 1 ? 'part' : 'parts'}`,
     ),
   ];
@@ -135,12 +116,17 @@ export function openCutSheet(app) {
   const mayClose = () => mayLeave(job, foot);
   const sheet = openSheet(title, null, { wide: true, focusField: false, mayClose });
   const side = node('div.cut-side');
-  const note = node('p.hint');
+  const paints = node('p.hint.cut-paints');
   const draw = () => {
-    replace(side, brushControls(job, change), partsList(job, change));
-    note.textContent = hint(job);
+    replace(
+      side,
+      brushControls(job, change),
+      partsList(job, change, guessButton(job, change)),
+      node('p.hint', {}, hint(job)),
+    );
+    paints.textContent = strokeSays(job);
     foot.classList.remove('asking');
-    replace(foot, actions(job, change));
+    replace(foot, actions(job));
   };
   const render = () => keepingFocus(sheet.body, draw);
   const art = cutCanvas(job, render);
@@ -152,9 +138,9 @@ export function openCutSheet(app) {
 
   job.close = sheet.close;
   rememberPlan(job);
+  sheet.body.classList.add('cut-window');
   sheet.body.append(
-    node('div.cut-layout', {}, node('div.cut-art', {}, art.canvas), side),
-    note,
+    node('div.cut-layout', {}, node('div.cut-art', {}, art.canvas, paints), side),
     foot,
   );
   render();

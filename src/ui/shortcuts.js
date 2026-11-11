@@ -72,8 +72,15 @@ const GROUPS = [
 // pins and body parts are a character's: their keys do nothing for a chest, a tile or an icon
 const BODY_KEYS = new Set(['P', 'O']);
 
+const BODY_GROUP = 'Posing a part';
+
+const forAll = (project) => !project || hasBody(project);
+
 const rowsFor = (rows, project) =>
-  !project || hasBody(project) ? rows : rows.filter(([keys]) => !BODY_KEYS.has(keys));
+  forAll(project) ? rows : rows.filter(([keys]) => !BODY_KEYS.has(keys));
+
+const groupsFor = (project) =>
+  forAll(project) ? GROUPS : GROUPS.filter(([title]) => title !== BODY_GROUP);
 
 export function openShortcuts(project = null) {
   const sheet = openSheet('Keyboard shortcuts', null, { wide: true });
@@ -82,7 +89,7 @@ export function openShortcuts(project = null) {
     node(
       'div.compare',
       { style: { gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))' } },
-      GROUPS.map(([title, rows]) =>
+      groupsFor(project).map(([title, rows]) =>
         node(
           'div',
           { style: { display: 'grid', gap: '6px', alignContent: 'start' } },

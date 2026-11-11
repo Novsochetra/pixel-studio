@@ -29,15 +29,33 @@ const workspaceEntries = (app) =>
     { checked: app.store.state.mode === id },
   ]);
 
+// with no keyboard this is the only way to paste; Copy is on the selection's own bar
+const pasteEntry = (app) => ['Paste', () => paste(app), { disabled: !app.clipboard?.length }];
+
 function canvasEntries(app) {
   const { showGrid } = app.store.state;
 
   return [
-    // with no keyboard this is the only way to paste; Copy is on the selection's own bar
-    ['Paste', () => paste(app), { disabled: !app.clipboard?.length }],
+    pasteEntry(app),
     ['Fit the canvas', () => app.fitCanvas()],
     ['Pixel grid', () => app.store.set({ showGrid: !showGrid }), { checked: showGrid }],
   ];
+}
+
+// A tablet held wide has the desk's bar and no keys: Paste was nowhere on it, while the message
+// at Copy said to look in this menu.
+function editEntries(app) {
+  const { layout, mode } = app.store.state;
+
+  if (mode !== 'edit') {
+    return [];
+  }
+
+  if (layout === 'compact') {
+    return canvasEntries(app);
+  }
+
+  return hasKeyboard() ? [] : [pasteEntry(app)];
 }
 
 const filterEntries = (app) =>
@@ -68,9 +86,8 @@ export function workspaceButton(app) {
 // what the toolbar has no room for: null between two groups draws a line
 function moreEntries(app) {
   const { state } = app.store;
-  const compact = state.layout === 'compact';
   const groups = [
-    compact && state.mode === 'edit' ? canvasEntries(app) : [],
+    editEntries(app),
     state.mode !== 'game' ? filterEntries(app) : [],
     [
       ['Canvas size…', () => openCanvasSizeSheet(app)],

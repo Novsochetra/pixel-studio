@@ -74,6 +74,31 @@
   background: var(--fill-quiet);
 }
 
+/* tabs wait past an end of the strip (more-behind.js marks it): a strip of the strip's own grey
+   stays at that end, so a lone tab does not read as the only one */
+.grid-tabs[data-before='true']::before,
+.grid-tabs[data-more='true']::after {
+  content: '';
+  position: sticky;
+  z-index: 1;
+  flex: none;
+  align-self: stretch;
+  width: 18px;
+  pointer-events: none;
+}
+
+.grid-tabs[data-before='true']::before {
+  left: -2px;
+  margin-right: -20px;
+  background: linear-gradient(to left, transparent, var(--chrome) 85%);
+}
+
+.grid-tabs[data-more='true']::after {
+  right: -2px;
+  margin-left: -20px;
+  background: linear-gradient(to right, transparent, var(--chrome) 85%);
+}
+
 .grid-tab {
   padding: 5px 12px;
   border-radius: 8px;

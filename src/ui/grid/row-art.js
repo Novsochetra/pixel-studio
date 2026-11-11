@@ -1,4 +1,4 @@
-import { node } from '../dom.js';
+import { node, toast } from '../dom.js';
 import { currentAnimation } from '../actions.js';
 import { mirrorCell } from './cells.js';
 import { compositeFrame } from '../../model/composite.js';
@@ -19,10 +19,14 @@ function mirrorRow(state, direction, source) {
   const frames = currentAnimation(state).directions[source].frames;
   const { sprites, box } = rowArt(state.project, frames);
   const name = viewName(state.project, direction);
+  const from = viewName(state.project, source);
+  // a press on it did nothing and said nothing: it is not drawn, and says where it comes from
+  const says = () =>
+    toast(`${name} is ${from} flipped: draw on ${from}, or add ${name} as a view of its own.`);
 
   return node(
     'div.grid-row.mirrored',
-    { role: 'row', title: `The game flips ${viewName(state.project, source)} for this side` },
+    { role: 'row', title: `The game flips ${from} for this side`, onclick: says },
     node(
       'div.grid-label',
       { role: 'rowheader' },

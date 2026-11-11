@@ -72,7 +72,7 @@ function sheetBody(job, file, fields) {
 
   return [
     node(
-      'div.compare',
+      'div.compare.cleaning',
       {},
       node('figure', {}, source, node('figcaption', {}, `Your image · ${file.name}`)),
       job.slot,

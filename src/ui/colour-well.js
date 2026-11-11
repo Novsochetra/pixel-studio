@@ -14,7 +14,9 @@ function hexField(app) {
     value: toHex(state.color),
     'aria-label': 'Colour hex code',
     id: 'colour-hex',
-    disabled: state.paletteLock,
+    // read, not typed, while the palette is locked: switched off, it looked the same and sent
+    // what was typed in it to the editor's shortcuts
+    readOnly: state.paletteLock,
     onchange: (event) => {
       const color = fromHex(event.target.value);
 
@@ -49,7 +51,11 @@ function pickInPlace(app, color) {
 
 export function colourWell(app, colors) {
   const { state } = app.store;
-  const note = node('span', {}, noteFor(state.color, colors));
+  const note = node(
+    'span',
+    {},
+    state.paletteLock ? 'Locked to the art’s colours' : noteFor(state.color, colors),
+  );
   const hex = hexField(app);
   const well = node('label.swatch.colour-well', {
     style: { background: toHex(state.color) },

@@ -98,36 +98,47 @@ function posedBar(app, target) {
   ];
 }
 
+// On a phone the bar is one row that scrolls: what to do comes first there, as after its reason
+// the button was cut off by the screen's edge.
+const doFirst = (state, said, does) => (state.layout === 'compact' ? [does, said] : [said, does]);
+
 function plainBar(app, state) {
   return [
-    node('span', {}, `Frame ${state.at.frame + 1} is plain pixels.`),
-    node('button.btn.primary', { onclick: () => poseHere(app) }, 'Pose the parts here'),
+    ...doFirst(
+      state,
+      node('span', {}, `Frame ${state.at.frame + 1} is plain pixels.`),
+      node('button.btn.primary', { onclick: () => poseHere(app) }, 'Pose the parts here'),
+    ),
     cutButton(app, 'Edit the cut…'),
   ];
 }
 
 function uncutBar(app, state) {
-  return [
+  return doFirst(
+    state,
     node('span', {}, `${viewName(state.project, state.at.direction)} is not cut into parts yet.`),
     node('button.btn.primary', { onclick: () => openCutSheet(app) }, 'Cut into parts…'),
-  ];
+  );
 }
 
 const showsBar = (state) =>
   state.mode === 'edit' && !state.selection && (state.tool === 'pose' || drawsOnPart(state));
 
+// which bar is showing, and what it holds
 function barFor(app, state) {
   const target = poseTarget(state);
 
   if (state.tool !== 'pose') {
-    return drawingBar(app, target);
+    return ['drawing', drawingBar(app, target)];
   }
 
   if (!target.rig) {
-    return uncutBar(app, state);
+    return ['uncut', uncutBar(app, state)];
   }
 
-  return target.body?.pose ? posedBar(app, target) : plainBar(app, state);
+  return target.body?.pose
+    ? [state.piece ? 'part' : 'posed', posedBar(app, target)]
+    : ['plain', plainBar(app, state)];
 }
 
 // Above the canvas while the Pose tool is on: what posing can do in this frame.
@@ -137,14 +148,24 @@ export function renderPoseBar(el, app) {
   el.hidden = !showsBar(state);
 
   if (el.hidden) {
+    el.dataset.bar = '';
     replace(el);
 
     return;
   }
 
   const focused = el.contains(document.activeElement) ? document.activeElement.id : '';
+  const [bar, controls] = barFor(app, state);
 
-  replace(el, barFor(app, state));
+  replace(el, controls);
+
+  // another bar starts at its first control: left where the last one was scrolled to, it opened
+  // with its part picker off the screen
+  if (el.dataset.bar !== bar) {
+    el.dataset.bar = bar;
+    el.scrollLeft = 0;
+  }
+
   watchMore(el);
 
   // the part picker or angle being used keeps the keyboard when the bar is drawn again

@@ -41,8 +41,16 @@
     padding-block: 10px;
   }
 
-  .status-link {
+  .status-link,
+  .save-status {
     position: relative;
+  }
+
+  /* the dot says what it means at a tap (toolbar.js): the room round it takes the tap */
+  .save-status::after {
+    content: '';
+    position: absolute;
+    inset: -14px -6px;
   }
 
   .status-link::after {
@@ -144,7 +152,7 @@
   }
 
   .swatches {
-    grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
     gap: 6px;
   }
 

@@ -87,7 +87,8 @@ function partRow(job, { part, index, size }, change) {
   );
 }
 
-export function partsList(job, change) {
+// beside: what else acts on every part, shown beside Add a part
+export function partsList(job, change, beside = null) {
   const sizes = partSizes(job.plan);
   const rows = job.plan.parts.map((part, index) => ({ part, index, size: sizes[index] })).reverse();
   const add = () =>
@@ -105,6 +106,11 @@ export function partsList(job, change) {
       { role: 'list', 'aria-label': 'Parts, top first' },
       rows.map((row) => partRow(job, row, change)),
     ),
-    node('button.btn.quiet', { onclick: add }, icon('plus'), 'Add a part'),
+    node(
+      'div.group',
+      {},
+      node('button.btn.quiet', { onclick: add }, icon('plus'), 'Add a part'),
+      beside,
+    ),
   );
 }

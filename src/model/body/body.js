@@ -19,12 +19,33 @@ export function poseBody(layer, { rig, pose, canvas }) {
   layer.sprite = renderBody(rig, pose, canvas);
 }
 
+// What a cut of this frame is made from: the layer cut, with what was drawn on a Body not cut
+// yet over it. A first cut gives every view a Body, and one not cut yet can be drawn on: left
+// out of the cut, those pixels were thrown away, or hidden under the parts.
+export function cutSource(frame, layer) {
+  const source = cloneSprite(layer.sprite);
+  const body = bodyOf(frame);
+
+  if (body?.sprite && !body.pose) {
+    paintOver(source, body.sprite);
+  }
+
+  return source;
+}
+
+// the layer that takes what no part holds: the one cut, or for a view cut before, its art
+export const leftoverLayer = (frame, layerKey) =>
+  frame.layers.find((layer) => layer.key === layerKey) ??
+  frame.layers.find((layer) => layer.kind === 'art');
+
+// cut.art: the layer as it was cut, without the Body's own pixels, to find the frames drawn alike
 function firstCut(entry, cut, { key, canvas }) {
-  const posed = entry.frames.filter((frame, index) => {
+  const alike = (frame) => {
     const layer = frame.layers.find((other) => other.key === cut.layerKey);
 
-    return index === cut.frame || (layer?.sprite && samePixels(layer.sprite, cut.source));
-  });
+    return Boolean(layer?.sprite) && samePixels(layer.sprite, cut.art ?? cut.source);
+  };
+  const posed = entry.frames.filter((frame, index) => index === cut.frame || alike(frame));
 
   for (const frame of posed) {
     const art = frame.layers.find((layer) => layer.key === cut.layerKey);
@@ -32,9 +53,9 @@ function firstCut(entry, cut, { key, canvas }) {
 
     art.sprite = cloneSprite(cut.leftover);
 
-    // A first cut gives every view a Body, and one not cut yet can be drawn on: what is there
-    // goes under the parts, onto the layer that was cut, where the pose would draw over it.
-    if (body.sprite && !body.pose) {
+    // another frame's Body may have pixels of its own, which this cut was not made from: they
+    // go under the parts, onto the layer that was cut
+    if (frame !== entry.frames[cut.frame] && body.sprite && !body.pose) {
       paintOver(art.sprite, body.sprite);
     }
 
@@ -44,12 +65,19 @@ function firstCut(entry, cut, { key, canvas }) {
   return posed.length;
 }
 
-function cutAgain(entry, rig, { key, canvas }) {
+// A part removed, or pixels unpainted, leave the parts: in the frame being edited they go back
+// to the art under the Body, where they stood when the view was cut. They were dropped instead.
+function cutAgain(entry, cut, { key, canvas }) {
   const bodies = entry.frames
     .map((frame) => frame.layers.find((layer) => layer.key === key))
     .filter((layer) => layer?.pose);
+  const art = leftoverLayer(entry.frames[cut.frame]);
 
-  bodies.forEach((layer) => poseBody(layer, { rig, pose: layer.pose, canvas }));
+  bodies.forEach((layer) => poseBody(layer, { rig: cut.rig, pose: layer.pose, canvas }));
+
+  if (art && cut.leftover) {
+    paintOver(art.sprite, cut.leftover);
+  }
 
   return bodies.length;
 }
@@ -82,9 +110,9 @@ function bodyInEveryFrame(project, animation, above) {
   return key;
 }
 
-// cut: { direction, frame, layerKey, source, leftover, rig }. The first cut of a view takes the
-// parts off the layer that was cut, in this frame and every frame drawn the same; a new cut of a
-// view redraws the frames posed with the old one. Returns how many frames the Body now draws.
+// cut: { direction, frame, layerKey, source, art, leftover, rig }. The first cut of a view takes
+// the parts off the layer that was cut, in this frame and every frame drawn the same; a new cut
+// of a view redraws the frames posed with the old one. Returns how many frames the Body now draws.
 export function applyCut(project, animation, cut) {
   const key = bodyInEveryFrame(project, animation, cut.layerKey);
   const entry = animation.directions[cut.direction];
@@ -93,7 +121,7 @@ export function applyCut(project, animation, cut) {
 
   entry.rig = cut.rig;
 
-  return recut ? cutAgain(entry, cut.rig, place) : firstCut(entry, cut, place);
+  return recut ? cutAgain(entry, cut, place) : firstCut(entry, cut, place);
 }
 
 // A picture cleaned into a posed frame takes the place of what the parts drew there.

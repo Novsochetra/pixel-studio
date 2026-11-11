@@ -5,14 +5,12 @@ import { cast } from '../preview-scene.js';
 import { drawScene } from './scene-draw.js';
 import { drawCentred, drawTiles } from './flat-draw.js';
 import { sceneOptions } from './scene-controls.js';
+import { roomFor, zoomButtons, zoomOf } from './preview-zoom.js';
 import { frameAtTick } from '../../model/frame-play.js';
+import { hasArt } from '../../model/frames.js';
 import { kindOf, viewName } from '../../model/kinds.js';
 
-const ZOOMS = { scene: [1, 2, 3], tiled: [1, 2, 4], centred: [1] };
 const FEET_ROOM = 24;
-
-// until a zoom is picked: a scene at its own size, tiles big enough to see each pixel
-const zoomOf = (state, mode) => state.game.zoom ?? (mode === 'tiled' ? 4 : 1);
 
 function animationPicker(app) {
   const { state } = app.store;
@@ -32,30 +30,13 @@ function animationPicker(app) {
   );
 }
 
-function zoomButtons(app, mode, set) {
-  const zooms = ZOOMS[mode];
-
-  return zooms.length > 1
-    ? node(
-        'div.segmented',
-        { role: 'group', 'aria-label': 'Zoom' },
-        zooms.map((zoom) =>
-          node(
-            'button',
-            {
-              'aria-pressed': String(zoomOf(app.store.state, mode) === zoom),
-              onclick: () => set({ zoom }),
-            },
-            `${zoom}×`,
-          ),
-        ),
-      )
-    : null;
-}
-
 function noteText(state, mode) {
   const animation = currentAnimation(state);
   const speed = `at ${animation.fps} fps`;
+
+  if (!viewFrames(state).some(hasArt)) {
+    return `Nothing is drawn in ${animation.name} yet: draw in Edit, and it shows here as it will be used.`;
+  }
 
   if (mode !== 'scene') {
     return `${animation.name}, ${speed}. ${mode === 'tiled' ? 'Laid edge to edge: a seam shows where the sides do not meet.' : 'At 1×, 2× and 4×, on light and dark.'}`;
@@ -102,7 +83,7 @@ function paintPreview(canvas, app, { clock, time }) {
     mode === 'scene'
       ? drawScene(canvas, state, { background: clock.background, clock: { tick, seconds } })
       : flat(canvas, state.project, { frames: viewFrames(state), tick });
-  const zoom = zoomOf(state, mode);
+  const zoom = zoomOf(state, mode, roomFor(canvas));
   // the ground line too: it moves when the scene's own picture arrives, after the first look
   const shown = `${size.width}×${size.height} at ${zoom} on ${size.subject?.bottom}`;
 
@@ -114,6 +95,9 @@ function paintPreview(canvas, app, { clock, time }) {
     showSubject(canvas, size.subject);
   }
 }
+
+const playButton = (playing, onclick) =>
+  node('button.btn.primary', { onclick }, playing ? 'Pause' : 'Play');
 
 // The art where it will be used: in a scene, laid as tiles, or at icon sizes. It plays on its own
 // clock, independent of the frames' Play.
@@ -144,14 +128,11 @@ export function mountPreview(container, app) {
       render();
       requestAnimationFrame(loop);
     };
-    const play = node(
-      'button.btn.primary',
-      { onclick: togglePlay },
-      clock.started === null ? 'Play' : 'Pause',
-    );
+    const play = playButton(clock.started !== null, togglePlay);
     const own = mode === 'scene' ? sceneOptions(app, set, clock) : null;
+    const zooms = zoomButtons(mode, zoomOf(state, mode, roomFor(canvas)), set);
 
-    replace(bar, animationPicker(app), play, zoomButtons(app, mode, set), own);
+    replace(bar, animationPicker(app), play, zooms, own);
     note.textContent = noteText(state, mode);
     backgroundOf(app).then((image) => {
       clock.background = image;

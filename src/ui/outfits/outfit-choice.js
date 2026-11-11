@@ -130,7 +130,13 @@ function keepButton(app, choice, onChange) {
     toast(`Kept as "${outfit.name}". Rename it in the parts list below.`);
   };
 
-  return node('button.btn', { onclick: keep }, 'Keep these colours as an outfit');
+  const nothing = !Object.keys(choice.custom ?? {}).length;
+
+  return node(
+    'button.btn',
+    { onclick: keep, disabled: nothing, title: nothing ? 'Pick a colour for a part first' : null },
+    'Keep these colours as an outfit',
+  );
 }
 
 // where the outfit comes from, then its kit or its colours

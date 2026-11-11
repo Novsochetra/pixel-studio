@@ -124,10 +124,13 @@
   box-sizing: border-box;
 }
 
-/* long words wrap inside a window */
-:is(.sheet, .sheet-out) .btn {
+/* long words wrap inside a window, with room above and under them: on two lines they touched
+   the button's edges */
+:is(.sheet, .sheet-out) .btn:not(.icon-only, .sheet-close) {
   white-space: normal;
   min-width: 0;
+  padding-block: 4px;
+  line-height: 1.2;
 }
 
 /* in a long window the main buttons, the last thing in it, stay in sight */

@@ -13,6 +13,7 @@ import { openExportSheet } from './export-sheet.js';
 import { openChatgptSheet } from './prompt/prompt-sheet.js';
 import { inWords } from '../model/told.js';
 import { isSingleView, viewName } from '../model/kinds.js';
+import { bounds } from '../model/sprite.js';
 
 const slug = (text) => fileSlug(text, 'project');
 
@@ -36,6 +37,11 @@ async function saveAllViews(app) {
   for (const direction of directionsInUse(state)) {
     const sprite = directionSprite(state, direction);
 
+    // a view with nothing drawn in it would be a blank picture in the zip
+    if (!bounds(sprite)) {
+      continue;
+    }
+
     for (const factor of scale > 1 ? [1, scale] : [1]) {
       const suffix = sprite.width * factor;
       const blob = await spritePng(sprite, factor);
@@ -45,6 +51,12 @@ async function saveAllViews(app) {
         data: new Uint8Array(await blob.arrayBuffer()),
       });
     }
+  }
+
+  if (!files.length) {
+    toast('Nothing is drawn in this frame yet: there is no picture to download.');
+
+    return;
   }
 
   await saveFile(

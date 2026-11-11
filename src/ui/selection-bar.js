@@ -28,10 +28,12 @@ function copySelected(app) {
   const { state } = app.store;
 
   app.clipboard = liftPixels(currentLayer(state).sprite, state.selection);
+  // the bar's own Paste shows once there is something to paste
+  app.store.touch('clipboard');
   toast(
     hasKeyboard()
       ? keyNames('Copied. Paste it in any frame with ⌘V.')
-      : 'Copied. Paste is in the More menu, in any frame.',
+      : `Copied. Paste is in ${state.layout === 'wide' ? 'the bar at the top' : 'the More menu'}, in any frame.`,
   );
 }
 

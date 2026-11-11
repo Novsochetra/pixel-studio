@@ -1,6 +1,7 @@
-// whether more of a row waits past its right edge
+// whether more of a row waits past its right edge, and before its left one
 export function markMore(row) {
   row.dataset.more = String(row.scrollLeft + row.clientWidth < row.scrollWidth - 1);
+  row.dataset.before = String(row.scrollLeft > 1);
 }
 
 function alongWith(row) {

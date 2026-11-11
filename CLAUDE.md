@@ -187,8 +187,16 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   no view in its files (`downloadName`, `viewFileName`).
 - What is typed is checked where it is read: a number is kept to what can be (`wholeNumber`), and
   a message to a person never carries an exception's own words.
-- A control whose change draws its own panel again keeps the keys: a slider is made with
-  `slider()` (`src/ui/slider.js`), which hands the focus to the slider now in its place.
+- The bars are drawn again at every change, so the page keeps the keys for someone using them
+  (`keepFocus` in `src/ui/focus.js`, round every redraw in `app.js`): the control now in the
+  place of the one used takes the focus, found by its id, its `aria-label` or its words. Give a
+  control one of those. After a click the keys stay the editor's own (`:focus-visible`), and a
+  field edited says its change before Tab moves on (`changeBeforeTab`).
+- A canvas is sized for the room it has, never shrunk by the stylesheet (`viewBox` in
+  `src/ui/body/cut-view.js`): squashed, its art is out of shape and a press lands beside the
+  finger.
+- What a shortcut does has a control where there are no keys (`hasKeyboard`), at every layout: a
+  tablet held wide has the desk's bar and a finger's hands (Paste in its More menu or its bar).
 
 ## Testing
 

@@ -76,6 +76,12 @@
   touch-action: none;
 }
 
+/* under the art, what the next stroke does */
+.cut-paints {
+  margin: 4px 0 0;
+  text-align: center;
+}
+
 .cut-side {
   display: grid;
   gap: 10px;
@@ -170,13 +176,43 @@
     display: none;
   }
 
-  /* the art and the parts share the screen: the list scrolls in what the art leaves, so the
-     part being painted and the art it is painted on are both in sight */
-  .cut-canvas {
-    max-height: 38vh;
+  /* The window is as tall as the screen and does not scroll: the art keeps its place at the
+     top, the tools and the parts scroll in what it leaves, and the buttons keep the foot. With
+     the whole window scrolling, the part being painted and its art were never both in sight. */
+  .cut-window:is(.sheet, .sheet-out) {
+    height: 100%;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+
+  .cut-layout {
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: 10px;
+    min-height: 0;
+  }
+
+  .cut-art {
+    padding: 6px;
+  }
+
+  .cut-side {
+    align-content: start;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .cut-parts [role='list'] {
-    max-height: 30vh;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* a phone held wide has no height for the art above the parts: it stands beside them */
+@media (max-width: 860px) and (max-height: 499px) {
+  .cut-layout {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
   }
 }

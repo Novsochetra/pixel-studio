@@ -26,11 +26,5 @@ export function brushControls(job, change) {
     job.tool === 'brush'
       ? node('div.segmented', { role: 'group', 'aria-label': 'Brush size' }, sizes)
       : null,
-    // beside the art, which part the next stroke is for: the list may be scrolled away from it
-    node(
-      'span.hint',
-      {},
-      `${job.erase ? 'Unpaints' : 'Paints'} ${job.plan.parts[job.selected]?.name ?? 'a part'}`,
-    ),
   );
 }

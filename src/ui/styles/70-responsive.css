@@ -95,8 +95,14 @@
   color: var(--label);
 }
 
+/* the bar's gaps draw in so a short project name is whole beside the longest workspace's word:
+   "Grass" was cut to "Gras…" in Preview */
 :root[data-layout='compact'] .save-status {
-  margin-inline: 4px;
+  margin-inline: 1px;
+}
+
+:root[data-layout='compact'] .toolbar > .group {
+  gap: 2px;
 }
 
 :root[data-layout='compact'] .rail {
@@ -155,26 +161,6 @@
 
 :root[data-layout='compact'] .stage-inner.preview > .preview-bar-place {
   top: 8px;
-}
-
-.preview-more > summary {
-  list-style: none;
-}
-
-.preview-more > summary::-webkit-details-marker {
-  display: none;
-}
-
-.preview-more > summary::marker {
-  content: none;
-}
-
-.preview-more > summary::after {
-  content: '▸';
-}
-
-.preview-more[open] > summary::after {
-  content: '▾';
 }
 
 /* unfolded, they take rows of their own under the first */
@@ -268,8 +254,9 @@
   order: -2;
 }
 
-/* a tablet held upright has the width for one row: the tabs take what the rest leaves */
-@media (min-width: 700px) {
+/* A tablet held upright has the width for one row: the tabs take what the rest leaves. A phone on
+   its side is as wide but shows the frames in a narrow panel at the canvas's side. */
+@media (min-width: 700px) and (min-height: 521px) {
   :root[data-layout='compact'] .grid-tabs-bar {
     flex: 0 1 auto;
     max-width: 40%;
@@ -294,6 +281,14 @@
 /* the picture and what cleaning made of it stand side by side, not a screen apart */
 :root[data-layout='compact'] .compare:not(:has(> :not(figure))) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* The picture chosen is known: it is shown small, so what was made of it is on the first screen.
+   As wide as the phone, it pushed the cleaned art under the window's buttons. */
+:root[data-layout='compact'] .cleaning > figure:first-child img {
+  width: auto;
+  max-width: 100%;
+  max-height: 22vh;
 }
 
 /* a list beside its picture (the colours of a swap) has half a phone each way: the picture goes
@@ -622,6 +617,13 @@
   /* the views' choice and the three switches share the panel's second row */
   :root[data-layout='compact'] .grid-bar {
     gap: 4px;
+  }
+
+  /* the panel is too narrow for the tabs beside Play: sharing its row, one tab showed two
+     letters of its name */
+  :root[data-layout='compact'] .grid-tabs-bar {
+    flex-basis: 100%;
+    max-width: 100%;
   }
 
   :root[data-layout='compact'] .grid-bar .segmented button {

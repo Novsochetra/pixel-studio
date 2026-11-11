@@ -14,6 +14,7 @@ import { currentLayer } from './actions.js';
 import { renderDock } from './dock.js';
 import { onLayoutChange } from './layout.js';
 import { saveOnLeaving } from './save-on-leaving.js';
+import { changeBeforeTab, keepFocus } from './focus.js';
 
 const WORKSPACES = { edit: mountEditStage, board: mountBoard, game: mountPreview };
 
@@ -43,11 +44,22 @@ function followResize(app, drawStage) {
   }
 }
 
+function drawChanged(draw, patch) {
+  const keys = Object.keys(patch);
+
+  for (const [part, triggers] of Object.entries(ROUTES)) {
+    if (keys.some((key) => triggers.includes(key))) {
+      draw[part](patch);
+    }
+  }
+}
+
 export function mountApp(app) {
   onInstallChange(() => app.store.touch('installable'));
   onLayoutChange((layout) => app.store.set({ layout }));
 
   const stage = document.getElementById('stage');
+  const page = stage.closest('.app');
   const draw = {
     toolbar: () => renderToolbar(document.getElementById('toolbar'), app),
     rail: () => renderRail(document.getElementById('rail'), app),
@@ -60,13 +72,7 @@ export function mountApp(app) {
   let shownProject = app.store.state.project.id;
 
   app.store.subscribe((_, patch) => {
-    const keys = Object.keys(patch);
-
-    for (const [part, triggers] of Object.entries(ROUTES)) {
-      if (keys.some((key) => triggers.includes(key))) {
-        draw[part](patch);
-      }
-    }
+    keepFocus(page, () => drawChanged(draw, patch));
 
     // another project's canvas has its own size: it opens fitted, not at the last one's zoom
     if (app.store.state.project.id !== shownProject) {
@@ -85,6 +91,7 @@ export function mountApp(app) {
 
   app.fitCanvas();
   bindKeyboard(app);
+  changeBeforeTab(page);
   saveOnLeaving(app);
   bindDrop(stage, app);
   showQuickStart(document.body, app.store.state.project);

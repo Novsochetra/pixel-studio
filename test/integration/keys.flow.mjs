@@ -178,4 +178,10 @@ check(
 );
 await page.keyboard.press('p');
 check((await tool()) !== 'Pin a body part (Alt-click removes it)', 'nor does P pick one');
+await page.keyboard.press('?');
+await page.waitForTimeout(300);
+check(
+  !(await page.locator('.sheet').textContent()).includes('Posing a part'),
+  'and the list of shortcuts leaves posing out',
+);
 await finish();

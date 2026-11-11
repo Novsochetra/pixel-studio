@@ -117,6 +117,14 @@ function ownTouches(canvas) {
   }
 }
 
+// On a phone a message shows at the top of the canvas: read or not, it leaves at the press, as
+// it lay over the pixels and the handle the finger came for.
+function clearSaid(app) {
+  if (app.store.state.layout === 'compact') {
+    document.querySelector('.toast')?.remove();
+  }
+}
+
 export function bindPointer(canvas, app, stage) {
   const view = { canvas, stage, touches: new Map(), session: null, intent: null };
   const place = (event) =>
@@ -126,6 +134,8 @@ export function bindPointer(canvas, app, stage) {
   ownTouches(canvas);
   bindBeside(view, { place, press: (event) => press(app, view, event), finish });
   canvas.addEventListener('pointerdown', (event) => {
+    clearSaid(app);
+
     // a name still being typed (a new layer's) is done once the canvas is drawn on: on a phone
     // its keyboard would stay up over the art
     if (document.activeElement?.matches?.('input, textarea')) {

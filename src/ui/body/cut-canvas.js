@@ -1,29 +1,15 @@
 import { node } from '../dom.js';
 import { cssVar, drawChecker, drawSprite, sizeCanvas } from '../draw.js';
 import { PART_COLOURS } from '../../art/editor-colours.js';
-import { bounds } from '../../model/sprite.js';
 import { linePoints } from '../../editor/paint.js';
 import { paintOwners, pivotsOf } from '../../model/body/cut-plan.js';
 import { drawLasso, lassoDrag } from './cut-lasso.js';
+import { viewBox } from './cut-view.js';
 
 // The art with each part painted over in its colour, and the pivots each part turns about. The
 // brush gives pixels to the part picked; a pivot is dragged where the part should turn.
 
-const ROOM = { width: 440, height: 420 };
-const MARGIN = 3;
-
 export const partColour = (index) => PART_COLOURS[index % PART_COLOURS.length];
-
-function viewBox(source) {
-  const box = bounds(source) ?? { left: 0, top: 0, right: source.width, bottom: source.height };
-  const left = Math.max(0, box.left - MARGIN);
-  const top = Math.max(0, box.top - MARGIN);
-  const width = Math.min(source.width, box.right + MARGIN) - left;
-  const height = Math.min(source.height, box.bottom + MARGIN) - top;
-  const scale = Math.max(2, Math.floor(Math.min(ROOM.width / width, ROOM.height / height)));
-
-  return { left, top, width, height, scale };
-}
 
 function drawOwners(context, job, view) {
   const { owners } = job.plan;
@@ -82,12 +68,16 @@ export function drawCut(canvas, job) {
   drawLasso(context, job);
 }
 
-// the art pixel under the pointer, or with `exact`, the point itself in art pixels
+// The art pixel under the pointer, or with `exact`, the point itself in art pixels. The canvas
+// may be shown smaller than it is drawn (a window narrower than the art), so the point is
+// measured in what is shown.
 function pointOf(canvas, view, event, exact = false) {
   const box = canvas.getBoundingClientRect();
-  const along = (offset) => (exact ? offset / view.scale : Math.floor(offset / view.scale));
+  const across = ((event.clientX - box.left) / box.width) * view.width;
+  const down = ((event.clientY - box.top) / box.height) * view.height;
+  const along = (pixels) => (exact ? pixels : Math.floor(pixels));
 
-  return [along(event.clientX - box.left) + view.left, along(event.clientY - box.top) + view.top];
+  return [along(across) + view.left, along(down) + view.top];
 }
 
 // the part whose pivot is under the pointer, near enough to grab

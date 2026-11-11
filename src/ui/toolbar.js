@@ -1,4 +1,4 @@
-import { node, icon, replace } from './dom.js';
+import { node, icon, replace, toast } from './dom.js';
 import { openDownloadMenu } from './downloads.js';
 import { openVersionsSheet } from './versions-sheet.js';
 import { openShortcuts } from './shortcuts.js';
@@ -6,6 +6,8 @@ import { canInstall, installApp } from './install-app.js';
 import { openProjectsSheet } from './projects/projects-sheet.js';
 import { saveText, undoRedo, viewFilter, zoomControls } from './toolbar-parts.js';
 import { modesFor, moreButton, workspaceButton } from './toolbar-menu.js';
+import { hasKeyboard } from './platform-keys.js';
+import { paste } from './selection-keys.js';
 
 function workspaces(app) {
   const { state } = app.store;
@@ -48,7 +50,18 @@ function installButton() {
   );
 }
 
+// the widest bar has no More menu: a tablet that wide, with no keys, pastes from the bar
+const pasteButton = (app) =>
+  !hasKeyboard() && app.store.state.mode === 'edit' && app.clipboard?.length
+    ? node(
+        'button.btn.quiet',
+        { title: 'Paste what was copied, in this frame', onclick: () => paste(app) },
+        'Paste',
+      )
+    : null;
+
 const wideButtons = (app) => [
+  pasteButton(app),
   canInstall() ? installButton() : null,
   node(
     'button.btn.quiet',
@@ -80,6 +93,19 @@ function downloadButton(app) {
   );
 }
 
+// A narrow bar shows the words as a dot, and a finger has no pointer to hover it for them: a tap
+// says them.
+const saveStatus = (state) =>
+  node(
+    'span.save-status',
+    {
+      'data-state': state.saveStatus,
+      title: saveText(state),
+      onclick: () => toast(saveText(state)),
+    },
+    saveText(state),
+  );
+
 // a narrower window keeps one row: what does not fit waits in the More menu
 export function renderToolbar(el, app) {
   const { state } = app.store;
@@ -95,11 +121,7 @@ export function renderToolbar(el, app) {
     layout !== 'compact' && state.mode === 'edit' ? zoomControls(app) : null,
     layout === 'wide' && state.mode !== 'game' ? viewFilter(app) : null,
     node('div.spacer'),
-    node(
-      'span.save-status',
-      { 'data-state': state.saveStatus, title: saveText(state) },
-      saveText(state),
-    ),
+    saveStatus(state),
     layout === 'compact' ? workspaceButton(app) : null,
     layout === 'wide' ? wideButtons(app) : moreButton(app),
     downloadButton(app),

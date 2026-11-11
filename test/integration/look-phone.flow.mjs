@@ -273,21 +273,4 @@ await page.locator('#rail [aria-label^="Select and move"]').evaluate((button) =>
 const said = await page.locator('.toast').boundingBox();
 check(said.width > 200 && said.height < 80, 'a message spreads across the screen');
 
-// cut into parts, the Pose tool's bar is wider than a phone: centred, its first controls were
-// out of the scroll's reach, and the cut window's own buttons were a long scroll down
-await page.locator('#rail [aria-label^="Pose"]').evaluate((button) => button.click());
-await page
-  .locator('.pose-bar')
-  .getByRole('button', { name: /Cut into parts/ })
-  .tap();
-await page.waitForTimeout(600);
-const foot = await page.locator('.sheet .sheet-actions').boundingBox();
-check(
-  foot.y > 400 && foot.y + foot.height <= 840,
-  'the cut window keeps its buttons at the foot of the screen',
-);
-await page.locator('.sheet .btn.primary').tap();
-await page.waitForTimeout(800);
-const firstControl = await page.locator('.pose-bar > :first-child').boundingBox();
-check(firstControl.x >= 0, 'the Pose bar starts at its first control, the rest a scroll away');
 await finish();

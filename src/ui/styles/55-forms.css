@@ -95,6 +95,13 @@ button.swatch:active {
   cursor: default;
 }
 
+/* a code shown but not to be typed over, while the palette is locked */
+.input[readonly] {
+  background: transparent;
+  color: var(--label-secondary);
+  cursor: default;
+}
+
 .colour-well:has(input:focus-visible) {
   outline: 2px solid var(--tint);
   outline-offset: 2px;

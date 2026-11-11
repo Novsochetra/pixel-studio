@@ -11,6 +11,7 @@ export const ROUTES = {
     'viewFilter',
     'installable',
     'layout',
+    'clipboard',
   ],
   rail: ['tool', 'symmetry', 'mode', 'project', 'layout', 'colourPick'],
   dock: ['panel', 'layout', 'mode', 'color', 'colourPick', 'project'],

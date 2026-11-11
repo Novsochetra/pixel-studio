@@ -3,6 +3,7 @@ import { currentFrames, currentLayer, directionSprite } from './actions.js';
 import { viewName } from '../model/kinds.js';
 import { bounds, colorCounts } from '../model/sprite.js';
 import { openCanvasSizeSheet } from './canvas-size-sheet.js';
+import { hasKeyboard } from './platform-keys.js';
 
 // the view, frame and layer being edited, in words
 export function placeText(state) {
@@ -40,6 +41,6 @@ export function renderStatus(el, app) {
     ),
     node('span', {}, `${colorCounts(sprite).length} colours`),
     node('span', {}, cursor ? `x ${cursor.x}, y ${cursor.y} · ${cursor.color}` : ''),
-    node('span.status-help', {}, 'Press ? for shortcuts'),
+    hasKeyboard() ? node('span.status-help', {}, 'Press ? for shortcuts') : null,
   );
 }
