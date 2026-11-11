@@ -116,10 +116,18 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   at the screen's foot, the tools', a capsule with round tools in it, and beside it two round
   buttons, the colour in hand and Panels (`dock.js`). There is no second bar of tabs: a panel
   is a sheet at the screen's foot, and the row at the sheet's top names it and picks another
-  (`panel-sheet.js`, the panels themselves in `panels.js`), beside the bar it is pulled down by
-  and a ×. The sheet still takes its row: the canvas is fitted in the room above it, never
-  under it. What stays put in a panel while it scrolls is painted in `--sheet` there. On its
-  side the phone keeps a tab for each panel at the screen's edge.
+  (`panel-sheet.js`, the panels themselves in `panels.js`), beside a ×. The sheet is pulled by
+  its whole top: up makes it tall (`data-sheet='tall'`), down brings it back, then shuts it.
+  The sheet still takes its row: the canvas is fitted in the room above it, never under it.
+  What stays put in a panel while it scrolls is painted in `--sheet` there. On its side the
+  phone keeps a tab for each panel at the screen's edge.
+- The phone's bar shows its tools as bare pictures, a few at a time: All tools, at its end,
+  opens every one with its name (`tools-panel.js`). A new tool in `tool-list.js` is in both.
+- Off a phone the frames stand under the canvas, as tall as the line above them is dragged
+  (`grid/grid-resizer.js`, `--grid-height`); on `compact` they are a sheet, with no line.
+- Fit shows the whole canvas, at a whole zoom. A canvas that would be shown at its own size
+  takes a step more when the stage's margins are all that stop it, and the stage gives them up
+  (`fitZoom`, `.stage-inner.tight`): its last rows are never under the frames.
 - Two fingers never zoom the page (`touch-action` on `html`): they zoom the canvas, on the art or
   on the stage beside it (`stage-beside.js`). While they hold it the canvas is moved and sized as
   a picture (`pinch.js`), and drawn again once, at the whole zoom nearest, when they let go:

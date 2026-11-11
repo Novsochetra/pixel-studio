@@ -3,6 +3,7 @@ import { currentLayer, goTo, restructure } from './actions.js';
 import { placeLayer } from '../model/layer-ops.js';
 import { frameOf, layerBar } from './layer-bar.js';
 import { layerRow } from './layer-row.js';
+import { layersToMove } from './layer-move.js';
 import { pictureStrength } from './trace-picture.js';
 import { bindFrameDrag } from './frame-drag.js';
 import { arrowsMoveArt } from './selection-keys.js';
@@ -29,14 +30,20 @@ function onListKey(app, event, stack) {
 
 // top first, as image editors list them; a drag puts a layer anywhere in the stack
 function layerList(app, stack, active) {
+  const group = layersToMove(app.store.state);
   const list = node(
     'div.view-list',
     {
       role: 'listbox',
       'aria-label': 'Layers, top first',
+      'aria-multiselectable': 'true',
       onkeydown: (event) => onListKey(app, event, stack),
     },
-    [...stack].reverse().map((entry) => layerRow(app, entry, entry.key === active.key)),
+    [...stack]
+      .reverse()
+      .map((entry) =>
+        layerRow(app, entry, { active: entry.key === active.key, picked: group.includes(entry) }),
+      ),
   );
   const top = stack.length - 1;
 
@@ -63,6 +70,7 @@ export function renderLayersPanel(el, app) {
 
   const stack = frameOf(state).layers;
   const active = currentLayer(state);
+  const picked = layersToMove(state).length;
   // The row itself: a control inside it (its eye) keeps the keys where it stood, as any control
   // of the page does. Sent to the row, a second Enter on the eye did nothing.
   const hadFocus = Boolean(document.activeElement?.matches?.('.layer-row'));
@@ -72,11 +80,18 @@ export function renderLayersPanel(el, app) {
     node('h2', { tabindex: '0' }, 'Layers'),
     stack.length < 2 ? node('p.hint', {}, ONE_LAYER_HINT) : null,
     layerList(app, stack, active),
+    picked > 1
+      ? node(
+          'p.hint',
+          {},
+          `${picked} layers picked. Drag their art or use the arrow keys to move them, or the handle to turn them.`,
+        )
+      : null,
     active.kind === 'reference' ? pictureStrength(app, active) : null,
     layerBar(app, active),
   );
 
   if (hadFocus) {
-    el.querySelector('.layer-row[aria-selected="true"]')?.focus();
+    el.querySelector('.layer-row[aria-current="true"]')?.focus();
   }
 }

@@ -10,6 +10,7 @@ import { onTurnHandle, turnSelectionDrag } from './selection-turn.js';
 import { pickLayerToDrag } from './pick-layer.js';
 import { moveFrameDrag } from './frame-move.js';
 import { moveLayerDrag } from './layer-move.js';
+import { onLayersHandle, turnLayersDrag } from './layer-turn.js';
 import { isPosedBody } from '../model/body/body-kind.js';
 import { startOnPart } from './body/part-draw.js';
 import { poseTool } from './body/pose-tool.js';
@@ -41,17 +42,20 @@ function pin(app, [x, y]) {
 const orTurnHandle = (tool) => (app, point, event) =>
   onTurnHandle(app, point) ? turnSelectionDrag(app, point) : tool(app, point, event);
 
+function moveTool(app, point) {
+  if (onLayersHandle(app, point)) {
+    return turnLayersDrag(app, point);
+  }
+
+  return pickLayerToDrag(app, point) ? moveLayerDrag(app, point) : moveFrameDrag(app, point);
+}
+
 // the tools a press starts; each returns the drag that follows, or null
 const ON_PRESS = {
   select: orTurnHandle(select),
   wand: orTurnHandle((app, point, event) => wand(app, point, event.shiftKey)),
   pin,
-  movelayer(app, point) {
-    pickLayerToDrag(app, point);
-
-    return moveLayerDrag(app, point);
-  },
-  moveframe: moveFrameDrag,
+  move: orTurnHandle(moveTool),
   shade: (app, point, event) => shade(app, point, event.shiftKey || app.store.state.shadeDarker),
   pencil: (app, point) => stroke(app, point, app.store.state.color),
   eraser: (app, point) => stroke(app, point, CLEAR),

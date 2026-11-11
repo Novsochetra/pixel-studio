@@ -142,6 +142,18 @@ export function flipHorizontal(sprite) {
   return mapPixels(sprite, (_, x, y) => getPixel(sprite, sprite.width - 1 - x, y));
 }
 
+export function cropped(sprite, box) {
+  const out = createSprite(box.right - box.left, box.bottom - box.top);
+
+  for (let y = 0; y < out.height; y++) {
+    const from = ((box.top + y) * sprite.width + box.left) * 4;
+
+    out.pixels.set(sprite.pixels.subarray(from, from + out.width * 4), y * out.width * 4);
+  }
+
+  return out;
+}
+
 export function samePixels(first, second) {
   return (
     first.width === second.width &&

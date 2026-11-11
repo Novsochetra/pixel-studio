@@ -1,4 +1,5 @@
 import { currentLayer, goTo } from './actions.js';
+import { layersToMove } from './layer-move.js';
 import { toast } from './dom.js';
 import { poseTarget } from './body/pose-actions.js';
 import { isPosedBody } from '../model/body/body-kind.js';
@@ -22,7 +23,7 @@ export function pickLayerAt(app, point) {
   const layer = topLayerAt(frameAt(state.project, state.at), point);
 
   if (!layer) {
-    return;
+    return null;
   }
 
   const changed = layer.key !== currentLayer(state).key;
@@ -34,14 +35,20 @@ export function pickLayerAt(app, point) {
   if (changed) {
     toast(piece ? `${layer.name}: ${piece.name}` : `Layer: ${layer.name}`);
   }
+
+  return layer;
 }
 
-// A layer picked in the panel stays picked while the press is on its own pixels, even under
-// another layer. A hidden one stays too, so the tool can say why nothing moves.
+// Layers picked in the panel stay picked while the press is on their own pixels, even under
+// another layer. A hidden layer stays too, so the tool can say why nothing moves.
 export function pickLayerToDrag(app, point) {
-  const layer = currentLayer(app.store.state);
+  const { state } = app.store;
+  const onItsArt = (layer) =>
+    layer.visible && layer.sprite && getPixel(layer.sprite, ...point) !== CLEAR;
 
-  if (layer.visible && (!layer.sprite || getPixel(layer.sprite, ...point) === CLEAR)) {
-    pickLayerAt(app, point);
+  if (!currentLayer(state).visible || layersToMove(state).some(onItsArt)) {
+    return true;
   }
+
+  return Boolean(pickLayerAt(app, point));
 }

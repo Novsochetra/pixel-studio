@@ -6,7 +6,7 @@
 
 .edit-layout {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto auto;
   height: 100%;
 }
 
@@ -43,10 +43,45 @@
   stroke-width: 3.4;
 }
 
+/* The line between the canvas and the frames: wider to grab than it looks, taking no room itself. */
+.grid-resizer {
+  position: relative;
+  z-index: 1;
+  height: 10px;
+  margin-block: -5px;
+  cursor: row-resize;
+  touch-action: none;
+}
+
+.grid-resizer::after {
+  content: '';
+  position: absolute;
+  inset: 3px calc(50% - 18px);
+  border-radius: 2px;
+  background: var(--separator);
+}
+
+.grid-resizer:hover::after,
+.grid-resizer:focus-visible::after,
+.grid-resizer.dragging::after {
+  background: var(--tint);
+}
+
+.grid-resizer:focus-visible {
+  outline: none;
+}
+
+.grid-resizer:has(+ .grid-panel.folded) {
+  display: none;
+}
+
 .grid-panel {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 8px;
-  max-height: 40vh;
+  box-sizing: border-box;
+  height: var(--grid-height, auto);
+  max-height: var(--grid-height, 40vh);
   padding: 8px 12px 10px;
   border-top: 1px solid var(--separator);
   background: var(--chrome);
@@ -429,6 +464,23 @@
 
 .menu button:disabled {
   opacity: 0.45;
+}
+
+.grid-panel.folded {
+  height: auto;
+  max-height: none;
+}
+
+/* a finger needs more to hold than a pointer does */
+@media (pointer: coarse) {
+  .grid-resizer {
+    height: 24px;
+    margin-block: -12px;
+  }
+
+  .grid-resizer::after {
+    inset: 10px calc(50% - 18px);
+  }
 }
 
 @media (max-width: 700px) {

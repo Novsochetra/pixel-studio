@@ -1,6 +1,7 @@
 import { node, icon } from './dom.js';
 import { restructure } from './actions.js';
-import { pickLayer } from './layer-move.js';
+import { pickLayer, pickRangeToMove, togglePickToMove } from './layer-move.js';
+import { keyNames } from './platform-keys.js';
 import { renameInPlace } from './rename-field.js';
 import { setLayerShown, updateLayer } from '../model/structure.js';
 import { frameAt } from '../model/project.js';
@@ -84,9 +85,12 @@ function secondClickOnName(entry, event) {
   return second;
 }
 
-export function layerRow(app, entry, active) {
-  const shown = entry.visible;
-  const select = (event) => {
+function selectRow(app, entry, event) {
+  if (event.shiftKey) {
+    pickRangeToMove(app, entry.key);
+  } else if (event.metaKey || event.ctrlKey) {
+    togglePickToMove(app, entry.key);
+  } else {
     const rename = secondClickOnName(entry, event);
 
     pickLayer(app, entry.key);
@@ -94,19 +98,27 @@ export function layerRow(app, entry, active) {
     if (rename) {
       renameRow(app, entry);
     }
-  };
-  const label = node('span.layer-name', { title: 'Double-click to rename (F2)' }, entry.name);
+  }
+}
+
+const NAME_HINT = keyNames(
+  'Double-click to rename (F2). ⌘click or Shift-click to pick more layers',
+);
+
+export function layerRow(app, entry, { active, picked }) {
+  const shown = entry.visible;
+  const label = node('span.layer-name', { title: NAME_HINT }, entry.name);
 
   return node(
     'div.layer-row',
     {
       role: 'option',
       tabindex: active ? '0' : '-1',
-      'aria-selected': String(active),
+      'aria-selected': String(picked),
       'aria-current': String(active),
       'data-hidden': String(!shown),
       'data-key': entry.key,
-      onclick: select,
+      onclick: (event) => selectRow(app, entry, event),
       onkeydown: (event) => event.key === 'F2' && startRename(app, entry, label),
     },
     eyeButton(app, entry, shown),

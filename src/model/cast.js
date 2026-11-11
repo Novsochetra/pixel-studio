@@ -1,4 +1,4 @@
-import { bounds, createSprite } from './sprite.js';
+import { bounds, createSprite, cropped } from './sprite.js';
 import { compositeFrame } from './composite.js';
 import { referenceOf } from './reference.js';
 import { newId } from './project.js';
@@ -28,18 +28,6 @@ export function blankCopy(project, name) {
   }
 
   return { ...copy, id: newId('p'), name, outfits: [], mappings: {} };
-}
-
-function cropped(sprite, box) {
-  const out = createSprite(box.right - box.left, box.bottom - box.top);
-
-  for (let y = 0; y < out.height; y++) {
-    const from = ((box.top + y) * sprite.width + box.left) * 4;
-
-    out.pixels.set(sprite.pixels.subarray(from, from + out.width * 4), y * out.width * 4);
-  }
-
-  return out;
 }
 
 export function portraitFrame(project) {

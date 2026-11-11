@@ -44,20 +44,21 @@ function eraseSelected(app) {
   commit(app, 'Delete', [layer], () => eraseSelection(layer.sprite, state.selection));
 }
 
-function angleField(app) {
+// now(): the angle the art stands at, read again once a typed angle has been taken
+export function angleField({ id, name, title, angle, turnTo, now = () => angle }) {
   return node(
     'label.pose-angle',
-    { title: 'How far the selection is turned, in degrees: or drag the handle above it' },
+    { title },
     node('input.input.mono', {
-      id: 'selection-angle',
+      id,
       type: 'number',
       step: '1',
-      'aria-label': 'Selection angle',
-      value: String(selectionAngle(app.store.state)),
+      'aria-label': name,
+      value: String(angle),
       // what was typed is shown as the angle it came to: 1000 is 80 short of three turns
       onchange: (event) => {
-        turnSelectionTo(app, Number(event.target.value) || 0);
-        event.target.value = String(selectionAngle(app.store.state));
+        turnTo(Number(event.target.value) || 0);
+        event.target.value = String(now());
       },
       // Enter and Esc give the keys back to the editor: left in the field, undo and the tools'
       // keys were typed into it, and Esc let nothing go
@@ -134,7 +135,14 @@ export function renderSelectionBar(el, app) {
 
   replace(
     el,
-    angleField(app),
+    angleField({
+      id: 'selection-angle',
+      name: 'Selection angle',
+      title: 'How far the selection is turned, in degrees: or drag the handle above it',
+      angle: selectionAngle(app.store.state),
+      turnTo: (degrees) => turnSelectionTo(app, degrees),
+      now: () => selectionAngle(app.store.state),
+    }),
     ACTIONS.map(([kind, label, title]) =>
       button(title, () => transform(app, kind, title.split(' the')[0]), label),
     ),

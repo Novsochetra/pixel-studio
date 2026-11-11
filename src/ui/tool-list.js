@@ -46,9 +46,9 @@ const TOOLS = [
   },
   {
     id: 'select',
-    label: 'Select and move: a click picks the layer under it',
+    label: 'Select and move: a click on art turns on Move for its layer',
     key: 's',
-    touch: 'Select and move: drag a box, then drag it; a tap picks the layer under it',
+    touch: 'Select and move: drag a box, then drag it; a tap on art turns on Move for its layer',
   },
   {
     id: 'wand',
@@ -71,16 +71,12 @@ const TOOLS = [
     touch: 'Pin a body part: pick the part on the bar over the canvas, then tap where it is',
   },
   {
-    id: 'movelayer',
-    label: 'Move this layer: drag it, or use the arrow keys',
+    id: 'move',
+    label:
+      'Move: drag art to move its layer, empty canvas to move the whole frame, the handle to turn. Arrow keys too',
     key: 't',
-    touch: 'Move this layer: drag it',
-  },
-  {
-    id: 'moveframe',
-    label: 'Move the whole frame: drag it, or use the arrow keys',
-    key: 'v',
-    touch: 'Move the whole frame: drag it',
+    touch:
+      'Move: drag art to move its layer, empty canvas to move the whole frame, the handle to turn',
   },
   { id: 'pose', label: 'Pose the body parts: drag a part, or its handle to turn it', key: 'o' },
 ];

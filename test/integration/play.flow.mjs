@@ -6,6 +6,11 @@ import { frameAction, frameLabels, openExample, selectFrame, showAllViews } from
 const { page, check, finish, shots } = await openStudio();
 const canvas = page.locator('.canvas-holder canvas');
 const canvasWidth = async () => (await canvas.boundingBox()).width;
+const canvasShape = async () => {
+  const box = await canvas.boundingBox();
+
+  return box.width / box.height;
+};
 
 // the frame numbers marked as playing over a few rounds of the animation
 const framesPlayed = () =>
@@ -72,11 +77,8 @@ check(
   !(await page.locator('.empty-frame').isVisible()),
   'the empty frame card steps aside for play',
 );
-const wide = await canvasWidth();
-check(
-  wide > single * 1.5,
-  `with All views, play shows every view side by side (${single} to ${wide})`,
-);
+const shape = await canvasShape();
+check(shape > 1.5, `with All views, play shows every view side by side (${shape.toFixed(2)} wide)`);
 await page.screenshot({ path: `${shots}/play-all-views.png` });
 const art = await page.evaluate(() => document.querySelector('.cell canvas').toDataURL());
 await canvas.click({ position: { x: 20, y: 40 } });

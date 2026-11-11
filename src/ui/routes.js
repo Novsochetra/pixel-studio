@@ -46,6 +46,8 @@ export const ROUTES = {
     'project',
     'onion',
     'frameDrag',
+    'layerTurn',
+    'pickedLayers',
     'selection',
     'frames',
     'layers',
@@ -57,7 +59,7 @@ export const ROUTES = {
     'panel',
   ],
   tools: ['tool', 'project'],
-  layers: ['at', 'project', 'layers', 'pixels', 'frames', 'animations', 'layout'],
+  layers: ['at', 'project', 'layers', 'pickedLayers', 'pixels', 'frames', 'animations', 'layout'],
   colours: [
     'color',
     'basicColours',

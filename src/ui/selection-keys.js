@@ -8,8 +8,7 @@ import {
   shiftOnCanvas,
 } from '../editor/floating.js';
 import { toast } from './dom.js';
-import { shiftCurrentFrame } from './frame-move.js';
-import { shiftCurrentLayer } from './layer-move.js';
+import { shiftPickedLayers } from './layer-move.js';
 import { forHands } from './platform-keys.js';
 
 const ARROWS = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] };
@@ -109,17 +108,14 @@ const PLAIN_KEYS = {
   '.': { when: () => true, run: (app) => stepFrame(app, 1) },
 };
 
-const TOOL_ARROWS = { moveframe: shiftCurrentFrame, movelayer: shiftCurrentLayer };
-
-export const arrowsMoveArt = (state) => Boolean(state.selection || TOOL_ARROWS[state.tool]);
+export const arrowsMoveArt = (state) => Boolean(state.selection || state.tool === 'move');
 
 function arrowKey([dx, dy]) {
   return {
     when: arrowsMoveArt,
     run(app, event) {
       const step = event.shiftKey ? 10 : 1;
-      const { selection, tool } = app.store.state;
-      const move = selection ? nudge : TOOL_ARROWS[tool];
+      const move = app.store.state.selection ? nudge : shiftPickedLayers;
 
       move(app, [dx * step, dy * step]);
     },

@@ -247,6 +247,17 @@
     max(12px, env(safe-area-inset-right, 0px));
 }
 
+/* A phone's frames are a sheet of its own height: the line a desk drags to size them, and the
+   height it was dragged to, are not for it. The sheet's top bar is a row above the tabs. */
+:root[data-layout='compact'] .grid-resizer {
+  display: none;
+}
+
+:root[data-layout='compact'] .grid-panel {
+  height: auto;
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
 /* the tabs and Play keep the first row; what is set once sits on the row under them */
 :root[data-layout='compact'] .grid-bar .spacer {
   display: none;
@@ -425,7 +436,7 @@
 
 /* at the canvas's foot, by the thumb, clear of the messages that show at the top */
 :root[data-layout='compact'] .selection-bar,
-:root[data-layout='compact'] :is(.pose-bar, .pin-bar) {
+:root[data-layout='compact'] :is(.layer-turn-bar, .pose-bar, .pin-bar) {
   --rise-from: -50% 10px;
 
   top: auto;
@@ -435,7 +446,7 @@
 
 /* A bar over the canvas is one row that scrolls: wrapped to two or three, it lay over half the
    canvas. */
-:root[data-layout='compact'] :is(.selection-bar, .pose-bar, .pin-bar) {
+:root[data-layout='compact'] :is(.selection-bar, .layer-turn-bar, .pose-bar, .pin-bar) {
   --rise-from: 0 10px;
 
   left: 8px;
@@ -449,11 +460,12 @@
   scrollbar-width: none;
 }
 
-:root[data-layout='compact'] :is(.selection-bar, .pose-bar, .pin-bar)::-webkit-scrollbar {
+:root[data-layout='compact']
+  :is(.selection-bar, .layer-turn-bar, .pose-bar, .pin-bar)::-webkit-scrollbar {
   display: none;
 }
 
-:root[data-layout='compact'] :is(.selection-bar, .pose-bar, .pin-bar) > * {
+:root[data-layout='compact'] :is(.selection-bar, .layer-turn-bar, .pose-bar, .pin-bar) > * {
   flex: none;
 }
 

@@ -23,8 +23,8 @@ export function clampShift(frame, canvas, shift) {
   return clampToCanvas(artBox(frame.layers), canvas, shift);
 }
 
-export function clampLayerShift(layer, canvas, shift) {
-  return clampToCanvas(artBox([layer]), canvas, shift);
+export function clampLayersShift(layers, canvas, shift) {
+  return clampToCanvas(artBox(layers), canvas, shift);
 }
 
 function shifted(sprite, [dx, dy]) {

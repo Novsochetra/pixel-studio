@@ -79,6 +79,11 @@
   }
 }
 
+/* fitted a step larger than its margins allow (fitZoom), the canvas takes their room */
+:root .stage .stage-inner.edit.tight {
+  padding: 8px;
+}
+
 /* where the editor is, said over the canvas's corner on a phone, which has no status bar */
 .stage-place {
   display: none;
@@ -105,7 +110,7 @@
 
 /* floats over the canvas, so the canvas never moves when it shows: glass, as the art shows through */
 .selection-bar,
-:is(.pose-bar, .pin-bar) {
+:is(.layer-turn-bar, .pose-bar, .pin-bar) {
   position: absolute;
   top: 12px;
   left: 50%;

@@ -1,16 +1,16 @@
 /* Posing: the bar over the canvas while the Pose tool is on. */
-:is(.pose-bar, .pin-bar) {
+:is(.layer-turn-bar, .pose-bar, .pin-bar) {
   align-items: center;
   gap: 4px;
   padding: 4px 6px;
 }
 
-:is(.pose-bar, .pin-bar) > span:not(.pose-gap) {
+:is(.layer-turn-bar, .pose-bar, .pin-bar) > span:not(.pose-gap) {
   padding-inline: 6px;
   color: var(--label-secondary);
 }
 
-:is(.pose-bar, .pin-bar) .hint {
+:is(.layer-turn-bar, .pose-bar, .pin-bar) .hint {
   margin: 0;
 }
 
@@ -32,7 +32,7 @@
   width: 58px;
 }
 
-:is(.pose-bar, .pin-bar) select.input {
+:is(.layer-turn-bar, .pose-bar, .pin-bar) select.input {
   max-width: 150px;
 }
 
@@ -40,11 +40,11 @@
    own column it moved the canvas under the finger each time a part was picked */
 /* Centred while it fits, by the room its two ends take; wider than the screen, it starts at its
    first control and scrolls: centred there, its left end was out of the scroll's reach. */
-:root[data-layout='compact'] :is(.pose-bar, .pin-bar) > :first-child {
+:root[data-layout='compact'] :is(.layer-turn-bar, .pose-bar, .pin-bar) > :first-child {
   margin-left: auto;
 }
 
-:root[data-layout='compact'] :is(.pose-bar, .pin-bar) > :last-child {
+:root[data-layout='compact'] :is(.layer-turn-bar, .pose-bar, .pin-bar) > :last-child {
   margin-right: auto;
 }
 

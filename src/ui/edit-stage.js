@@ -1,10 +1,12 @@
 import { node } from './dom.js';
 import { bindWheelZoom } from './navigate.js';
+import { renderLayerTurnBar } from './layer-turn-bar.js';
 import { renderSelectionBar } from './selection-bar.js';
 import { paint } from './stage-paint.js';
 import { bindPointer } from './stage-pointer.js';
 import { renderEmptyFrame } from './empty-frame.js';
 import { mountGridPanel } from './grid/grid-panel.js';
+import { mountGridResizer } from './grid/grid-resizer.js';
 import { stopPlayback } from './grid/playback.js';
 import { renderPoseBar } from './body/pose-bar.js';
 import { renderPinBar } from './grid/pin-controls.js';
@@ -59,8 +61,12 @@ const TIGHT = { across: 16, down: 16 };
 // the zoom at which the canvas fits the part of the stage above the frames
 export function fitZoom(stage, sprite) {
   const area = stage.querySelector('.edit-scroll') ?? stage;
+  const inner = area.querySelector('.stage-inner') ?? area;
+
+  inner.classList.remove('tight');
+
   // the stage's own padding, which the stylesheet sets by the room there is
-  const padding = getComputedStyle(area.querySelector('.stage-inner') ?? area);
+  const padding = getComputedStyle(inner);
   const across = parseFloat(padding.paddingLeft) + parseFloat(padding.paddingRight);
   const down = parseFloat(padding.paddingTop) + parseFloat(padding.paddingBottom);
   const roomWith = (edge) =>
@@ -69,14 +75,19 @@ export function fitZoom(stage, sprite) {
       (area.clientHeight - edge.down) / sprite.height,
     );
   const fit = Math.floor(roomWith({ across, down }));
+  // A canvas shown at its own size has the most to gain from a whole step more: the stage gives
+  // up its margins for it (`.tight`), or the step would put its last rows out of sight. A
+  // tablet held wide left a 160 pixel canvas at 100%, with room for 200%.
+  const tight = fit < 2 ? Math.floor(roomWith(TIGHT)) : fit;
 
-  // A canvas that fits only once or twice has the most to gain from a whole step more: it takes
-  // the step when it still stands clear of the stage's edges. A tablet held wide left a 160
-  // pixel canvas at 100%, with room for 200% but for the stage's own margins.
-  return Math.max(1, Math.min(24, fit < 3 ? Math.floor(roomWith(TIGHT)) : fit));
+  inner.classList.toggle('tight', tight > fit);
+
+  return Math.max(1, Math.min(24, tight));
 }
 
-function renderStage(app, { canvas, bar, poseBar, pinBar, place, empty, grid }, patch) {
+function renderStage(app, parts, patch) {
+  const { canvas, bar, turnBar, poseBar, pinBar, place, empty, grid } = parts;
+
   if (Object.keys(patch).some((key) => STOPS_PLAYING.includes(key))) {
     stopPlayback(app);
   }
@@ -89,6 +100,7 @@ function renderStage(app, { canvas, bar, poseBar, pinBar, place, empty, grid }, 
   }
 
   renderSelectionBar(bar, app);
+  renderLayerTurnBar(turnBar, app);
   renderPoseBar(poseBar, app);
   renderPinBar(pinBar, app);
   place.textContent = placeText(app.store.state);
@@ -99,13 +111,13 @@ function renderStage(app, { canvas, bar, poseBar, pinBar, place, empty, grid }, 
   }
 }
 
-// what floats over the canvas: the selection's bar, the Pose tool's bar, an empty frame's card
 function overlays() {
   const bar = (className, label) =>
     node(className, { role: 'toolbar', 'aria-label': label, hidden: true });
 
   return {
     bar: bar('div.selection-bar', 'Selection'),
+    turnBar: bar('div.layer-turn-bar', 'Turn layers'),
     poseBar: bar('div.pose-bar', 'Pose'),
     pinBar: bar('div.pin-bar', 'Pins'),
     // a phone has no status bar: with its panels shut, nothing said which frame this is
@@ -120,11 +132,11 @@ function overlays() {
 
 export function mountEditStage(container, app) {
   const canvas = node('canvas', { 'aria-label': 'Pixel canvas' });
-  const { bar, poseBar, pinBar, place, empty } = overlays();
+  const { bar, turnBar, poseBar, pinBar, place, empty } = overlays();
   const holder = node('div.canvas-holder', {}, canvas);
   const scroller = node('div.edit-scroll', {}, node('div.stage-inner.edit', {}, holder));
   // beside the scroller, not in it: zoomed in, what floats went off with the canvas
-  const area = node('div.edit-area', {}, scroller, place, bar, poseBar, pinBar, empty);
+  const area = node('div.edit-area', {}, scroller, place, bar, turnBar, poseBar, pinBar, empty);
   const grid = mountGridPanel(app, {
     isShown: () => canvas.isConnected,
     onPlayFrame: () => {
@@ -133,13 +145,16 @@ export function mountEditStage(container, app) {
     },
   });
 
-  container.replaceChildren(node('div.edit-layout', {}, area, grid.el));
+  const layout = node('div.edit-layout', {}, area, grid.el);
+
+  container.replaceChildren(layout);
+  mountGridResizer(layout, grid.el);
   bindPointer(canvas, app, scroller);
   bindWheelZoom(scroller, canvas, app);
   keepFitted(app, scroller, canvas);
   grid.render();
 
-  const parts = { canvas, bar, poseBar, pinBar, place, empty, grid };
+  const parts = { canvas, bar, turnBar, poseBar, pinBar, place, empty, grid };
 
   return { render: (patch = {}) => renderStage(app, parts, patch) };
 }
