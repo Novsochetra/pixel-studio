@@ -46,6 +46,16 @@ await showViews(page, 'All views');
 await page.locator('.grid-row.current .cell-add').click();
 await page.waitForTimeout(300);
 await selectFrame(page, 0);
+// a frame is moved by holding it first, which only a tooltip said, and a finger sees none
+check(
+  (
+    (await page
+      .locator('.toast')
+      .textContent()
+      .catch(() => '')) ?? ''
+  ).includes('hold a frame, then drag it'),
+  'the first frame a finger picks says how to move one',
+);
 const stage = await canvas.boundingBox();
 
 await page.mouse.click(stage.x + stage.width / 2, stage.y + stage.height / 2);

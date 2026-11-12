@@ -28,6 +28,8 @@
   --tint: #0a84ff;
   /* the tint as words and icons on the page: the tint itself is for fills, and too dim to read */
   --tint-text: #5eb0ff;
+  /* the tint under white words: a menu's picked line; the tint itself was too light to read on */
+  --tint-under-words: #0a6ee0;
   --on-tint: #ffffff;
   --tint-quiet: rgb(10 132 255 / 22%);
   --fill-quiet: rgb(118 118 128 / 24%);
@@ -96,6 +98,7 @@
     --label-muted: #6d6d72;
     --tint: #007aff;
     --tint-text: #005fcc;
+    --tint-under-words: #0064d2;
     --tint-quiet: rgb(0 122 255 / 14%);
     --fill-quiet: rgb(118 118 128 / 14%);
     --ok: #248a3d;
@@ -135,6 +138,7 @@
   --label-muted: #6d6d72;
   --tint: #007aff;
   --tint-text: #005fcc;
+  --tint-under-words: #0064d2;
   --tint-quiet: rgb(0 122 255 / 14%);
   --fill-quiet: rgb(118 118 128 / 14%);
   --ok: #248a3d;

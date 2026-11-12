@@ -5,6 +5,8 @@ import { openCellMenu } from './cell-menu.js';
 import { moveFrameTo, toggleFrameHidden } from '../frame-actions.js';
 import { bounds } from '../../model/sprite.js';
 import { viewName } from '../../model/kinds.js';
+import { forHands } from '../platform-keys.js';
+import { tipForFingers } from './frame-tip.js';
 
 const THUMB_SIZE = 52;
 
@@ -142,13 +144,23 @@ export function cell(app, place) {
       tabindex: place.selected ? '0' : '-1',
       'aria-selected': String(place.selected),
       'aria-label': cellName(name, place, empty),
+      // a finger's drag scrolls the frames: it holds a frame a moment first (frame-drag.js)
       title: place.selected
-        ? 'Click for its actions, or drag to move it'
+        ? forHands(
+            'Click for its actions, or drag to move it',
+            'Tap for its actions, or hold it, then drag, to move it',
+          )
         : `Frame ${place.index + 1}`,
-      onclick: (event) =>
-        place.selected
-          ? openCellMenu(app, event.currentTarget, place.direction, place.index)
-          : selectCell(app, place.direction, place.index),
+      onclick: (event) => {
+        if (place.selected) {
+          openCellMenu(app, event.currentTarget, place.direction, place.index);
+
+          return;
+        }
+
+        selectCell(app, place.direction, place.index);
+        tipForFingers();
+      },
       oncontextmenu: (event) => menuAt(app, place, event),
       onkeydown: (event) => onCellKey(app, event, place),
     },

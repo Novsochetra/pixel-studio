@@ -355,7 +355,7 @@
 
 @media (hover: hover) {
   .menu button:not(:disabled):hover {
-    background: var(--tint);
+    background: var(--tint-under-words);
     color: var(--on-tint);
   }
 }
@@ -366,7 +366,7 @@
 
 .menu button:not(:disabled):is(:active, :focus-visible) {
   outline: 0;
-  background: var(--tint);
+  background: var(--tint-under-words);
   color: var(--on-tint);
 }
 
