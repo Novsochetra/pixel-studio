@@ -20,6 +20,7 @@ import { inWords } from '../model/told.js';
 import { listGroup } from './list-group.js';
 import { keepFocus } from './keep-focus.js';
 import { tabSaysChange } from './field-keys.js';
+import { fileSlug } from './file-name.js';
 
 function warn(warnings) {
   if (warnings.length) {
@@ -76,6 +77,15 @@ function presetButtons(state, choice, pick) {
   );
 }
 
+// A game's sheet is named as its manifest names it (idle.png), which the window shows beside it.
+// Any other carries the project's name, as every other download does: idle.png from two
+// projects were told apart by nothing. An icon named for its project is not named twice.
+function sheetFile(project, name, gamePack) {
+  const owner = fileSlug(project.name, 'project');
+
+  return gamePack || name.startsWith(owner) ? `${name}.png` : `${owner}-${name}.png`;
+}
+
 function drawExport(slot, job) {
   const { state, animation, choice, change } = job;
   const { gamePack } = gameOf(state.project);
@@ -84,9 +94,8 @@ function drawExport(slot, job) {
     ...choice.settings,
     includeMirrored: choice.includeMirrored,
   });
+  const filename = sheetFile(state.project, result.name, gamePack);
   const download = async () => {
-    const filename = `${result.name}.png`;
-
     if (await saveFile(filename, await spritePng(result.sheet))) {
       warn(result.warnings.map((warning) => saidWarning(state.project, result, warning)));
     }
@@ -114,7 +123,7 @@ function drawExport(slot, job) {
       'div.sheet-actions',
       {},
       node('button.btn', { onclick: job.close }, 'Close'),
-      node('button.btn.primary', { onclick: download }, `Download ${result.name}.png`),
+      node('button.btn.primary', { onclick: download }, `Download ${filename}`),
     ),
   );
 }

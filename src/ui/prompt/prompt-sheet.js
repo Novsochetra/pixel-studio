@@ -12,6 +12,7 @@ import { drawableDirections } from '../../model/directions.js';
 import { referenceOf } from '../../model/reference.js';
 import { isSingleView, viewName } from '../../model/kinds.js';
 import { forHands, keyNames } from '../platform-keys.js';
+import { fieldRow, listGroup } from '../list-group.js';
 
 // a character asks for another view or the next frame; anything else for the next frame or another
 // of its kind in the same style
@@ -26,7 +27,9 @@ const asksFor = (project) =>
         ['frame', 'An animation frame'],
       ];
 
-function choices(state, ask, redraw) {
+// What is asked for is picked at the window's top; which view, and the frame's pose, are rows
+// under it, as every other window's fields are. `box` is the prompt, which a pose typed changes.
+function choices(state, ask, { redraw, box }) {
   const segmented = node(
     'div.segmented',
     { role: 'group', 'aria-label': 'Ask for' },
@@ -56,7 +59,12 @@ function choices(state, ask, redraw) {
         ),
       );
 
-  return node('div.group', { style: { gap: '8px', flexWrap: 'wrap' } }, views, segmented);
+  const rows = [
+    views ? fieldRow('View', views) : null,
+    ask.task === 'frame' ? poseField(state, ask, box) : null,
+  ].filter(Boolean);
+
+  return [segmented, rows.length ? listGroup({}, rows) : null];
 }
 
 function copyButton(box) {
@@ -98,14 +106,13 @@ function draw(slot, state, ask, { close, redraw }) {
 
   replace(
     slot,
-    choices(state, ask, redraw),
+    choices(state, ask, { redraw, box }),
     node('div', { style: { overflowX: 'auto' } }, viewsToFit(shown, 860)),
     node(
       'p.hint',
       {},
       `Attach the sheet (${sheet.width}×${sheet.height}, ${scale}× pixels) and paste the prompt. Bring the AI's answer back with Image into this frame${forHands(', or drop it on the canvas', '')}.`,
     ),
-    ask.task === 'frame' ? poseField(state, ask, box) : null,
     box,
     node(
       'div.sheet-actions',

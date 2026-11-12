@@ -258,7 +258,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   offers the canvas it keeps its own pixels on (`canvasToKeep`, `import/keep-size.js`): never
   shrunk without a word.
 - A download carries the project's name (`fileSlug(project.name)`), and art with one view names
-  no view in its files (`downloadName`, `viewFileName`).
+  no view in its files (`downloadName`, `viewFileName`). A game's sprite sheet alone is named as
+  the game's manifest names it (`sheetFile` in `export-sheet.js`): the window shows that path
+  beside it.
 - What is typed is checked where it is read: a number is kept to what can be (`wholeNumber`), and
   a message to a person never carries an exception's own words.
 - The bars are drawn again at every change, so the page keeps the keys for someone using them

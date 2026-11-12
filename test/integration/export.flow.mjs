@@ -113,6 +113,10 @@ check(
   !(await page.getByRole('button', { name: 'Naga Eleven game pack' }).count()),
   'there is no game pack without a game',
 );
+check(
+  (await page.getByRole('button', { name: 'Download wall.png', exact: true }).count()) === 1,
+  'and a tile named for its project is not named twice',
+);
 // one animation seen from one side is one GIF: it came in a zip, to be taken out again
 const oneGif = await saved(button('Animated GIFs'), 'wall.gif');
 check(
@@ -130,6 +134,13 @@ await menu(/Sprite sheet/);
 check(
   (await page.locator('.sheet p.hint').first().textContent()).includes('× 8 rows'),
   'a character drawn in all eight directions has a row for each',
+);
+// A game's sheet is named as its manifest names it; any other carries the project's name, as
+// every other download does: idle.png from two projects were told apart by nothing.
+check(
+  (await page.getByRole('button', { name: 'Download compass-idle.png', exact: true }).count()) ===
+    1,
+  'a sheet with no game’s manifest to match carries the project’s name',
 );
 const eight = readZip((await saved(button('Animated GIFs'), 'eight.zip')).path);
 check(Object.values(eight).length === 8 && Object.values(eight).every(isGif), 'and a GIF for each');
