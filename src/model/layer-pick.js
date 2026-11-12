@@ -45,6 +45,10 @@ export function keptPick(picked = [], key) {
   return picked.includes(key) ? picked : [];
 }
 
+// whether the frame still has a layer of art with these gone: it keeps at least one
+export const leavesArt = (frame, keys) =>
+  frame.layers.some((layer) => layer.kind === 'art' && !keys.includes(layer.key));
+
 // every layer of the group that can go, goes: a frame keeps one layer of art
 export function removeLayers(animation, frame, keys) {
   return keys.filter((key) => removeLayer(animation, frame, key));

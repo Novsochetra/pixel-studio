@@ -45,7 +45,8 @@
 .swatch {
   aspect-ratio: 1;
   border-radius: 8px;
-  border: 1px solid rgb(127 127 127 / 35%);
+  /* strong enough to edge the darkest swatch on the dark panel, and the lightest on the light */
+  border: 1px solid rgb(127 127 127 / 55%);
   cursor: pointer;
   padding: 0;
   position: relative;

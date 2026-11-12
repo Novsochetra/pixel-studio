@@ -46,6 +46,8 @@ const GRID_KEYS = [
   'onion',
   'showPins',
   'pinName',
+  // the Pin tool's own controls stand in the frames' bar: they come and go with the tool
+  'tool',
   'layout',
 ];
 

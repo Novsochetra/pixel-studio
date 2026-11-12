@@ -3,7 +3,7 @@ import { previewCanvas } from '../sheet.js';
 import { referenceSprite } from '../actions.js';
 import { cleanImage } from '../../io/cleaner.js';
 import { isPose, referenceOf } from '../../model/reference.js';
-import { placementOf, viewName } from '../../model/kinds.js';
+import { placementOf, standsOn, viewName } from '../../model/kinds.js';
 import { artHeight, reportText } from './import-report.js';
 import { cleanAtViewScale, scaleOf } from './view-scale.js';
 import { keepSizeOffer } from './keep-size.js';
@@ -39,6 +39,7 @@ function showResult(job, result, ref, alone) {
   const refName = viewName(project, referenceOf(project));
   const text = reportText(result.report, {
     place: placementOf(project).place,
+    stands: standsOn(project),
     refHeight: artHeight(ref),
     refName: refName.toLowerCase(),
   });

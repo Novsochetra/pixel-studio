@@ -16,9 +16,11 @@ export function mayLeave(job, foot) {
   }
 
   if (!foot.classList.contains('asking')) {
+    // "Keep" alone could be the changes or the window: the answers say which
     askDelete(foot, {
       question: 'Close without cutting? What you changed here goes.',
-      word: 'Close',
+      word: 'Close without cutting',
+      keep: 'Go on cutting',
       onDelete: () => {
         job.done = true;
         job.close();

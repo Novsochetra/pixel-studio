@@ -180,4 +180,40 @@ check(
   await page.locator('.selection-bar').isVisible(),
   'a selection’s step redone keeps the selection',
 );
+await page.keyboard.press('Escape');
+
+// With every layer of art picked, Delete took all but one, under a step called "Delete 2
+// layers", and the art went with them.
+await openPanel(page, 'Layers');
+await page.getByRole('button', { name: 'New layer', exact: true }).click();
+await page.keyboard.press('Enter');
+const layers = await page.locator('.layer-row').count();
+
+await page
+  .locator('.layer-row')
+  .last()
+  .click({ modifiers: ['Shift'] });
+await page.getByRole('button', { name: `Delete ${layers} layers` }).click();
+check(
+  (await page.locator('.layer-row').count()) === layers &&
+    (await page.locator('.toast').textContent()).includes('nothing was deleted'),
+  'Delete with every layer of art picked deletes none, and says so',
+);
+
+// A message lay over a window's buttons at the screen's foot.
+await page.locator('.status-link').click();
+await page.waitForTimeout(300);
+await page.fill('#canvas-width', '0');
+await page.locator('#canvas-width').press('Enter');
+// once it has risen into place
+await page.waitForTimeout(500);
+const message = await page.locator('.toast').boundingBox();
+const buttons = await page.locator('.sheet .sheet-actions').boundingBox();
+
+check(
+  message.y + message.height <= buttons.y,
+  'a message over a window stands above the window’s buttons',
+);
+await page.keyboard.press('Escape');
+
 await finish();

@@ -22,6 +22,8 @@ function colourUnder(state, { x, y }) {
 }
 
 // where you are, what the art measures, and what is under the pointer
+const coloursSaid = (count) => `${count} colour${count === 1 ? '' : 's'}`;
+
 export function renderStatus(el, app) {
   const { state } = app.store;
   const sprite = directionSprite(state, state.at.direction);
@@ -47,7 +49,7 @@ export function renderStatus(el, app) {
         ? `sprite ${box.right - box.left}×${box.bottom - box.top}, rows ${box.top}–${box.bottom - 1}`
         : 'empty',
     ),
-    node('span', {}, `${colorCounts(sprite).length} colours`),
+    node('span', {}, coloursSaid(colorCounts(sprite).length)),
     node('span', {}, cursor ? `x ${cursor.x}, y ${cursor.y} · ${colourUnder(state, cursor)}` : ''),
     hasKeyboard() ? node('span.status-help', {}, 'Press ? for shortcuts') : null,
   );

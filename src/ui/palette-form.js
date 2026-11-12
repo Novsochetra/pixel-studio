@@ -27,6 +27,20 @@ function fileInput(add) {
   });
 }
 
+const NONE_FOUND = `No colours found. Paste hex codes like ${EXAMPLE_HEX_CODES.split(' ').at(-1)}, or open a .hex, .gpl or image file.`;
+
+// whether there are colours to add: says so when there are none, and takes that back when a
+// later try has some
+function anyFound(colors) {
+  if (!colors.length) {
+    toast(NONE_FOUND);
+  } else {
+    document.querySelector('.toast')?.remove();
+  }
+
+  return colors.length > 0;
+}
+
 // Paste hex codes or open a .hex, .gpl, .txt or palette image; calls onAdd({ id, name, colors }).
 export function paletteForm(onAdd) {
   const name = node('input.input', {
@@ -41,15 +55,9 @@ export function paletteForm(onAdd) {
     'aria-label': 'Hex codes',
   });
   const add = (colors, fallbackName) => {
-    if (!colors.length) {
-      toast(
-        `No colours found. Paste hex codes like ${EXAMPLE_HEX_CODES.split(' ').at(-1)}, or open a .hex, .gpl or image file.`,
-      );
-
-      return;
+    if (anyFound(colors)) {
+      onAdd({ id: newId('p'), name: name.value.trim() || fallbackName, colors });
     }
-
-    onAdd({ id: newId('p'), name: name.value.trim() || fallbackName, colors });
   };
   const file = fileInput(add);
 

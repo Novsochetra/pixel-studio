@@ -1,4 +1,5 @@
 import { leave } from './leave.js';
+import { aboveButtons } from './toast-place.js';
 
 // node('button.btn.primary', { onclick }, 'Save') builds an element; children may be strings,
 // nodes, arrays or null.
@@ -145,6 +146,7 @@ export function toast(message) {
   document.querySelector('.toast')?.remove();
   const el = node('div.toast', { role: 'status' }, message);
   document.body.append(el);
+  aboveButtons(el);
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => leave(el, 'toast-out'), readingTime(String(message)));
 }

@@ -1,6 +1,6 @@
 import { toast } from './dom.js';
 import { commit, currentAnimation, currentLayer, restructure } from './actions.js';
-import { duplicateLayers, mergeLayers, removeLayers } from '../model/layer-pick.js';
+import { duplicateLayers, leavesArt, mergeLayers, removeLayers } from '../model/layer-pick.js';
 import { frameAt } from '../model/project.js';
 
 const frameOf = (state) => frameAt(state.project, state.at);
@@ -44,6 +44,14 @@ function inHandAfter(frame, before) {
 export function deleteGroup(app, group) {
   const keys = group.map((layer) => layer.key);
   let refused = false;
+
+  // Every layer of art picked: none goes. Two of three went and the third stayed, under a step
+  // called "Delete 3 layers", with the art gone and a word about keeping one.
+  if (!leavesArt(frameOf(app.store.state), keys)) {
+    toast('A frame keeps at least one layer of art: nothing was deleted. Use Clear to empty it.');
+
+    return;
+  }
 
   restructure(app, `Delete ${namedGroup(group)}`, (draft) => {
     const frame = frameOf(draft);

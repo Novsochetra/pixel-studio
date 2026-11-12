@@ -144,10 +144,12 @@ check(
   'Fit brings back the zoom that fills the window',
 );
 
+// which pin to place showed only once a pin had been placed, and stayed with the Pencil in hand
 await page.keyboard.press('p');
-await page.mouse.click(...at(80, 40));
 check((await page.locator('#pin-name').count()) === 1, 'the pin tool offers which pin to place');
+await page.mouse.click(...at(80, 40));
 await page.keyboard.press('b');
+check((await page.locator('#pin-name').count()) === 0, 'and the offer goes with the tool');
 
 const zoomBefore = await page.locator('.zoom-label').textContent();
 await page.mouse.move(art.x + 100, art.y + 100);

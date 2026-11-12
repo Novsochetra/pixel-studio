@@ -39,9 +39,10 @@ function matchLine(report, refHeight, refName) {
 }
 
 // what the cleaner did, in a few lines: the grid it found, how it sized the art, where it stands
-export function reportText(report, { place, refHeight, refName }) {
+// `stands`: what the art stands on, said as its kind has it: a figure's feet, a chest's base
+export function reportText(report, { place, refHeight, refName, stands = 'feet' }) {
   const size = `${report.size[0]} × ${report.size[1]} px`;
-  const where = place === 'feet' ? `, feet on row ${report.feetRow}` : '';
+  const where = place === 'feet' ? `, ${stands} on row ${report.feetRow}` : '';
 
   return [
     `Grid: one art pixel = ${cellText(report.cell)} of the image`,

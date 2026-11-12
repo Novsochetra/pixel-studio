@@ -15,7 +15,7 @@ import { buildSheet } from '../export/sheet.js';
 import { spritePng } from '../io/images.js';
 import { gameOf } from '../model/presets.js';
 import { mirrorsOf } from '../model/directions.js';
-import { placementOf } from '../model/kinds.js';
+import { placementOf, standsOn } from '../model/kinds.js';
 import { inWords } from '../model/told.js';
 import { listGroup } from './list-group.js';
 import { keepFocus } from './keep-focus.js';
@@ -45,7 +45,9 @@ function startingChoice(state) {
 }
 
 function frameFields(state, choice, { set, toggle }) {
-  const anchor = placementOf(state.project).place === 'feet' ? 'Feet' : 'Anchor';
+  // a chest has no feet: where it stands is its base
+  const stands = standsOn(state.project) === 'feet' ? 'Feet' : 'Base';
+  const anchor = placementOf(state.project).place === 'feet' ? stands : 'Anchor';
   const { settings } = choice;
   const fields = [
     ['Frame width', 'frameWidth', 'frame-width'],

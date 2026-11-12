@@ -3,7 +3,7 @@ import { node } from './dom.js';
 // What undo cannot bring back (a folder, a version, a preset, a project) asks before it goes, the
 // same way everywhere: where the thing stood, a question with the word that does it and Keep.
 // Keep, or Esc, puts back what was there.
-export function askDelete(place, { question, word = 'Delete', onDelete }) {
+export function askDelete(place, { question, word = 'Delete', keep: stay = 'Keep', onDelete }) {
   const was = [...place.childNodes];
   const keep = () => {
     place.classList.remove('asking');
@@ -18,7 +18,7 @@ export function askDelete(place, { question, word = 'Delete', onDelete }) {
       'span.ask-answers',
       {},
       node('button.btn.danger', { onclick: onDelete }, word),
-      node('button.btn', { onclick: keep }, 'Keep'),
+      node('button.btn', { onclick: keep }, stay),
     ),
   );
   place.onkeydown = (event) => {

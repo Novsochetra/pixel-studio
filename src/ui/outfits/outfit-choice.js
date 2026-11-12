@@ -128,7 +128,7 @@ function keepButton(app, choice, onChange) {
     project.outfits.push(outfit);
     changeStructure(app, 'parts');
     onChange({ source: 'outfit', outfit: outfit.id });
-    toast(`Kept as "${outfit.name}". Rename it in the parts list below.`);
+    toast(`Kept as "${outfit.name}". Rename it under "Which colours are which part".`);
   };
 
   const nothing = !Object.keys(choice.custom ?? {}).length;

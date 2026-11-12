@@ -95,8 +95,8 @@ check(
   (await page.locator('.sheet .ask-question').count()) === 1,
   'closing the cut window on corrections asks first',
 );
-await page.getByRole('button', { name: 'Keep', exact: true }).click();
-check((await page.locator('.cut-part').count()) === 13, 'and Keep goes on with them');
+await page.getByRole('button', { name: 'Go on cutting', exact: true }).click();
+check((await page.locator('.cut-part').count()) === 13, 'and Go on cutting goes on with them');
 await page.getByRole('button', { name: 'Guess again' }).click();
 check((await head.locator('.cut-size').textContent()) === headSize, 'Guess again starts over');
 await page.locator('.sheet').getByRole('button', { name: 'Cut into 13 parts' }).click();

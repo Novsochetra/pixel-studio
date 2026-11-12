@@ -87,6 +87,9 @@ export function kindOf(project) {
 // pins and body parts are a character's: a chest, a tile or an icon has no head or hands
 export const hasBody = (project) => Boolean(kindOf(project).body);
 
+// what art that stands on the ground stands on: a figure's feet, a chest's or a tree's base
+export const standsOn = (project) => (hasBody(project) ? 'feet' : 'base');
+
 export function isSingleView(project) {
   return Boolean(kindOf(project).view);
 }

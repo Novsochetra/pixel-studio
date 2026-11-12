@@ -46,6 +46,7 @@ function angleControls(app, piece, pose) {
       { title: 'How far the part is turned, in degrees' },
       node('input.input.mono', {
         id: 'pose-angle',
+        'aria-label': `Angle of ${piece.name}`,
         type: 'number',
         step: '1',
         value: String(angle),
