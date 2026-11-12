@@ -353,9 +353,11 @@
 }
 
 /* a window comes up from the bottom edge, as wide as the screen, within the thumb's reach */
+/* above the on-screen keyboard while it is up (keyboard-room.js): at the screen's foot, under
+   the keys, a field was typed into unseen */
 :root[data-layout='compact'] :is(.sheet-backdrop, .sheet-backdrop-out) {
   place-items: end stretch;
-  padding: max(28px, env(safe-area-inset-top, 0px)) 0 0;
+  padding: max(28px, env(safe-area-inset-top, 0px)) 0 var(--keyboard, 0px);
 }
 
 :root[data-layout='compact'] :is(.sheet, .sheet-out) {

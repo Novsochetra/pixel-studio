@@ -143,6 +143,10 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   a picture (`pinch.js`), and drawn again once, at the whole zoom nearest, when they let go:
   nothing in the store changes at a finger's move, as drawing the stage each time lagged. A tool that acts at a press (Fill, Replace colour)
   acts as the pointer lets go (`onRelease`), so the first finger of a pinch fills nothing.
+- The on-screen keyboard lies over the screen's foot and tells the page only how much of it is
+  still in sight: what it covers is `--keyboard` on the root (`keyboard-room.js`), and a window
+  at the screen's foot stands above it. No test can raise real keys: `phone-turned.flow.mjs`
+  shortens the part of the page in sight as they would.
 - A finger has no pointer to hover and no keys: a control's meaning cannot live only in a tooltip
   or a shortcut. What Shift or Alt does to a tool has a control too (Even shapes and Darker shades
   in Brush; Add, Take away and Everywhere on the selection's bar; Pick several in Layers), and what a tool says when it

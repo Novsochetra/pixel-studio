@@ -93,4 +93,33 @@ check(
   'a window cancelled after making the canvas larger puts the canvas back',
 );
 
+// The on-screen keyboard lies over the screen's foot, where a window on a phone stands: its
+// field was typed into unseen. No test can raise real keys, so the part of the page in sight
+// is made as short as they leave it, as the browser tells it.
+const keys = (height) =>
+  page.evaluate((shown) => {
+    const viewport = window.visualViewport;
+
+    Object.defineProperty(viewport, 'height', { get: () => shown, configurable: true });
+    viewport.dispatchEvent(new window.Event('resize'));
+  }, height);
+const screen = page.viewportSize().height;
+
+await page.locator('#canvas-width').focus();
+await keys(screen - 320);
+await page.waitForTimeout(300);
+const lifted = await box('.sheet');
+const field = await box('#canvas-width');
+
+check(
+  lifted.y + lifted.height <= screen - 320 + 1 && field.y + field.height <= screen - 320,
+  `with the keys up, a window and the field typed in stand above them (${Math.round(lifted.y + lifted.height)} of ${screen - 320})`,
+);
+await page.screenshot({ path: `${shots}/phone-keys-up.png` });
+await keys(screen);
+await page.waitForTimeout(300);
+const back = await box('.sheet');
+
+check(back.y + back.height >= screen - 1, 'and it goes back to the screen’s foot as they go');
+
 await finish();
