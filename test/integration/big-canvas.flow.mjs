@@ -104,10 +104,11 @@ await page.mouse.move(fitted.x + 60.25, fitted.y + 100.25, { steps: 4 });
 await page.mouse.up();
 const drawnAtHalf = await page.locator('#statusbar').textContent();
 
-// the stroke before spans columns 176 to 336 and rows 216 to 276; this one, columns 100 to 120
-// of row 200
+// The stroke before spans columns 176 to 336 and rows 216 to 276; this one, columns 100 to 120
+// of row 200. At a half an art pixel is half a pixel of the screen, and a pointer is told to the
+// whole pixel in some browsers: one art pixel either way is the same place.
 check(
-  drawnAtHalf.includes('sprite 237×77'),
+  /sprite 23[678]×7[67]\b/.test(drawnAtHalf),
   `and a stroke drawn at a half lands on the pixels under the pointer (${drawnAtHalf.match(/sprite [^,]*/)?.[0]})`,
 );
 await page.keyboard.press('+');
