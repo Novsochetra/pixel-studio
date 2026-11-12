@@ -239,7 +239,16 @@ check(
 
 await page.setViewportSize({ width: 390, height: 844 });
 await page.waitForTimeout(300);
-await poseBar.getByRole('button', { name: 'Edit the cut…' }).click();
+const phoneBar = await poseBar.evaluate((bar) => ({
+  scroll: bar.scrollWidth,
+  shown: bar.clientWidth,
+}));
+check(
+  phoneBar.scroll <= phoneBar.shown * 1.5,
+  `on a phone the Pose bar keeps to about the screen’s width (${phoneBar.scroll} of ${phoneBar.shown}px)`,
+);
+await poseBar.getByRole('button', { name: 'More for the pose' }).click();
+await page.getByRole('menuitem', { name: 'Edit the cut…' }).click();
 await page.waitForTimeout(300);
 check(
   await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),

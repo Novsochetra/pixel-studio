@@ -205,25 +205,29 @@
   }
 
   .cut-part {
-    grid-template-columns: 36px minmax(0, 1fr) repeat(3, 36px);
+    grid-template-columns: 40px minmax(0, 1fr) repeat(3, 40px);
   }
 
   /* one line a part where the window is wide enough for it; narrower, a part keeps the two
      lines 87-body.css gives it */
   @media (min-width: 861px) {
     .cut-part {
-      grid-template-columns: 36px minmax(0, 1fr) minmax(0, 1.2fr) 44px repeat(3, 36px);
+      grid-template-columns: 40px minmax(0, 1fr) minmax(0, 1.2fr) 44px repeat(3, 40px);
     }
   }
 
   .cut-part .btn {
-    min-width: 36px;
-    height: 36px;
+    min-width: 40px;
+    height: 40px;
   }
 
   .cut-swatch {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .cut-size {
+    font-size: 12px;
   }
 
   /* a tablet held wide has the desk's layout and a finger's reach */

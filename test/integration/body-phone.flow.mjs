@@ -46,6 +46,18 @@ check(
     (await page.locator('.cut-brush').getByRole('button', { name: 'Unpaint' }).isVisible()),
   'and the brush’s controls are a row a finger can use',
 );
+const small = await page
+  .locator('.cut-part')
+  .first()
+  .evaluate((part) =>
+    [...part.querySelectorAll('button, select')]
+      .map((control) => control.getBoundingClientRect())
+      .filter((box) => box.width < 40 || box.height < 40),
+  );
+check(
+  small.length === 0,
+  `a part’s colour and buttons are a finger’s size (${small.length} smaller)`,
+);
 
 // A second finger landing in the middle of a stroke painted with it too: two fingers set down
 // to zoom left two smears. It takes the stroke back, as on the editor's canvas.

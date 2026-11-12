@@ -5,6 +5,7 @@ import { tidyAngle } from '../../model/body/handle.js';
 import { viewName } from '../../model/kinds.js';
 import { openCutSheet } from './cut-sheet.js';
 import { drawsOnPart } from './part-draw.js';
+import { poseMore } from './pose-more.js';
 import { poseHere, poseTarget, resetPose, setPart, turnIntoPixels } from './pose-actions.js';
 
 const STEP = 15;
@@ -59,7 +60,6 @@ function angleControls(app, piece, pose) {
       { 'aria-label': `Turn ${piece.name} ${STEP}° right`, onclick: () => turnTo(angle + STEP) },
       icon('turn-right'),
     ),
-    button('Reset part', () => setPart(app, piece, null), `${piece.name} back as it was cut`),
     button(
       'Draw on part',
       () => app.store.set({ tool: 'pencil', at: onBody(app) }),
@@ -85,14 +85,27 @@ function drawingBar(app, target) {
   ];
 }
 
+const resetPart = (app, piece) =>
+  button('Reset part', () => setPart(app, piece, null), `${piece.name} back as it was cut`);
+
 function posedBar(app, target) {
   const picked = pieceById(target.rig, app.store.state.piece);
+  const controls = picked
+    ? angleControls(app, picked, target.body.pose)
+    : [node('span.hint', {}, 'Drag a part to move it; its handle turns it.')];
+
+  if (app.store.state.layout === 'compact') {
+    return [
+      partPicker(app, target.rig, picked),
+      ...(picked ? controls : []),
+      poseMore(app, picked),
+    ];
+  }
 
   return [
     partPicker(app, target.rig, picked),
-    picked
-      ? angleControls(app, picked, target.body.pose)
-      : node('span.hint', {}, 'Drag a part to move it; its handle turns it.'),
+    ...controls,
+    picked ? resetPart(app, picked) : null,
     node('span.pose-gap'),
     button('Reset pose', () => resetPose(app), 'Every part back as it was cut'),
     button('Turn into pixels', () => turnIntoPixels(app), 'Paint on this frame by hand'),
