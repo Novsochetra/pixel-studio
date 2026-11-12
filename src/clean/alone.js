@@ -15,7 +15,9 @@ function factors(own, canvas, options, cell) {
 
   const [sx, sy] = cell;
   const room = options.place === 'centre' ? canvas.height - 2 : groundRow(canvas, options) - 4;
-  const byHeight = (options.height || Math.min(tall, room)) / tall;
+  // a height asked for is kept to the room too: taller than the canvas, the art was placed with
+  // its head above the canvas's top, and cut off there
+  const byHeight = Math.min(options.height || tall, room) / tall;
   const byWidth = (canvas.width - 2) / (wide * (sx / sy));
   const fy = Math.min(byHeight, byWidth);
 
@@ -99,7 +101,11 @@ export function cleanAlone(imageData, canvas, options = {}) {
   const unchanged = Math.abs(scaleBy.fy - 1) <= 1e-9 && Math.abs(scaleBy.fx - 1) <= 0.01;
   const sprite = unchanged ? analyzed : scaled(analyzed, own, scaleBy, options.place === 'fill');
   const placed = place(sprite, canvas, options);
-  const drawn = { drawnHeight: own.bottom - own.top, drawnWidth: own.right - own.left };
+  const drawn = {
+    drawnHeight: own.bottom - own.top,
+    drawnWidth: own.right - own.left,
+    wantedHeight: options.height || own.bottom - own.top,
+  };
   const scaledBy = unchanged ? null : { ...scaleBy, ...drawn };
 
   return { ...placed, report: report(analyzed, placed, scaledBy) };

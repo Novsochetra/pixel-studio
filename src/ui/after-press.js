@@ -30,12 +30,23 @@ const TYPED_IN = 'input:not([type="checkbox"], [type="radio"], [type="range"]), 
 
 const nameOf = (control) => control.getAttribute('aria-label') ?? control.textContent.trim();
 
+// The control drawn in its place is found by its id first: by where the press was, a window
+// whose rows had moved handed the press to the field below, and a height typed went into the
+// anchor's field, as fields with no name of their own all looked the same.
+function standingIn(old, click) {
+  if (old?.id) {
+    return document.getElementById(old.id);
+  }
+
+  return document.elementFromPoint(click.clientX, click.clientY)?.closest(CONTROL);
+}
+
 // The control the click was for may have been drawn again by the change, with what it does made
 // anew from the new value: the click goes to the one now standing in its place. Left to the old
 // one, a typed frame width followed by Download would download at the width before.
 function passOn(click) {
   const old = click.target.closest?.(CONTROL);
-  const now = document.elementFromPoint(click.clientX, click.clientY)?.closest(CONTROL);
+  const now = standingIn(old, click);
   const same = old && now && now.tagName === old.tagName && nameOf(now) === nameOf(old);
 
   if (old && !old.isConnected && same) {

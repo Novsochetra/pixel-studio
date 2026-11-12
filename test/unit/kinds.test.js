@@ -38,7 +38,24 @@ test('a one-view kind names its view after itself, a character after the directi
   assert.equal(viewName(tile, 'south'), 'Tile');
   assert.equal(viewName(hero, 'east'), 'Side');
   assert.deepEqual(placementOf(tile), { place: 'fill', ground: null });
-  assert.deepEqual(placementOf(hero), { place: 'feet', ground: 0.8 });
+  assert.equal(placementOf(hero).place, 'feet');
+  assert.equal(
+    Math.round(hero.canvas.height * placementOf(hero).ground),
+    hero.guides.find((guide) => guide.rule === 'bottom').row,
+    'a character stands on its Feet guide',
+  );
+});
+
+// a canvas made taller moved the Feet guide, and cleaned art still stood on the old share of the
+// height: above its feet
+test('art stands on the Feet guide where the guide is, not on the kind’s share', () => {
+  const hero = newProject({ kind: 'character', width: 128, height: 128 });
+
+  hero.guides.find((guide) => guide.rule === 'bottom').row = 115;
+  assert.equal(Math.round(hero.canvas.height * placementOf(hero).ground), 115);
+
+  hero.guides = [];
+  assert.equal(placementOf(hero).ground, 0.8, 'with no such guide the kind’s own share');
 });
 
 test('a one-view kind cannot be given directions', () => {

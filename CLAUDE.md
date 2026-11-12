@@ -284,7 +284,12 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   a move draws, so it says the same on a slow machine.
 - A picture cleaned onto a canvas too small for it is made smaller, and the window says so and
   offers the canvas it keeps its own pixels on (`canvasToKeep`, `import/keep-size.js`): never
-  shrunk without a word.
+  shrunk without a word. A height typed is kept to the room the canvas has, and offered the
+  canvas it needs, the same way. Art stands on the guide that marks its bottom (Feet, Ground)
+  wherever that guide is (`placementOf`), not on the kind's share of the height.
+- An icon's or an effect's sprite sheet frame is its canvas, the art where it was drawn ("The
+  canvas" in the sheet's sizes): fitted to the art, its frame came out odd sizes, off centre.
+- A run of arrow-key nudges of layers with Move is one step to undo, as a selection's is.
 - A download carries the project's name (`fileSlug(project.name)`), and art with one view names
   no view in its files (`downloadName`, `viewFileName`). A game's sprite sheet alone is named as
   the game's manifest names it (`sheetFile` in `export-sheet.js`): the window shows that path

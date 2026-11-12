@@ -81,12 +81,28 @@ export function togglePickToMove(app, key) {
   pickToMove(app, layer, picked);
 }
 
+const SAME_RUN_MS = 1000;
+
+// Key after key, the layers nudged are one move to undo, as a selection's nudges are: three
+// presses were three steps back. A run is of the same layers.
 export function shiftPickedLayers(app, shift) {
   const layers = shownLayers(app);
+  const keys = layers.map((layer) => layer.key).join();
+  const last = app.layersNudged ?? { keys: null, at: -Infinity };
+  const inRun = last.keys === keys && performance.now() - last.at < SAME_RUN_MS;
+  const steps = app.history.done.length;
 
-  if (layers.length) {
-    moveLayers(app, layers, shift);
+  if (!layers.length) {
+    return;
   }
+
+  moveLayers(app, layers, shift);
+
+  if (inRun && app.history.done.length > steps) {
+    app.history.joinLast();
+  }
+
+  app.layersNudged = { keys, at: performance.now() };
 }
 
 // the layers are drawn moved during the drag, and really move when they are let go

@@ -6,12 +6,17 @@ const upTo = (size) => Math.ceil(size / STEP) * STEP;
 
 // the room a cleaned picture is given: its feet stand on the ground line with four rows of air
 // over its head, or it keeps a pixel of margin all round (clean/alone.js)
-function roomFor({ drawnWidth, drawnHeight }, [sx, sy], { place, ground }) {
-  const tall =
-    place === 'centre' ? drawnHeight + 2 : Math.ceil((drawnHeight + 4) / (ground ?? 0.8));
+function roomFor({ drawnWidth, drawnHeight, wantedHeight }, [sx, sy], { place, ground }) {
+  const height = wantedHeight ?? drawnHeight;
+  const wide = drawnWidth * (height / drawnHeight);
+  const tall = place === 'centre' ? height + 2 : Math.ceil((height + 4) / (ground ?? 0.8));
 
-  return { width: Math.ceil(drawnWidth * (sx / sy)) + 2, height: tall };
+  return { width: Math.ceil(wide * (sx / sy)) + 2, height: tall };
 }
+
+// whether the art came out smaller than it was meant to be: its own height, or one asked for
+const madeSmaller = ({ fy, drawnHeight, wantedHeight }) =>
+  fy * drawnHeight < (wantedHeight ?? drawnHeight) - 0.5;
 
 // The canvas on which a picture made smaller to fit would keep its own pixel size: null when it
 // kept it, when it fills the canvas as a tile does, or when no canvas is that large. A square
@@ -19,7 +24,7 @@ function roomFor({ drawnWidth, drawnHeight }, [sx, sy], { place, ground }) {
 export function canvasToKeep(report, canvas, placement) {
   const { scaled, cell } = report;
 
-  if (placement.place === 'fill' || !scaled?.drawnWidth || scaled.fy >= 1) {
+  if (placement.place === 'fill' || !scaled?.drawnWidth || !madeSmaller(scaled)) {
     return null;
   }
 

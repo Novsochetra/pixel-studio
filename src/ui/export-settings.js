@@ -53,12 +53,15 @@ export function sane(settings) {
   };
 }
 
-// "Fit the art" (for a tile, the tile itself), the game's own frame when it has one, or custom
+const FIT_NAMES = { fill: 'The tile', centre: 'The canvas' };
+
+// "Fit the art" (for a tile or an icon, the canvas itself), the game's own frame when it has one,
+// or custom
 export function presetsFor(project) {
   const frame = gameOf(project).frame;
 
   return [
-    ['fit', placementOf(project).place === 'fill' ? 'The tile' : 'Fit the art'],
+    ['fit', FIT_NAMES[placementOf(project).place] ?? 'Fit the art'],
     ...(frame ? [['game', frame.label]] : []),
     ['custom', 'Custom'],
   ];
@@ -77,6 +80,18 @@ export function presetSettings(state, preset) {
 
   if (placementOf(state.project).place === 'fill') {
     return { frameWidth: width, frameHeight: height, anchorX: 0, anchorY: 0, artAnchor: anchor };
+  }
+
+  // An icon or an effect is the canvas it is drawn on, its art where it was drawn: fitted to the
+  // art, a full icon came out 35×34, off its middle, and a small one 31×16.
+  if (placementOf(state.project).place === 'centre') {
+    return {
+      frameWidth: width,
+      frameHeight: height,
+      anchorX: anchor.x,
+      anchorY: anchor.y,
+      artAnchor: anchor,
+    };
   }
 
   return { ...fittedFrame(state.project, state.project.animations, anchor), artAnchor: anchor };

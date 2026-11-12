@@ -87,7 +87,8 @@
    bar never lies over the art's first rows; a short one gives that room to the art. */
 @media (min-height: 800px) {
   :root:not([data-layout='compact']) .stage-inner.edit {
-    padding-top: 56px;
+    /* a bar's 50px under its 12px of air: at 56 its foot lay on the art's first row */
+    padding-top: 64px;
   }
 }
 
@@ -226,30 +227,43 @@
   flex: none;
 }
 
+/* The selection's bar is one row at any height too: the Lasso's, with Add and Take away, went
+   to two rows on a tablet held wide and lay over the art's first rows, under the band kept for
+   one. */
+:root:not([data-layout='compact']) .selection-bar {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+:root:not([data-layout='compact']) .selection-bar > * {
+  flex: none;
+}
+
+/* Done stays in sight at the row's end, whatever is scrolled under it; its ground and what
+   covers the bar's padding beside it are for a row that scrolls, as on a phone */
+:root:not([data-layout='compact']) .selection-end {
+  position: sticky;
+  right: 0;
+  margin-left: auto;
+  padding-left: 4px;
+}
+
+:root:not([data-layout='compact'])
+  .selection-bar:is([data-more='true'], [data-before='true'])
+  .selection-end {
+  background: var(--material-ground);
+}
+
+:root:not([data-layout='compact']) .selection-bar[data-more='true'] .selection-end {
+  box-shadow: 6px 0 0 var(--material-ground);
+}
+
 @media (max-height: 799px) {
-  :root:not([data-layout='compact']) .selection-bar {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  :root:not([data-layout='compact']) .selection-bar > * {
-    flex: none;
-  }
-
   :root:not([data-layout='compact']) .selection-bar[data-side='bottom'] {
     --rise-from: -50% 10px;
 
     top: auto;
     bottom: 12px;
-  }
-
-  /* Done stays in sight at the row's end, whatever is scrolled under it */
-  :root:not([data-layout='compact']) .selection-end {
-    position: sticky;
-    right: 0;
-    margin-left: auto;
-    padding-left: 4px;
-    background: var(--material-ground);
   }
 }

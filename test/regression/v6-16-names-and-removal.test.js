@@ -104,3 +104,24 @@ test('a run of moves of one layer is one step to undo', async () => {
     'and one undo puts the layer back where the run began',
   );
 });
+
+// "Fit the art" made a full 32 pixel icon a 35×34 frame, its art off the middle, and an icon
+// with a few pixels near its top a 31×16 one
+test('an icon’s sprite sheet frame is its canvas, the art where it was drawn', async () => {
+  const { presetSettings, presetsFor } = await import('../../src/ui/export-settings.js');
+  const { setPixel, pack } = await import('../../src/model/sprite.js');
+  const project = newProject({ kind: 'icon', width: 32, height: 32 });
+  const sprite = project.animations[0].directions.south.frames[0].layers[0].sprite;
+
+  setPixel(sprite, 10, 2, pack(255, 0, 0));
+  setPixel(sprite, 11, 2, pack(255, 0, 0));
+
+  const settings = presetSettings({ project }, 'fit');
+
+  assert.deepEqual(
+    [settings.frameWidth, settings.frameHeight, settings.anchorX, settings.anchorY],
+    [32, 32, 16, 16],
+  );
+  assert.deepEqual(settings.artAnchor, { x: 16, y: 16 }, 'every pixel lands where it was drawn');
+  assert.equal(presetsFor(project)[0][1], 'The canvas');
+});

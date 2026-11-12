@@ -116,6 +116,38 @@ if (await done.isVisible()) {
   await done.tap();
 }
 
+// The Lasso's bar, with Add and Take away, went to two rows held wide and lay over the art's
+// first rows: one row, over the band kept for it.
+await page.getByRole('button', { name: 'Fit', exact: true }).tap();
+await page.waitForTimeout(400);
+await page.locator('#rail').getByRole('button', { name: 'Lasso', exact: true }).tap();
+await page.waitForTimeout(300);
+await touch('touchStart', [await at(2, 2)]);
+
+for (const [x, y] of [
+  [8, 2],
+  [14, 2],
+  [14, 6],
+  [14, 9],
+  [8, 9],
+  [2, 9],
+  [2, 5],
+  [2, 3],
+]) {
+  await touch('touchMove', [await at(x, y)]);
+}
+
+await touch('touchEnd', []);
+await page.waitForTimeout(500);
+const lasso = await page.locator('.selection-bar').boundingBox();
+const top = (await canvas.boundingBox()).y;
+
+check(
+  lasso.height <= 56 && lasso.y + lasso.height <= top + 1,
+  `held wide, the Lasso’s bar is one row, clear of the art (${Math.round(lasso.height)} tall, foot ${Math.round(lasso.y + lasso.height)} over ${Math.round(top)})`,
+);
+await page.locator('.selection-bar').getByRole('button', { name: 'Done' }).tap();
+await page.waitForTimeout(300);
 await page.locator('.cell-add').tap();
 await page.waitForTimeout(400);
 const card = await page.locator('.empty-frame').boundingBox();

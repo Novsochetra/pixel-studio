@@ -61,3 +61,17 @@ test('a later frame keeps its own height instead of taking the reference pose', 
   assert.equal(own.report.scaled?.fy ?? 1, 1);
   assert.equal(kept.bottom, matched.bottom, 'both stand on the same feet row');
 });
+
+// a height typed taller than the canvas has room for put the art's head above the canvas's top
+test('a height asked for is kept to the room the canvas has, and says so', () => {
+  const cleaned = cleanAlone(
+    side,
+    { width: 64, height: 64 },
+    { place: 'feet', ground: 0.8, height: 100 },
+  );
+  const box = boxOf(cleaned);
+
+  assert.ok(box.top >= 0 && box.bottom - 1 === 51, 'whole, feet on the line');
+  assert.equal(cleaned.report.scaled.wantedHeight, 100);
+  assert.ok(box.bottom - box.top <= 47);
+});

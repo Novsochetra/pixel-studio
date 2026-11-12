@@ -60,7 +60,8 @@ export function optionFields({ matching, keepScale, onChange, onEnter }) {
     'aria-label': 'Height in art pixels',
   });
   const cell = node('input.input.mono', {
-    placeholder: 'Auto, or 7.18x9.19',
+    // an example, not a value found: beside a report of the grid it read as the one detected
+    placeholder: 'Auto (or e.g. 6x6)',
     id: 'import-cell',
     'aria-label': 'Grid size',
   });

@@ -56,3 +56,25 @@ test('a tile fills its canvas, and art larger than any canvas has none to offer'
   assert.equal(canvasToKeep(report(100, 100), canvas, { place: 'fill' }), null);
   assert.equal(canvasToKeep(report(100, 500), canvas, FEET), null);
 });
+
+test('a height asked for that did not fit is offered the canvas it needs', () => {
+  const asked = {
+    cell: [1, 1],
+    scaled: { fy: 0.48, drawnHeight: 98, drawnWidth: 40, wantedHeight: 60 },
+  };
+  const size = canvasToKeep(asked, { width: 64, height: 64 }, { place: 'feet', ground: 0.8 });
+
+  assert.ok(
+    size && size.height >= Math.ceil(64 / 0.8),
+    `room for 60 rows over the feet (${size?.height})`,
+  );
+  assert.equal(
+    canvasToKeep(
+      { ...asked, scaled: { ...asked.scaled, fy: 30 / 98, wantedHeight: 30 } },
+      { width: 64, height: 64 },
+      { place: 'feet', ground: 0.8 },
+    ),
+    null,
+    'one that fitted is offered nothing',
+  );
+});

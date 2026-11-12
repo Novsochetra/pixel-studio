@@ -16,7 +16,9 @@ export function projectFileText(project) {
   return JSON.stringify({ kind: 'pixel-clean-studio', version: 1, project: copy, pngs });
 }
 
-const NOT_A_PROJECT = 'This is not a Pixel Clean Studio project file.';
+// a picture opened here as a project was only said not to be one: where pictures go is said too
+const NOT_A_PROJECT =
+  'This is not a Pixel Clean Studio project file. To bring in a picture, drop it on the canvas or use "Image into this frame…" in a frame’s menu.';
 
 // the file as an object, or null when it is not JSON at all
 function parsed(text) {

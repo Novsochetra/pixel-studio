@@ -94,11 +94,21 @@ export function isSingleView(project) {
   return Boolean(kindOf(project).view);
 }
 
+// The line art stands on: the guide that marks the art's bottom (Feet, Ground). The kind's own
+// share of the height was used before, and a canvas made taller moved the guide but not the
+// line: cleaned art floated above its feet.
+function groundOf(project, kind) {
+  const line = project.guides?.find((guide) => guide.rule === 'bottom');
+  const { height } = project.canvas ?? {};
+
+  return line && height && line.row < height ? line.row / height : (kind.ground ?? null);
+}
+
 // where a new picture stands when there is nothing to match it to
 export function placementOf(project) {
   const kind = kindOf(project);
 
-  return { place: kind.place, ground: kind.ground ?? null };
+  return { place: kind.place, ground: kind.place === 'feet' ? groundOf(project, kind) : null };
 }
 
 // a view's name: its direction for a character ("Side"), the kind's own name for the rest ("Tile")
