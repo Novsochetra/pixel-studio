@@ -16,7 +16,7 @@ function initialize({ protocolVersion }) {
     capabilities: { tools: {} },
     serverInfo: SERVER,
     instructions:
-      'Tools for Pixel Clean Studio project files (.json, written by the studio’s "Save as file" and opened by "Open a project file…"). Start with describe_project; read_frame before and after set_pixels.',
+      'Tools for Pixel Clean Studio project files (.json, written by the studio’s "Save project file" and opened by "Open a project file…"). Start with describe_project; read_frame before and after set_pixels.',
   };
 }
 

@@ -61,6 +61,23 @@
   background: var(--separator);
 }
 
+/* a row that holds controls of its own (Swap colours' starters, its palette form): they take
+   the row's width, and wrap */
+.list-row.holds-controls {
+  display: block;
+  padding-block: 10px;
+}
+
+.list-row.holds-controls > * {
+  width: 100%;
+}
+
+.list-row.holds-controls > .start-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .list-label {
   flex: none;
 }
@@ -256,4 +273,17 @@
 /* a phone's sheet is the raised colour itself: there the rows are a quiet fill */
 :root[data-layout='compact'] .inspector .list-rows {
   background: var(--fill-quiet);
+}
+
+/* the canvas size window's picture of the frame on the canvas asked for */
+.list-row.size-shown {
+  justify-content: center;
+  padding-block: 10px;
+}
+
+.size-preview canvas {
+  display: block;
+  max-width: 100%;
+  border-radius: 4px;
+  image-rendering: pixelated;
 }

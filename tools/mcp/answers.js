@@ -20,7 +20,7 @@ export const WHERE = {
 
 export const PATH = {
   type: 'string',
-  description: 'Path of the project file, as the studio’s "Save as file" writes it (.json).',
+  description: 'Path of the project file, as the studio’s "Save project file" writes it (.json).',
 };
 
 export const schema = (properties, required = ['path']) => ({

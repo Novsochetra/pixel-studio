@@ -6,6 +6,7 @@ import { allArtLayers } from './actions.js';
 import { recolourLayers } from './body/recolour.js';
 import { characterColors } from './character-colours.js';
 import { mappingRows } from './swap/swap-mapping.js';
+import { paletteStart } from './swap/swap-start.js';
 import { swapSaid } from './swap/swap-said.js';
 import {
   addPalette,
@@ -17,9 +18,6 @@ import {
 } from './swap/swap-parts.js';
 import { frameAt } from '../model/project.js';
 import { suggestMapping } from '../palette/palette.js';
-
-const NO_PALETTE =
-  "Add the palette you want to use: paste its hex codes or open a palette file, pick a starter below, or make one from 8 of the art's own colours.";
 
 function layersFor(state, scope) {
   return scope === 'view'
@@ -122,6 +120,7 @@ function drawMapping(job, palette) {
       {},
       node('summary', {}, 'Add another palette'),
       addPalette(job),
+      node('div.hint', {}, 'Or start from one of these'),
       starterPalettes(job),
     ),
     applyButtons(job, mapping),
@@ -158,11 +157,7 @@ export function openSwapSheet(app) {
 
     replace(
       slot,
-      node('p.hint', {}, NO_PALETTE),
-      addPalette(job),
-      starterPalettes(job),
-      // in a row of its own, at its own width: alone in the window's column it was a bar across it
-      node('div.group', {}, reduceButton(job)),
+      paletteStart(job),
       node('div.sheet-actions', {}, node('button.btn', { onclick: job.close }, 'Close')),
     );
     app.store.set({ swapPreview: null });

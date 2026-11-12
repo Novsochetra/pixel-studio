@@ -45,7 +45,7 @@ function moreEntries(app) {
     filterEntries(app),
     [
       ['Canvas size…', () => openCanvasSizeSheet(app)],
-      ['History: saved versions…', () => openVersionsSheet(app)],
+      ['History…', () => openVersionsSheet(app)],
       hasKeyboard() ? ['Keyboard shortcuts…', () => openShortcuts(app.store.state.project)] : null,
       canInstall() ? ['Install app', () => installApp()] : null,
     ].filter(Boolean),

@@ -297,6 +297,11 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   (`History.alsoSetting`). Pins, like guides, stay on a canvas made smaller.
 - A picture's view is read from whole words of its name (`namedDirection`): "back" inside
   "background" is no view.
+- Palette lock keeps the art's colours and the project's palettes in reach (`palette-lock.js`):
+  a palette added is the art's own choice.
+- The Canvas size window shows the frame on the canvas asked for as the size is typed
+  (`canvas-size-preview.js`); the prompt window starts on the view being edited and asks again
+  what was asked last in the project.
 - A download carries the project's name (`fileSlug(project.name)`), and art with one view names
   no view in its files (`downloadName`, `viewFileName`). A game's sprite sheet alone is named as
   the game's manifest names it (`sheetFile` in `export-sheet.js`): the window shows that path
@@ -343,7 +348,7 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 ## The MCP server
 
 `tools/mcp/` is a server of tools for Claude Code (`.mcp.json` names it): it reads and writes the
-project file "Save as file" writes, with the studio's own plain logic (`src/model`, `src/clean`,
+project file "Save project file" writes, with the studio's own plain logic (`src/model`, `src/clean`,
 `src/export`), so what it makes opens in the studio. It needs nothing installed: the protocol
 (`protocol.js`) and PNG (`png.js`) are written out, as the page's code cannot use the browser's
 canvas there. A tool is `{ name, description, inputSchema, run }`; `run` returns what to say, and

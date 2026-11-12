@@ -60,6 +60,26 @@ check(
   `two guides added have names of their own (${added.join(', ')})`,
 );
 
+// The canvas size window said art outside a smaller canvas is cut off, and showed none of it:
+// it shows the frame on the canvas asked for, as it is typed
+await page.locator('#canvas-size-link').click();
+await page.waitForTimeout(300);
+const shownAt = () =>
+  page.locator('.size-preview canvas').evaluate((picture) => [picture.width, picture.height]);
+const before = await shownAt();
+
+await page.fill('#canvas-width', '32');
+await page.locator('#canvas-width').dispatchEvent('input');
+await page.waitForTimeout(200);
+const after = await shownAt();
+
+check(
+  before[0] / before[1] === 1 && after[0] / after[1] === 0.5,
+  `the canvas size window shows the canvas asked for (${before} to ${after})`,
+);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+
 // A height taller than the canvas has room for put the art's head above its top, cut off, and
 // the report said it was scaled to fit.
 await page.locator('button.wordmark').click();

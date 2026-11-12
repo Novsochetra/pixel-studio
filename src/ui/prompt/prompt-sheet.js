@@ -125,6 +125,22 @@ function draw(slot, state, ask, { close, redraw }) {
   );
 }
 
+// The view being edited, when it is not the one everything is matched to: the window opened
+// on Side with Front in hand. What was asked last time in this project is asked again, the pose
+// typed with it.
+function firstAsk(app, others) {
+  const { state } = app.store;
+  const editing = others.includes(state.at.direction) ? state.at.direction : null;
+  const last = app.promptAsked?.project === state.project.id ? app.promptAsked : {};
+
+  return {
+    task: last.task ?? (isSingleView(state.project) ? 'frame' : 'view'),
+    pose: last.pose ?? '',
+    direction: editing ?? last.direction ?? others[0] ?? state.at.direction,
+    project: state.project.id,
+  };
+}
+
 export function openChatgptSheet(app) {
   const { state } = app.store;
   const sheet = openSheet('Prompt and reference for an AI image', null, { wide: true });
@@ -148,13 +164,10 @@ export function openChatgptSheet(app) {
   const others = Object.keys(currentAnimation(state).directions).filter(
     (other) => other !== referenceOf(state.project),
   );
-  const ask = {
-    direction: others[0] ?? state.at.direction,
-    task: isSingleView(state.project) ? 'frame' : 'view',
-    pose: '',
-  };
+  const ask = firstAsk(app, others);
   const redraw = (patch) => {
     Object.assign(ask, patch);
+    app.promptAsked = { ...ask };
     keepFocus(slot, () => draw(slot, state, ask, { close: sheet.close, redraw }));
   };
 

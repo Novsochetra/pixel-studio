@@ -157,7 +157,7 @@ export function thisProject(job) {
     ),
     listGroup(
       { title: 'Keep', note: PRESET_NOTE },
-      actionRow('Save as file', () => saveProject(app)),
+      actionRow('Save project file', () => saveProject(app)),
       actionRow('Save as a preset', () => keepAsPreset(job)),
     ),
   );

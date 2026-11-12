@@ -48,11 +48,11 @@ function basicColours(app, colors) {
 
 // Colours to draw with that the art does not have yet: the palettes added to the project, each
 // under its name, and the basic ones.
-export function otherColours(app, colors) {
+// the palettes added to the project, each under its name
+export function projectPalettes(app) {
   const palettes = app.store.state.project.palettes ?? [];
 
-  return [
-    palettes.map((palette) => [node('div.hint', {}, palette.name), swatchGroup(app, palette)]),
-    basicColours(app, colors),
-  ];
+  return palettes.map((palette) => [node('div.hint', {}, palette.name), swatchGroup(app, palette)]);
 }
+
+export const otherColours = (app, colors) => basicColours(app, colors);

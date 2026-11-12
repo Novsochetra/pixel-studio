@@ -108,15 +108,10 @@ export function starterPalettes(job) {
   };
 
   return node(
-    'div.field',
-    {},
-    node('span', {}, 'Or start from one of these'),
-    node(
-      'div.start-sizes',
-      { role: 'group', 'aria-label': 'Starter palettes' },
-      STARTER_PALETTES.map((starter) =>
-        node('button.btn.chip', { type: 'button', onclick: () => add(starter) }, starter.name),
-      ),
+    'div.start-sizes',
+    { role: 'group', 'aria-label': 'Starter palettes' },
+    STARTER_PALETTES.map((starter) =>
+      node('button.btn.chip', { type: 'button', onclick: () => add(starter) }, starter.name),
     ),
   );
 }

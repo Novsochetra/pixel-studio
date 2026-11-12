@@ -5,6 +5,7 @@ import { restoreProject } from './session.js';
 import { numberInput } from './number-input.js';
 import { fieldRow, listGroup } from './list-group.js';
 import { keepFocus } from './keep-focus.js';
+import { sizePreview } from './canvas-size-preview.js';
 import { CANVAS_LIMITS, canvasShift, withCanvasSize } from '../model/canvas-size.js';
 import { isWholeBetween, wholeNumber } from '../model/numbers.js';
 import { kindOf } from '../model/kinds.js';
@@ -97,6 +98,12 @@ function refuses(fields) {
   return true;
 }
 
+// a size that cannot be shown (letters, out of range) leaves the preview as it was
+const refusesQuietly = ({ width, height }) =>
+  [width, height].some(
+    ({ input }) => input.value.trim() !== '' && !isWholeBetween(input.value, CANVAS_LIMITS),
+  );
+
 // a field left empty keeps the size the canvas has
 const sizeOf = ({ width, height }, canvas) => ({
   width: wholeNumber(width.input.value, { ...CANVAS_LIMITS, fallback: canvas.width }),
@@ -136,14 +143,23 @@ export function openCanvasSizeSheet(app) {
   };
   const job = { anchor: firstAnchor(app.store.state.project) };
   const anchors = node('div');
+  const preview = sizePreview(app);
+  const showSize = () =>
+    refusesQuietly(fields) ? null : preview.show(sizeOf(fields, canvas), job.anchor);
   // drawn again as one is picked: the keys stay on the one picked
-  const draw = () => keepFocus(anchors, () => replace(anchors, anchorGrid(job, draw)));
+  const draw = () => {
+    keepFocus(anchors, () => replace(anchors, anchorGrid(job, draw)));
+    showSize();
+  };
   const change = node('button.btn.primary', {}, 'Change the size');
   const apply = () => changeSize(app, { fields, job, sheet }, change);
   const onEnter = (event) => event.key === 'Enter' && apply();
 
   change.addEventListener('click', apply);
-  [fields.width, fields.height].forEach(({ input }) => input.addEventListener('keydown', onEnter));
+  [fields.width, fields.height].forEach(({ input }) => {
+    input.addEventListener('keydown', onEnter);
+    input.addEventListener('input', showSize);
+  });
 
   draw();
   sheet.body.append(
@@ -155,6 +171,7 @@ export function openCanvasSizeSheet(app) {
       fields.width.field,
       fields.height.field,
       node('div.list-row', {}, node('span.list-label.grows', {}, 'Keep the art at'), anchors),
+      node('div.list-row.size-shown', {}, preview.el),
     ),
     node('div.sheet-actions', {}, node('button.btn', { onclick: sheet.close }, 'Cancel'), change),
   );

@@ -54,13 +54,13 @@ export function colourWell(app, colors) {
   const note = node(
     'span',
     {},
-    state.paletteLock ? 'Locked to the art’s colours' : noteFor(state.color, colors),
+    state.paletteLock ? 'Locked to the art’s colours and palettes' : noteFor(state.color, colors),
   );
   const hex = hexField(app);
   const well = node('label.swatch.colour-well', {
     style: { background: toHex(state.color) },
     title: state.paletteLock
-      ? "Palette lock is on: pick one of the art's colours"
+      ? "Palette lock is on: pick one of the art's colours or palettes"
       : 'Pick any colour',
   });
   const pick = (event) => {

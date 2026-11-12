@@ -10,7 +10,7 @@ import { pinsOf, setPin } from '../../src/model/pins.js';
 import { CLEAR, createSprite, getPixel, pack, setPixel } from '../../src/model/sprite.js';
 import { floodFill, replaceColor } from '../../src/editor/paint.js';
 import { inWords, told } from '../../src/model/told.js';
-import { paintOverChoices } from '../../src/ui/drawing-settings.js';
+import { paintOverChoices } from '../../src/ui/palette-lock.js';
 import { parsePaletteText } from '../../src/palette/palette.js';
 import { sane } from '../../src/ui/export-settings.js';
 import { isWholeBetween } from '../../src/model/numbers.js';

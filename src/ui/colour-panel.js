@@ -1,7 +1,7 @@
 import { node, replace } from './dom.js';
 import { characterColors } from './character-colours.js';
 import { colourWell } from './colour-well.js';
-import { otherColours, swatchGroup } from './colour-groups.js';
+import { otherColours, projectPalettes, swatchGroup } from './colour-groups.js';
 import { drawingSettings } from './drawing-settings.js';
 import { actionRow, listGroup } from './list-group.js';
 import { openSwapSheet } from './swap-sheet.js';
@@ -32,9 +32,11 @@ export function renderColourPanel(el, app) {
     node('h2', { tabindex: '0' }, 'Colours', node('span.mono', {}, `${colors.length}`)),
     colourWell(app, colors),
     colors.length ? swatchGroup(app, { name: "The art's colours", colors }) : null,
-    // With the palette locked only the art's own colours are offered: the others stay where
-    // they stand, dimmed and out of reach. Taken away, everything under them moved up, the
-    // lock's own switch from under the finger that pressed it.
+    // the palettes added to the project are the art's own choice: the lock keeps them in reach
+    projectPalettes(app),
+    // With the palette locked only the art's colours and its palettes are offered: the others
+    // stay where they stand, dimmed and out of reach. Taken away, everything under them moved
+    // up, the lock's own switch from under the finger that pressed it.
     node(
       `div.other-colours${state.paletteLock ? '.locked' : ''}`,
       { inert: state.paletteLock, title: state.paletteLock ? 'Palette lock is on' : null },

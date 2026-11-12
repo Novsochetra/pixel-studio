@@ -12,7 +12,7 @@ function spriteOf(dataUrl) {
   return { width, height, pixels: new Uint8ClampedArray(data) };
 }
 
-// The file the studio's "Save as file" writes and "Open a project file…" reads: the project's
+// The file the studio's "Save project file" writes and "Open a project file…" reads: the project's
 // structure, with each layer's pixels as a PNG data URL (src/store/project-file.js).
 export function readProject(path) {
   const file = JSON.parse(readFileSync(path, 'utf8'));
