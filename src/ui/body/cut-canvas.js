@@ -140,6 +140,17 @@ export function cutCanvas(job, onChange) {
 
   job.view = viewBox(job.source);
   canvas.addEventListener('pointerdown', (event) => {
+    // a second finger takes the stroke back, as it does on the editor's canvas: it painted too
+    if (drag) {
+      job.plan = before;
+      job.lasso = null;
+      drag = null;
+      drawCut(canvas, job);
+      onChange();
+
+      return;
+    }
+
     canvas.setPointerCapture(event.pointerId);
     before = planCopy(job.plan);
     drag = pressOn(job, canvas, event);

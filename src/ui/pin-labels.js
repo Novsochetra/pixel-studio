@@ -1,4 +1,4 @@
-const LINE_PX = 11;
+const LINE_PX = 13;
 const GAP_PX = 3;
 
 const overlaps = (one, other) =>

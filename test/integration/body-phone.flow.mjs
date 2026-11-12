@@ -1,9 +1,9 @@
 // Posing on a phone, where there is the least room for it: the cut window, the Pose bar, and
 // the frames' tabs with the phone on its side.
-import { openStudio } from './harness.mjs';
+import { fingers, openStudio } from './harness.mjs';
 import { openDock, openExample } from './studio.mjs';
 
-const { page, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
+const { page, context, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
 await openExample(page);
 
 // cut into parts, the Pose tool's bar is wider than a phone: centred, its first controls were
@@ -46,6 +46,40 @@ check(
     (await page.locator('.cut-brush').getByRole('button', { name: 'Unpaint' }).isVisible()),
   'and the brush’s controls are a row a finger can use',
 );
+
+// A second finger landing in the middle of a stroke painted with it too: two fingers set down
+// to zoom left two smears. It takes the stroke back, as on the editor's canvas.
+const touch = await fingers(context, page);
+const sizes = () => page.locator('.cut-size').allTextContents();
+const guessed = (await sizes()).join();
+const art = await page.locator('.cut-canvas').boundingBox();
+const across = (share) => [art.x + art.width * share, art.y + art.height * 0.45];
+
+await page.locator('.cut-brush').getByRole('button', { name: 'Unpaint' }).tap();
+await touch('touchStart', [across(0.3)]);
+await touch('touchMove', [across(0.5)]);
+await touch('touchStart', [across(0.5), across(0.7)]);
+await touch('touchMove', [across(0.45), across(0.75)]);
+await touch('touchEnd', []);
+await page.waitForTimeout(250);
+check(
+  (await sizes()).join() === guessed,
+  'a second finger in the cut window takes the stroke back',
+);
+check(
+  await page.locator('.sheet').getByRole('button', { name: 'Undo', exact: true }).isDisabled(),
+  'and leaves no step',
+);
+await touch('touchStart', [across(0.3)]);
+await touch('touchMove', [across(0.5)]);
+await touch('touchEnd', []);
+await page.waitForTimeout(250);
+check((await sizes()).join() !== guessed, 'one finger alone still unpaints');
+// Chromium makes no click of a tap that follows two fingers within a moment
+await page.waitForTimeout(1500);
+await page.locator('.sheet').getByRole('button', { name: 'Undo', exact: true }).tap();
+await page.waitForTimeout(250);
+check((await sizes()).join() === guessed, 'and Undo under a finger takes that back');
 await page.locator('.sheet .btn.primary').tap();
 await page.waitForTimeout(800);
 const firstControl = await page.locator('.pose-bar > :first-child').boundingBox();

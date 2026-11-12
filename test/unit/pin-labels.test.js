@@ -21,9 +21,17 @@ test('the names of pins close together are written on lines of their own', () =>
     ],
     widthOf,
   );
-  const rows = places.map((label) => label.y).sort((one, other) => one - other);
+  const apart = (one, other) =>
+    Math.abs(one.y - other.y) >= 13 ||
+    one.x + one.width <= other.x ||
+    other.x + other.width <= one.x;
 
-  assert.ok(rows[1] - rows[0] >= 11 && rows[2] - rows[1] >= 11, 'a line apart');
+  for (const one of places) {
+    for (const other of places.filter((label) => label !== one)) {
+      assert.ok(apart(one, other), `${one.name} is clear of ${other.name}`);
+    }
+  }
+
   assert.equal(at(places, 'LEFT FOOT').y, 103, 'the upper one stays beside its dot');
 });
 
