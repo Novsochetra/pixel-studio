@@ -34,6 +34,19 @@ const titleStops = await page.locator('.section > h2[tabindex]').count();
 
 check(titleStops === 0, `a phone’s panel titles take no stop of the keys (${titleStops} do)`);
 
+// a press a pixel past Undo's edge was Redo's, whose reach lay over the gap between them
+const besideUndo = await page.evaluate(() => {
+  const [undo, redo] = ['Undo', 'Redo'].map((name) =>
+    document.querySelector(`#toolbar [aria-label="${name}"]`).getBoundingClientRect(),
+  );
+  const y = undo.top + undo.height / 2;
+  const hit = (x) => document.elementFromPoint(x, y)?.closest('button')?.getAttribute('aria-label');
+
+  return [hit(undo.right + 1), hit(redo.left - 1)].join();
+});
+
+check(besideUndo === 'Undo,Redo', `a press beside Undo or Redo is its own (${besideUndo})`);
+
 // a tablet held wide has the desk's layout, under fingers
 await page.setViewportSize({ width: 1194, height: 834 });
 await page.waitForTimeout(600);

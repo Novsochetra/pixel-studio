@@ -405,4 +405,10 @@
     position: absolute;
     inset: -2px -3px;
   }
+
+  /* each button's reach meets the next one's in the middle of the gap: over a 2px gap, a press
+     beside Undo was Redo's */
+  :root[data-layout='compact'] .toolbar .group {
+    gap: 6px;
+  }
 }
