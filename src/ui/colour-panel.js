@@ -8,6 +8,7 @@ import { openSwapSheet } from './swap-sheet.js';
 import { openOutfitsSheet } from './outfits-sheet.js';
 import { gameOf } from '../model/presets.js';
 import { kindOf } from '../model/kinds.js';
+import { steadyOrder } from '../palette/steady-order.js';
 
 // each leads to a window of its own, as its row's chevron says
 function colourWindows(app) {
@@ -24,9 +25,20 @@ function colourWindows(app) {
   );
 }
 
+// in the order the project's colours were first shown, kept while the project is open
+function inTheirPlaces(app, colors) {
+  const project = app.store.state.project.id;
+  const kept = app.swatchOrder?.project === project ? app.swatchOrder.seen : [];
+  const { shown, seen } = steadyOrder(kept, colors);
+
+  app.swatchOrder = { project, seen };
+
+  return shown;
+}
+
 export function renderColourPanel(el, app) {
   const { state } = app.store;
-  const colors = characterColors(state);
+  const colors = inTheirPlaces(app, characterColors(state));
   replace(
     el,
     node('h2', { tabindex: '0' }, 'Colours', node('span.mono', {}, `${colors.length}`)),

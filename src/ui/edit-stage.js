@@ -67,6 +67,14 @@ const TIGHT = { across: 16, down: 16 };
 // (71-phone-sheets.css): more at the stage's foot than any margin of its own
 const BAR_ROOM_PX = 48;
 
+// Fitted tight with the Pose or Pin bar up, the canvas keeps the band above it for the bar
+// (40-stage.css): an iPad held wide had the bar over the canvas's first rows.
+function tightEdge(area, padding) {
+  const barUp = area.closest('.edit-area')?.querySelector(':is(.pose-bar, .pin-bar):not([hidden])');
+
+  return barUp ? { ...TIGHT, down: parseFloat(padding.paddingTop) + TIGHT.down / 2 } : TIGHT;
+}
+
 // the zoom at which the canvas fits the part of the stage above the frames
 export function fitZoom(stage, sprite) {
   const area = stage.querySelector('.edit-scroll') ?? stage;
@@ -90,7 +98,7 @@ export function fitZoom(stage, sprite) {
   // sheet up: the room under the canvas there is a bar's, and a canvas grown into it had its
   // last rows under the bar of a selection.
   const keepsBarRoom = parseFloat(padding.paddingBottom) >= BAR_ROOM_PX;
-  const tight = fit < 2 && !keepsBarRoom ? Math.floor(roomWith(TIGHT)) : fit;
+  const tight = fit < 2 && !keepsBarRoom ? Math.floor(roomWith(tightEdge(area, padding))) : fit;
 
   inner.classList.toggle('tight', tight > fit);
 

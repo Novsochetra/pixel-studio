@@ -209,4 +209,22 @@ check(
 );
 check((await pixels('#3d7fe0')).length === 8, 'and the art is as it was');
 
+// Sorted by how much each was used, the art's swatches changed places at a stroke, and the
+// colour under the finger was another one at its next press.
+const swatchOrder = () =>
+  page
+    .locator('[aria-label="The art\'s colours"] .swatch')
+    .evaluateAll((swatches) => swatches.map((swatch) => swatch.title));
+const before = await swatchOrder();
+
+await page.selectOption('#paint-over', { label: 'Any pixel' });
+await page.locator('[aria-label="The art\'s colours"] .swatch').last().click();
+await page.keyboard.press('g');
+await page.mouse.click(...(await at(2, 2)));
+await page.waitForTimeout(200);
+check(
+  (await swatchOrder()).join() === before.join(),
+  `a colour made the most used keeps its place among the swatches (${before.at(-1)})`,
+);
+
 await finish();

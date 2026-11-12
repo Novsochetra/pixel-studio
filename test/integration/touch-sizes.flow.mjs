@@ -55,4 +55,35 @@ check(
   `held wide, a tablet’s words are 12px or more and its toolbar a finger wide (${small.words} words, ${small.buttons} buttons smaller)`,
 );
 
+// An iPad held wide fits the canvas a step larger by giving up the stage's margins: the band
+// above it went too, and the Pose bar lay over the canvas's first rows.
+await page.setViewportSize({ width: 1080, height: 810 });
+await page.waitForTimeout(400);
+await page.keyboard.press('Escape');
+await page
+  .locator('[aria-label^="Pose"]')
+  .first()
+  .evaluate((button) => button.click());
+await page
+  .locator('.pose-bar')
+  .getByRole('button', { name: /Cut into parts/ })
+  .click();
+await page.waitForTimeout(600);
+await page.locator('.sheet .btn.primary').click();
+await page.waitForTimeout(800);
+await page.getByRole('button', { name: 'Fit', exact: true }).click();
+await page.waitForTimeout(400);
+const overArt = await page.evaluate(() => {
+  const poseBar = document.querySelector('.pose-bar').getBoundingClientRect();
+  const canvasBox = document.querySelector('[aria-label="Pixel canvas"]').getBoundingClientRect();
+
+  return Math.round(poseBar.bottom - canvasBox.top);
+});
+
+check(
+  overArt <= 0,
+  `on an iPad held wide the Pose bar stays above the canvas (${overArt}px over it)`,
+);
+await page.screenshot({ path: `${shots}/touch-sizes-ipad-pose.png` });
+
 await finish();

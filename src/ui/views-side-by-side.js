@@ -1,6 +1,7 @@
 import { cssVar, drawGuide, drawSprite } from './draw.js';
 import { drawChecker } from './checker.js';
-import { directionSprite, directionsInUse } from './actions.js';
+import { currentAnimation, directionSprite, directionsInUse } from './actions.js';
+import { nearestDrawn } from '../model/nearest-drawn.js';
 import { checkerPainter } from '../io/images.js';
 import { viewName } from '../model/kinds.js';
 import { applyMapping } from '../palette/palette.js';
@@ -13,7 +14,7 @@ const GAP = 16;
 function drawView(context, state, view) {
   const { direction, scale, options } = view;
   const { width, height } = state.project.canvas;
-  const sprite = directionSprite(state, direction);
+  const sprite = directionSprite(state, direction, view.frame);
   const filter = VIEW_FILTERS[state.viewFilter ?? 'colour'];
 
   // files and the AI's reference sheet keep the original's green checkerboard; the screen uses
@@ -37,8 +38,24 @@ function drawView(context, state, view) {
   );
 }
 
+// A preview of a swap or a kit shows a view with nothing in the frame being edited at its
+// nearest drawn frame, and says which: blank, it looked as if the kit had wiped that view.
+function frameShown(state, direction, options) {
+  const here = state.at.frame ?? 0;
+  const frames = currentAnimation(state).directions[direction]?.frames ?? [];
+
+  return options.nearest ? (nearestDrawn(frames, here) ?? here) : here;
+}
+
+function caption(state, direction, frame) {
+  const name = viewName(state.project, direction).toUpperCase();
+
+  return frame === (state.at.frame ?? 0) ? name : `${name} · FRAME ${frame + 1}`;
+}
+
 // Every view of the current animation side by side, with the guide lines across all of them.
-// options: { mapping: colours to show swapped, onScreen: for a window, not a file }
+// options: { mapping: colours to show swapped, onScreen: for a window, not a file, nearest: a
+// view's nearest drawn frame where the one being edited is empty }
 export function viewsSideBySide(state, scale, options = {}) {
   const directions = directionsInUse(state);
   const { width, height } = state.project.canvas;
@@ -55,14 +72,15 @@ export function viewsSideBySide(state, scale, options = {}) {
 
   directions.forEach((direction, i) => {
     const x = i * (width * scale + GAP);
+    const frame = frameShown(state, direction, options);
 
     context.save();
     context.translate(x, CAPTION);
-    drawView(context, state, { direction, scale, options, first: i === 0 });
+    drawView(context, state, { direction, frame, scale, options, first: i === 0 });
     context.restore();
     context.font = '700 16px Silkscreen, ui-monospace, monospace';
     context.fillStyle = cssVar('--label');
-    context.fillText(viewName(state.project, direction).toUpperCase(), x, 18);
+    context.fillText(caption(state, direction, frame), x, 18, width * scale);
   });
 
   return canvas;

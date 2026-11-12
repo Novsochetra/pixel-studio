@@ -115,7 +115,7 @@ function drawOutfits(job) {
     node(
       'div',
       { style: { overflowX: 'auto' } },
-      viewsToFit(state, 860, { mapping, onScreen: true }),
+      viewsToFit(state, 860, { mapping, onScreen: true, nearest: true }),
     ),
     outfitFirstStep(job, mapping),
     partsSection(job),

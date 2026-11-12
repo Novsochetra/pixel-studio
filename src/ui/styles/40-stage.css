@@ -97,6 +97,16 @@
   padding: 8px;
 }
 
+/* but for the band the Pose or Pin bar stands in: given up, the bar lay over the canvas's
+   first rows on an iPad held wide */
+@media (min-height: 800px) {
+  :root:not([data-layout='compact'])
+    .edit-area:has(:is(.pose-bar, .pin-bar):not([hidden]))
+    .stage-inner.edit.tight {
+    padding-top: 64px;
+  }
+}
+
 /* With no band above the canvas (a short window, a canvas fitted tight) the layers' bar, one
    field, stands in the corner at the stage's foot: at the top it lay over the art's head and
    the handle that turns it. */

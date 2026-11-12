@@ -14,7 +14,7 @@ export function previewFigure(app, mapping) {
   return node(
     'figure',
     {},
-    viewsToFit(app.store.state, 420, { mapping, onScreen: true }),
+    viewsToFit(app.store.state, 420, { mapping, onScreen: true, nearest: true }),
     node('figcaption.hint', {}, 'With the swap applied'),
   );
 }
