@@ -3,24 +3,32 @@
 
 // Zooms are whole, so a pixel of the art is a whole number of the screen's. Below 1 there is a
 // half: a canvas larger than the window showed only part of itself at 100%, and Fit fitted none
-// of the rest.
+// of the rest. Below the half there is a quarter, for a canvas too large even for that: the
+// largest canvas, with a phone's sheet up, ran under the sheet.
 export const MIN_ZOOM = 0.5;
+export const QUARTER_ZOOM = 0.25;
 export const MAX_ZOOM = 24;
 
-// The half is for a canvas that does not fit the window whole: a small one pinched down to it
-// was a thumbnail no one could draw on. `least` is the least zoom there is for the open canvas.
-export const leastZoom = (app) => (app.fittedZoom < 1 ? MIN_ZOOM : 1);
+// The half and the quarter are for a canvas that does not fit the window whole: a small one
+// pinched down to them was a thumbnail no one could draw on. `least` is the least zoom there is
+// for the open canvas, the one Fit shows it at when that is under 100%.
+export const leastZoom = (app) => (app.fittedZoom < 1 ? app.fittedZoom : 1);
+
+// the step under 100% nearest to `zoom`, no smaller than the canvas has
+const underOne = (zoom, least) => Math.max(least, zoom < 0.375 ? QUARTER_ZOOM : MIN_ZOOM);
 
 export const nearestZoom = (zoom, least = MIN_ZOOM) =>
-  zoom < 0.75 ? least : Math.min(MAX_ZOOM, Math.max(1, Math.round(zoom)));
+  zoom < 0.75 ? underOne(zoom, least) : Math.min(MAX_ZOOM, Math.max(1, Math.round(zoom)));
 
-// one step closer (1) or further (-1): the half is a step of its own under 1
+// one step closer (1) or further (-1): the half and the quarter are steps of their own under 1
 export function steppedZoom(zoom, step, least = MIN_ZOOM) {
   if (zoom < 1) {
-    return step > 0 ? 1 : MIN_ZOOM;
+    const closer = zoom < MIN_ZOOM ? MIN_ZOOM : 1;
+
+    return step > 0 ? closer : Math.max(least, QUARTER_ZOOM);
   }
 
-  return nearestZoom(zoom + step < 1 ? least : zoom + step, least);
+  return zoom + step < 1 ? Math.max(least, MIN_ZOOM) : nearestZoom(zoom + step, least);
 }
 
 // zoom to `zoom` keeping the art pixel under the screen point [clientX, clientY] where it is;

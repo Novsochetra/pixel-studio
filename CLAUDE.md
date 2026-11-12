@@ -135,8 +135,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - Off a phone the frames stand under the canvas, as tall as the line above them is dragged
   (`grid/grid-resizer.js`, `--grid-height`); on `compact` they are a sheet, with no line.
 - Fit shows the whole canvas, at a whole zoom, or at a half where the canvas is larger than the
-  window (`nearestZoom`, `steppedZoom` in `navigate.js`). Only such a canvas has the half
-  (`leastZoom`): a small one pinched down to it was a thumbnail.
+  window, or a quarter where the half does not fit either: the largest canvas with a phone's
+  sheet up (`nearestZoom`, `steppedZoom` in `navigate.js`). Only such a canvas has the half or
+  the quarter (`leastZoom`): a small one pinched down to them was a thumbnail.
 - With no band above the canvas and room beside it (a laptop's short window, a phone held on its
   side), the selection's bar is a card in the stage's corner, clear of the art
   (`selection-beside.js`, `72-selection-beside.css`). With no room beside it either, it stands
@@ -312,8 +313,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - With a phone's sheet up the canvas keeps to the room above the bar's: it gives up no margin
   for a step more of zoom there (`keepsBarRoom` in `fitZoom`).
 - A frame deleted from one view goes from every view, its hidden mark with it, when no other
-  view has anything drawn in it (`drawnOnlyIn`), and the export says which frames are hidden from play and
-  still in the files (`hiddenFrames`).
+  view has anything drawn in it (`drawnOnlyIn`). Where another view keeps its frame, the mark
+  stays on its place in every view, and the change says so (`saysWhatMoved`). The export says
+  which frames are hidden from play and still in the files (`hiddenFrames`).
 - A canvas is sized for the room it has, never shrunk by the stylesheet (`viewBox` in
   `src/ui/body/cut-view.js`): squashed, its art is out of shape and a press lands beside the
   finger.

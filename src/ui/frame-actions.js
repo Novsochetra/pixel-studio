@@ -4,11 +4,13 @@ import { openImport } from './import-sheet.js';
 import {
   addFrame,
   addFrameAtEnd,
+  frameCount,
   moveFrame,
   removeFrame,
   removeViewFrame,
 } from '../model/frames.js';
-import { isFrameHidden, setFrameHidden } from '../model/frame-play.js';
+import { hiddenFrames, isFrameHidden, setFrameHidden } from '../model/frame-play.js';
+import { viewName } from '../model/kinds.js';
 import { copyFrameToViews } from '../model/copy-frame.js';
 import { copyOfLayer } from '../model/structure.js';
 import { toast } from './dom.js';
@@ -48,10 +50,30 @@ export const moveFrameTo = (app, from, to) =>
 export const deleteFrame = (app, index) =>
   frameChange(app, 'Delete frame', (animation) => removeFrame(animation, index));
 
-export const deleteViewFrame = (app, direction, index) =>
+// One view's later frames move up a place while the others' stay. A frame hidden from play is
+// a place in every view, so its mark stays where it was and another of this view's drawings
+// now stands under it: said, as the grid alone showed it and the frame "came back" into play.
+function saysWhatMoved(app, direction, index) {
+  const { state } = app.store;
+  const animation = currentAnimation(state);
+  const shorter = animation.directions[direction].frames.length < frameCount(animation);
+  const hidden = hiddenFrames(animation).filter((number) => number > index);
+
+  if (shorter && hidden.length) {
+    const view = viewName(state.project, direction);
+
+    toast(
+      `${view}’s later frames moved up a place. Frame ${hidden.join(', ')} is still hidden from play, in every view.`,
+    );
+  }
+}
+
+export function deleteViewFrame(app, direction, index) {
   frameChange(app, 'Delete frame from one view', (animation) =>
     removeViewFrame(animation, direction, index),
   );
+  saysWhatMoved(app, direction, index);
+}
 
 // the other views' own frames there are drawn over: it says so, and that undo has them
 export function copyToOtherViews(app, direction, index) {
