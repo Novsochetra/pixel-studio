@@ -44,24 +44,8 @@ const steps = (project, hands) => [
   ['Use: ', 'Download gives PNGs at both sizes, sprite sheets and GIFs for your game.'],
 ];
 
-// The first time the page opens: the three things it is for, then out of the way.
-export function showQuickStart(stage, project) {
-  if (seen()) {
-    return;
-  }
-
-  const gotIt = node('button.btn.primary', { onclick: () => close() }, 'Got it');
-  const onKey = (event) => event.key === 'Escape' && close();
-  // getting on with it is an answer too: a press anywhere else puts the card away, and still
-  // does what it was for
-  const onPress = (event) => card.contains(event.target) || close();
-  const close = () => {
-    remember();
-    card.remove();
-    document.removeEventListener('keydown', onKey);
-    document.removeEventListener('pointerdown', onPress, true);
-  };
-  const card = node(
+const cardOf = (project, gotIt) =>
+  node(
     'div.quick-start',
     { role: 'dialog', 'aria-label': 'Quick start' },
     node('h3', {}, 'Three steps'),
@@ -79,6 +63,37 @@ export function showQuickStart(stage, project) {
         : null,
     ),
   );
+
+// The first time the page opens: the three things it is for, then out of the way.
+export function showQuickStart(stage, project) {
+  if (seen()) {
+    return;
+  }
+
+  // a button pressed with the keys clicks with no press counted
+  const gotIt = node(
+    'button.btn.primary',
+    { onclick: (event) => close(event.detail === 0) },
+    'Got it',
+  );
+  const onKey = (event) => event.key === 'Escape' && close(true);
+  // getting on with it is an answer too: a press anywhere else puts the card away, and still
+  // does what it was for
+  const onPress = (event) => card.contains(event.target) || close();
+  const close = (byKeys = false) => {
+    remember();
+    card.remove();
+    document.removeEventListener('keydown', onKey);
+    document.removeEventListener('pointerdown', onPress, true);
+
+    // put away with the keys, they go to the tool in hand, where they are when a project
+    // opens: left on nothing, the next Tab began at the top of the page
+    if (byKeys) {
+      document.querySelector('#rail .btn.on')?.focus({ preventScroll: true });
+    }
+  };
+  const card = cardOf(project, gotIt);
+
   stage.append(card);
   document.addEventListener('keydown', onKey);
   document.addEventListener('pointerdown', onPress, true);

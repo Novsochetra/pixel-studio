@@ -151,6 +151,8 @@ export function openVersionsSheet(app) {
     ),
     list,
     node('p.list-note', {}, `A version is the whole project. ${where}`),
+    // a window that applies nothing ends in Close, as Outfits and the sprite sheet do
+    node('div.sheet-actions', {}, node('button.btn', { onclick: sheet.close }, 'Close')),
   );
   redraw();
 }

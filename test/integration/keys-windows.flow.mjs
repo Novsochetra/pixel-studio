@@ -143,4 +143,20 @@ check(
   `a folder named with Enter is kept, the keys on its Rename (${await focused()})`,
 );
 
+// a window that applies nothing ends in Close, as Outfits and the sprite sheet do: History had
+// only its ×
+for (let press = 0; press < 3 && (await page.locator('.sheet').count()); press++) {
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(400);
+}
+
+await page.getByRole('button', { name: 'History' }).click();
+await page.waitForTimeout(400);
+const close = page.locator('.sheet .sheet-actions').getByRole('button', { name: 'Close' });
+
+check((await close.count()) === 1, 'History ends in Close');
+await close.click();
+await page.waitForTimeout(400);
+check((await page.locator('.sheet').count()) === 0, 'which closes it');
+
 await finish();
