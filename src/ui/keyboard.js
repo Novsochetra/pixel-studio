@@ -148,6 +148,11 @@ export function bindKeyboard(app) {
   // Space let go while another window had the keys never says so here
   window.addEventListener('blur', stopPanning);
   document.addEventListener('keydown', (event) => {
+    // ⌘S is never the browser's: with a window open or in a field, its "Save page" came up
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+      event.preventDefault();
+    }
+
     if (startPanning(app, event) || typing(event) || modalOpen()) {
       return;
     }

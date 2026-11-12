@@ -22,14 +22,23 @@ function sheetHead(title, close) {
 
 // The window's content is added after it opens. A phone's keyboard would cover the sheet, so a
 // field takes focus only where there is a pointer.
+// The keys never start on the window's ×, where Enter closed it and lost what it was making;
+// 'window' starts them on the window itself, where Enter does nothing until a control is ready.
 function focusFirst(body, focusField) {
-  const controls = focusables(body);
+  const controls = focusables(body).filter((control) => !control.matches('.sheet-close'));
   const field =
-    focusField && matchMedia('(pointer: fine)').matches
+    focusField === true && matchMedia('(pointer: fine)').matches
       ? controls.find((control) => control.matches('input:not([type=file]), textarea'))
       : null;
 
-  (field ?? controls[0])?.focus();
+  if (focusField === 'window' || !controls.length) {
+    body.tabIndex = -1;
+    body.focus({ preventScroll: true });
+
+    return;
+  }
+
+  (field ?? controls[0]).focus();
 }
 
 // focusField: a text field takes focus first, where there is a pointer; a sheet whose fields

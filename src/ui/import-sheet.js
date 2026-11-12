@@ -104,6 +104,16 @@ function sheetBody(job, file, fields) {
   ];
 }
 
+// Enter in a field cleans again, or, with nothing typed since the result on show, uses it:
+// after one clean again every Enter cleaned again, and Use was a Tab or a click away
+function enterInField(job, fields) {
+  if (!job.accept.disabled) {
+    job.accept.click();
+  } else if (job.image) {
+    cleanAgain(job, fields);
+  }
+}
+
 export async function openImport(app, direction, file, frame = app.store.state.at.frame) {
   const { state } = app.store;
   const place = placeName(state, direction, frame);
@@ -121,7 +131,7 @@ export async function openImport(app, direction, file, frame = app.store.state.a
   // not opened on its first field: in a short window that is under the buttons at its foot
   const sheet = openSheet(`Clean into ${place}`, () => cancelGrowth(app, outcome), {
     wide: true,
-    focusField: false,
+    focusField: 'window',
   });
   const alone = cleansAlone(state, direction, frame);
 
@@ -146,7 +156,7 @@ export async function openImport(app, direction, file, frame = app.store.state.a
     onChange: () => {
       job.accept.disabled = true;
     },
-    onEnter: () => job.image && cleanAgain(job, fields),
+    onEnter: () => enterInField(job, fields),
   });
 
   job.accept.addEventListener('click', () => accept(job, place));

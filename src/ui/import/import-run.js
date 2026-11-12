@@ -66,7 +66,7 @@ function showResult(job, result, ref, alone) {
 // left in the field.
 function readyForKeys(accept) {
   const held = document.activeElement;
-  const idle = !held || held === document.body || held.matches?.('.sheet-close');
+  const idle = !held || held === document.body || Boolean(held.matches?.('.sheet-close, .sheet'));
 
   if (idle && accept.isConnected) {
     accept.focus({ preventScroll: true });

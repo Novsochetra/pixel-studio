@@ -371,3 +371,34 @@
     padding-inline: 4px;
   }
 }
+
+/* What a tablet held wide (the desk's layout), a phone on its side and the narrowest phone kept
+   under a finger's size: drawn smaller where room is short, the room round each takes the
+   press, and no words are smaller than 12px. */
+@media (pointer: coarse) {
+  .statusbar,
+  .wordmark small {
+    font-size: 12px;
+  }
+
+  .toolbar .btn,
+  .grid-view {
+    min-width: 40px;
+  }
+
+  .section > h2 {
+    min-height: 40px;
+  }
+
+  :root[data-layout='compact'] .grid-bar .icon-toggle,
+  :root[data-layout='compact'] .toolbar .btn {
+    position: relative;
+  }
+
+  :root[data-layout='compact'] .grid-bar .icon-toggle::after,
+  :root[data-layout='compact'] .toolbar .btn::after {
+    content: '';
+    position: absolute;
+    inset: -2px -3px;
+  }
+}

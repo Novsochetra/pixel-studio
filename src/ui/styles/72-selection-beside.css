@@ -100,4 +100,17 @@
     .stage-inner.edit {
     padding-bottom: 64px;
   }
+
+  /* the selection's bar stands at the end the selection is not in: room is kept at that end */
+  :root[data-layout='compact']
+    .stage:has(.selection-bar:not([hidden])[data-side='bottom'])
+    .stage-inner.edit {
+    padding-bottom: 64px;
+  }
+
+  :root[data-layout='compact']
+    .stage:has(.selection-bar:not([hidden])[data-side='top'])
+    .stage-inner.edit {
+    padding-top: 64px;
+  }
 }

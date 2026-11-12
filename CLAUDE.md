@@ -212,8 +212,11 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   keys on the page, Alt N and Alt D add and copy a frame, Alt O is onion skin, ⌘S saves at
   once. Alt with a letter is read by `event.code`, as a Mac's Option types its own letter. A
   phone that starts playing says a tap on the art stops it.
-- A window whose result is ready puts the keys on its main button when they were on nothing
-  or on its ×: Enter there threw a clean away.
+- A window's keys never start on its ×; one making something starts them on itself
+  (`focusField: 'window'`), and puts them on its main button when the result is ready: Enter
+  on the × threw a clean away. ⌘S is never the browser's, in a window or a field too.
+- Under fingers (`pointer: coarse`) the desk's layout keeps the touch sizes as well: a tablet
+  held wide is a desk under fingers. A section's title is a button only where it folds.
 - A window open on a desk keeps its top where it opened and grows at its foot (`pinTop` in
   `sheet-pin.js`): centred, a window that drew itself again taller moved up under the pointer,
   and a double-click's second click landed on the field above. A phone's window rises from the

@@ -118,8 +118,12 @@ export function mountInspector(app) {
 
     const title = sections[name].querySelector(':scope > h2');
 
-    title?.setAttribute('role', 'button');
-    title?.setAttribute('aria-expanded', String(sections[name].dataset.collapsed !== 'true'));
+    // only where a title folds its section is it said to be a button: on a phone, where the dock
+    // opens a panel, a screen reader named a button that did nothing
+    if (title && foldsFromTitle()) {
+      title.setAttribute('role', 'button');
+      title.setAttribute('aria-expanded', String(sections[name].dataset.collapsed !== 'true'));
+    }
   };
 
   bindCollapsing(inspector, sections, (name) => keepFocus(inspector, drawn(name)));

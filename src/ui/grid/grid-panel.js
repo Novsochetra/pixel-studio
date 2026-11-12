@@ -7,6 +7,7 @@ import { gridPlace, keepGridPlace } from './grid-place.js';
 import { watchMore } from '../more-behind.js';
 import { keepFocus as keepKeys } from '../keep-focus.js';
 import { panelGrab, pullsShut } from '../panel-sheet.js';
+import { hasKeyboard } from '../platform-keys.js';
 
 const FOCUS_FOLLOWS = { '.cell': '.cell.selected', '.grid-tab': '.grid-tab[aria-selected="true"]' };
 
@@ -52,10 +53,10 @@ function showOpenTab(el) {
   watchMore(strip);
 }
 
-// On a phone the panel with Pause is shut as often as not while the views play: a tap on them
-// stops them, and nothing said so
+// Under fingers the panel with Pause is shut as often as not while the views play, on a phone or
+// a tablet held wide: a tap on them stops them, and nothing said so
 function saysHowToStop(app) {
-  if (isPlaying(app) && app.store.state.layout === 'compact') {
+  if (isPlaying(app) && !hasKeyboard()) {
     toast('Playing. Tap the art to stop.');
   }
 }
