@@ -1,15 +1,16 @@
 // The frames on the smallest phone, and what a walk through an animation there met: a frame in
 // sight whole, the tall sheet's strip of canvas, the open tab, a hidden frame's mark.
 import { fingers, openStudio } from './harness.mjs';
-import { createProject, frameAction, paintedPixels, selectFrame } from './studio.mjs';
+import { createProject, frameAction, paintedPixels, selectFrame, showViews } from './studio.mjs';
 
 const { page, context, check, finish, shots } = await openStudio({ device: 'iPhone SE' });
 const touch = await fingers(context, page);
 const box = (selector) => page.locator(selector).first().boundingBox();
 const canvas = page.getByLabel('Pixel canvas');
-const painted = async () => (await paintedPixels(canvas, 32)).length;
+const painted = async () => (await paintedPixels(canvas, 96)).length;
 
-await createProject(page, { kind: 'Character', name: 'Tiny', width: 32 });
+// 96 pixels: at twice its size the canvas took the room kept under it for a selection's bar
+await createProject(page, { kind: 'Character', name: 'Tiny', width: 96 });
 await page.locator('.dock-more').click();
 await page.waitForTimeout(600);
 
@@ -29,6 +30,17 @@ check(
   strip.width >= 200,
   `the animations’ tabs have the row to themselves and Play (${strip.width})`,
 );
+
+// "Front only" is a wider word than "All views": it sent the frame rate to a third row, and the
+// frames under the tools
+await showViews(page, 'Front only');
+const alone = await box('.grid-row.current .cell');
+
+check(
+  alone.y + alone.height <= bar.y,
+  `with one view’s frames in sight the row is still above the tools (${Math.round(alone.y + alone.height)})`,
+);
+await showViews(page, 'All views');
 
 // two things to do with an empty frame: both buttons are on the screen
 await page.locator('.grid-row.current .cell-add').click();
@@ -108,6 +120,13 @@ await page.waitForTimeout(600);
 check(
   (await page.locator('.app').getAttribute('data-sheet')) !== 'tall',
   'Play brings a tall sheet back to its height, so the play is seen',
+);
+const playing = await canvas.boundingBox();
+const sheetTop = (await box('.grid-panel')).y;
+
+check(
+  playing.y + playing.height <= sheetTop && playing.x + playing.width <= 320,
+  `every view playing is above the sheet and on the screen (${Math.round(playing.y + playing.height)} over ${Math.round(sheetTop)})`,
 );
 await page.getByRole('button', { name: 'Pause', exact: true }).click();
 check((await painted()) === before, 'and nothing was drawn meanwhile');

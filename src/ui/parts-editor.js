@@ -1,4 +1,5 @@
 import { icon, node } from './dom.js';
+import { afterPress } from './after-press.js';
 import { byKeys, keysToPutBack, putBackRow, rename, takeOff } from './put-back.js';
 import { changeStructure } from './actions.js';
 import { characterColors } from './character-colours.js';
@@ -22,9 +23,16 @@ function colourChip(part, color, toggle) {
 }
 
 function nameAndRemove(app, { part, taken }, save) {
+  // The name is said as the field loses the focus, in the middle of the press that took it: the
+  // list is drawn again once that press's click has come, or the button pressed went with the
+  // old list and the press did nothing.
   const named = (event) => {
-    rename(app, { key: 'parts', item: part, name: event.target.value.trim() });
-    save();
+    const name = event.target.value.trim();
+
+    afterPress(() => {
+      rename(app, { key: 'parts', item: part, name });
+      save();
+    });
   };
   const remove = (event) => {
     const keys = byKeys(event);

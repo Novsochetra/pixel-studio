@@ -56,6 +56,19 @@ check(
   'which undo takes back once the window is closed',
 );
 check((await sheet.locator('.put-back').count()) === 0, 'a window opened again offers nothing');
+
+// a part's name typed, then a press on a button: the list was drawn again under the press, and
+// the press did nothing
+await sheet.locator('.part-row input[aria-label="Part name"]').first().click();
+await page.keyboard.type('x');
+await sheet.getByRole('button', { name: 'Close', exact: true }).click();
+await page.waitForTimeout(600);
+check(
+  (await page.locator('.sheet').count()) === 0,
+  'a button pressed straight after a part is named acts at that press',
+);
+await openParts();
+check((await partNames())[0] === `${first}x`, 'and the name is kept');
 await page.keyboard.press('Escape');
 await page.waitForTimeout(400);
 

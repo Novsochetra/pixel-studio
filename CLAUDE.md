@@ -298,15 +298,19 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   the one in its place, but never by that guess to a button that applies or deletes
   (`besides`): a window says where they go instead (`showAdded` in Swap colours). A name typed in place is kept at Tab
   (`renameInPlace`), and a window's opener that the bars draw again has an id, so the keys
-  come back to it.
+  come back to it. A name typed in a list that is drawn again is kept through `afterPress`, as
+  any field's change is: a part's name, drawn again at once, swallowed the next press.
 - A button is named by what it is, in a word or two (`toolName`); what it does at length is
   its `title` and `aria-description`. A button whose name says what a press does (Hide, Show)
   is not also `aria-pressed`. A menu marks the button it hangs from (`marksOpen`).
 - Whatever a drag does in a list has keys too: Alt and an arrow move a frame or a layer, and
-  Home and End go to a list's ends (`onListKey` in `layers-panel.js`). A run of such moves, key
-  after key, is one step to undo, as a run of nudges is (`moveByKey`, `joinStructure`).
-- Every view playing is shown whole: at a half where a whole pixel does not fit the room, as
-  the canvas itself is (`playLayout`).
+  Home and End go to a list's ends (`onListKey` in `layers-panel.js`). A run of such moves of one
+  layer, key after key, is one step to undo, as a run of nudges is (`moveByKey`,
+  `joinStructure`).
+- Every view playing is shown whole, whatever the room: between whole pixels, or under one,
+  where whole pixels do not fit it (`playLayout`, `stepped`).
+- With a phone's sheet up the canvas keeps to the room above the bar's: it gives up no margin
+  for a step more of zoom there (`keepsBarRoom` in `fitZoom`).
 - A frame deleted from one view goes from every view, its hidden mark with it, when no other
   view has anything drawn in it (`drawnOnlyIn`), and the export says which frames are hidden from play and
   still in the files (`hiddenFrames`).

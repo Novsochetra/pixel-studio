@@ -1,4 +1,5 @@
 import { icon, node } from '../dom.js';
+import { afterPress } from '../after-press.js';
 import { byKeys, keysToPutBack, putBackRow, rename, takeOff } from '../put-back.js';
 import { changeStructure } from '../actions.js';
 import { listGroup } from '../list-group.js';
@@ -8,9 +9,14 @@ function outfitRow(app, { outfit, taken }, redraw) {
     changeStructure(app, 'parts');
     redraw();
   };
+  // drawn again only once the press that took the focus has had its click (see a part's name)
   const named = (event) => {
-    rename(app, { key: 'outfits', item: outfit, name: event.target.value.trim() });
-    changed();
+    const name = event.target.value.trim();
+
+    afterPress(() => {
+      rename(app, { key: 'outfits', item: outfit, name });
+      changed();
+    });
   };
   const remove = (event) => {
     const keys = byKeys(event);

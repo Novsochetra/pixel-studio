@@ -16,7 +16,9 @@ const SAME_RUN_MS = 1000;
 
 // key after key, a layer moved several places is one move to undo, as a drag there is
 function moveByKey(app, key, to) {
-  const inRun = performance.now() - (app.layerMovedAt ?? -Infinity) < SAME_RUN_MS;
+  const last = app.layerMoved ?? { key: null, at: -Infinity };
+  // a run is of one layer: another moved straight after is a step of its own
+  const inRun = last.key === key && performance.now() - last.at < SAME_RUN_MS;
   const steps = app.history.done.length;
 
   restructure(app, 'Move layer', (draft) => placeLayer(frameOf(draft), key, to));
@@ -26,7 +28,7 @@ function moveByKey(app, key, to) {
     app.history.joinLast();
   }
 
-  app.layerMovedAt = performance.now();
+  app.layerMoved = { key, at: performance.now() };
 }
 
 // where a key leads in the stack (0 is the bottom, drawn last in the list)

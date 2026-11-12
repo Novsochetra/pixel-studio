@@ -69,7 +69,8 @@ function drawView(context, { sprite, name, box, scale }) {
   }
 
   context.clip();
-  drawChecker(context, { width, height }, scale * 2);
+  // a view drawn very small keeps a checker that can be seen, and drawn
+  drawChecker(context, { width, height }, Math.max(2, scale * 2));
   context.translate(-box.left * scale, -box.top * scale);
   drawSprite(context, sprite, scale);
 }

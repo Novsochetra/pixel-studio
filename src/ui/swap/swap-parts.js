@@ -59,7 +59,9 @@ export function paletteRow(job) {
     );
     job.paletteId = project.palettes.at(-1)?.id ?? null;
     changeStructure(app, 'palettes');
-    job.draw();
+    // with the keys they go to the list, which shows the palette now picked: left on Remove, a
+    // second Enter took that one off too
+    showAdded(job);
   };
 
   return node(

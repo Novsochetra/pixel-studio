@@ -1,4 +1,5 @@
 import { icon, node } from '../dom.js';
+import { afterPress } from '../after-press.js';
 import {
   addPart,
   followersOf,
@@ -58,12 +59,27 @@ function orderButtons(job, index, change) {
 
 function partRow(job, { part, index, size }, change) {
   const picked = index === job.selected;
-  const rename = (event) => change(() => (part.name = event.target.value.trim() || part.name));
-  const remove = () =>
+  // The list is drawn again once the press that took the focus from the name has had its
+  // click: drawn at once, the button pressed went with the old list and the press did nothing.
+  const rename = (event) => {
+    const name = event.target.value.trim() || part.name;
+
+    afterPress(() => change(() => (part.name = name)));
+  };
+  const remove = (event) => {
+    const keys = event.currentTarget.matches(':focus-visible');
+
     change(() => {
       removePart(job.plan, index);
       job.selected = Math.max(0, Math.min(job.selected, job.plan.parts.length - 1));
     });
+
+    // With the keys they go to Undo, which takes the removal back: on the next part's Remove,
+    // Enter after Enter removed part after part.
+    if (keys) {
+      document.querySelector('.sheet .cut-undo button')?.focus();
+    }
+  };
 
   return node(
     `div.cut-part${picked ? '.picked' : ''}`,

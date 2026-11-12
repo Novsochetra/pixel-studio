@@ -62,6 +62,10 @@ const showsInGrid = (patch) => {
 
 const TIGHT = { across: 16, down: 16 };
 
+// with a phone's sheet up, the stylesheet keeps room under the canvas for a bar
+// (71-phone-sheets.css): more at the stage's foot than any margin of its own
+const BAR_ROOM_PX = 48;
+
 // the zoom at which the canvas fits the part of the stage above the frames
 export function fitZoom(stage, sprite) {
   const area = stage.querySelector('.edit-scroll') ?? stage;
@@ -81,8 +85,11 @@ export function fitZoom(stage, sprite) {
   const fit = Math.floor(roomWith({ across, down }));
   // A canvas shown at its own size has the most to gain from a whole step more: the stage gives
   // up its margins for it (`.tight`), or the step would put its last rows out of sight. A
-  // tablet held wide left a 160 pixel canvas at 100%, with room for 200%.
-  const tight = fit < 2 ? Math.floor(roomWith(TIGHT)) : fit;
+  // tablet held wide left a 160 pixel canvas at 100%, with room for 200%. Not with a phone's
+  // sheet up: the room under the canvas there is a bar's, and a canvas grown into it had its
+  // last rows under the bar of a selection.
+  const keepsBarRoom = parseFloat(padding.paddingBottom) >= BAR_ROOM_PX;
+  const tight = fit < 2 && !keepsBarRoom ? Math.floor(roomWith(TIGHT)) : fit;
 
   inner.classList.toggle('tight', tight > fit);
 
