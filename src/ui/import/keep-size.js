@@ -22,6 +22,8 @@ export function keepSizeOffer(job, report, cleanAgain) {
     const anchor = firstAnchor(app.store.state.project);
 
     if (await resizeCanvas(app, { size, anchor })) {
+      // the window may yet be cancelled, and the canvas with it (import-sheet.js)
+      job.outcome.grew = true;
       cleanAgain();
     }
   };

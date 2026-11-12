@@ -23,3 +23,10 @@ test('a step stops at either end', () => {
   assert.equal(steppedZoom(MIN_ZOOM, -1), MIN_ZOOM);
   assert.equal(steppedZoom(MAX_ZOOM, 1), MAX_ZOOM);
 });
+
+test('a canvas that fits the window whole has no half to go to', () => {
+  assert.equal(nearestZoom(0.3, 1), 1);
+  assert.equal(steppedZoom(1, -1, 1), 1);
+  assert.equal(steppedZoom(2, -1, 1), 1);
+  assert.equal(steppedZoom(1, -1, MIN_ZOOM), MIN_ZOOM);
+});

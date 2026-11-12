@@ -130,7 +130,12 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - Off a phone the frames stand under the canvas, as tall as the line above them is dragged
   (`grid/grid-resizer.js`, `--grid-height`); on `compact` they are a sheet, with no line.
 - Fit shows the whole canvas, at a whole zoom, or at a half where the canvas is larger than the
-  window (`nearestZoom`, `steppedZoom` in `navigate.js`). A canvas that would be shown at its own size
+  window (`nearestZoom`, `steppedZoom` in `navigate.js`). Only such a canvas has the half
+  (`leastZoom`): a small one pinched down to it was a thumbnail.
+- With no band above the canvas and room beside it (a laptop's short window, a phone held on its
+  side), the selection's bar is a card in the stage's corner, clear of the art
+  (`selection-beside.js`, `72-selection-beside.css`). With no room beside it either, it stands
+  at the end of the canvas the selection is not in. A canvas that would be shown at its own size
   takes a step more when the stage's margins are all that stop it, and the stage gives them up
   (`fitZoom`, `.stage-inner.tight`): its last rows are never under the frames.
 - Two fingers never zoom the page (`touch-action` on `html`): they zoom the canvas, on the art or

@@ -2,6 +2,7 @@ import { node, toast } from './dom.js';
 import { openSheet } from './sheet.js';
 import { currentAnimation, referenceSprite, replaceDirectionArt } from './actions.js';
 import { keepVersion } from './versions-sheet.js';
+import { undo } from './undo.js';
 import { optionFields } from './import/import-options.js';
 import { runClean, shaped } from './import/import-run.js';
 import { scalesAfter } from './import/view-scale.js';
@@ -45,8 +46,18 @@ function cleansAlone(state, direction, frame) {
   return isThePose || project.kind !== 'character' || !isPose(referenceSprite(state));
 }
 
+// The canvas made larger for a picture goes back as the window is cancelled: Cancel left it
+// at the new size, with nothing put on it. Not once something else has been done since.
+function cancelGrowth(app, { grew, used }) {
+  if (grew && !used && app.history.nextUndo === 'Canvas size') {
+    undo(app);
+  }
+}
+
 function accept(job, place) {
   const { app, direction, frame } = job;
+
+  job.outcome.used = true;
   const { state } = app.store;
   const was = frameAt(state.project, { ...state.at, direction, frame });
   const replaced = Boolean(was && hasArt(was));
@@ -106,8 +117,12 @@ export async function openImport(app, direction, file, frame = app.store.state.a
     return;
   }
 
+  const outcome = { grew: false, used: false };
   // not opened on its first field: in a short window that is under the buttons at its foot
-  const sheet = openSheet(`Clean into ${place}`, null, { wide: true, focusField: false });
+  const sheet = openSheet(`Clean into ${place}`, () => cancelGrowth(app, outcome), {
+    wide: true,
+    focusField: false,
+  });
   const alone = cleansAlone(state, direction, frame);
 
   // a later frame of an animation is another pose: by default it keeps its own height
@@ -117,6 +132,7 @@ export async function openImport(app, direction, file, frame = app.store.state.a
     frame,
     alone,
     image,
+    outcome,
     result: null,
     close: sheet.close,
     slot: node('div', { style: { display: 'grid', gap: '12px' } }),

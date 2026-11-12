@@ -182,8 +182,8 @@
 
   .target-picker .swatch,
   .map-row .swatch {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
   }
 
   .cut-part {
@@ -265,6 +265,15 @@
     inset: 0 -4px;
   }
 
+  /* the two flips, bare pictures on a phone's bar, and the empty frame's buttons */
+  .selection-bar .btn {
+    min-width: 40px;
+  }
+
+  .empty-frame .btn {
+    --btn-height: 40px;
+  }
+
   /* held at arm's length, the small print of a desk is too small to read */
   .hint,
   .field > span,
@@ -275,6 +284,8 @@
   .place-count,
   .folders-head,
   .swatches-toggle,
+  .dock-tab,
+  .compare figcaption,
   .stage-place,
   .grid-number,
   .grid-label small {
@@ -310,5 +321,16 @@
 
   :root[data-layout='compact'] .grid-bar .icon-toggle {
     width: 34px;
+  }
+
+  /* Projects' three pages share the row: as wide as their words, the last was cut off at the
+     screen's edge with nothing to say it was there */
+  .projects-nav {
+    justify-self: stretch;
+  }
+
+  .projects-nav button {
+    flex: 1;
+    padding-inline: 4px;
   }
 }

@@ -1,7 +1,7 @@
 import { node, icon } from './dom.js';
 import { redo, undo } from './undo.js';
 import { keyNames } from './platform-keys.js';
-import { steppedZoom } from './navigate.js';
+import { leastZoom, steppedZoom } from './navigate.js';
 
 const SAVE_TEXT = {
   pending: 'Edited',
@@ -23,7 +23,7 @@ export function saveText(state) {
 
 // one step closer or further: a button that stops at the end of what the canvas can zoom to
 function zoomStep(app, { step, name, keys, iconName }) {
-  const zoom = steppedZoom(app.store.state.zoom, step);
+  const zoom = steppedZoom(app.store.state.zoom, step, leastZoom(app));
 
   return node(
     'button.btn.quiet',

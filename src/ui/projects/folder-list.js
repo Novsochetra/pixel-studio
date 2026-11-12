@@ -1,4 +1,5 @@
 import { icon, node } from '../dom.js';
+import { forHands } from '../platform-keys.js';
 import { folderDropTarget } from './drag-to-folder.js';
 import { moveProject } from './change-list.js';
 import { EVERY_PROJECT, NO_FOLDER, countsByPlace, foldersMatching } from '../../store/browse.js';
@@ -60,8 +61,7 @@ function foldersHead(job) {
   );
 }
 
-const NONE_YET =
-  'Folders keep a game’s projects together. Put a project in one from its ⋯ menu, or drag it onto the folder.';
+const NONE_YET = `Folders keep a game’s projects together. Put a project in one from its ⋯ menu${forHands(', or drag it onto the folder', '')}.`;
 
 export function folderList(job) {
   const { index } = job.app;

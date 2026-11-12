@@ -20,7 +20,9 @@
 :root[data-layout='compact'] .quick-start {
   top: calc(60px + env(safe-area-inset-top, 0px));
   left: 16px;
-  max-height: calc(100% - 200px);
+  /* as tall as the room between the bar at the top and the tools at the foot: on the smallest
+     phone a shorter one cut its own button off */
+  max-height: calc(100dvh - 150px);
   overflow: auto;
 }
 

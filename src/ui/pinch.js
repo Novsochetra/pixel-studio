@@ -1,4 +1,4 @@
-import { MAX_ZOOM, MIN_ZOOM, nearestZoom } from './navigate.js';
+import { MAX_ZOOM, MIN_ZOOM, leastZoom, nearestZoom } from './navigate.js';
 
 const middle = ([first, second]) => ({ x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 });
 
@@ -10,7 +10,7 @@ export function heldAt(start, touches) {
   const points = [...touches.values()];
   const mid = middle(points);
   const zoom = Math.max(
-    MIN_ZOOM,
+    start.least ?? MIN_ZOOM,
     Math.min(MAX_ZOOM, start.zoom * (spreadOf(points) / start.spread)),
   );
   const scale = zoom / start.zoom;
@@ -27,7 +27,7 @@ export function heldAt(start, touches) {
 // The fingers let go: the canvas is drawn once at the whole zoom nearest, scrolled so the pixel
 // that was under them is as near there as the stage lets it be, and glides the rest of the way.
 function settle(app, { stage, holder }, start, held) {
-  const zoom = nearestZoom(held.zoom);
+  const zoom = nearestZoom(held.zoom, leastZoom(app));
   const art = { x: start.grip.x / start.zoom, y: start.grip.y / start.zoom };
   const shown = {
     left: start.box.left + held.x,
@@ -67,6 +67,8 @@ export function twoFingerSession(app, { stage, canvas }, touches) {
   const start = {
     box,
     zoom: app.store.state.zoom,
+    // the canvas held by the fingers goes no smaller than it can be left at
+    least: Math.min(leastZoom(app), app.store.state.zoom),
     spread: spreadOf(points) || 1,
     grip: { x: mid.x - box.left, y: mid.y - box.top },
   };

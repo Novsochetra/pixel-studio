@@ -13,7 +13,7 @@ const remember = () => keepSetting(SEEN, true);
 const CLEAN = {
   keys: 'drop an AI image on the canvas, or into a frame below it.',
   fingers:
-    'tap the round button at the foot, then Frames, and put an AI image into a frame from its ⋯ menu.',
+    'tap Panels (the sliders, at the foot), then Frames, and put an AI image into a frame from its ⋯ menu.',
   // a tablet held wide has the frames under its canvas: there is no round button to tap
   tablet: 'put an AI image into a frame under the canvas, from its ⋯ menu.',
 };

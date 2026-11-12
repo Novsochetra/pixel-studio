@@ -1,4 +1,5 @@
 import { node } from '../dom.js';
+import { forHands } from '../platform-keys.js';
 import { placeHead } from './place-head.js';
 import { projectRow } from './project-row.js';
 import { EVERY_PROJECT, projectsIn } from '../../store/browse.js';
@@ -7,8 +8,7 @@ const UNREADABLE =
   'Your projects list could not be read just now, so only this one shows. Nothing was removed: reload the page to see the others.';
 const ALONE =
   'Your other projects show here, each with its own views, animations, colours and history. For the next one of its kind, "… like this" under This project sets one up as this one is, with nothing drawn.';
-const EMPTY_FOLDER =
-  'Nothing in this folder yet. Pick "Move to folder…" in a project’s ⋯ menu, or drag a project onto the folder.';
+const EMPTY_FOLDER = `Nothing in this folder yet. Pick "Move to folder…" in a project’s ⋯ menu${forHands(', or drag a project onto the folder', '')}.`;
 
 function emptyHint({ app, view }, entries) {
   if (app.index.unreadable) {

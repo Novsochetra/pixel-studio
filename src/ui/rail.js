@@ -90,6 +90,24 @@ const allTools = (app) =>
     icon('grid'),
   );
 
+const toolInSight = (el) =>
+  el.querySelector('[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+
+// A turn of the phone lays the strip the other way, and the tool in hand was left past its edge
+// with nothing marked: it is brought back in sight as the window changes size.
+function watchTurns(el) {
+  if (el.dataset.watched) {
+    return;
+  }
+
+  el.dataset.watched = 'true';
+  window.addEventListener('resize', () => {
+    if (document.documentElement.dataset.layout === 'compact') {
+      toolInSight(el);
+    }
+  });
+}
+
 export function renderRail(el, app) {
   const { state } = app.store;
   const tools = toolsFor(state.project).map((tool) => toolButton(app, tool));
@@ -99,11 +117,9 @@ export function renderRail(el, app) {
   // A tool picked from elsewhere (a layer's row, a key) may be past the edge of a phone's strip.
   // Only a change of tool moves the strip: Symmetry, at its far end, stays under the finger.
   if (state.layout === 'compact' && el.dataset.tool !== state.tool) {
-    el.querySelector('[aria-pressed="true"]')?.scrollIntoView({
-      block: 'nearest',
-      inline: 'center',
-    });
+    toolInSight(el);
   }
 
   el.dataset.tool = state.tool;
+  watchTurns(el);
 }

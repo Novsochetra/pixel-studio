@@ -153,6 +153,9 @@ test('a few pixels sketched in the reference view are no pose to match a picture
   assert.equal(isPose(sketch), false);
   assert.equal(isPose(createSprite(64, 64)), false);
   assert.equal(isPose(null), false);
+  // a shape in one colour: a picture matched to its colours came out a silhouette of it
+  assert.equal(isPose(figure), false);
+  setPixel(figure, 30, 12, pack(20, 20, 20));
   assert.equal(isPose(figure), true);
 });
 

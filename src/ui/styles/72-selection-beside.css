@@ -1,0 +1,60 @@
+/* The selection's bar beside the canvas (selection-beside.js): a card in the stage's corner, two
+   to a row, clear of the art. For a window with no band above the canvas and room at its side: a
+   laptop's, a phone's held on its side. At the canvas's end the bar lay over the art's last
+   rows, the feet of a figure among them. After the phone's own rules for the bar, which it
+   changes. */
+:root .selection-bar[data-side='beside'] {
+  --rise-from: 0 -10px;
+
+  top: 6px;
+  right: auto;
+  bottom: auto;
+  left: 6px;
+  translate: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  width: 180px;
+  max-width: none;
+  padding: 6px;
+  border-radius: var(--radius-card);
+  overflow: visible;
+}
+
+:root .selection-bar[data-side='beside'] .btn {
+  justify-content: flex-start;
+  padding-inline: 10px;
+}
+
+/* the rows stay pairs: Delete, third where fingers have Paste beside Copy, takes a row, and
+   Turn stands at the head of its own with the angle beside it */
+:root .selection-bar[data-side='beside'] .selection-delete:nth-child(3) {
+  grid-column: 1 / -1;
+}
+
+:root .selection-bar[data-side='beside'] .bar-word {
+  grid-column: 1;
+}
+
+:root .selection-bar[data-side='beside'] .action-word {
+  display: inline;
+}
+
+:root .selection-bar[data-side='beside'] .selection-end {
+  position: static;
+  grid-column: 1 / -1;
+  display: grid;
+  margin: 4px 0 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+:root .selection-bar[data-side='beside'] .selection-end::before,
+:root .selection-bar[data-side='beside'] .selection-end::after {
+  display: none;
+}
+
+:root .selection-bar[data-side='beside'] .selection-done {
+  justify-content: center;
+}

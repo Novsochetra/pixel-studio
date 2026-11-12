@@ -88,7 +88,7 @@ const HOLD_HINT = 'Hold a layer, then drag it, to move it up or down.';
 
 // what a list of more than one layer has under it
 const forSeveral = (app, picked) => [
-  hasKeyboard() ? null : node('p.hint', {}, HOLD_HINT),
+  hasKeyboard() ? null : node('p.hint.for-fingers', {}, HOLD_HINT),
   pickSeveral(app),
   picked > 1 ? node('p.hint', {}, `${picked} layers picked. ${PICKED_HINT}`) : null,
 ];

@@ -264,8 +264,9 @@
   width: 44px;
 }
 
-/* a line of advice costs a phone a third of its panel */
-:root[data-layout='compact'] .section > p.hint {
+/* a line of advice costs a phone a third of its panel; one that says what fingers must do, and
+   nothing else says, is kept */
+:root[data-layout='compact'] .section > p.hint:not(.for-fingers) {
   display: none;
 }
 
@@ -609,10 +610,10 @@
     min-height: 44px;
   }
 
-  /* too little height for a title and buttons that both stay put: they scroll with the rest */
-  :root[data-layout='compact'] .sheet-head,
-  :root[data-layout='compact'] :is(.sheet, .sheet-out) > .sheet-actions:last-child,
-  :root[data-layout='compact'] :is(.sheet, .sheet-out) > :last-child > .sheet-actions:last-child {
+  /* Too little height for a title and buttons that both stay put: the title scrolls with the
+     rest. The buttons stay: scrolled away too, a window opened with only a sliver of them in
+     sight. */
+  :root[data-layout='compact'] .sheet-head {
     position: static;
   }
 
