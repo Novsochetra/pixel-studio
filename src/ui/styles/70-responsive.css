@@ -276,13 +276,23 @@
     width: 40px;
   }
 
-  /* the views' button keeps to what the row has left, a long name cut short: "Front only" was
-     wide enough to send the frame rate to a third row, and the frames under the tools */
+  /* the views' button keeps to what the row has left: "Front only" was wide enough to send the
+     frame rate to a third row, and the frames under the tools. A longer name is cut short at
+     its end, with the chevron still in sight: cut by the button, it lost both its ends. */
   :root[data-layout='compact'] .views-pick {
+    justify-content: flex-start;
     max-width: calc(100% - 185px);
+  }
+
+  :root[data-layout='compact'] .views-pick > span {
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  :root[data-layout='compact'] .views-pick > svg {
+    flex: none;
   }
 }
 

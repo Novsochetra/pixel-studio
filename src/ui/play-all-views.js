@@ -43,14 +43,28 @@ function playedBox(project, animation, views) {
   };
 }
 
-// the stage above the frames, less its own padding
+// the stage above the frames, less its own padding and the frame the canvas stands in: without
+// the frame's few pixels, views fitted to the last pixel made the stage scroll sideways
 function roomFor(canvas) {
   const area = canvas.closest('.edit-scroll');
   const padding = getComputedStyle(area.querySelector('.stage-inner') ?? area);
+  const holder = canvas.parentElement;
+  const frame = {
+    across: holder.offsetWidth - canvas.offsetWidth,
+    down: holder.offsetHeight - canvas.offsetHeight,
+  };
 
   return {
-    width: area.clientWidth - parseFloat(padding.paddingLeft) - parseFloat(padding.paddingRight),
-    height: area.clientHeight - parseFloat(padding.paddingTop) - parseFloat(padding.paddingBottom),
+    width:
+      area.clientWidth -
+      parseFloat(padding.paddingLeft) -
+      parseFloat(padding.paddingRight) -
+      frame.across,
+    height:
+      area.clientHeight -
+      parseFloat(padding.paddingTop) -
+      parseFloat(padding.paddingBottom) -
+      frame.down,
   };
 }
 

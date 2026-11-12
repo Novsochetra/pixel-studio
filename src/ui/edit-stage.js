@@ -2,6 +2,7 @@ import { node } from './dom.js';
 import { MAX_ZOOM, MIN_ZOOM, QUARTER_ZOOM, bindWheelZoom } from './navigate.js';
 import { renderLayerTurnBar } from './layer-turn-bar.js';
 import { renderSelectionBar } from './selection-bar.js';
+import { standsBeside } from './selection-beside.js';
 import { paint } from './stage-paint.js';
 import { bindPointer } from './stage-pointer.js';
 import { renderEmptyFrame } from './empty-frame.js';
@@ -104,6 +105,17 @@ export function fitZoom(stage, sprite) {
   return room >= MIN_ZOOM ? MIN_ZOOM : QUARTER_ZOOM;
 }
 
+// Where a phone has room beside the canvas and none under it (held on its side), these bars
+// are cards in the stage's corner, as the selection's is: the stylesheet lays them out
+// (72-selection-beside.css).
+function placeBars(bars, layout) {
+  const side = layout === 'compact' && standsBeside(layout) ? 'beside' : '';
+
+  bars.forEach((el) => {
+    el.dataset.side = side;
+  });
+}
+
 function renderStage(app, parts, patch) {
   const { canvas, bar, turnBar, poseBar, pinBar, place, empty, grid } = parts;
 
@@ -123,6 +135,7 @@ function renderStage(app, parts, patch) {
   renderLayerTurnBar(turnBar, app);
   renderPoseBar(poseBar, app);
   renderPinBar(pinBar, app);
+  placeBars([turnBar, poseBar, pinBar], app.store.state.layout);
   place.textContent = placeText(app.store.state);
   renderEmptyFrame(empty, app);
 

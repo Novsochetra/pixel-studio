@@ -64,6 +64,19 @@ await page.keyboard.press('ControlOrMeta+Shift+z');
 await page.waitForTimeout(150);
 check((await headSize()) === unpainted, 'and the redo keys');
 
+// a part's name typed, then Tab: the list was drawn again under the control Tab was going to
+await head.getByLabel('Part name').click();
+await page.keyboard.type('x');
+await page.keyboard.press('Tab');
+await page.waitForTimeout(200);
+check(
+  (await page.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? '')).startsWith(
+    'What Headx follows',
+  ),
+  'a part named in the cut window, then Tab, goes on to what it follows',
+);
+await undo.click();
+await page.waitForTimeout(150);
 await head.getByRole('button', { name: 'Remove Head' }).click();
 await page.waitForTimeout(150);
 check((await page.locator('.cut-part').count()) === 12, 'a part is removed');

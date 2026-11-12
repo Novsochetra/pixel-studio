@@ -3,7 +3,7 @@ import { compositeFrame } from '../model/composite.js';
 import { hasArt, heldFrame } from '../model/frames.js';
 import { drawnDirections, flippedSides } from '../model/directions.js';
 import { isSingleView } from '../model/kinds.js';
-import { hiddenFrames } from '../model/frame-play.js';
+import { hiddenFrames, listed } from '../model/frame-play.js';
 
 // the drawn views in compass order, then the flipped ones when they are wanted
 function sheetRows(project, animation, includeMirrored) {
@@ -147,7 +147,7 @@ export function buildSheet(project, animation, settings) {
   // a frame the preview never did
   if (hidden.length) {
     warnings.push(
-      `${hidden.length > 1 ? 'Frames' : 'Frame'} ${hidden.join(', ')} ${hidden.length > 1 ? 'are' : 'is'} hidden from play, and still in the files.`,
+      `${hidden.length > 1 ? 'Frames' : 'Frame'} ${listed(hidden)} ${hidden.length > 1 ? 'are' : 'is'} hidden from play, and still in the files.`,
     );
   }
 

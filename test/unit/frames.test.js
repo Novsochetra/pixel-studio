@@ -266,3 +266,11 @@ test('a new animation is offered untaken names and the drawn poses, the open one
   assert.deepEqual(posesToStartFrom(project, run), [run, idle]);
   assert.ok(!posesToStartFrom(project, walk).includes(walk));
 });
+
+test('numbers are listed as they are said', async () => {
+  const { listed } = await import('../../src/model/frame-play.js');
+
+  assert.equal(listed([3]), '3');
+  assert.equal(listed([2, 3]), '2 and 3');
+  assert.equal(listed([2, 3, 5]), '2, 3 and 5');
+});

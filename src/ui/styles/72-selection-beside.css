@@ -58,3 +58,46 @@
 :root .selection-bar[data-side='beside'] .selection-done {
   justify-content: center;
 }
+
+/* A phone held on its side has no room under the canvas, and room beside it: the bars of a pose,
+   a pin and the layers' turn are cards in the stage's corner there too (edit-stage.js says
+   when). At the canvas's foot they lay over its last rows, which no scroll brought out. */
+@media (orientation: landscape) and (max-height: 520px) {
+  :root[data-layout='compact'] :is(.pose-bar, .pin-bar, .layer-turn-bar)[data-side='beside'] {
+    --rise-from: 0 -10px;
+
+    top: 6px;
+    right: auto;
+    bottom: auto;
+    left: 6px;
+    translate: none;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: flex-start;
+    gap: 6px;
+    width: 180px;
+    max-width: none;
+    max-height: calc(100% - 12px);
+    padding: 8px;
+    border-radius: var(--radius-card);
+    overflow: hidden auto;
+    white-space: normal;
+  }
+
+  /* what a card says wraps in it: on one line, as in the bar, its end was cut off */
+  :root[data-layout='compact'] :is(.pose-bar, .pin-bar, .layer-turn-bar)[data-side='beside'] > * {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  /* With no room beside the canvas either (the largest canvas), the bar stays at the stage's
+     foot and the stage keeps room under the canvas, so its last rows scroll out from under
+     the bar. */
+  :root[data-layout='compact']
+    .stage:has(:is(.pose-bar, .pin-bar, .layer-turn-bar):not([hidden], [data-side='beside']))
+    .stage-inner.edit {
+    padding-bottom: 64px;
+  }
+}

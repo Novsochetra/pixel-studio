@@ -1,5 +1,6 @@
 import { node, replace, toast } from '../dom.js';
 import { openSheet } from '../sheet.js';
+import { tabSaysChange } from '../field-keys.js';
 import { watchBelow, watchMore } from '../more-behind.js';
 import { currentAnimation, currentLayer } from '../actions.js';
 import { frameAt } from '../../model/project.js';
@@ -153,6 +154,8 @@ export function openCutSheet(app) {
     art.redraw();
   };
   job.close = sheet.close;
+  // a part's name typed, then Tab: said at the key, so Tab goes on from the name drawn again
+  tabSaysChange(sheet.body);
   rememberPlan(job);
   sheet.body.classList.add('cut-window');
   sheet.body.append(

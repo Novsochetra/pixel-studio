@@ -23,6 +23,12 @@ export function setFrameHidden(animation, index, hidden) {
   return index;
 }
 
+// numbers as they are said: "2", "2 and 3", "2, 3 and 5"
+export const listed = (numbers) =>
+  numbers.length > 1
+    ? `${numbers.slice(0, -1).join(', ')} and ${numbers.at(-1)}`
+    : String(numbers[0]);
+
 // the frames hidden from play, as they are numbered in the grid
 export function hiddenFrames(animation) {
   return Array.from({ length: frameCount(animation) }, (_, index) => index + 1).filter((number) =>

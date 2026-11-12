@@ -35,6 +35,38 @@ check(
   await page.getByRole('button', { name: 'Undo', exact: true }).first().isEnabled(),
   'and a finger still draws on it there',
 );
+
+// Drawn at a quarter by leaving rows out, a stroke one pixel thick was on a row left out three
+// times in four: in the art, and not on the screen.
+const rowsShown = () =>
+  canvas.evaluate((element) => {
+    const { data } = element.getContext('2d').getImageData(0, 0, element.width, element.height);
+    let rows = 0;
+
+    for (let y = 0; y < element.height; y++) {
+      let red = 0;
+
+      for (let x = 0; x < element.width; x++) {
+        const at = (y * element.width + x) * 4;
+
+        red += data[at] > 180 && data[at + 1] < 90 && data[at + 2] < 90 ? 1 : 0;
+      }
+
+      rows += red > element.width / 3 ? 1 : 0;
+    }
+
+    return rows;
+  });
+const before = await rowsShown();
+
+for (const down of [0.31, 0.42, 0.53, 0.64]) {
+  await stroke([0.05, down], [0.95, down]);
+}
+
+check(
+  (await rowsShown()) - before >= 4,
+  `four thin strokes drawn at a quarter are all to be seen (${(await rowsShown()) - before} rows)`,
+);
 await page.screenshot({ path: `${shots}/phone-big.png` });
 
 // A frame hidden from play is a place in every view. One view's frames moving up under it
@@ -62,5 +94,25 @@ check(
   (await canvas.boundingBox()).width === 256,
   'the sheet shut, the canvas is at its half again',
 );
+
+// Held on its side a phone has no room under the canvas: a pin's bar lay over its last rows,
+// and nothing scrolled them out. It is a card beside the canvas there.
+await page.setViewportSize({ width: 750, height: 342 });
+await page.waitForTimeout(600);
+await page.keyboard.press('p');
+await page.waitForTimeout(400);
+const pin = await page.locator('.pin-bar').boundingBox();
+const art = await canvas.boundingBox();
+const beside = pin.x + pin.width <= art.x;
+const under = Math.max(0, art.y + art.height - pin.y);
+const scrolls = await page
+  .locator('.edit-scroll')
+  .evaluate((stage) => stage.scrollHeight - stage.clientHeight);
+
+check(
+  beside || scrolls >= under,
+  `on its side the pin’s bar is beside the canvas, or the canvas scrolls out from under it (${Math.round(under)} under, ${scrolls} to scroll)`,
+);
+await page.screenshot({ path: `${shots}/phone-big-landscape.png` });
 
 await finish();

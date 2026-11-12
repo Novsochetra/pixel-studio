@@ -1,4 +1,6 @@
 // Canvas painting shared by the editor and the pictures of every view side by side.
+import { createSprite } from '../model/sprite.js';
+import { shrinkInto, shrunkSize } from '../model/sprite-shrink.js';
 
 export function cssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -31,11 +33,36 @@ function nativeCanvas(sprite) {
 
 // The drawing helpers paint at the context's origin: a caller drawing elsewhere translates first.
 
+const smaller = new WeakMap();
+
+// Under 100% the sprite is made smaller first, each square of art keeping a painted pixel: left
+// to the canvas, which draws every other row or one row in four, thin strokes were not drawn.
+function forScale(sprite, scale) {
+  if (scale >= 1) {
+    return sprite;
+  }
+
+  const step = Math.ceil(1 / scale);
+  const { width, height } = shrunkSize(sprite, step);
+  const kept = smaller.get(sprite);
+  const into = kept?.width === width && kept.height === height ? kept : createSprite(width, height);
+
+  smaller.set(sprite, into);
+
+  return shrinkInto(sprite, step, into);
+}
+
 export function drawSprite(context, sprite, scale, alpha = 1) {
   context.save();
   context.globalAlpha = alpha;
   context.imageSmoothingEnabled = false;
-  context.drawImage(nativeCanvas(sprite), 0, 0, sprite.width * scale, sprite.height * scale);
+  context.drawImage(
+    nativeCanvas(forScale(sprite, scale)),
+    0,
+    0,
+    sprite.width * scale,
+    sprite.height * scale,
+  );
   context.restore();
 }
 

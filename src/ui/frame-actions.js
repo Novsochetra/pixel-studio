@@ -9,7 +9,7 @@ import {
   removeFrame,
   removeViewFrame,
 } from '../model/frames.js';
-import { hiddenFrames, isFrameHidden, setFrameHidden } from '../model/frame-play.js';
+import { hiddenFrames, isFrameHidden, listed, setFrameHidden } from '../model/frame-play.js';
 import { viewName } from '../model/kinds.js';
 import { copyFrameToViews } from '../model/copy-frame.js';
 import { copyOfLayer } from '../model/structure.js';
@@ -56,14 +56,17 @@ export const deleteFrame = (app, index) =>
 function saysWhatMoved(app, direction, index) {
   const { state } = app.store;
   const animation = currentAnimation(state);
-  const shorter = animation.directions[direction].frames.length < frameCount(animation);
+  const { frames } = animation.directions[direction];
+  // frames of this view that came after the one deleted, and moved; the others' stayed
+  const moved = frames.length > index && frames.length < frameCount(animation);
   const hidden = hiddenFrames(animation).filter((number) => number > index);
 
-  if (shorter && hidden.length) {
+  if (moved && hidden.length) {
     const view = viewName(state.project, direction);
+    const still = hidden.length > 1 ? `Frames ${listed(hidden)} are` : `Frame ${hidden[0]} is`;
 
     toast(
-      `${view}’s later frames moved up a place. Frame ${hidden.join(', ')} is still hidden from play, in every view.`,
+      `${view}’s later frames moved up a place. ${still} still hidden from play, in every view.`,
     );
   }
 }

@@ -140,7 +140,10 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   the quarter (`leastZoom`): a small one pinched down to them was a thumbnail.
 - With no band above the canvas and room beside it (a laptop's short window, a phone held on its
   side), the selection's bar is a card in the stage's corner, clear of the art
-  (`selection-beside.js`, `72-selection-beside.css`). With no room beside it either, it stands
+  (`selection-beside.js`, `72-selection-beside.css`). On a phone held on its side the bars of a
+  pose, a pin and the layers' turn are cards there too (`placeBars`), and with no room beside
+  the canvas either the stage keeps room under it, so its last rows scroll out from under the
+  bar. With no room beside it either, it stands
   at the end of the canvas the selection is not in. A canvas that would be shown at its own size
   takes a step more when the stage's margins are all that stop it, and the stage gives them up
   (`fitZoom`, `.stage-inner.tight`): its last rows are never under the frames.
@@ -271,6 +274,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - The view a project is left on (view, frame, tool, colour) is kept for the next visit
   (`view-kept.js`): something new in the state that is how the editor is showing things joins
   `VIEW` there.
+- Under 100% a sprite is made smaller before it is drawn, each square of art keeping a painted
+  pixel (`shrinkInto`, `forScale` in `draw.js`): left to the canvas, thin strokes fell on rows
+  that were not drawn.
 - What runs at every move of the pointer is kept small on the largest canvas (512×512): the
   checkerboard is one tile repeated (`checker.js`), a pass over a sprite's pixels or a
   selection's cells is a plain loop, and an inspector section folded shut draws its title alone
