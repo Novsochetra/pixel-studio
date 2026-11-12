@@ -44,9 +44,14 @@ function editing() {
   const findLayer = (id) =>
     [...allLayers(project)].find(({ layer }) => layer.id === id)?.layer ?? null;
   const app = {
-    store: { state, set: (patch) => Object.assign(state, patch), touch() {} },
+    store: {
+      state,
+      set: (patch) => Object.assign(state, patch),
+      touch() {},
+      together: (change) => change(),
+    },
     history: new History(findLayer),
-    saver: { markLayers() {}, markNewLayers() {}, markStructure() {} },
+    saver: { markLayers() {}, markRestructured() {}, markStructure() {} },
   };
 
   return { ...made, app, state, body: (frame = 0) => bodyOf(made.front.frames[frame]) };

@@ -92,6 +92,37 @@ await page.waitForTimeout(1500);
 await page.locator('.sheet').getByRole('button', { name: 'Undo', exact: true }).tap();
 await page.waitForTimeout(250);
 check((await sizes()).join() === guessed, 'and Undo under a finger takes that back');
+// the whole figure left a hand a few pixels wide on a phone: zoomed, the part fills the room
+const shape = () =>
+  page.locator('.cut-canvas').evaluate((canvas) => {
+    const box = canvas.getBoundingClientRect();
+
+    return { tall: box.height / box.width, wide: box.width };
+  });
+const wholeArt = await shape();
+
+await page.locator('.cut-brush').getByRole('button', { name: 'Zoom to part' }).tap();
+await page.waitForTimeout(300);
+const zoomed = await shape();
+
+check(
+  wholeArt.tall > 1.5 && zoomed.tall < 1.5 && zoomed.wide > wholeArt.wide,
+  `Zoom to part shows the part picked close up (${wholeArt.wide}px wide, then ${zoomed.wide}px)`,
+);
+const beforeZoomedStroke = (await sizes()).join();
+const close = await page.locator('.cut-canvas').boundingBox();
+
+await page.locator('.cut-brush').getByRole('button', { name: 'Paint', exact: true }).tap();
+await touch('touchStart', [[close.x + close.width * 0.2, close.y + close.height * 0.5]]);
+await touch('touchMove', [[close.x + close.width * 0.8, close.y + close.height * 0.5]]);
+await touch('touchEnd', []);
+await page.waitForTimeout(250);
+check((await sizes()).join() !== beforeZoomedStroke, 'and a stroke there paints the part');
+await page.locator('.cut-brush').getByRole('button', { name: 'Zoom to part' }).tap();
+await page.waitForTimeout(300);
+check((await shape()).tall > 1.5, 'and pressed again it shows the whole art');
+await page.waitForTimeout(1500);
+await page.locator('.sheet').getByRole('button', { name: 'Undo', exact: true }).tap();
 await page.locator('.sheet .btn.primary').tap();
 await page.waitForTimeout(800);
 const firstControl = await page.locator('.pose-bar > :first-child').boundingBox();

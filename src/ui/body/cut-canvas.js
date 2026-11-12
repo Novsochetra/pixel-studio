@@ -6,7 +6,7 @@ import { linePoints } from '../../editor/paint.js';
 import { paintOwners, pivotsOf } from '../../model/body/cut-plan.js';
 import { keepStep, planCopy } from '../../model/body/cut-steps.js';
 import { drawLasso, lassoDrag } from './cut-lasso.js';
-import { viewBox } from './cut-view.js';
+import { refit } from './cut-view.js';
 
 // The art with each part painted over in its colour, and the pivots each part turns about. The
 // brush gives pixels to the part picked; a pivot is dragged where the part should turn.
@@ -133,19 +133,26 @@ function pressOn(job, canvas, event) {
   return job.tool === 'lasso' ? lassoDrag(job, at(true)) : brushDrag(job, at(false));
 }
 
+// a second finger takes the stroke back, as it does on the editor's canvas: it painted too
+function takeBack(canvas, job, before) {
+  job.plan = before;
+  job.lasso = null;
+  drawCut(canvas, job);
+}
+
 export function cutCanvas(job, onChange) {
   const canvas = node('canvas.cut-canvas', { 'aria-label': 'The art, painted by part' });
   let drag = null;
   let before = null;
+  const show = () => {
+    refit(job);
+    drawCut(canvas, job);
+  };
 
-  job.view = viewBox(job.source);
   canvas.addEventListener('pointerdown', (event) => {
-    // a second finger takes the stroke back, as it does on the editor's canvas: it painted too
     if (drag) {
-      job.plan = before;
-      job.lasso = null;
+      takeBack(canvas, job, before);
       drag = null;
-      drawCut(canvas, job);
       onChange();
 
       return;
@@ -174,7 +181,7 @@ export function cutCanvas(job, onChange) {
 
   canvas.addEventListener('pointerup', letGo);
   canvas.addEventListener('pointercancel', letGo);
-  drawCut(canvas, job);
+  show();
 
-  return { canvas, redraw: () => drawCut(canvas, job) };
+  return { canvas, redraw: show };
 }

@@ -8,8 +8,18 @@ export function cssVar(name) {
 
 const nativeCanvases = new WeakMap();
 
+// Sprites made once and never changed (each view's frame while it plays): their canvas is
+// filled once, where copying their pixels into it at each tick made playing lag on a phone.
+const stillSprites = new WeakSet();
+
+export const keepsStill = (sprite) => stillSprites.add(sprite) && sprite;
+
 function nativeCanvas(sprite) {
   let entry = nativeCanvases.get(sprite);
+
+  if (entry && stillSprites.has(sprite)) {
+    return entry.canvas;
+  }
 
   if (!entry) {
     const canvas = document.createElement('canvas');

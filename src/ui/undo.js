@@ -7,12 +7,10 @@ import { allLayers, frameAt } from '../model/project.js';
 // frames, layers or animations put back, or made again
 function afterStructure(app, step, back) {
   // either side may hold layers the other lacks, so compare both ways
-  app.saver.markLayers([
-    ...changedLayers(step.before, step.after),
-    ...changedLayers(step.after, step.before),
-  ]);
-  app.saver.markNewLayers(app.store.state.project);
-  app.saver.markStructure();
+  app.saver.markRestructured(
+    [...changedLayers(step.before, step.after), ...changedLayers(step.after, step.before)],
+    app.store.state.project,
+  );
   // back to the frame, layer and animation the step was made from, or on to where it led:
   // the art came back, but the editor stayed on whatever was next to it
   const { picked, ...place } = step.place?.[back ? 'before' : 'after'] ?? app.store.state.at;
@@ -144,7 +142,7 @@ export function undo(app) {
   }
 
   const step = app.history.undo(app.store.state.project);
-  afterHistory(app, step, true);
+  app.store.together(() => afterHistory(app, step, true));
   tellStep(step, 'Undone');
 }
 
@@ -154,6 +152,6 @@ export function redo(app) {
   }
 
   const step = app.history.redo(app.store.state.project);
-  afterHistory(app, step, false);
+  app.store.together(() => afterHistory(app, step, false));
   tellStep(step, 'Redone');
 }

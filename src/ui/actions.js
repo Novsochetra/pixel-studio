@@ -139,22 +139,22 @@ export function settleAt(state) {
 
 // An undoable change to frames, layers or animations: `mutate` returns where to go after it.
 export function restructure(app, label, mutate) {
-  const { state } = app.store;
-  const before = snapshotAnimations(state.project.animations);
-  const from = placeOf(state);
-  const at = mutate(state) ?? state.at;
-  const changed = app.history.recordStructure(label, before, state.project);
+  app.store.together(() => {
+    const { state } = app.store;
+    const before = snapshotAnimations(state.project.animations);
+    const from = placeOf(state);
+    const at = mutate(state) ?? state.at;
+    const changed = app.history.recordStructure(label, before, state.project);
 
-  app.saver.markLayers(changedLayers(before, state.project.animations));
-  app.saver.markNewLayers(state.project);
-  app.saver.markStructure();
-  goToSettled(app, settleAt({ ...state, at: { ...state.at, ...at } }));
+    app.saver.markRestructured(changedLayers(before, state.project.animations), state.project);
+    goToSettled(app, settleAt({ ...state, at: { ...state.at, ...at } }));
 
-  if (changed) {
-    app.history.keepPlace(from, placeOf(app.store.state));
-  }
+    if (changed) {
+      app.history.keepPlace(from, placeOf(app.store.state));
+    }
 
-  app.store.touch('animations');
+    app.store.touch('animations');
+  });
 }
 
 // to a place that exists after a change, the selection kept if it is still the same drawing

@@ -1,5 +1,5 @@
 import { currentAnimation } from './actions.js';
-import { cssVar, drawSprite, sizeCanvas } from './draw.js';
+import { cssVar, drawSprite, keepsStill, sizeCanvas } from './draw.js';
 import { drawChecker } from './checker.js';
 import { showsEveryView } from './grid/views-menu.js';
 import { isSingleView, viewName } from '../model/kinds.js';
@@ -89,6 +89,20 @@ function drawView(context, { sprite, name, box, scale }) {
   drawSprite(context, sprite, scale);
 }
 
+// Made once a playback, as its box is: made again at each tick, every view composited and the
+// mirrored sides flipped pixel by pixel, playing lagged on a slow phone. A change stops playing.
+function spriteAt(app, animation, view) {
+  const tick = app.playback.frame;
+  const sprites = (app.playback.sprites ??= new Map());
+  const key = `${view.direction}:${tick}`;
+
+  if (!sprites.has(key)) {
+    sprites.set(key, keepsStill(playedSprite(app.store.state.project, animation, view, tick)));
+  }
+
+  return sprites.get(key);
+}
+
 export function paintAllViews(canvas, app) {
   const { state } = app.store;
   const { project } = state;
@@ -116,7 +130,7 @@ export function paintAllViews(canvas, app) {
     context.save();
     context.translate((i % columns) * step.x, Math.floor(i / columns) * step.y);
     drawView(context, {
-      sprite: playedSprite(project, animation, view, app.playback.frame),
+      sprite: spriteAt(app, animation, view),
       name: viewName(project, view.direction),
       box,
       scale,

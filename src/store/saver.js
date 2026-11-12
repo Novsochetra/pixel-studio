@@ -31,6 +31,13 @@ export class Saver {
     this.schedule();
   }
 
+  // frames, layers or animations made, moved or taken away, and the layers they changed
+  markRestructured(ids, project) {
+    this.markLayers(ids);
+    this.markNewLayers(project);
+    this.markStructure();
+  }
+
   markEverything(project) {
     for (const { layer } of allLayers(project)) {
       this.dirty.add(layer.id);

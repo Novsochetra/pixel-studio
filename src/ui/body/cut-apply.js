@@ -35,20 +35,22 @@ export function makeCut(job) {
   const leftover = leftOver(job.source, job.plan.owners);
   let frames = 0;
 
-  restructure(app, job.recut ? 'Edit the cut' : 'Cut into parts', (draft) => {
-    const animation = currentAnimation(draft);
-    const cutOf = { direction: job.direction, frame: job.frame, rig, source: job.source };
+  app.store.together(() => {
+    restructure(app, job.recut ? 'Edit the cut' : 'Cut into parts', (draft) => {
+      const animation = currentAnimation(draft);
+      const cutOf = { direction: job.direction, frame: job.frame, rig, source: job.source };
 
-    frames = applyCut(draft.project, animation, {
-      ...cutOf,
-      layerKey: job.layer?.key,
-      art: job.layer?.sprite,
-      leftover,
+      frames = applyCut(draft.project, animation, {
+        ...cutOf,
+        layerKey: job.layer?.key,
+        art: job.layer?.sprite,
+        leftover,
+      });
+
+      return { layer: bodyKey(animation) };
     });
-
-    return { layer: bodyKey(animation) };
+    app.store.set({ tool: 'pose', piece: null });
   });
-  app.store.set({ tool: 'pose', piece: null });
   job.close();
   toast(cutSaid(job, { parts: rig.pieces.length, frames, left: Boolean(bounds(leftover)) }));
 }

@@ -29,14 +29,17 @@ function partSprite(source, owners, index) {
   return out;
 }
 
+// read as a pixel's alpha, as the parts are cut once for each pair that meets: a colour made of
+// every pixel of the canvas each time was most of a cut's time
+const opaque = (sprite, i) => sprite.pixels[i * 4 + 3] !== 0;
+
 // the lower part grows, a ring at a time, into the upper part's pixels
 function reachUnder(lower, owners, upperIndex) {
-  const { width } = lower;
   const outline = darkestColour(lower);
   let ring = [];
 
   owners.forEach((owner, i) => {
-    if (owner !== upperIndex && getPixel(lower, i % width, Math.floor(i / width)) !== CLEAR) {
+    if (owner !== upperIndex && opaque(lower, i)) {
       ring.push(i);
     }
   });
@@ -73,7 +76,9 @@ function darkestColour(sprite) {
   let darkest = CLEAR;
 
   for (let i = 0; i < sprite.width * sprite.height; i++) {
-    const colour = getPixel(sprite, i % sprite.width, Math.floor(i / sprite.width));
+    const colour = opaque(sprite, i)
+      ? getPixel(sprite, i % sprite.width, Math.floor(i / sprite.width))
+      : CLEAR;
 
     if (colour !== CLEAR && (darkest === CLEAR || lightness(colour) < lightness(darkest))) {
       darkest = colour;
@@ -83,19 +88,26 @@ function darkestColour(sprite) {
   return darkest;
 }
 
+// The colour is reckoned only where there is somewhere to grow: reckoned for every pixel of the
+// part, a cut took half a second on a slow phone.
 function growFrom(lower, owners, { i, upperIndex, outline }) {
   const { width, height } = lower;
   const [x, y] = [i % width, Math.floor(i / width)];
+  const targets = NEIGHBOURS.map(([dx, dy]) => [x + dx, y + dy])
+    .filter(([nx, ny]) => nx >= 0 && ny >= 0 && nx < width && ny < height)
+    .filter(([nx, ny]) => owners[ny * width + nx] === upperIndex && !getPixel(lower, nx, ny));
+
+  if (!targets.length) {
+    return [];
+  }
+
   const colour = mainColourNear(lower, [x, y], outline);
 
-  return NEIGHBOURS.map(([dx, dy]) => [x + dx, y + dy])
-    .filter(([nx, ny]) => nx >= 0 && ny >= 0 && nx < width && ny < height)
-    .filter(([nx, ny]) => owners[ny * width + nx] === upperIndex && !getPixel(lower, nx, ny))
-    .map(([nx, ny]) => {
-      setPixel(lower, nx, ny, colour);
+  return targets.map(([nx, ny]) => {
+    setPixel(lower, nx, ny, colour);
 
-      return ny * width + nx;
-    });
+    return ny * width + nx;
+  });
 }
 
 function linkedPairs(parts) {
