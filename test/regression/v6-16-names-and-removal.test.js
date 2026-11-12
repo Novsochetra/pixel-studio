@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { History } from '../../src/editor/history.js';
 import { freeName } from '../../src/model/free-name.js';
 import { newProject } from '../../src/model/new-project.js';
-import { takeOff } from '../../src/ui/put-back.js';
+import { rename, takeOff } from '../../src/ui/put-back.js';
 
 // a project file opened twice, or a copy made twice, gave two rows of one name in Projects
 test('a name already in the list is numbered, and a free one is kept', () => {
@@ -51,4 +51,22 @@ test('a part taken off the project is a step that undo brings back in its place'
     project.parts.map((part) => part.name),
     ['Shirt', 'Cape', 'Boots'],
   );
+});
+
+// removing a part was a step and renaming one was not: undo passed over the new name
+test('a part renamed is a step, and a name left as it was is none', () => {
+  const project = newProject({ kind: 'character' });
+
+  project.parts = [{ id: 'a', name: 'Shirt', colours: [] }];
+  const app = appOf(project);
+
+  rename(app, { key: 'parts', item: project.parts[0], name: 'Shirt' });
+  rename(app, { key: 'parts', item: project.parts[0], name: '' });
+  assert.equal(app.history.canUndo, false);
+
+  rename(app, { key: 'parts', item: project.parts[0], name: 'Jersey' });
+  assert.equal(project.parts[0].name, 'Jersey');
+
+  app.history.undo(project);
+  assert.equal(project.parts[0].name, 'Shirt');
 });

@@ -70,10 +70,11 @@ export function showQuickStart(stage, project) {
     return;
   }
 
-  // a button pressed with the keys clicks with no press counted
+  // pressed with the keys, the button shows their ring (a click's count of presses does not
+  // say so in every browser)
   const gotIt = node(
     'button.btn.primary',
-    { onclick: (event) => close(event.detail === 0) },
+    { onclick: (event) => close(event.currentTarget.matches(':focus-visible')) },
     'Got it',
   );
   const onKey = (event) => event.key === 'Escape' && close(true);

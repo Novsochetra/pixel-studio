@@ -1,3 +1,5 @@
+import { standIn } from '../keep-focus.js';
+
 const CONTROLS = 'button, input, select';
 
 // a button with a picture alone (Undo, Redo) is known by its name
@@ -35,6 +37,9 @@ export function keepingFocus(body, draw) {
   draw();
 
   if (place && !held.isConnected) {
-    controlAt(body, place)?.focus();
+    const now = controlAt(body, place);
+
+    // Undo, at the window's first step, is switched off under the keys: it keeps them
+    (now?.disabled ? standIn(now) : now)?.focus();
   }
 }

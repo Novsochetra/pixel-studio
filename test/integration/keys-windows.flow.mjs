@@ -84,6 +84,68 @@ if (await page.locator('.sheet').count()) {
   await page.waitForTimeout(300);
 }
 
+// a part removed with the keys: they stood on the next part's Remove, and a second Enter
+// removed that too
+await page.getByRole('button', { name: 'Team kits…' }).click();
+await page.waitForTimeout(400);
+await page
+  .locator('.sheet details', { hasText: 'Which colours are which part' })
+  .evaluate((fold) => {
+    fold.open = true;
+  });
+const parts = await page.locator('.sheet .part-row').count();
+
+await page.locator('.sheet .part-row').first().locator('button.icon-only').focus();
+await page.keyboard.press('Enter');
+await page.waitForTimeout(300);
+check(
+  (await focused()).startsWith('Put back'),
+  `a part removed with the keys leaves them on Put back (${await focused()})`,
+);
+await page.keyboard.press('Enter');
+await page.waitForTimeout(300);
+check((await page.locator('.sheet .part-row').count()) === parts, 'where Enter puts it back');
+await page.locator('.sheet .part-row input[aria-label="Part name"]').first().focus();
+await page.keyboard.type('x');
+await page.keyboard.press('Tab');
+await page.waitForTimeout(300);
+check(
+  (await focused()) !== 'the page',
+  `a part named, then Tab, keeps the keys (${await focused()})`,
+);
+
+for (let press = 0; press < 3 && (await page.locator('.sheet').count()); press++) {
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+}
+
+// a palette added with the keys: they fell to Apply to all, and the next Enter recoloured
+// every frame
+await page.getByRole('button', { name: 'Swap colours…' }).click();
+await page.waitForTimeout(400);
+await page.locator('.sheet').getByRole('button', { name: 'Ice', exact: true }).focus();
+await page.keyboard.press('Enter');
+await page.waitForTimeout(300);
+check((await focused()) === 'swap-palette', 'a palette added with the keys leaves them on it');
+await page.locator('.sheet details', { hasText: 'Add another palette' }).evaluate((fold) => {
+  fold.open = true;
+});
+await page.locator('.sheet').getByRole('button', { name: 'Dusk', exact: true }).focus();
+await page.keyboard.press('Enter');
+await page.waitForTimeout(300);
+check(
+  (await focused()) === 'swap-palette' &&
+    (await page.locator('#swap-palette option:checked').textContent()).startsWith('Dusk'),
+  `and so does one added from Add another palette (${await focused()})`,
+);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+
+if (await page.locator('.sheet').count()) {
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+}
+
 // a new layer named, then Tab: the list was drawn again under the control Tab was going to
 await openPanel(page, 'Layers');
 await page.getByRole('button', { name: 'New layer' }).focus();
@@ -111,6 +173,16 @@ check(
   (await page.locator('.layer-row[aria-current="true"] .layer-name').textContent()) === stacked[1],
   'Home goes to the top layer',
 );
+const scrolled = () => page.locator('#inspector').evaluate((panel) => panel.scrollTop);
+const before = await scrolled();
+
+await page.keyboard.press('ArrowUp');
+await page.keyboard.press('Alt+ArrowUp');
+await page.waitForTimeout(200);
+check(
+  (await scrolled()) === before && (await focused()) !== 'the page',
+  'an arrow at the list’s end scrolls nothing away',
+);
 await page.keyboard.press('ControlOrMeta+z');
 await page.waitForTimeout(300);
 check((await layerNames())[0] === 'Cape', 'and the move is a step that undo takes back');
@@ -121,6 +193,13 @@ await page.locator('#projects-button').focus();
 await page.keyboard.press('Enter');
 await page.waitForSelector('.sheet .project-row');
 await page.waitForTimeout(500);
+await page.locator('.sheet .place').first().focus();
+await page.keyboard.press('Enter');
+await page.waitForTimeout(300);
+check(
+  (await focused()).includes('All projects'),
+  `a place picked with Enter keeps the keys (${await focused()})`,
+);
 await page.locator('.sheet .folders-new').focus();
 await page.keyboard.press('Enter');
 await page.waitForTimeout(400);

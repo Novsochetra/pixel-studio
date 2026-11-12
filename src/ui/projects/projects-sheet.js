@@ -1,5 +1,7 @@
 import { node, replace } from '../dom.js';
 import { openSheet } from '../sheet.js';
+import { keepFocus } from '../keep-focus.js';
+import { tabSaysChange } from '../field-keys.js';
 import { readSetting, keepSetting } from '../remembered.js';
 import { thisProject } from './this-project.js';
 import { browseBar } from './browse-bar.js';
@@ -48,7 +50,8 @@ function drawing(job, { current, browser, body }) {
   const show = () => {
     job.view.place = knownPlace(job.app.index, job.view.place);
     lastPlace = job.view.place;
-    replace(browser, folderList(job), projectList(job));
+    // a folder picked with the keys keeps them, in the list as it is drawn again
+    keepFocus(browser, () => replace(browser, folderList(job), projectList(job)));
     keepInSight(browser.querySelector('.folder-name-field, .place[aria-current="true"]'));
 
     const where = body.querySelector('.start-where');
@@ -66,7 +69,7 @@ function drawing(job, { current, browser, body }) {
   return {
     show,
     redraw: () => {
-      replace(current, thisProject(job));
+      keepFocus(current, () => replace(current, thisProject(job)));
       show();
     },
   };
@@ -138,6 +141,8 @@ export function openProjectsSheet(app) {
     // over this window, which Escape there comes back to; one of the cast picked shuts both
     lineUp: (entries) => openLineUp(job.pictures.cast(entries), sheet.close),
   });
+  // the project's name typed, then Tab: said at the key, so Tab goes on from the page drawn again
+  tabSaysChange(parts.current);
   sheet.body.classList.add('projects-sheet');
   sheet.body.append(book.nav, ...Object.values(book.pages));
   job.redraw();

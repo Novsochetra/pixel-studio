@@ -1,5 +1,5 @@
 import { icon, node } from './dom.js';
-import { putBackRow, takeOff } from './put-back.js';
+import { byKeys, keysToPutBack, putBackRow, rename, takeOff } from './put-back.js';
 import { changeStructure } from './actions.js';
 import { characterColors } from './character-colours.js';
 import { sharedColours } from '../palette/kits.js';
@@ -22,13 +22,19 @@ function colourChip(part, color, toggle) {
 }
 
 function nameAndRemove(app, { part, taken }, save) {
-  const rename = (event) => {
-    part.name = event.target.value.trim() || part.name;
+  const named = (event) => {
+    rename(app, { key: 'parts', item: part, name: event.target.value.trim() });
     save();
   };
-  const remove = () => {
+  const remove = (event) => {
+    const keys = byKeys(event);
+
     takeOff(app, { key: 'parts', item: part, taken });
     save();
+
+    if (keys) {
+      keysToPutBack('parts');
+    }
   };
 
   return node(
@@ -37,7 +43,7 @@ function nameAndRemove(app, { part, taken }, save) {
     node('input.list-field.guide-name', {
       value: part.name,
       'aria-label': 'Part name',
-      onchange: rename,
+      onchange: named,
     }),
     node(
       'button.btn.quiet.icon-only',

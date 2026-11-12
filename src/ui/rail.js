@@ -21,7 +21,7 @@ function toolButton(app, tool) {
       title: forHands(`${tool.label} (${tool.key.toUpperCase()})`, toolSaid(tool)),
       'data-key': tool.key.toUpperCase(),
       'aria-label': toolName(tool),
-      'aria-description': toolSaid(tool),
+      'aria-description': toolSaid(tool) === toolName(tool) ? null : toolSaid(tool),
       'aria-pressed': String(state.tool === tool.id),
       onclick: () => pickTool(app, tool),
     },

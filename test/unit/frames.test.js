@@ -143,6 +143,25 @@ test('a frame deleted from the one view drawn in takes its empty column along', 
   assert.equal(frameCount(animation), 2, 'a frame drawn in another view stays');
 });
 
+// the frame after it, hidden from play, came back into play: the mark stayed with a column
+// that was then dropped
+test('a hidden frame stays hidden when an earlier frame goes from the one view drawn in', () => {
+  const project = newProject();
+  const animation = project.animations[0];
+
+  addFrame(project, animation, 0);
+  addFrame(project, animation, 1);
+  animation.directions.south.frames.forEach((frame, i) =>
+    setPixel(frame.layers[0].sprite, i, 0, RED),
+  );
+  setFrameHidden(animation, 2, true);
+  removeViewFrame(animation, 'south', 1);
+
+  assert.deepEqual(order(animation, 'south'), [0, 2]);
+  assert.equal(isFrameHidden(animation, 1), true, 'the frame that was third is still hidden');
+  assert.equal(isFrameHidden(animation, 0), false);
+});
+
 test('deleting from every view spares a view down to its last frame', () => {
   const project = newProject();
   const animation = project.animations[0];

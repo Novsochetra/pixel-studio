@@ -30,6 +30,24 @@ const stage = await canvas.boundingBox();
 
 await page.mouse.click(stage.x + stage.width / 2, stage.y + stage.height / 2);
 await page.waitForTimeout(300);
+
+// the frames' sheet takes none of the canvas's room: a selection's bar stands under the art
+await page.keyboard.press('s');
+await touch('touchStart', [[stage.x + stage.width * 0.3, stage.y + stage.height * 0.3]]);
+await touch('touchMove', [[stage.x + stage.width * 0.5, stage.y + stage.height * 0.5]]);
+await touch('touchMove', [[stage.x + stage.width * 0.7, stage.y + stage.height * 0.7]]);
+await touch('touchEnd', []);
+await page.waitForTimeout(500);
+const selection = await box('.selection-bar');
+const art = await canvas.boundingBox();
+
+check(
+  selection.y >= art.y + art.height - 2,
+  `with the frames up, a selection’s bar is under the canvas, not over its foot (${Math.round(selection.y)} under ${Math.round(art.y + art.height)})`,
+);
+await page.locator('.selection-bar').getByRole('button', { name: 'Done' }).tap();
+await page.keyboard.press('b');
+await page.waitForTimeout(1500);
 await selectFrame(page, 1);
 await page.waitForTimeout(300);
 const image = await page

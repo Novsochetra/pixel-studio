@@ -74,12 +74,25 @@ export function paletteRow(job) {
   );
 }
 
+// A palette just added is the one picked: with the keys in use they go to the list that says
+// so. The button that added it is gone or folded away, and they fell to Apply to all, where a
+// second Enter recoloured every frame.
+function showAdded(job) {
+  const byKeys = Boolean(document.activeElement?.matches?.(':focus-visible'));
+
+  job.draw();
+
+  if (byKeys) {
+    document.getElementById('swap-palette')?.focus();
+  }
+}
+
 export function addPalette(job) {
   return paletteForm((added) => {
     job.app.store.state.project.palettes.push(added);
     job.paletteId = added.id;
     changeStructure(job.app, 'palettes');
-    job.draw();
+    showAdded(job);
   });
 }
 
@@ -90,7 +103,7 @@ export function starterPalettes(job) {
     job.app.store.state.project.palettes.push(palette);
     job.paletteId = palette.id;
     changeStructure(job.app, 'palettes');
-    job.draw();
+    showAdded(job);
   };
 
   return node(
@@ -110,7 +123,7 @@ export function starterPalettes(job) {
 export function reduceButton(job) {
   const reduce = () => {
     job.paletteId = makeReducedPalette(job.app, 8)?.id ?? job.paletteId;
-    job.draw();
+    showAdded(job);
   };
 
   const name = 'Make an 8-colour palette from the art';

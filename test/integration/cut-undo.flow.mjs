@@ -34,14 +34,27 @@ check(await undo.isEnabled(), 'and can be undone');
 await undo.click();
 await page.waitForTimeout(150);
 check((await headSize()) === guessed, 'Undo in the cut window takes the stroke back');
-check(
-  (await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))) === 'Undo' ||
-    (await undo.isDisabled()),
-  'with the keys still in the window',
-);
 await redo.click();
 await page.waitForTimeout(150);
 check((await headSize()) === unpainted, 'and Redo makes it again');
+
+// Undo by the keys at the window's first step switched itself off, and the keys fell to nothing
+await undo.focus();
+await page.keyboard.press('Enter');
+await page.waitForTimeout(150);
+check(
+  (await page.evaluate(() =>
+    [
+      document.activeElement?.getAttribute('aria-label'),
+      document.activeElement?.ariaDisabled,
+    ].join(),
+  )) === 'Undo,true',
+  'Undo pressed with the keys at the first step keeps them, switched off',
+);
+await page.keyboard.press('Tab');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(150);
+check((await headSize()) === unpainted, 'and Tab goes on to Redo, which makes the stroke again');
 
 await page.locator('.cut-canvas').click({ position: { x: 2, y: 2 } });
 await page.keyboard.press('ControlOrMeta+z');

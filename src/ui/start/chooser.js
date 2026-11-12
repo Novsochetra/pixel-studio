@@ -2,6 +2,7 @@ import { icon, node, replace, toast } from '../dom.js';
 import { newProject } from '../../model/new-project.js';
 import { startChoices } from '../../model/start-choices.js';
 import { projectFields } from './fields.js';
+import { clearOfFoot } from './clear-of-foot.js';
 import { askDelete } from '../ask-delete.js';
 
 // A preset forgotten cannot be brought back: its card asks first, as deleting a folder, a version
@@ -123,8 +124,7 @@ export function newProjectChooser({ presets, onCreate, onDeletePreset }) {
   };
 
   handlers.onPick(picked);
-
-  return node(
+  const form = node(
     'div.start-chooser',
     { onkeydown: atEnter(create) },
     node('h3.start-heading', {}, 'What are you making?'),
@@ -132,4 +132,8 @@ export function newProjectChooser({ presets, onCreate, onDeletePreset }) {
     fields.el,
     node('div.sheet-actions', {}, node('button.btn.primary', { onclick: create }, 'Create')),
   );
+
+  clearOfFoot(form);
+
+  return form;
 }

@@ -52,7 +52,7 @@ const nearest = (matches, controls, index) =>
 // Still there, but switched off (Undo, with nothing left to undo): it keeps the keys, as a
 // button that says it is off and does nothing, until the bar is drawn again. On its neighbour
 // the next Enter did the opposite of the last; on nothing, the next Tab began the page again.
-function standIn(off) {
+export function standIn(off) {
   const stand = off.cloneNode(true);
 
   stand.disabled = false;
@@ -61,6 +61,10 @@ function standIn(off) {
 
   return stand;
 }
+
+// Where the control stood is the last guess, and never a button that applies or deletes: the
+// keys came to rest on Apply to all, and the Enter meant for a palette recoloured every frame.
+const besides = (control) => (control?.matches('.primary, .danger') ? null : control);
 
 // the control now switched off that the keys were on: the one of its name, or the one in its
 // place when what it did named it anew (an outline's row, its count now 0)
@@ -97,7 +101,7 @@ function nowAt(place, root) {
 
   return controls.includes(inPlace) && inPlace.tagName === place.tag
     ? inPlace
-    : controls[Math.min(place.index, controls.length - 1)];
+    : besides(controls[Math.min(place.index, controls.length - 1)]);
 }
 
 // The bars are drawn again at every change, and the control that made the change goes with the

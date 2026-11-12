@@ -27,11 +27,17 @@ function onListKey(app, event, stack) {
   const at = stack.findIndex((entry) => entry.key === currentLayer(app.store.state).key);
   const to = leadsTo(event.key, at, stack.length - 1);
 
-  if (to === undefined || !stack[to]) {
+  if (to === undefined) {
     return;
   }
 
+  // the key is the list's own even at its end: let through there, it scrolled the panel and
+  // took the list out of sight
   event.preventDefault();
+
+  if (!stack[to]) {
+    return;
+  }
 
   if (event.altKey) {
     restructure(app, 'Move layer', (draft) => placeLayer(frameOf(draft), stack[at].key, to));

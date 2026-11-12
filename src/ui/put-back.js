@@ -16,6 +16,30 @@ export function takeOff(app, { key, item, taken }) {
   changeStructure(app, 'parts');
 }
 
+// A name changed in the window is a step too, as its removal is: undo passed over it.
+export function rename(app, { key, item, name }) {
+  const { project } = app.store.state;
+
+  if (!name || name === item.name) {
+    return;
+  }
+
+  const before = structuredClone(project[key]);
+
+  item.name = name;
+  app.history.recordSetting(`Rename ${name}`, key, before, structuredClone(project[key]));
+}
+
+// whether a button was pressed with the keys: asked before its list is drawn again, as a
+// button taken off the page answers no. A click's own count of presses is 0 for the keys in
+// one browser and not in another.
+export const byKeys = (click) => Boolean(click.currentTarget?.matches(':focus-visible'));
+
+// With the keys in use they go to the row that takes the removal back. Left to the list as it
+// was drawn again, they stood on the next thing's Remove, and a second Enter removed that too.
+export const keysToPutBack = (key) =>
+  document.querySelector(`.sheet [data-put-back="${key}"]`)?.focus();
+
 export function putBackRow(app, { key, taken }, redraw) {
   const last = taken[key];
 
@@ -41,6 +65,7 @@ export function putBackRow(app, { key, taken }, redraw) {
   const row = actionRow(`Put back ${last.item.name}`, putBack);
 
   row.classList.add('put-back');
+  row.dataset.putBack = key;
 
   return row;
 }

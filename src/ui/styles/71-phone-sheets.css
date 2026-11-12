@@ -294,33 +294,41 @@
   }
 
   /* On the shortest phones the sheet had room for the frames' two bars and little more: no
-     frame was in sight whole, only the top of the first row. The frames' sheet alone takes a
-     little of the canvas's room there (the others keep it for a selection's bar), and the
-     frames are smaller. */
+     frame was in sight whole, only the top of the first row. The room is found in the sheet
+     itself, not taken from the canvas, which keeps the room under it for a selection's bar:
+     less air round the sheet's top row, and smaller frames. */
   @media (max-height: 600px) {
-    :root[data-layout='compact']:has(.app[data-panel='frames']:not([data-sheet='tall'])) {
-      --sheet-height: min(50vh, 100dvh - 300px);
+    :root[data-layout='compact'] .grid-panel {
+      padding-bottom: 2px;
+    }
+
+    :root[data-layout='compact'] .grid-panel > .panel-grab {
+      padding-block: 12px 2px;
+    }
+
+    :root[data-layout='compact'] .grid-panel > .panel-grab::before {
+      top: 4px;
     }
 
     :root[data-layout='compact'] :is(.cell, .cell-add) {
-      width: 46px;
-      height: 46px;
+      width: 40px;
+      height: 40px;
     }
 
     :root[data-layout='compact'] .grid-number {
-      width: 46px;
+      width: 40px;
     }
 
     :root[data-layout='compact'] .cell canvas {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
     }
 
     :root[data-layout='compact'] .cell-more {
       top: 0;
       right: 0;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
     }
   }
 

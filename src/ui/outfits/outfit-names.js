@@ -1,5 +1,5 @@
 import { icon, node } from '../dom.js';
-import { putBackRow, takeOff } from '../put-back.js';
+import { byKeys, keysToPutBack, putBackRow, rename, takeOff } from '../put-back.js';
 import { changeStructure } from '../actions.js';
 import { listGroup } from '../list-group.js';
 
@@ -8,13 +8,19 @@ function outfitRow(app, { outfit, taken }, redraw) {
     changeStructure(app, 'parts');
     redraw();
   };
-  const rename = (event) => {
-    outfit.name = event.target.value.trim() || outfit.name;
+  const named = (event) => {
+    rename(app, { key: 'outfits', item: outfit, name: event.target.value.trim() });
     changed();
   };
-  const remove = () => {
+  const remove = (event) => {
+    const keys = byKeys(event);
+
     takeOff(app, { key: 'outfits', item: outfit, taken });
     redraw();
+
+    if (keys) {
+      keysToPutBack('outfits');
+    }
   };
 
   return node(
@@ -23,7 +29,7 @@ function outfitRow(app, { outfit, taken }, redraw) {
     node('input.list-field.guide-name', {
       value: outfit.name,
       'aria-label': 'Outfit name',
-      onchange: rename,
+      onchange: named,
     }),
     node(
       'button.btn.quiet.icon-only',

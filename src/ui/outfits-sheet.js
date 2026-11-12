@@ -1,6 +1,7 @@
 import { node, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
 import { keepFocus } from './keep-focus.js';
+import { tabSaysChange } from './field-keys.js';
 import { allArtLayers } from './actions.js';
 import { recolourLayers } from './body/recolour.js';
 import { viewsToFit } from './views-side-by-side.js';
@@ -148,6 +149,8 @@ export function openOutfitsSheet(app) {
   // drawn again at every choice: the keys stay on the control that made it
   job.draw = () => keepFocus(slot, () => drawOutfits(job));
 
+  // a part's name typed, then Tab: said at the key, so Tab goes on from the name drawn again
+  tabSaysChange(slot);
   sheet.body.append(slot);
   job.draw();
 }

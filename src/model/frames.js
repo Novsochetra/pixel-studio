@@ -68,6 +68,12 @@ export function removeFrame(animation, index) {
   return Math.min(index, frameCount(animation) - 1);
 }
 
+// nothing is drawn at `index` in any view but `direction`
+const drawnOnlyIn = (animation, direction, index) =>
+  Object.entries(animation.directions).every(
+    ([other, { frames }]) => other === direction || !frames[index] || !hasArt(frames[index]),
+  );
+
 // Hiding belongs to a moment, not to a drawing, so the marks stay in their places while this
 // view's later frames move up: otherwise a mark would hide a different moment in every other view.
 export function removeViewFrame(animation, direction, index) {
@@ -77,8 +83,10 @@ export function removeViewFrame(animation, direction, index) {
     return index;
   }
 
-  // with one view a moment is its frame: the mark goes with the drawing
-  if (Object.keys(animation.directions).length === 1) {
+  // With one view a moment is its frame, and so it is when no other view has drawn it: the
+  // moment goes whole, marks and all. Left standing empty in the other views, it kept the loop
+  // a tick longer on a frame nobody could see.
+  if (drawnOnlyIn(animation, direction, index)) {
     return removeFrame(animation, index);
   }
 
@@ -93,20 +101,7 @@ export function removeViewFrame(animation, direction, index) {
     }
   });
 
-  dropEmptyEnd(animation, frames.length);
-
   return Math.min(index, frames.length - 1);
-}
-
-// The other views' last frames go too while nothing is drawn in them: a frame deleted from the
-// one view drawn in left its column standing, empty, and the loop held its last frame a tick
-// longer for a frame nobody could see.
-function dropEmptyEnd(animation, kept) {
-  for (const { frames } of entriesOf(animation)) {
-    while (frames.length > Math.max(1, kept) && !hasArt(frames.at(-1))) {
-      frames.pop();
-    }
-  }
 }
 
 // the frame at `from` taken out and put back in at `to`, in every view that has it; returns where

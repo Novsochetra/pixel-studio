@@ -257,7 +257,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   asks the same way before it closes (`mayClose` in `openSheet`), and takes its own changes
   back while it is open (`cut-steps.js`, `cut-undo.js`): the editor's undo waits behind a window.
 - One of the project's named things taken off in a window (a part, an outfit) is a step
-  (`takeOff` in `src/ui/put-back.js`), and the window offers it back itself (`putBackRow`).
+  (`takeOff` in `src/ui/put-back.js`), and the window offers it back itself (`putBackRow`);
+  removed with the keys, they go to that row (`keysToPutBack`). Its name changed is a step too
+  (`rename`).
 - A project added and a version saved take a name nothing in their list has (`freeName`): a
   copy made twice is "Hero copy" and "Hero copy 2".
 - A whole project put in the open one's place (a canvas of another size, a version gone back to)
@@ -290,7 +292,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   (`field-keys.js`). A window that draws itself again at a choice wraps that draw in
   `keepFocus` too. A button that switches itself off under the keys (Undo, at the last step)
   keeps them as a stand-in that says it is off (`standIn`, `aria-disabled`): style what is off
-  with `:is(:disabled, [aria-disabled='true'])`. A name typed in place is kept at Tab
+  with `:is(:disabled, [aria-disabled='true'])`. Where the control used is gone, the keys go to
+  the one in its place, but never by that guess to a button that applies or deletes
+  (`besides`): a window says where they go instead (`showAdded` in Swap colours). A name typed in place is kept at Tab
   (`renameInPlace`), and a window's opener that the bars draw again has an id, so the keys
   come back to it.
 - A button is named by what it is, in a word or two (`toolName`); what it does at length is
@@ -298,8 +302,8 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   is not also `aria-pressed`. A menu marks the button it hangs from (`marksOpen`).
 - Whatever a drag does in a list has keys too: Alt and an arrow move a frame or a layer, and
   Home and End go to a list's ends (`onListKey` in `layers-panel.js`).
-- A frame deleted from one view takes along the other views' last frames while nothing is
-  drawn in them (`dropEmptyEnd`), and the export says which frames are hidden from play and
+- A frame deleted from one view goes from every view, its hidden mark with it, when no other
+  view has anything drawn in it (`drawnOnlyIn`), and the export says which frames are hidden from play and
   still in the files (`hiddenFrames`).
 - A canvas is sized for the room it has, never shrunk by the stylesheet (`viewBox` in
   `src/ui/body/cut-view.js`): squashed, its art is out of shape and a press lands beside the

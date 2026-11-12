@@ -128,11 +128,17 @@ export function openVersionsSheet(app) {
   const redraw = async () => {
     const versions = await listVersions(app.backend, app.keys);
     const rows = versions.map((entry) => row(app, entry, { redraw, close: sheet.close }));
+    const held = list.contains(document.activeElement);
 
     // a version deleted takes the button that deleted it: the keys go on from the next row
     keepFocus(list, () =>
       replace(list, versions.length ? rows : node('p.list-note.version-none', {}, NONE_YET)),
     );
+
+    // the last version deleted leaves no row for the keys: they go to the name of the next
+    if (held && document.activeElement === document.body) {
+      name.focus();
+    }
   };
   const save = async () => {
     const kept = await keepVersion(app, name.value.trim() || `Version of ${when(Date.now())}`);

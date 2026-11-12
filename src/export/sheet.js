@@ -147,7 +147,7 @@ export function buildSheet(project, animation, settings) {
   // a frame the preview never did
   if (hidden.length) {
     warnings.push(
-      `Frame ${hidden.join(', ')} ${hidden.length > 1 ? 'are' : 'is'} hidden from play, and still in the files.`,
+      `${hidden.length > 1 ? 'Frames' : 'Frame'} ${hidden.join(', ')} ${hidden.length > 1 ? 'are' : 'is'} hidden from play, and still in the files.`,
     );
   }
 
