@@ -7,13 +7,23 @@ import { forHands, keyNames } from './platform-keys.js';
 
 const ARROWS = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] };
 
+const SAME_RUN_MS = 1000;
+
+// Key after key, a run of nudges is one move to undo: ten presses were ten steps back.
 function nudge(app, [dx, dy]) {
   const layer = currentLayer(app.store.state);
+  const inRun = performance.now() - (app.nudgedAt ?? -Infinity) < SAME_RUN_MS;
   let selection = app.store.state.selection;
 
-  commitSelected(app, 'Move', [layer], () => {
+  const moved = commitSelected(app, 'Move', [layer], () => {
     selection = moveLifted(layer.sprite, selection, [dx, dy]);
   });
+
+  if (moved && inRun) {
+    app.history.joinLast();
+  }
+
+  app.nudgedAt = moved ? performance.now() : app.nudgedAt;
   app.store.set({ selection });
 }
 

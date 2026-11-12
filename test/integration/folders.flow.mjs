@@ -209,8 +209,12 @@ check(
   "a folder's line-up holds only its projects",
 );
 await page.keyboard.press('Escape');
+await page.waitForTimeout(800);
+check(
+  (await page.locator('.sheet .project-row').count()) > 0,
+  'Escape in the line-up comes back to Projects, as it was',
+);
 
-await openProjects();
 await goTo('Naga Eleven');
 await place('Naga Eleven').dblclick();
 await page.locator('.folder-name-field').fill('Naga Eleven cast');

@@ -1,13 +1,28 @@
 // Moving around the canvas: space-drag or middle-drag pans, ⌘/Ctrl + scroll or a trackpad pinch
 // zooms around the pointer, two fingers on a touch screen pan and pinch.
 
-export const MIN_ZOOM = 1;
+// Zooms are whole, so a pixel of the art is a whole number of the screen's. Below 1 there is a
+// half: a canvas larger than the window showed only part of itself at 100%, and Fit fitted none
+// of the rest.
+export const MIN_ZOOM = 0.5;
 export const MAX_ZOOM = 24;
+
+export const nearestZoom = (zoom) =>
+  zoom < 0.75 ? MIN_ZOOM : Math.min(MAX_ZOOM, Math.max(1, Math.round(zoom)));
+
+// one step closer (1) or further (-1): the half is a step of its own under 1
+export function steppedZoom(zoom, step) {
+  if (zoom < 1) {
+    return step > 0 ? 1 : MIN_ZOOM;
+  }
+
+  return nearestZoom(zoom + step < 1 ? MIN_ZOOM : zoom + step);
+}
 
 // zoom to `zoom` keeping the art pixel under the screen point [clientX, clientY] where it is;
 // view: { stage, canvas }, the scrolling stage and the canvas in it
 export function zoomAround(app, { stage, canvas }, zoom, [clientX, clientY]) {
-  const next = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.round(zoom)));
+  const next = nearestZoom(zoom);
   const old = app.store.state.zoom;
 
   if (next === old) {
@@ -38,10 +53,9 @@ export function bindWheelZoom(stage, canvas, app) {
 
       // a trackpad pinch sends many small steps; a mouse wheel one big one
       if (Math.abs(pending) >= 40) {
-        zoomAround(app, { stage, canvas }, app.store.state.zoom - Math.sign(pending), [
-          event.clientX,
-          event.clientY,
-        ]);
+        const zoom = steppedZoom(app.store.state.zoom, -Math.sign(pending));
+
+        zoomAround(app, { stage, canvas }, zoom, [event.clientX, event.clientY]);
         pending = 0;
       }
     },

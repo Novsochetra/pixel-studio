@@ -24,9 +24,10 @@ async function readCast(cast) {
   };
 }
 
-function memberButton({ name, sprite, open }, { scale, close }) {
+function memberButton({ name, sprite, open }, { scale, close, picked }) {
   const choose = () => {
     close();
+    picked();
     open?.();
   };
 
@@ -48,7 +49,7 @@ async function download(drawn, scale) {
   await saveFile(`line-up-${scale}x.png`, await spritePng(picture, scale));
 }
 
-function lineUpBody({ drawn, empty }, close) {
+function lineUpBody({ drawn, empty }, { close, picked }) {
   const scale = lineUpScale(
     drawn.map((each) => each.sprite),
     TALLEST_ON_SCREEN_PX,
@@ -61,7 +62,7 @@ function lineUpBody({ drawn, empty }, close) {
     node(
       'div.line-up',
       { 'data-scale': scale },
-      drawn.map((each) => memberButton(each, { scale, close })),
+      drawn.map((each) => memberButton(each, { scale, close, picked })),
     ),
     empty.length ? node('p.hint', {}, `Nothing drawn yet: ${empty.join(', ')}.`) : null,
     node(
@@ -77,10 +78,12 @@ function lineUpBody({ drawn, empty }, close) {
   ];
 }
 
-export async function openLineUp(cast) {
+// Over the window it was asked for in, which Close and Escape go back to; `picked` runs as one
+// of the cast is chosen, to shut that window too.
+export async function openLineUp(cast, picked = () => {}) {
   const sheet = openSheet('Line-up', null, { wide: true });
   const body = node('div', {}, node('p.hint', {}, 'Lining up…'));
 
   sheet.body.append(body);
-  replace(body, lineUpBody(await readCast(cast), sheet.close));
+  replace(body, lineUpBody(await readCast(cast), { close: sheet.close, picked }));
 }

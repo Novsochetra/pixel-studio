@@ -73,10 +73,10 @@
   padding-inline: 12px 14px;
 }
 
-/* A window too short for the band above the canvas has room beside the canvas instead: there
-   the bar is a small card in the stage's corner. Across the top it lay over the art's first
-   rows, and a press on them met its button. */
-@media (max-height: 799px) {
+/* A window too short for the band above the canvas, and wide, has room beside the canvas
+   instead: there the bar is a small card in the stage's corner. Across the top it lay over the
+   art's first rows, and a press on them met its button. */
+@media (max-height: 799px) and (min-width: 1280px) {
   :root:not([data-layout='compact']) .empty-frame {
     --rise-from: 0 -10px;
 

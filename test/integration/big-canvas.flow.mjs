@@ -83,4 +83,34 @@ check(
   'and opened from the keys it has its rows again',
 );
 
+// Fit stopped at 100%: in a window smaller than the canvas the art's last rows were out of
+// sight, and nothing brought the whole of it in.
+await page.setViewportSize({ width: 1280, height: 720 });
+await page.waitForTimeout(400);
+await page.getByRole('button', { name: 'Fit', exact: true }).click();
+await page.waitForTimeout(300);
+const fitted = await canvas.boundingBox();
+const room = await page.locator('.edit-scroll').boundingBox();
+
+check(
+  (await page.locator('.zoom-label').textContent()) === '50%' &&
+    fitted.y >= room.y &&
+    fitted.y + fitted.height <= room.y + room.height,
+  `Fit shows the whole of a canvas larger than the window, at a half (${await page.locator('.zoom-label').textContent()})`,
+);
+await page.mouse.move(fitted.x + 50.25, fitted.y + 100.25);
+await page.mouse.down();
+await page.mouse.move(fitted.x + 60.25, fitted.y + 100.25, { steps: 4 });
+await page.mouse.up();
+const drawnAtHalf = await page.locator('#statusbar').textContent();
+
+// the stroke before spans columns 176 to 336 and rows 216 to 276; this one, columns 100 to 120
+// of row 200
+check(
+  drawnAtHalf.includes('sprite 237×77'),
+  `and a stroke drawn at a half lands on the pixels under the pointer (${drawnAtHalf.match(/sprite [^,]*/)?.[0]})`,
+);
+await page.keyboard.press('+');
+check((await page.locator('.zoom-label').textContent()) === '100%', 'a step in from it is 100%');
+
 await finish();

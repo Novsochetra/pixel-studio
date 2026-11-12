@@ -19,7 +19,7 @@ const stroke = async (row) => {
 };
 const openProjects = async () => {
   await page.locator('button.wordmark').click();
-  await page.waitForSelector('.project-row');
+  await page.waitForSelector('.sheet .project-row');
 };
 const undo = () => page.getByRole('button', { name: 'Undo', exact: true });
 
@@ -38,7 +38,7 @@ await stroke(4);
 
 await openProjects();
 await page
-  .locator('.project-row', { hasText: 'Gem' })
+  .locator('.sheet .project-row', { hasText: 'Gem' })
   .locator('.row-open, .row-name')
   .first()
   .click();
@@ -57,7 +57,7 @@ check(await undo().isDisabled(), 'with nothing left to undo');
 
 await openProjects();
 await page
-  .locator('.project-row', { hasText: 'Key' })
+  .locator('.sheet .project-row', { hasText: 'Key' })
   .locator('.row-open, .row-name')
   .first()
   .click();
@@ -81,11 +81,11 @@ await page.waitForTimeout(400);
 check((await size()) === '24', 'the canvas is made larger');
 
 await openProjects();
-await page.locator('.project-row', { hasText: 'Gem' }).locator('.row-open').click();
+await page.locator('.sheet .project-row', { hasText: 'Gem' }).locator('.row-open').click();
 await page.waitForSelector('.sheet', { state: 'detached' });
 await page.waitForTimeout(400);
 await openProjects();
-await page.locator('.project-row', { hasText: 'Key' }).locator('.row-open').click();
+await page.locator('.sheet .project-row', { hasText: 'Key' }).locator('.row-open').click();
 await page.waitForSelector('.sheet', { state: 'detached' });
 await page.waitForTimeout(400);
 await page.keyboard.press('ControlOrMeta+z');

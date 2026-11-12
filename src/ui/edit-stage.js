@@ -1,5 +1,5 @@
 import { node } from './dom.js';
-import { bindWheelZoom } from './navigate.js';
+import { MAX_ZOOM, MIN_ZOOM, bindWheelZoom } from './navigate.js';
 import { renderLayerTurnBar } from './layer-turn-bar.js';
 import { renderSelectionBar } from './selection-bar.js';
 import { paint } from './stage-paint.js';
@@ -81,7 +81,9 @@ export function fitZoom(stage, sprite) {
 
   inner.classList.toggle('tight', tight > fit);
 
-  return Math.max(1, Math.min(24, tight));
+  // a canvas larger than the window is shown at a half, whole, where at 100% part of it was out
+  // of sight
+  return tight < 1 ? MIN_ZOOM : Math.min(MAX_ZOOM, tight);
 }
 
 function renderStage(app, parts, patch) {

@@ -2,7 +2,7 @@ import { node } from '../dom.js';
 import { openSheet } from '../sheet.js';
 import { currentAnimation, restructure } from '../actions.js';
 import { nameSuggestions, posesToStartFrom, startAnimation } from '../../model/animations.js';
-import { kindOf } from '../../model/kinds.js';
+import { kindOf, numberedName } from '../../model/kinds.js';
 import { wholeNumber } from '../../model/numbers.js';
 import { numberInput } from '../number-input.js';
 import { fieldRow, listGroup } from '../list-group.js';
@@ -28,8 +28,10 @@ function startChoice(project, open) {
 
 function nameField(project, item) {
   const names = nameSuggestions(project);
-  const fallback =
-    names[0] ?? `${item[0].toUpperCase()}${item.slice(1)} ${project.animations.length + 1}`;
+  // an animation left unnamed is the next of the usual ones (Walk); an icon or a tile is the
+  // art itself, and takes no name it was not given
+  const numbered = numberedName(item, project.animations.length + 1);
+  const fallback = item === 'animation' ? (names[0] ?? numbered) : numbered;
   const input = node('input.input', {
     id: 'new-animation-name',
     'aria-label': 'Name',

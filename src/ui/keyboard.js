@@ -2,6 +2,7 @@ import { toolsFor } from './tool-list.js';
 import { currentFrames, flipCurrent } from './actions.js';
 import { moveFrameTo } from './frame-actions.js';
 import { redo, undo } from './undo.js';
+import { steppedZoom } from './navigate.js';
 import { handleSelectionKey } from './selection-keys.js';
 import { openShortcuts } from './shortcuts.js';
 import { resizeBrush } from '../editor/brush.js';
@@ -25,8 +26,7 @@ function typing(event) {
 
 const modalOpen = () => Boolean(document.querySelector('.sheet-backdrop, .menu'));
 
-const zoomBy = (app, step) =>
-  app.store.set({ zoom: Math.max(1, Math.min(24, app.store.state.zoom + step)) });
+const zoomBy = (app, step) => app.store.set({ zoom: steppedZoom(app.store.state.zoom, step) });
 
 // keys that do the same whatever is selected; ⌘ ones and plain ones apart
 const COMMAND_KEYS = {

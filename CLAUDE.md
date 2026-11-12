@@ -129,7 +129,8 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   opens every one with its name (`tools-panel.js`). A new tool in `tool-list.js` is in both.
 - Off a phone the frames stand under the canvas, as tall as the line above them is dragged
   (`grid/grid-resizer.js`, `--grid-height`); on `compact` they are a sheet, with no line.
-- Fit shows the whole canvas, at a whole zoom. A canvas that would be shown at its own size
+- Fit shows the whole canvas, at a whole zoom, or at a half where the canvas is larger than the
+  window (`nearestZoom`, `steppedZoom` in `navigate.js`). A canvas that would be shown at its own size
   takes a step more when the stage's margins are all that stop it, and the stage gives them up
   (`fitZoom`, `.stage-inner.tight`): its last rows are never under the frames.
 - Two fingers never zoom the page (`touch-action` on `html`): they zoom the canvas, on the art or
@@ -219,6 +220,7 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   `body/body-lock.js`). A change to many layers at once takes the hidden ones along.
 - A handle is taken hold of where it is drawn, reckoned from where the pointer is, not from the
   middle of the pixel under it (`onKnob`): at a high zoom that reached into the art.
+- A run of nudges by the arrows, key after key, is one step to undo (`History.joinLast`).
 - A step that moves the selection with the pixels (a move, a turn, a paste) is made with
   `commitSelected`, so undo puts the selection back too. A change that changes nothing records no
   step (`History.recordStructure` says whether it did).

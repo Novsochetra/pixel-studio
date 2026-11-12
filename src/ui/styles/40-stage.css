@@ -253,3 +253,46 @@
     background: var(--material-ground);
   }
 }
+
+@media (max-height: 799px) and (min-width: 1280px) {
+  /* A wide window has room beside the canvas where it has none above it: there the bar is a
+     card in the stage's corner, two to a row, clear of the art. At the canvas's end it lay
+     over its last rows, the feet of a figure among them. */
+  :root:not([data-layout='compact']) .selection-bar,
+  :root:not([data-layout='compact']) .selection-bar[data-side='bottom'] {
+    --rise-from: 0 -10px;
+
+    top: 12px;
+    bottom: auto;
+    left: 12px;
+    translate: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    width: 216px;
+    padding: 8px;
+    overflow: visible;
+  }
+
+  :root:not([data-layout='compact']) .selection-bar .btn {
+    justify-content: flex-start;
+  }
+
+  :root:not([data-layout='compact']) .selection-bar .selection-end {
+    position: static;
+    grid-column: 1 / -1;
+    display: grid;
+    margin: 4px 0 0;
+    padding: 0;
+    background: none;
+  }
+
+  :root:not([data-layout='compact']) .selection-bar .selection-end::before,
+  :root:not([data-layout='compact']) .selection-bar .selection-end::after {
+    display: none;
+  }
+
+  :root:not([data-layout='compact']) .selection-bar .selection-done {
+    justify-content: center;
+  }
+}

@@ -2,7 +2,7 @@ import { newAnimation, newId } from './project.js';
 import { drawableDirections } from './directions.js';
 import { NAGA_ELEVEN, blankPreset, defaultName, validDirectionSet } from './presets.js';
 import { normalizeProject } from './normalize.js';
-import { KINDS } from './kinds.js';
+import { KINDS, numberedName } from './kinds.js';
 import { newGuide } from '../views/guides.js';
 
 // the preset a new project starts from: one given, a blank one for a kind, else Naga Eleven's
@@ -44,11 +44,16 @@ const carried = (preset) => ({
 
 // What a project of icons or tiles holds is the art itself, one to a tab: the first takes the
 // name the project was given. Named Gem, it began with an icon called Coin, and its files were
-// coin.png. An animation (Idle, Walk) is not the art, and keeps its own name.
+// coin.png. With no name given it is Icon 1: called Coin, a sword drawn there was saved as
+// coin.png too. An animation (Idle, Walk) is not the art, and keeps its own name.
 function firstName(project, preset) {
-  const isArt = (KINDS[preset.kind]?.itemName ?? 'animation') !== 'animation';
+  const item = KINDS[preset.kind]?.itemName ?? 'animation';
 
-  return isArt && project.name !== defaultName(preset) ? project.name : preset.names?.[0];
+  if (item === 'animation') {
+    return preset.names?.[0];
+  }
+
+  return project.name !== defaultName(preset) ? project.name : numberedName(item, 1);
 }
 
 function firstAnimation(project, preset, { animation: name, directions }) {

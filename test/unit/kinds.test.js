@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { KINDS, isSingleView, placementOf, viewName } from '../../src/model/kinds.js';
+import { KINDS, isSingleView, numberedName, placementOf, viewName } from '../../src/model/kinds.js';
 import {
   NAGA_ELEVEN,
   blankPreset,
@@ -19,7 +19,11 @@ test('each kind starts with its own canvas, views and first animation', () => {
 
     assert.equal(project.kind, id);
     assert.equal(project.canvas.width, kind.size);
-    assert.equal(project.animations[0].name, kind.names[0]);
+    // an animation starts as the kind's first; art left unnamed is numbered, not called Coin
+    assert.equal(
+      project.animations[0].name,
+      kind.itemName === 'animation' ? kind.names[0] : numberedName(kind.itemName, 1),
+    );
     assert.equal(project.name, defaultName(blankPreset(id)));
     const views = Object.keys(project.animations[0].directions);
     assert.deepEqual(views, id === 'character' ? ['south', 'east', 'north'] : ['south']);

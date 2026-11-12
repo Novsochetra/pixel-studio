@@ -76,6 +76,9 @@ export const BODY_PARTS = [
   { id: 'lower-arm-r', name: 'Lower arm R', parent: 'upper-arm-r' },
 ];
 
+// "Icon 2", "Tile 3": what a piece of art is called until it is given a name of its own
+export const numberedName = (item, number) => `${item[0].toUpperCase()}${item.slice(1)} ${number}`;
+
 export function kindOf(project) {
   return KINDS[project.kind] ?? KINDS.character;
 }

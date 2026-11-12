@@ -103,3 +103,31 @@ test('a project that takes another’s place in the same visit repoints nothing'
   assert.equal(swap.before, small);
   assert.equal(swap.after, grown);
 });
+
+test('a run of the same step joins into one: undo goes back to before the first of them', () => {
+  const project = newProject({ width: 8, height: 8 });
+  const find = (id) => [...allLayers(project)].find(({ layer }) => layer.id === id)?.layer ?? null;
+  const history = new History(find);
+  const layer = project.animations[0].directions.south.frames[0].layers[0];
+  const step = (label, x) => {
+    const before = cloneSprite(layer.sprite);
+
+    setPixel(layer.sprite, x, 0, RED);
+    history.record(label, [{ layer, before }]);
+  };
+
+  step('Pencil', 0);
+  step('Move', 1);
+  step('Move', 2);
+  assert.equal(history.joinLast(), true);
+  step('Move', 3);
+  assert.equal(history.joinLast(), true);
+
+  history.undo(project);
+  assert.equal(getPixel(layer.sprite, 1, 0), 0, 'the whole run is taken back at once');
+  assert.equal(getPixel(layer.sprite, 0, 0), RED, 'and the step before it is left');
+  history.redo(project);
+  assert.equal(getPixel(layer.sprite, 3, 0), RED, 'and redone at once');
+
+  assert.equal(history.joinLast(), false, 'a step of another name is not joined to');
+});

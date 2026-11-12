@@ -46,6 +46,12 @@ await page.fill('.tab-rename', 'Sprint');
 await page.keyboard.press('Enter');
 await page.waitForTimeout(200);
 check((await tabs()).includes('Sprint'), 'a double-click renames the tab');
+// F2 named a layer and not an animation
+await page.locator('.grid-tab[aria-selected="true"]').focus();
+await page.keyboard.press('F2');
+check((await page.locator('.tab-rename').count()) === 1, 'F2 on a tab opens its name too');
+await page.keyboard.press('Escape');
+await page.waitForTimeout(150);
 await page.getByRole('button', { name: 'New animation' }).click();
 await page.fill('#new-animation-name', 'Sprint');
 await page.getByRole('button', { name: 'Create animation' }).click();

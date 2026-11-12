@@ -43,6 +43,18 @@ function marksBelow(body) {
   addEventListener('resize', mark);
 }
 
+// Only the window on top answers the keys: with the line-up open over Projects, Escape shut
+// both, where it was meant to go back to the list.
+const onTop = (backdrop) => backdrop === [...document.querySelectorAll('.sheet-backdrop')].at(-1);
+
+function closesOutside(backdrop, close) {
+  backdrop.addEventListener('pointerdown', (event) => {
+    if (event.target === backdrop) {
+      close();
+    }
+  });
+}
+
 export function openSheet(title, onClose, { wide = false, focusField = true, mayClose } = {}) {
   const restoreFocus = rememberFocus();
   const body = node(`div.sheet${wide ? '.wide' : ''}`, {
@@ -63,6 +75,10 @@ export function openSheet(title, onClose, { wide = false, focusField = true, may
     restoreFocus();
   };
   const onKey = (event) => {
+    if (!onTop(backdrop)) {
+      return;
+    }
+
     if (event.key === 'Escape') {
       close();
     }
@@ -74,11 +90,7 @@ export function openSheet(title, onClose, { wide = false, focusField = true, may
 
   body.append(head);
   pullToClose({ head, body, close });
-  backdrop.addEventListener('pointerdown', (event) => {
-    if (event.target === backdrop) {
-      close();
-    }
-  });
+  closesOutside(backdrop, close);
   document.addEventListener('keydown', onKey);
   // a message from before would lie over the window's title
   document.querySelector('.toast')?.remove();

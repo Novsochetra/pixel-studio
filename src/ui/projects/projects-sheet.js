@@ -132,11 +132,8 @@ export function openProjectsSheet(app) {
   );
 
   Object.assign(job, drawing(job, { ...parts, body: sheet.body }), browsing(job, sheet.body), {
-    // one sheet at a time: two open sheets would both close on one Escape
-    lineUp: (entries) => {
-      sheet.close();
-      openLineUp(job.pictures.cast(entries));
-    },
+    // over this window, which Escape there comes back to; one of the cast picked shuts both
+    lineUp: (entries) => openLineUp(job.pictures.cast(entries), sheet.close),
   });
   sheet.body.classList.add('projects-sheet');
   sheet.body.append(book.nav, ...Object.values(book.pages));

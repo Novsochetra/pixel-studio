@@ -1,5 +1,6 @@
 import { cloneSprite, samePixels } from '../model/sprite.js';
 import { sameAnimations, snapshotAnimations } from './snapshots.js';
+import { joinSteps } from './history-join.js';
 
 function layerChange({ layer, before, poseBefore }) {
   return {
@@ -163,6 +164,14 @@ export class History {
     if (step) {
       step.selection = { before };
     }
+  }
+
+  // A run of the same small step (a nudge by the arrows, key after key) is one step to undo:
+  // the newest joins the one before it. Resolves to whether it did.
+  joinLast() {
+    const [first, second] = this.done.slice(-2);
+
+    return joinSteps(first, second) && Boolean(this.done.pop());
   }
 
   get nextUndo() {

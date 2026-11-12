@@ -74,6 +74,10 @@ function onTabKey(app, event, animation) {
   } else if (event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey)) {
     event.preventDefault();
     tabMenu(app, event.currentTarget, event.currentTarget, animation);
+  } else if (event.key === 'F2') {
+    // as a layer's name is
+    event.preventDefault();
+    rename(app, event.currentTarget, animation);
   }
 }
 

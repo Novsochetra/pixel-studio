@@ -101,6 +101,16 @@ check(
     isPng(readFileSync(`${shots}/line-up.png`)),
   'the line-up downloads as a PNG',
 );
+// Escape shut the line-up and Projects under it, where it was meant to go back to the list
+await page.keyboard.press('Escape');
+await page.waitForTimeout(800);
+check(
+  !(await page.locator('.sheet .line-up-member').count()) &&
+    (await page.locator('.sheet .project-row').count()) > 0,
+  'Escape shuts the line-up, and leaves Projects open under it',
+);
+await page.locator('.place-head').getByRole('button', { name: 'Line up' }).click();
+await page.waitForSelector('.line-up-member');
 await page.locator('.line-up-member', { hasText: 'Sochetra' }).click();
 await page.waitForTimeout(800);
 check(

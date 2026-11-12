@@ -62,7 +62,9 @@ test('the first icon or tile of a named project takes the project’s name', () 
 
   assert.equal(named({ kind: 'icon', name: 'Gem' }), 'Gem');
   assert.equal(named({ kind: 'tile', name: 'Castle floor' }), 'Castle floor');
-  assert.equal(named({ kind: 'icon' }), 'Coin', 'one with no name of its own keeps the usual');
+  // called Coin, a sword drawn in a project left unnamed was saved as coin.png
+  assert.equal(named({ kind: 'icon' }), 'Icon 1', 'one with no name of its own is numbered');
+  assert.equal(named({ kind: 'tile' }), 'Tile 1');
   assert.equal(named({ kind: 'character', name: 'Hero' }), 'Idle', 'an animation is not the art');
 });
 
