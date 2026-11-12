@@ -2,7 +2,7 @@
 // window that draws itself again keeps them, a window hands them back, and the layers are
 // moved and a folder is taken back with them.
 import { openStudio } from './harness.mjs';
-import { openExample, openPanel, waitSaved } from './studio.mjs';
+import { openExample, openPanel, projectsPage, waitSaved } from './studio.mjs';
 
 const { page, check, finish } = await openStudio();
 const focused = () =>
@@ -187,6 +187,20 @@ await page.keyboard.press('ControlOrMeta+z');
 await page.waitForTimeout(300);
 check((await layerNames())[0] === 'Cape', 'and the move is a step that undo takes back');
 
+// key after key, a layer moved up and down again was a step for each press
+await page.locator('.layer-row', { hasText: 'Cape' }).focus();
+await page.keyboard.press('Alt+ArrowDown');
+await page.keyboard.press('Alt+ArrowUp');
+await page.keyboard.press('Alt+ArrowDown');
+await page.waitForTimeout(300);
+await page.keyboard.press('ControlOrMeta+z');
+await page.waitForTimeout(300);
+check(
+  (await layerNames())[0] === 'Cape' &&
+    (await page.locator('.toast').textContent()).includes('Move layer'),
+  'a run of moves with the keys is one step to undo',
+);
+
 // a folder made and not wanted: Escape in its name left "New folder" behind
 await waitSaved(page);
 await page.locator('#projects-button').focus();
@@ -200,6 +214,19 @@ check(
   (await focused()).includes('All projects'),
   `a place picked with Enter keeps the keys (${await focused()})`,
 );
+
+// the project's name done with Enter left the keys on nothing
+await projectsPage(page, 'This project');
+await page.locator('#current-project-name').focus();
+await page.keyboard.type('x');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(400);
+check(
+  (await focused()) === 'This project' &&
+    (await page.locator('#current-project-name').inputValue()).endsWith('x'),
+  `the project named with Enter leaves the keys on its page’s tab (${await focused()})`,
+);
+await projectsPage(page, 'All projects');
 await page.locator('.sheet .folders-new').focus();
 await page.keyboard.press('Enter');
 await page.waitForTimeout(400);

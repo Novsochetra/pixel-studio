@@ -22,6 +22,14 @@ check(
 );
 await page.screenshot({ path: `${shots}/phone-frames-small.png` });
 
+// beside the frame rate the tabs had room for one short name: the rate is a row down here
+const strip = await box('.grid-tabs-bar');
+
+check(
+  strip.width >= 200,
+  `the animations’ tabs have the row to themselves and Play (${strip.width})`,
+);
+
 // two things to do with an empty frame: both buttons are on the screen
 await page.locator('.grid-row.current .cell-add').click();
 await page.waitForTimeout(300);

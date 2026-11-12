@@ -12,6 +12,23 @@ import { listGroup, switchRow } from './list-group.js';
 
 const ONE_LAYER_HINT = 'Add a layer for hair or a sword, to draw it without touching the rest.';
 
+const SAME_RUN_MS = 1000;
+
+// key after key, a layer moved several places is one move to undo, as a drag there is
+function moveByKey(app, key, to) {
+  const inRun = performance.now() - (app.layerMovedAt ?? -Infinity) < SAME_RUN_MS;
+  const steps = app.history.done.length;
+
+  restructure(app, 'Move layer', (draft) => placeLayer(frameOf(draft), key, to));
+
+  // only a move that was a step joins the one before it
+  if (inRun && app.history.done.length > steps) {
+    app.history.joinLast();
+  }
+
+  app.layerMovedAt = performance.now();
+}
+
 // where a key leads in the stack (0 is the bottom, drawn last in the list)
 const leadsTo = (key, at, top) => ({ ArrowUp: at + 1, ArrowDown: at - 1, Home: top, End: 0 })[key];
 
@@ -40,7 +57,7 @@ function onListKey(app, event, stack) {
   }
 
   if (event.altKey) {
-    restructure(app, 'Move layer', (draft) => placeLayer(frameOf(draft), stack[at].key, to));
+    moveByKey(app, stack[at].key, to);
   } else {
     goTo(app, { layer: stack[to].key });
   }

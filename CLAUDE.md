@@ -122,8 +122,10 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   The sheet still takes its row: the canvas is fitted in the room above it, never under it;
   only a sheet pulled tall, for a long list, lies over the canvas until it is pulled back.
   The strip of canvas above a tall sheet takes no stroke, and Play brings the sheet back to
-  its height (`lowerTallSheet`). On the shortest phones (568px) the frames' sheet is a little
-  taller than the others and its frames smaller, so one row of them is in sight whole.
+  its height (`lowerTallSheet`). On the shortest phones (568px) the frames' sheet finds room
+  for a whole row of frames in itself (less air at its top, smaller frames), never in the
+  canvas's room, and on the narrowest (320px) the frame rate stands a row down, so the tabs
+  have the first row.
   With a sheet up the room under the canvas is kept for the bar of a selection, a pose or a
   pin, and a message shows across the sheet's top edge: neither lies over the art.
   What stays put in a panel while it scrolls is painted in `--sheet` there. On its side the
@@ -301,7 +303,10 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   its `title` and `aria-description`. A button whose name says what a press does (Hide, Show)
   is not also `aria-pressed`. A menu marks the button it hangs from (`marksOpen`).
 - Whatever a drag does in a list has keys too: Alt and an arrow move a frame or a layer, and
-  Home and End go to a list's ends (`onListKey` in `layers-panel.js`).
+  Home and End go to a list's ends (`onListKey` in `layers-panel.js`). A run of such moves, key
+  after key, is one step to undo, as a run of nudges is (`moveByKey`, `joinStructure`).
+- Every view playing is shown whole: at a half where a whole pixel does not fit the room, as
+  the canvas itself is (`playLayout`).
 - A frame deleted from one view goes from every view, its hidden mark with it, when no other
   view has anything drawn in it (`drawnOnlyIn`), and the export says which frames are hidden from play and
   still in the files (`hiddenFrames`).

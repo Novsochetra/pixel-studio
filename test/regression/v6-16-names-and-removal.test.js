@@ -70,3 +70,37 @@ test('a part renamed is a step, and a name left as it was is none', () => {
   app.history.undo(project);
   assert.equal(project.parts[0].name, 'Shirt');
 });
+
+// a layer moved three places with Alt and the arrows was three steps to undo
+test('a run of moves of one layer is one step to undo', async () => {
+  const { placeLayer } = await import('../../src/model/layer-ops.js');
+  const { snapshotAnimations } = await import('../../src/editor/snapshots.js');
+  const project = newProject({ kind: 'character' });
+  const frame = project.animations[0].directions.south.frames[0];
+  const history = new History(() => null);
+  const names = () => frame.layers.map((layer) => layer.name).join();
+  const move = (to) => {
+    const before = snapshotAnimations(project.animations);
+
+    placeLayer(frame, frame.layers.find((layer) => layer.name === 'Top').key, to);
+    history.recordStructure('Move layer', before, project);
+  };
+
+  frame.layers.push(
+    { ...structuredClone(frame.layers[0]), key: 'mid', name: 'Mid' },
+    { ...structuredClone(frame.layers[0]), key: 'top', name: 'Top' },
+  );
+  const stacked = names();
+
+  move(1);
+  move(0);
+  assert.equal(history.joinLast(), true, 'the second move joins the first');
+  assert.equal(history.done.length, 1);
+
+  history.undo(project);
+  assert.equal(
+    project.animations[0].directions.south.frames[0].layers.map((layer) => layer.name).join(),
+    stacked,
+    'and one undo puts the layer back where the run began',
+  );
+});

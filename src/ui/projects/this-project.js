@@ -1,6 +1,7 @@
 import { node, toast } from '../dom.js';
 import { changeStructure } from '../actions.js';
 import { afterPress } from '../after-press.js';
+import { hasKeyboard } from '../platform-keys.js';
 import { addProject } from '../session.js';
 import { saveProject } from '../downloads.js';
 import { openCanvasSizeSheet } from '../canvas-size-sheet.js';
@@ -78,6 +79,20 @@ function canvasRow(job) {
   });
 }
 
+// Done with a name on a keyboard, the keys go to the page's own tab, in the window still: left
+// on nothing, the next Tab began the window again. A phone's keys are put away.
+function leaveField(field) {
+  const tab = hasKeyboard()
+    ? field.closest('.sheet')?.querySelector('.projects-nav [aria-pressed="true"]')
+    : null;
+
+  if (tab) {
+    tab.focus();
+  } else {
+    field.blur();
+  }
+}
+
 function renameField({ app, redraw }) {
   const { project } = app.store.state;
 
@@ -94,7 +109,7 @@ function renameField({ app, redraw }) {
       }
 
       if (event.key === 'Enter' || event.key === 'Escape') {
-        event.target.blur();
+        leaveField(event.target);
       }
     },
     onchange: (event) => {
