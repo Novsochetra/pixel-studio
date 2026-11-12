@@ -5,6 +5,7 @@ import { characterColors } from './character-colours.js';
 import { sharedColours } from '../palette/kits.js';
 import { newId } from '../model/project.js';
 import { toHex } from '../model/sprite.js';
+import { listGroup } from './list-group.js';
 
 // a colour button for a part: pressed when the part is drawn in it
 function colourChip(part, color, toggle) {
@@ -40,9 +41,13 @@ function nameAndRemove(app, part, save) {
     });
 
   return node(
-    'div.group',
-    { style: { gap: '6px' } },
-    node('input.input', { value: part.name, 'aria-label': 'Part name', onchange: rename }),
+    'div.list-row',
+    {},
+    node('input.list-field.guide-name', {
+      value: part.name,
+      'aria-label': 'Part name',
+      onchange: rename,
+    }),
     node(
       'button.btn.quiet.icon-only',
       { 'aria-label': `Remove ${part.name}`, title: 'Remove this part', onclick: ask },
@@ -63,16 +68,20 @@ function partRow(app, part, colours, redraw) {
     save();
   };
 
-  return node(
-    'div.part-row',
+  // a part is a group of rows, as a guide is: its name, then the colours it is drawn in
+  const group = listGroup(
     {},
     nameAndRemove(app, part, save),
     node(
-      'div.target-picker',
+      'div.list-row.target-picker',
       { style: { justifyContent: 'flex-start' } },
       colours.map((color) => colourChip(part, color, toggle)),
     ),
   );
+
+  group.classList.add('part-row', 'guide-row');
+
+  return group;
 }
 
 // Which of the character's colours make up each part. An outfit recolours a part's colours

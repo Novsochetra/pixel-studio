@@ -1,6 +1,7 @@
 import { icon, node } from '../dom.js';
 import { askDelete } from '../ask-delete.js';
 import { changeStructure } from '../actions.js';
+import { listGroup } from '../list-group.js';
 
 function outfitRow(app, outfit, redraw) {
   const { project } = app.store.state;
@@ -26,9 +27,13 @@ function outfitRow(app, outfit, redraw) {
     });
 
   return node(
-    'div.group',
-    { style: { gap: '6px' } },
-    node('input.input', { value: outfit.name, 'aria-label': 'Outfit name', onchange: rename }),
+    'div.list-row.guide-row',
+    {},
+    node('input.list-field.guide-name', {
+      value: outfit.name,
+      'aria-label': 'Outfit name',
+      onchange: rename,
+    }),
     node(
       'button.btn.quiet.icon-only',
       { 'aria-label': `Remove ${outfit.name}`, onclick: ask },
@@ -45,10 +50,8 @@ export function outfitNames(app, redraw) {
     return null;
   }
 
-  return node(
-    'div.field',
-    {},
-    node('span', {}, 'Your outfits'),
+  return listGroup(
+    { title: 'Your outfits' },
     project.outfits.map((outfit) => outfitRow(app, outfit, redraw)),
   );
 }

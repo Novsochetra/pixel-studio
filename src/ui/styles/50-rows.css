@@ -66,11 +66,11 @@
   padding-block: 14px;
 }
 
-.part-row {
-  display: grid;
+/* a part's colours wrap onto as many lines as they need */
+.part-row .target-picker {
+  flex-wrap: wrap;
   gap: 6px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--separator);
+  padding-block: 10px;
 }
 
 .layer-row {

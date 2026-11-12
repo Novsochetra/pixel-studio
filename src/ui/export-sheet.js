@@ -104,8 +104,10 @@ function drawExport(slot, job) {
     slot,
     presetButtons(state, choice, pick),
     frameFields(state, choice, { set: edit, toggle: mirrors ? toggle : null }),
-    node('div', { style: { overflowX: 'auto' } }, sheetPreview(result)),
+    // what the sheet will be, and what is wrong with it, before its picture: under it, in a
+    // short window, a frame too small for the art cropped it with the warning out of sight
     summary(result, animation, state),
+    node('div', { style: { overflowX: 'auto' } }, sheetPreview(result)),
     gamePack ? manifestBlock(result, choice.settings) : null,
     formatButtons(job.run, gamePack),
     node(
