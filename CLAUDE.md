@@ -208,6 +208,10 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   (`playFold` in `inspector.js`).
 - Which views show their frames is one button that names them (`grid/views-menu.js`): "All
   views", or "Front only". An animation with one view has no such button.
+- A window open on a desk keeps its top where it opened and grows at its foot (`pinTop` in
+  `sheet-pin.js`): centred, a window that drew itself again taller moved up under the pointer,
+  and a double-click's second click landed on the field above. A phone's window rises from the
+  screen's foot.
 - What closes leaves through `leave()` (`src/ui/leave.js`) under an `-out` class
   (`.sheet-out`, `.menu-out`, `.toast-out`), so the page and the flows count it gone at once
   while it plays out: style both with `:is(.sheet, .sheet-out)`.

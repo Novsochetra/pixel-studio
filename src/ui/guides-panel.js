@@ -8,6 +8,23 @@ import { viewName } from '../model/kinds.js';
 import { referenceOf } from '../model/reference.js';
 import { freeName } from '../model/free-name.js';
 
+// the free row nearest the middle, below it first, then above: down to the last row alone,
+// two guides stood on it on a canvas whose top half was free
+function freeRow(guides, height) {
+  const taken = new Set(guides.map((guide) => guide.row));
+  const middle = Math.floor(height / 2);
+
+  for (let step = 0; step < height; step++) {
+    const row = middle + (step % 2 ? -Math.ceil(step / 2) : step / 2);
+
+    if (row >= 0 && row < height && !taken.has(row)) {
+      return row;
+    }
+  }
+
+  return middle;
+}
+
 // A new guide has a name of its own, and a row no other guide is on: two added one after the
 // other were both "Guide" on one row, the second hidden under the first.
 function addGuide(app) {
@@ -18,14 +35,7 @@ function addGuide(app) {
     'Guide',
     guides.map((guide) => guide.name),
   );
-  const rows = new Set(guides.map((guide) => guide.row));
-  let row = ref ? Math.floor(ref.height / 2) : 0;
-
-  while (rows.has(row) && ref && row < ref.height - 1) {
-    row += 1;
-  }
-
-  const guide = newGuide(name, row, 'fixed');
+  const guide = newGuide(name, freeRow(guides, ref?.height ?? 1), 'fixed');
 
   changeGuides(app, 'Add guide', (list) => list.push(guide));
 }

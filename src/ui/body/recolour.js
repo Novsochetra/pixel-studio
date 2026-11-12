@@ -66,5 +66,8 @@ function followColours(app, mapping) {
   if (after.some((guide, i) => guide.colour !== before[i].colour)) {
     project.guides = after;
     app.history.alsoSetting('guides', before, structuredClone(after));
+    // the panels were drawn as the art changed, before the guides did
+    app.saver.markStructure?.();
+    app.store.touch('guides');
   }
 }

@@ -349,8 +349,14 @@
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
-:is(.menu, .menu-out) [aria-hidden] {
-  font-weight: 600;
+:is(.menu, .menu-out) .menu-check {
+  display: inline-flex;
+  margin-left: auto;
+}
+
+:is(.menu, .menu-out) .menu-check svg {
+  width: 16px;
+  height: 16px;
 }
 
 @media (hover: hover) {

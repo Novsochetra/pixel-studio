@@ -23,7 +23,8 @@ const NAME_HINTS = [
 
 // the view a file's name says, without its extension, or null
 export function namedDirection(name) {
-  const stem = name.replace(/\.[a-z0-9]+$/i, '');
+  // knightBack is knight-Back: a capital starts a word too
+  const stem = name.replace(/\.[a-z0-9]+$/i, '').replace(/([a-z])([A-Z])/g, '$1-$2');
 
   return NAME_HINTS.find(([, pattern]) => pattern.test(stem))?.[0] ?? null;
 }

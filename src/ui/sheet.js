@@ -5,6 +5,7 @@ import { focusables, rememberFocus, trapTab } from './focus.js';
 import { leave } from './leave.js';
 import { pullToClose } from './sheet-pull.js';
 import { watchBelow } from './more-behind.js';
+import { pinTop } from './sheet-pin.js';
 
 function sheetHead(title, close) {
   return node(
@@ -97,6 +98,7 @@ export function openSheet(title, onClose, { wide = false, focusField = true, may
   document.body.append(backdrop);
   queueMicrotask(() => focusFirst(body, focusField));
   marksBelow(body);
+  pinTop(body, backdrop);
 
   return { body, close };
 }

@@ -101,7 +101,10 @@ function refuses(fields) {
 // a size that cannot be shown (letters, out of range) leaves the preview as it was
 const refusesQuietly = ({ width, height }) =>
   [width, height].some(
-    ({ input }) => input.value.trim() !== '' && !isWholeBetween(input.value, CANVAS_LIMITS),
+    // letters in a number field read as empty: the browser says so by badInput
+    ({ input }) =>
+      input.validity?.badInput ||
+      (input.value.trim() !== '' && !isWholeBetween(input.value, CANVAS_LIMITS)),
   );
 
 // a field left empty keeps the size the canvas has

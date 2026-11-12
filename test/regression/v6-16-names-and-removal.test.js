@@ -137,6 +137,7 @@ test('a picture’s view is read from whole words of its name', async () => {
   assert.equal(namedDirection('sideways-inside.png'), null);
   assert.equal(namedDirection('front-side-left.png'), 'south-west');
   assert.equal(namedDirection('hero1.png'), null);
+  assert.equal(namedDirection('knightBack.webp'), 'north', 'a capital starts a word');
 });
 
 // taking a palette off was a step and adding one was not: undo passed over it

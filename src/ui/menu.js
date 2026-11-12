@@ -1,4 +1,4 @@
-import { node } from './dom.js';
+import { icon, node } from './dom.js';
 import { focusables, rememberFocus } from './focus.js';
 import { leave } from './leave.js';
 
@@ -84,8 +84,9 @@ function item(entry, close, onError) {
       },
     },
     label,
-    // aria-checked says it to a screen reader: the mark itself stays out of the item's name
-    options.checked ? node('span', { 'aria-hidden': 'true' }, '✓') : null,
+    // aria-checked says it to a screen reader: the mark itself stays out of the item's name. A
+    // stroke icon, as every picture is: the font's tick stood in another weight beside them.
+    options.checked ? node('span.menu-check', { 'aria-hidden': 'true' }, icon('check')) : null,
   );
 }
 
