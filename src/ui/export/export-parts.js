@@ -35,7 +35,11 @@ export function sheetPreview(result) {
     1,
     Math.min(4, Math.floor(860 / sheet.width), Math.floor(320 / sheet.height)),
   );
-  const canvas = node('canvas', { style: { maxWidth: '100%', imageRendering: 'pixelated' } });
+  const canvas = node('canvas', {
+    role: 'img',
+    'aria-label': 'The sprite sheet as it will be saved',
+    style: { maxWidth: '100%', imageRendering: 'pixelated' },
+  });
 
   canvas.width = sheet.width * scale;
   canvas.height = sheet.height * scale;

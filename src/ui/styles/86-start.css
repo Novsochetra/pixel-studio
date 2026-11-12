@@ -137,6 +137,13 @@ h4.start-heading {
   border-bottom: 1px solid var(--separator);
 }
 
+/* A field the keys move to is scrolled clear of Create at the foot: under it, a name was typed
+   unseen. */
+.start-screen,
+:is(.sheet, .sheet-out):has(.start-chooser) {
+  scroll-padding-bottom: 96px;
+}
+
 /* The form is longer than a tablet's screen held wide, or a short window: Create stays at its
    foot, in sight whichever kind is picked. */
 .start-chooser .sheet-actions {

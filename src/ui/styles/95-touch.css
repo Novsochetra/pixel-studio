@@ -113,6 +113,12 @@
     inset: -8px;
   }
 
+  /* a mark, not a button, under a finger: a tap on a hidden frame to pick it unhid it. Show in
+     play is in the frame's menu. */
+  .cell-hidden {
+    pointer-events: none;
+  }
+
   .tab-more,
   .grid-tab-add,
   .icon-toggle,

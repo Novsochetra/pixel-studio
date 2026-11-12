@@ -91,7 +91,10 @@ await row('Hair').click();
 await row('Hat').click({ modifiers: ['Meta'] });
 check((await picked()) === 'Hat,Hair', '⌘-click picks a second layer');
 check(
-  (await page.getByRole('button', { name: /^Move:/ }).getAttribute('aria-pressed')) === 'true',
+  (await page
+    .locator('#rail')
+    .getByRole('button', { name: 'Move', exact: true })
+    .getAttribute('aria-pressed')) === 'true',
   'and the tool that moves layers is on',
 );
 check(await page.getByText('2 layers picked').isVisible(), 'the panel says how many are picked');

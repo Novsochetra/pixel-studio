@@ -26,7 +26,7 @@ function eyeButton(app, entry, shown) {
   return node(
     `button.btn.quiet.eye${shown ? '' : '.off'}`,
     {
-      'aria-pressed': String(shown),
+      // its name says what a press does: said pressed as well, "Hide Art, pressed" read backwards
       'aria-label': `${shown ? 'Hide' : 'Show'} ${entry.name}`,
       title: shown
         ? 'Shown in this frame. Click to hide it here (a hidden layer stays out of downloads)'

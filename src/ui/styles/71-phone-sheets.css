@@ -150,6 +150,12 @@
     --sheet-height: min(78vh, 100dvh - 150px);
   }
 
+  /* the strip of canvas left above a tall sheet takes no stroke: a finger reaching for the
+     sheet's top drew on art too small to be seen */
+  :root[data-layout='compact'] .app[data-sheet='tall'] .edit-scroll {
+    pointer-events: none;
+  }
+
   :root[data-layout='compact'] :is(.inspector, .grid-panel) {
     height: var(--sheet-height);
     max-height: none;
@@ -285,6 +291,37 @@
     min-width: 0;
     margin: -8px -12px 0;
     background: none;
+  }
+
+  /* On the shortest phones the sheet had room for the frames' two bars and little more: no
+     frame was in sight whole, only the top of the first row. The frames' sheet alone takes a
+     little of the canvas's room there (the others keep it for a selection's bar), and the
+     frames are smaller. */
+  @media (max-height: 600px) {
+    :root[data-layout='compact']:has(.app[data-panel='frames']:not([data-sheet='tall'])) {
+      --sheet-height: min(50vh, 100dvh - 300px);
+    }
+
+    :root[data-layout='compact'] :is(.cell, .cell-add) {
+      width: 46px;
+      height: 46px;
+    }
+
+    :root[data-layout='compact'] .grid-number {
+      width: 46px;
+    }
+
+    :root[data-layout='compact'] .cell canvas {
+      width: 36px;
+      height: 36px;
+    }
+
+    :root[data-layout='compact'] .cell-more {
+      top: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
+    }
   }
 
   :root[data-layout='compact'] .btn.panel-close {

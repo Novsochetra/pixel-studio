@@ -121,6 +121,9 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   its whole top: up makes it tall (`data-sheet='tall'`), down brings it back, then shuts it.
   The sheet still takes its row: the canvas is fitted in the room above it, never under it;
   only a sheet pulled tall, for a long list, lies over the canvas until it is pulled back.
+  The strip of canvas above a tall sheet takes no stroke, and Play brings the sheet back to
+  its height (`lowerTallSheet`). On the shortest phones (568px) the frames' sheet is a little
+  taller than the others and its frames smaller, so one row of them is in sight whole.
   With a sheet up the room under the canvas is kept for the bar of a selection, a pose or a
   pin, and a message shows across the sheet's top edge: neither lies over the art.
   What stays put in a panel while it scrolls is painted in `--sheet` there. On its side the
@@ -284,7 +287,20 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   its name changes as it is used (Play to Pause). After a click the keys stay the editor's own
   (`:focus-visible`). A field edited says its change before Tab moves on, and Enter in a field
   clicked into, or Escape in any, gives the keys back to the editor's shortcuts
-  (`field-keys.js`).
+  (`field-keys.js`). A window that draws itself again at a choice wraps that draw in
+  `keepFocus` too. A button that switches itself off under the keys (Undo, at the last step)
+  keeps them as a stand-in that says it is off (`standIn`, `aria-disabled`): style what is off
+  with `:is(:disabled, [aria-disabled='true'])`. A name typed in place is kept at Tab
+  (`renameInPlace`), and a window's opener that the bars draw again has an id, so the keys
+  come back to it.
+- A button is named by what it is, in a word or two (`toolName`); what it does at length is
+  its `title` and `aria-description`. A button whose name says what a press does (Hide, Show)
+  is not also `aria-pressed`. A menu marks the button it hangs from (`marksOpen`).
+- Whatever a drag does in a list has keys too: Alt and an arrow move a frame or a layer, and
+  Home and End go to a list's ends (`onListKey` in `layers-panel.js`).
+- A frame deleted from one view takes along the other views' last frames while nothing is
+  drawn in them (`dropEmptyEnd`), and the export says which frames are hidden from play and
+  still in the files (`hiddenFrames`).
 - A canvas is sized for the room it has, never shrunk by the stylesheet (`viewBox` in
   `src/ui/body/cut-view.js`): squashed, its art is out of shape and a press lands beside the
   finger.

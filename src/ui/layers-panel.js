@@ -12,20 +12,31 @@ import { listGroup, switchRow } from './list-group.js';
 
 const ONE_LAYER_HINT = 'Add a layer for hair or a sword, to draw it without touching the rest.';
 
-// ↑ and ↓ pick the layer above or below, as in an image editor's list
+// where a key leads in the stack (0 is the bottom, drawn last in the list)
+const leadsTo = (key, at, top) => ({ ArrowUp: at + 1, ArrowDown: at - 1, Home: top, End: 0 })[key];
+
+// ↑ and ↓ pick the layer above or below, as in an image editor's list, and Home and End the top
+// and the bottom one. With Alt they move the layer there: a drag was the only way to, and the
+// keys had none. Home and End scrolled the panel from under the row instead.
 function onListKey(app, event, stack) {
   // clicking a layer focuses its row, and the arrows must still move what the tool moves
   if (arrowsMoveArt(app.store.state)) {
     return;
   }
 
-  const step = { ArrowUp: 1, ArrowDown: -1 }[event.key];
   const at = stack.findIndex((entry) => entry.key === currentLayer(app.store.state).key);
-  const next = stack[at + (step ?? 0)];
+  const to = leadsTo(event.key, at, stack.length - 1);
 
-  if (step && next) {
-    event.preventDefault();
-    goTo(app, { layer: next.key });
+  if (to === undefined || !stack[to]) {
+    return;
+  }
+
+  event.preventDefault();
+
+  if (event.altKey) {
+    restructure(app, 'Move layer', (draft) => placeLayer(frameOf(draft), stack[at].key, to));
+  } else {
+    goTo(app, { layer: stack[to].key });
   }
 }
 

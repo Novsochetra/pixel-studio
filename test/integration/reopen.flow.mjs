@@ -32,7 +32,9 @@ await page.mouse.click(canvas.x + 12, canvas.y + 12);
 await comesBack('the example, once edited, opens again on the next visit');
 
 await selectView(page, 'Side');
-await page.locator('.grid-row.current .cell-add').click();
+// a copy, with its art in every view: an empty last frame would go with the one deleted
+await selectFrame(page, 0);
+await frameAction(page, 'Duplicate frame');
 await page.waitForTimeout(200);
 await selectFrame(page, 1);
 await frameAction(page, 'Delete frame 2 from Side');

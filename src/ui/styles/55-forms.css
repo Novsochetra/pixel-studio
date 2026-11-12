@@ -63,6 +63,13 @@ button.swatch:active {
   outline-offset: 2px;
 }
 
+/* the picked colour's ring is the keys' ring too: with the keys on it, the ring stands further
+   out and thicker, or nothing told the two apart */
+.swatch[aria-pressed='true']:focus-visible {
+  outline-width: 4px;
+  outline-offset: 4px;
+}
+
 .swatch.clear {
   background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 10px
     10px;

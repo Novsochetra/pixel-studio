@@ -1,5 +1,6 @@
 import { node, replace, toast } from '../dom.js';
 import { openSheet } from '../sheet.js';
+import { keepFocus } from '../keep-focus.js';
 import { artSprite, currentAnimation, directionsInUse, referenceSprite } from '../actions.js';
 import { viewsSideBySide, viewsToFit } from '../views-side-by-side.js';
 import { saveFile } from '../save-file.js';
@@ -154,7 +155,7 @@ export function openChatgptSheet(app) {
   };
   const redraw = (patch) => {
     Object.assign(ask, patch);
-    draw(slot, state, ask, { close: sheet.close, redraw });
+    keepFocus(slot, () => draw(slot, state, ask, { close: sheet.close, redraw }));
   };
 
   sheet.body.append(slot);

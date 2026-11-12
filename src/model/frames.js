@@ -93,7 +93,20 @@ export function removeViewFrame(animation, direction, index) {
     }
   });
 
+  dropEmptyEnd(animation, frames.length);
+
   return Math.min(index, frames.length - 1);
+}
+
+// The other views' last frames go too while nothing is drawn in them: a frame deleted from the
+// one view drawn in left its column standing, empty, and the loop held its last frame a tick
+// longer for a frame nobody could see.
+function dropEmptyEnd(animation, kept) {
+  for (const { frames } of entriesOf(animation)) {
+    while (frames.length > Math.max(1, kept) && !hasArt(frames.at(-1))) {
+      frames.pop();
+    }
+  }
 }
 
 // the frame at `from` taken out and put back in at `to`, in every view that has it; returns where

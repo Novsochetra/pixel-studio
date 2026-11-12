@@ -1,5 +1,5 @@
 import { node, icon, replace, toast } from './dom.js';
-import { toolSaid, toolsFor } from './tool-list.js';
+import { toolName, toolSaid, toolsFor } from './tool-list.js';
 import { forHands } from './platform-keys.js';
 import { flipCurrent } from './actions.js';
 
@@ -20,7 +20,8 @@ function toolButton(app, tool) {
     {
       title: forHands(`${tool.label} (${tool.key.toUpperCase()})`, toolSaid(tool)),
       'data-key': tool.key.toUpperCase(),
-      'aria-label': toolSaid(tool),
+      'aria-label': toolName(tool),
+      'aria-description': toolSaid(tool),
       'aria-pressed': String(state.tool === tool.id),
       onclick: () => pickTool(app, tool),
     },

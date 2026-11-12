@@ -115,12 +115,18 @@ check((await pixels()) === unselected, 'and undo brings the pixels back');
 
 await page.keyboard.press('t');
 check(
-  (await page.getByRole('button', { name: /^Move:/ }).getAttribute('aria-pressed')) === 'true',
+  (await page
+    .locator('#rail')
+    .getByRole('button', { name: 'Move', exact: true })
+    .getAttribute('aria-pressed')) === 'true',
   'T picks the tool that moves',
 );
 await page.keyboard.press('v');
 check(
-  (await page.getByRole('button', { name: /^Move:/ }).getAttribute('aria-pressed')) === 'true',
+  (await page
+    .locator('#rail')
+    .getByRole('button', { name: 'Move', exact: true })
+    .getAttribute('aria-pressed')) === 'true',
   'V is no tool any more',
 );
 const unmoved = await pixels();

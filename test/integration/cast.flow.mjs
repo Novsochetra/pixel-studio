@@ -80,7 +80,7 @@ check(
 );
 await page.screenshot({ path: `${shots}/cast-projects.png` });
 
-await page.locator('.place-head').getByRole('button', { name: 'Line up' }).click();
+await page.locator('.place-head').getByRole('button', { name: 'Line-up' }).click();
 await page.waitForSelector('.line-up-member');
 check(
   JSON.stringify((await page.locator('.line-up-name').allTextContents()).sort()) ===
@@ -109,7 +109,7 @@ check(
     (await page.locator('.sheet .project-row').count()) > 0,
   'Escape shuts the line-up, and leaves Projects open under it',
 );
-await page.locator('.place-head').getByRole('button', { name: 'Line up' }).click();
+await page.locator('.place-head').getByRole('button', { name: 'Line-up' }).click();
 await page.waitForSelector('.line-up-member');
 await page.locator('.line-up-member', { hasText: 'Sochetra' }).click();
 await page.waitForTimeout(800);

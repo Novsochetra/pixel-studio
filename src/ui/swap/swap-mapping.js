@@ -5,10 +5,11 @@ import { newId } from '../../model/project.js';
 import { toHex } from '../../model/sprite.js';
 import { reducePalette } from '../../palette/reduce.js';
 
-function targetPicker(palette, current, onPick) {
+// the group says which colour its buttons are for: sixteen rows of "Keep" said nothing of it
+function targetPicker(palette, { from, current }, onPick) {
   return node(
     'div.target-picker',
-    { role: 'group' },
+    { role: 'group', 'aria-label': `What ${toHex(from)} becomes` },
     node(
       'button.btn.quiet.keep',
       {
@@ -41,7 +42,9 @@ export function mappingRows(state, palette, mapping, onChange) {
       node('span.swatch', { style: { background: toHex(color) }, 'aria-hidden': 'true' }),
       node('span.mono', {}, toHex(color), node('span.hint', {}, ` · ${counts.get(color)} px`)),
       icon('arrow-right'),
-      targetPicker(palette, mapping[color], (target) => onChange(color, target)),
+      targetPicker(palette, { from: color, current: mapping[color] }, (target) =>
+        onChange(color, target),
+      ),
     ),
   );
 }

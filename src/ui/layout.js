@@ -1,6 +1,6 @@
 // a phone held either way, or a small tablet upright
 const COMPACT_WINDOW = '(max-width: 860px), (max-height: 520px) and (max-width: 960px)';
-const MEDIUM_WINDOW = '(max-width: 1320px)';
+const MEDIUM_WINDOW = '(max-width: 1180px)';
 const listeners = new Set();
 
 // How much room the window gives: 'compact' (a phone, a small tablet: the panels wait in the

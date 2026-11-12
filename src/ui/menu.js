@@ -123,12 +123,26 @@ const MENU_STYLE = {
   overflowY: 'auto',
 };
 
+// a menu is named after the button it hangs from
+const menuFor = (anchor) =>
+  node('div.menu', {
+    role: 'menu',
+    'aria-label': anchor.getAttribute('aria-label') ?? anchor.textContent.trim(),
+    style: MENU_STYLE,
+  });
+
+// said of the button the menu hangs from, whichever button that is
+function marksOpen(anchor, open) {
+  anchor.setAttribute('aria-haspopup', 'menu');
+  anchor.setAttribute('aria-expanded', String(open));
+}
+
 export function openMenu(anchor, entries, { align = 'left', onError = () => {} } = {}) {
   // remembered before the menu open before closes, which gives focus back to its own button
   const restoreFocus = rememberFocus();
   closeOpenMenu?.();
 
-  const menu = node('div.menu', { role: 'menu', style: MENU_STYLE });
+  const menu = menuFor(anchor);
   // the button it hangs from moves when the window changes size: the menu would stay behind
   const close = () => {
     leave(menu, 'menu-out');
@@ -136,6 +150,7 @@ export function openMenu(anchor, entries, { align = 'left', onError = () => {} }
     document.removeEventListener('pointerdown', outside, true);
     document.removeEventListener('keydown', onKey, true);
     closeOpenMenu = null;
+    marksOpen(anchor, false);
     restoreFocus();
   };
   // a menu taken away with the page drawn over it lets go of the keys too
@@ -166,6 +181,7 @@ export function openMenu(anchor, entries, { align = 'left', onError = () => {} }
   document.addEventListener('pointerdown', outside, true);
   document.addEventListener('keydown', onKey, true);
   closeOpenMenu = close;
+  marksOpen(anchor, true);
   menu.querySelector('button:not(:disabled)')?.focus();
 
   return close;

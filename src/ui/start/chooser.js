@@ -68,18 +68,16 @@ function drawCards(el, saved, picked, handlers) {
   const order = [...kinds, ...presets];
   const drawCard = (choice) => card(choice, choice.id === picked.id, { ...handlers, order });
 
+  // One choice, of a kind or a preset, so one group: as two, the arrows went from the last
+  // kind into a group that said it was another question.
   replace(
     el,
     node(
-      'div.start-cards',
+      'div.start-groups',
       { role: 'radiogroup', 'aria-label': 'What are you making?' },
-      kinds.map(drawCard),
-    ),
-    node('h4.start-heading', {}, 'Or start from a game preset'),
-    node(
-      'div.start-cards',
-      { role: 'radiogroup', 'aria-label': 'Game presets' },
-      presets.map(drawCard),
+      node('div.start-cards', {}, kinds.map(drawCard)),
+      node('h4.start-heading', {}, 'Or start from a game preset'),
+      node('div.start-cards', {}, presets.map(drawCard)),
     ),
   );
 }

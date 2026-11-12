@@ -1,5 +1,6 @@
 import { icon, node, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
+import { keepFocus } from './keep-focus.js';
 import {
   deleteVersion,
   listVersions,
@@ -64,7 +65,7 @@ function deleteButton(app, entry, redraw) {
   place.append(
     node(
       'button.btn.quiet.icon-only',
-      { onclick: ask, title: 'Delete this version', 'aria-label': 'Delete' },
+      { onclick: ask, title: 'Delete this version', 'aria-label': `Delete ${entry.name}` },
       icon('trash'),
     ),
   );
@@ -89,7 +90,7 @@ function row(app, entry, { redraw, close }) {
       { style: { gap: '2px' } },
       node(
         'button.btn.quiet.version-back',
-        { onclick: goBack, 'aria-label': 'Go back to this' },
+        { onclick: goBack, 'aria-label': `Go back to this: ${entry.name}` },
         'Go back',
       ),
       node(
@@ -97,7 +98,7 @@ function row(app, entry, { redraw, close }) {
         {
           onclick: () => download(app, entry),
           title: 'Download this version',
-          'aria-label': 'Download',
+          'aria-label': `Download ${entry.name}`,
         },
         icon('download'),
       ),
@@ -128,7 +129,10 @@ export function openVersionsSheet(app) {
     const versions = await listVersions(app.backend, app.keys);
     const rows = versions.map((entry) => row(app, entry, { redraw, close: sheet.close }));
 
-    replace(list, versions.length ? rows : node('p.list-note.version-none', {}, NONE_YET));
+    // a version deleted takes the button that deleted it: the keys go on from the next row
+    keepFocus(list, () =>
+      replace(list, versions.length ? rows : node('p.list-note.version-none', {}, NONE_YET)),
+    );
   };
   const save = async () => {
     const kept = await keepVersion(app, name.value.trim() || `Version of ${when(Date.now())}`);

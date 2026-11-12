@@ -49,34 +49,55 @@ const nearest = (matches, controls, index) =>
     matches[0],
   );
 
+// Still there, but switched off (Undo, with nothing left to undo): it keeps the keys, as a
+// button that says it is off and does nothing, until the bar is drawn again. On its neighbour
+// the next Enter did the opposite of the last; on nothing, the next Tab began the page again.
+function standIn(off) {
+  const stand = off.cloneNode(true);
+
+  stand.disabled = false;
+  stand.setAttribute('aria-disabled', 'true');
+  off.replaceWith(stand);
+
+  return stand;
+}
+
+// the control now switched off that the keys were on: the one of its name, or the one in its
+// place when what it did named it anew (an outline's row, its count now 0)
+function switchedOff(place, within, inPlace) {
+  const named = [...within.querySelectorAll(':disabled')].find((off) => isNamed(off, place));
+  const stands = inPlace?.tagName === place.tag && inPlace.matches(':disabled');
+
+  return named ?? (stands ? inPlace : null);
+}
+
 // A control whose name changes as it is used (Play to Pause, Hide to Show) is found where it
 // stood: by its words alone, the keys went to another row's button, or to nothing.
 function nowAt(place, root) {
   if (place.id) {
-    return document.getElementById(place.id);
+    const known = document.getElementById(place.id);
+
+    return known?.disabled ? standIn(known) : known;
   }
 
   const within = (place.region && document.getElementById(place.region)) || root;
   const controls = focusables(within);
   const named = controls.filter((control) => isNamed(control, place));
 
-  // Still there, but switched off (Undo, with nothing left to undo): the keys go to no other
-  // control. On its neighbour, the next Enter did the opposite of the last.
-  if (
-    !named.length &&
-    [...within.querySelectorAll(':disabled')].some((off) => isNamed(off, place))
-  ) {
-    return null;
+  if (named.length) {
+    return nearest(named, controls, place.index);
   }
 
   const inPlace = place.steps.reduce((at, step) => at?.children[step], within);
-  const stood = controls.includes(inPlace) && inPlace.tagName === place.tag ? inPlace : null;
+  const off = switchedOff(place, within, inPlace);
 
-  return (
-    nearest(named, controls, place.index) ??
-    stood ??
-    controls[Math.min(place.index, controls.length - 1)]
-  );
+  if (off) {
+    return standIn(off);
+  }
+
+  return controls.includes(inPlace) && inPlace.tagName === place.tag
+    ? inPlace
+    : controls[Math.min(place.index, controls.length - 1)];
 }
 
 // The bars are drawn again at every change, and the control that made the change goes with the

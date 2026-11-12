@@ -49,6 +49,9 @@ const GRID_KEYS = [
   // the Pin tool's own controls stand in the frames' bar: they come and go with the tool
   'tool',
   'layout',
+  // a phone's frames are drawn while their sheet is shut, with no width to scroll the open
+  // tab into sight by: they are drawn again as the sheet opens
+  'panel',
 ];
 
 const showsInGrid = (patch) => {

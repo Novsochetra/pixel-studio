@@ -1,6 +1,7 @@
 import { node, replace, toast } from './dom.js';
 import { watchBelow } from './more-behind.js';
 import { openSheet } from './sheet.js';
+import { keepFocus } from './keep-focus.js';
 import { allArtLayers } from './actions.js';
 import { recolourLayers } from './body/recolour.js';
 import { characterColors } from './character-colours.js';
@@ -144,7 +145,7 @@ export function openSwapSheet(app) {
     paletteId: palettes.at(-1)?.id ?? null,
   };
 
-  job.draw = () => {
+  const draw = () => {
     const palette = app.store.state.project.palettes.find(
       (candidate) => candidate.id === job.paletteId,
     );
@@ -166,6 +167,8 @@ export function openSwapSheet(app) {
     app.store.set({ swapPreview: null });
   };
 
+  // drawn again at every choice: the keys stay on the control that made it
+  job.draw = () => keepFocus(slot, draw);
   sheet.body.append(slot);
   job.draw();
 }

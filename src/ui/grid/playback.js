@@ -44,6 +44,16 @@ export function stopPlayback(app) {
   return false;
 }
 
+// A phone's sheet pulled tall leaves the canvas a strip: Play there showed a picture the size
+// of a stamp, or none. The sheet goes back to its height, and the play is seen.
+function lowerTallSheet() {
+  const frame = globalThis.document?.querySelector?.('.app[data-sheet="tall"]');
+
+  if (frame) {
+    frame.dataset.sheet = '';
+  }
+}
+
 export function togglePlayback(app, { isShown, onFrame }) {
   if (stopPlayback(app)) {
     onFrame();
@@ -51,6 +61,7 @@ export function togglePlayback(app, { isShown, onFrame }) {
     return;
   }
 
+  lowerTallSheet();
   const animation = currentAnimation(app.store.state);
   const from = app.store.state.at.frame;
   const first = frameAtTime({ from, fps: animation.fps, order: playedFrames(animation) }, 0);

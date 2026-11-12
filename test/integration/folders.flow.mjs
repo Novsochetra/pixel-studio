@@ -201,7 +201,7 @@ await page.waitForTimeout(150);
 check(JSON.stringify(await shown()) === '["Grass","Rival","Sochetra"]', 'projects sort by name');
 
 await goTo('Naga Eleven');
-await page.locator('.place-head').getByRole('button', { name: 'Line up' }).click();
+await page.locator('.place-head').getByRole('button', { name: 'Line-up' }).click();
 await page.waitForSelector('.line-up');
 await page.waitForTimeout(400);
 check(

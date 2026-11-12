@@ -13,6 +13,8 @@ function projectButton(app) {
   return node(
     'button.wordmark',
     {
+      // named, so the keys come back to it when the project's name changed in the window
+      id: 'projects-button',
       title: 'Projects: switch, start a new one, line them up',
       onclick: () => openProjectsSheet(app),
     },

@@ -3,6 +3,7 @@ import { compositeFrame } from '../model/composite.js';
 import { hasArt, heldFrame } from '../model/frames.js';
 import { drawnDirections, flippedSides } from '../model/directions.js';
 import { isSingleView } from '../model/kinds.js';
+import { hiddenFrames } from '../model/frame-play.js';
 
 // the drawn views in compass order, then the flipped ones when they are wanted
 function sheetRows(project, animation, includeMirrored) {
@@ -140,6 +141,16 @@ export function buildSheet(project, animation, settings) {
   const warnings = rows.flatMap((row, rowIndex) =>
     placeRow(sheet, row, { project, animation, settings, frames, rowIndex }),
   );
+  const hidden = hiddenFrames(animation);
+
+  // Play skips a frame hidden from it and the files do not: said, as the file otherwise shows
+  // a frame the preview never did
+  if (hidden.length) {
+    warnings.push(
+      `Frame ${hidden.join(', ')} ${hidden.length > 1 ? 'are' : 'is'} hidden from play, and still in the files.`,
+    );
+  }
+
   const slug = slugOf(project, animation);
   const manifest = {
     image: `assets/sprites/${slug}.png`,

@@ -1,5 +1,6 @@
 import { node, replace, toast } from './dom.js';
 import { openSheet } from './sheet.js';
+import { keepFocus } from './keep-focus.js';
 import { allArtLayers } from './actions.js';
 import { recolourLayers } from './body/recolour.js';
 import { viewsToFit } from './views-side-by-side.js';
@@ -144,7 +145,8 @@ export function openOutfitsSheet(app) {
     partsOpen: !project.parts.some((part) => part.colours.length),
   };
 
-  job.draw = () => drawOutfits(job);
+  // drawn again at every choice: the keys stay on the control that made it
+  job.draw = () => keepFocus(slot, () => drawOutfits(job));
 
   sheet.body.append(slot);
   job.draw();

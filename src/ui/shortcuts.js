@@ -55,6 +55,10 @@ const GROUPS = [
       ['Alt ←  →', 'Move the selected frame earlier or later'],
       ['Arrows, Home, End', 'In the frames: walk the frames and views; on a tab: the tabs'],
       ['Shift F10, right-click', 'A tab’s menu: rename, duplicate, delete'],
+      ['Enter, Shift F10', 'On a frame: its menu'],
+      ['↑  ↓, Home, End', 'In the layers: the layer above or below, the top or bottom one'],
+      ['Alt ↑  ↓', 'Move the layer up or down'],
+      ['F2', 'Rename the layer or the tab the keys are on'],
       ['+  −', 'Zoom'],
       ['⌘scroll, or pinch', 'Zoom around the pointer'],
       ['Space + drag, middle drag', 'Pan'],
@@ -103,6 +107,6 @@ export function openShortcuts(project = null) {
         ),
       ),
     ),
-    node('div.sheet-actions', {}, node('button.btn.primary', { onclick: sheet.close }, 'Done')),
+    node('div.sheet-actions', {}, node('button.btn', { onclick: sheet.close }, 'Close')),
   );
 }

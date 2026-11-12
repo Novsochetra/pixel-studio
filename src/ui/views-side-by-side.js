@@ -44,6 +44,9 @@ export function viewsSideBySide(state, scale, options = {}) {
   const { width, height } = state.project.canvas;
   const canvas = document.createElement('canvas');
 
+  // a picture, named for someone who cannot see it
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', 'The views side by side');
   canvas.width = directions.length * width * scale + (directions.length - 1) * GAP;
   canvas.height = height * scale + CAPTION;
   const context = canvas.getContext('2d');

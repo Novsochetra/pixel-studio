@@ -38,7 +38,13 @@ export function renderStatus(el, app) {
       {},
       node(
         'button.status-link',
-        { title: 'Change the canvas size', onclick: () => openCanvasSizeSheet(app) },
+        // named, so the keys come back to it from the window it opens: the bar is drawn again
+        // meanwhile
+        {
+          id: 'canvas-size-link',
+          title: 'Change the canvas size',
+          onclick: () => openCanvasSizeSheet(app),
+        },
         `${sprite.width}×${sprite.height} canvas`,
       ),
     ),

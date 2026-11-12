@@ -71,6 +71,12 @@
   outline: none;
 }
 
+/* the keys' ring goes round the grabber: its colour alone was a faint sign of where they were */
+.grid-resizer:focus-visible::after {
+  outline: 3px solid var(--tint);
+  outline-offset: 3px;
+}
+
 .grid-resizer:has(+ .grid-panel.folded) {
   display: none;
 }
@@ -470,6 +476,11 @@
 
 .menu button:disabled {
   opacity: 0.45;
+}
+
+/* switched off, a Delete is as grey as the rest: faded red was the faintest words on the page */
+.menu button.danger:disabled {
+  color: inherit;
 }
 
 .grid-panel.folded {

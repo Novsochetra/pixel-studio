@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { History } from '../../src/editor/history.js';
 import { newProject } from '../../src/model/new-project.js';
+import { pack, setPixel } from '../../src/model/sprite.js';
 import { fillMissingSprites, install } from '../../src/ui/session.js';
 
 // choosing the reference view was not undoable, so the undo after it undid the step before
@@ -62,7 +63,7 @@ test('a version restored keeps how the editor was showing things', () => {
 test('⌘⌫ erases a selection and ⌘ Esc lets go of it, as ⌫ and Esc do', async () => {
   const { handleSelectionKey } = await import('../../src/ui/selection-keys.js');
   const { rectSelection } = await import('../../src/editor/selection.js');
-  const { getPixel, pack, setPixel, CLEAR } = await import('../../src/model/sprite.js');
+  const { getPixel, CLEAR } = await import('../../src/model/sprite.js');
   const project = newProject({ width: 4, height: 4 });
   const at = { animation: project.animations[0].id, direction: 'south', frame: 0, layer: null };
   const sprite = project.animations[0].directions.south.frames[0].layers[0].sprite;
@@ -126,6 +127,8 @@ test('a frame deleted from one view stays deleted when the project opens again',
   const animation = project.animations[0];
 
   addFrame(project, animation, 0);
+  // drawn in, so the other view's frame is no empty end to drop with it
+  setPixel(animation.directions.east.frames[1].layers[0].sprite, 1, 1, pack(255, 0, 0));
   removeViewFrame(animation, 'south', 1);
   fillMissingSprites(project);
 
@@ -141,6 +144,8 @@ test('going to a shorter view lands on a frame it has', async () => {
   const animation = project.animations[0];
 
   addFrame(project, animation, 0);
+  // drawn in, so the other view's frame is no empty end to drop with it
+  setPixel(animation.directions.east.frames[1].layers[0].sprite, 1, 1, pack(255, 0, 0));
   removeViewFrame(animation, 'south', 1);
 
   const app = {

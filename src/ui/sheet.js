@@ -102,7 +102,7 @@ export function openSheet(title, onClose, { wide = false, focusField = true, may
 }
 
 export function previewCanvas(sprite, guides = [], scale = 3) {
-  const canvas = node('canvas');
+  const canvas = node('canvas', { role: 'img', 'aria-label': 'Preview' });
 
   canvas.width = sprite.width * scale;
   canvas.height = sprite.height * scale;

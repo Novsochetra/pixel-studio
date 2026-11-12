@@ -132,3 +132,31 @@ test('a sheet warns of views and frames not drawn yet', () => {
   assert.ok(warnings.includes('east is empty: it ships as a blank row.'));
   assert.ok(!warnings.some((warning) => warning.startsWith('west')), 'a flipped row says nothing');
 });
+
+// Play skipped a frame hidden from it, and the GIF and the sheet showed it, with no word of it
+test('the sheet says which frames are hidden from play and still in the files', async () => {
+  const { setFrameHidden } = await import('../../src/model/frame-play.js');
+  const project = newProject();
+  const animation = project.animations[0];
+  const settings = {
+    frameWidth: 20,
+    frameHeight: 30,
+    anchorX: 10,
+    anchorY: 29,
+    artAnchor: { x: 80, y: 128 },
+    includeMirrored: false,
+  };
+
+  addFrame(project, animation, 0);
+  addFrame(project, animation, 1);
+  assert.equal(
+    buildSheet(project, animation, settings).warnings.some((warning) => warning.includes('hidden')),
+    false,
+  );
+
+  setFrameHidden(animation, 1, true);
+  const { warnings, frames } = buildSheet(project, animation, settings);
+
+  assert.equal(frames, 3, 'the hidden frame is in the sheet');
+  assert.ok(warnings.includes('Frame 2 is hidden from play, and still in the files.'));
+});

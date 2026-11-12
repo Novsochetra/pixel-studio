@@ -23,6 +23,13 @@ export function setFrameHidden(animation, index, hidden) {
   return index;
 }
 
+// the frames hidden from play, as they are numbered in the grid
+export function hiddenFrames(animation) {
+  return Array.from({ length: frameCount(animation) }, (_, index) => index + 1).filter((number) =>
+    isFrameHidden(animation, number - 1),
+  );
+}
+
 // the frames a play goes through, in order; with every frame hidden there is nothing to skip to
 export function playedFrames(animation) {
   const all = Array.from({ length: frameCount(animation) }, (_, index) => index);

@@ -225,12 +225,12 @@
   outline-offset: -2px;
 }
 
-.list-action:disabled {
+.list-action:is(:disabled, [aria-disabled='true']) {
   color: var(--label-muted);
   cursor: default;
 }
 
-.list-action:disabled:hover {
+.list-action:is(:disabled, [aria-disabled='true']):hover {
   background: none;
 }
 

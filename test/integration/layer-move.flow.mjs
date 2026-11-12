@@ -56,7 +56,10 @@ await drag([5, 5], [30, 15]);
 
 await page.keyboard.press('t');
 check(
-  (await page.getByRole('button', { name: /^Move:/ }).getAttribute('aria-pressed')) === 'true',
+  (await page
+    .locator('#rail')
+    .getByRole('button', { name: 'Move', exact: true })
+    .getAttribute('aria-pressed')) === 'true',
   'T picks the tool that moves a layer',
 );
 check(
@@ -104,7 +107,10 @@ const beforeRowClick = await layerPixels();
 
 await page.locator('.layer-row', { hasText: 'Hair' }).click();
 check(
-  (await page.getByRole('button', { name: /^Move:/ }).getAttribute('aria-pressed')) === 'true',
+  (await page
+    .locator('#rail')
+    .getByRole('button', { name: 'Move', exact: true })
+    .getAttribute('aria-pressed')) === 'true',
   'clicking a layer picks the tool that moves it',
 );
 await drag([45, 30], [50, 36]);

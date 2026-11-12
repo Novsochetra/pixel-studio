@@ -46,7 +46,7 @@ check(await onLayer('Hat'), 'the new layer is the one being edited');
 await page.keyboard.press('s');
 await click(80, 60);
 check(await onLayer('Art'), 'a click on the character picks its layer');
-check(await toolOn(/^Move:/), 'and turns on the tool that moves it');
+check(await toolOn(/^Move$/), 'and turns on the tool that moves it');
 await click(20, 10);
 check(await onLayer('Hat'), 'a click on what the new layer holds picks that');
 await click(150, 150);

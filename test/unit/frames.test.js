@@ -116,11 +116,31 @@ test('a hidden mark stays with its place when one view loses a frame', () => {
 
   addFrame(project, animation, 0);
   addFrame(project, animation, 1);
+  numbered(animation);
   setFrameHidden(animation, 2, true);
   removeViewFrame(animation, 'south', 0);
 
   assert.equal(isFrameHidden(animation, 1), false, 'the moment before it stays shown');
   assert.equal(isFrameHidden(animation, 2), true);
+});
+
+// Drawn in Front alone, a frame deleted from Front left its column in the views with nothing
+// in them: the loop ran a tick longer, on a frame that was not there to delete.
+test('a frame deleted from the one view drawn in takes its empty column along', () => {
+  const project = newProject();
+  const animation = project.animations[0];
+
+  addFrame(project, animation, 0);
+  addFrame(project, animation, 1);
+  animation.directions.south.frames.forEach((frame) => setPixel(frame.layers[0].sprite, 1, 1, RED));
+  removeViewFrame(animation, 'south', 2);
+
+  assert.equal(frameCount(animation), 2, 'the views with nothing drawn lose their last frame too');
+
+  setPixel(animation.directions.east.frames[1].layers[0].sprite, 1, 1, RED);
+  removeViewFrame(animation, 'south', 1);
+
+  assert.equal(frameCount(animation), 2, 'a frame drawn in another view stays');
 });
 
 test('deleting from every view spares a view down to its last frame', () => {
@@ -185,8 +205,8 @@ test('a frame copied to the other views reaches a view too short to have it', ()
   const animation = project.animations[0];
 
   addFrame(project, animation, 0);
-  removeViewFrame(animation, 'south', 1);
   setPixel(art(animation, 'east', 1), 1, 1, RED);
+  removeViewFrame(animation, 'south', 1);
   copyFrameToViews(project, animation, 'east', 1);
 
   assert.equal(getPixel(art(animation, 'south', 1), 1, 1), RED);

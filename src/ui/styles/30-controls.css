@@ -50,7 +50,7 @@
   transition-duration: var(--duration-fast);
 }
 
-.btn:disabled {
+.btn:is(:disabled, [aria-disabled='true']) {
   opacity: 0.35;
   scale: none;
   cursor: default;

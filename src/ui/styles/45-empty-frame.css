@@ -73,6 +73,18 @@
   padding-inline: 12px 14px;
 }
 
+/* With two things to do on a phone's width, the buttons alone: after "Empty frame" the second
+   was cut off at the screen's edge, and the frame picked in the list says it is empty. */
+@media (max-width: 420px) {
+  :root[data-layout='compact'] .empty-frame:has(.btn ~ .btn) > strong {
+    display: none;
+  }
+
+  :root[data-layout='compact'] .empty-frame:has(.btn ~ .btn) {
+    padding-left: 5px;
+  }
+}
+
 /* A window too short for the band above the canvas, and wide, has room beside the canvas
    instead: there the bar is a small card in the stage's corner. Across the top it lay over the
    art's first rows, and a press on them met its button. */

@@ -95,7 +95,10 @@ function browsing(job, body) {
       job.renaming = id;
       job.goTo(id);
     },
-    newFolder: () => job.renameFolder(changeList(job, (index) => addFolder(index)).id),
+    newFolder: () => {
+      job.fresh = changeList(job, (index) => addFolder(index)).id;
+      job.renameFolder(job.fresh);
+    },
   };
 }
 
