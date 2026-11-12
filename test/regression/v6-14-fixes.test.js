@@ -14,7 +14,7 @@ import { paintOverChoices } from '../../src/ui/drawing-settings.js';
 import { parsePaletteText } from '../../src/palette/palette.js';
 import { sane } from '../../src/ui/export-settings.js';
 import { isWholeBetween } from '../../src/model/numbers.js';
-import { barSide } from '../../src/ui/selection-bar.js';
+import { barSide } from '../../src/ui/selection-beside.js';
 import { colourSelection } from '../../src/editor/selection.js';
 import { swapSaid } from '../../src/ui/swap/swap-said.js';
 import { frameIndexes } from '../../src/ui/batch/batch-items.js';
@@ -204,6 +204,8 @@ test('the selection’s bar stands at the end of the canvas the selection is not
   assert.equal(barSide({ top: 26, bottom: 30 }, canvas), 'top');
   assert.equal(barSide({ top: 2, bottom: 8 }, canvas), 'bottom');
   assert.equal(barSide({ top: 0, bottom: 31 }, canvas), 'bottom', 'all of it: by the thumb');
+  // past the middle and clear of the foot: it left the thumb with nothing under it
+  assert.equal(barSide({ top: 14, bottom: 24 }, canvas), 'bottom');
 });
 
 // "Select a colour" on a clear pixel selected every clear pixel: the whole empty canvas

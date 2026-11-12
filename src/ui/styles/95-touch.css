@@ -323,6 +323,25 @@
     width: 34px;
   }
 
+  /* Drawn small to keep each bar to one row on the narrowest phone, and pressed from the room
+     round them: a finger's reach, where their own was 36 high or 34 wide. */
+  :root[data-layout='compact'] .toolbar .btn,
+  :root[data-layout='compact'] .grid-bar .icon-toggle {
+    position: relative;
+  }
+
+  :root[data-layout='compact'] .toolbar .btn::after {
+    content: '';
+    position: absolute;
+    inset: -2px 0;
+  }
+
+  :root[data-layout='compact'] .grid-bar .icon-toggle::after {
+    content: '';
+    position: absolute;
+    inset: 0 -3px;
+  }
+
   /* Projects' three pages share the row: as wide as their words, the last was cut off at the
      screen's edge with nothing to say it was there */
   .projects-nav {

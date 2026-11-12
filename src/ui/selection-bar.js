@@ -7,7 +7,7 @@ import { hasKeyboard, keyNames } from './platform-keys.js';
 import { paste } from './selection-keys.js';
 import { selectionAngle, turnSelectionTo } from './selection-turn.js';
 import { modeControls, syncModes } from './selection-modes.js';
-import { standsBeside } from './selection-beside.js';
+import { barSide, standsBeside } from './selection-beside.js';
 
 // what each does, the picture and word it wears, and what it is called
 const ACTIONS = [
@@ -99,12 +99,6 @@ export function angleField({ id, name, title, angle, turnTo, now = () => angle }
 
 const button = (title, onclick, label) =>
   node(`button.btn.quiet.selection-${label.toLowerCase()}`, { title, onclick }, label);
-
-// On a phone the bar lies over one end of the canvas: the end the selection is not in, so it
-// never hides the pixels it acts on. A selection all over the canvas leaves it by the thumb.
-export function barSide(box, canvas) {
-  return (box.top + box.bottom) / 2 > canvas.height * 0.55 ? 'top' : 'bottom';
-}
 
 // not while it is dragged: the bar would jump from under the finger's way
 function placeBar(el, app) {

@@ -1,5 +1,6 @@
 import { node, toast } from '../dom.js';
 import { changeStructure } from '../actions.js';
+import { actionRow, fieldRow, listGroup } from '../list-group.js';
 import { outfitRamps } from '../../palette/kits.js';
 import { newId } from '../../model/project.js';
 import { gameOf } from '../../model/presets.js';
@@ -101,8 +102,9 @@ function kitButtons(choice, onChange) {
 function pickedColours(project, choice, onChange) {
   return project.parts.map((part) =>
     node(
-      'label.group',
-      { style: { gap: '4px' } },
+      'label.list-row',
+      {},
+      node('span.list-label.grows', {}, part.name),
       node('input', {
         type: 'color',
         value: choice.custom[part.id] ?? UNPICKED_PART,
@@ -110,7 +112,6 @@ function pickedColours(project, choice, onChange) {
         oninput: (event) =>
           onChange({ custom: { ...choice.custom, [part.id]: event.target.value } }),
       }),
-      part.name,
     ),
   );
 }
@@ -132,11 +133,10 @@ function keepButton(app, choice, onChange) {
 
   const nothing = !Object.keys(choice.custom ?? {}).length;
 
-  return node(
-    'button.btn',
-    { onclick: keep, disabled: nothing, title: nothing ? 'Pick a colour for a part first' : null },
-    'Keep these colours as an outfit',
-  );
+  return actionRow('Keep these colours as an outfit', keep, {
+    disabled: nothing,
+    title: nothing ? 'Pick a colour for a part first' : null,
+  });
 }
 
 // where the outfit comes from, then its kit or its colours
@@ -144,11 +144,19 @@ export function choiceControls(app, choice, onChange) {
   const { project } = app.store.state;
   const custom = choice.source === 'custom';
 
-  return node(
-    'div.group',
-    { style: { gap: '8px', flexWrap: 'wrap' } },
-    sourcePicker(project, choice, onChange),
-    choice.source === 'team' ? kitButtons(choice, onChange) : null,
+  // rows of one group, as every other window's choices are: they were a select, colour boxes
+  // and a button loose in a line
+  return listGroup(
+    {},
+    fieldRow('Outfit', sourcePicker(project, choice, onChange)),
+    choice.source === 'team'
+      ? node(
+          'div.list-row',
+          {},
+          node('span.list-label.grows', {}, 'Kit'),
+          kitButtons(choice, onChange),
+        )
+      : null,
     custom ? pickedColours(project, choice, onChange) : null,
     custom && project.parts.length ? keepButton(app, choice, onChange) : null,
   );
