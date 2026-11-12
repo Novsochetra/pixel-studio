@@ -123,6 +123,8 @@ export function mountInspector(app) {
     if (title && foldsFromTitle()) {
       title.setAttribute('role', 'button');
       title.setAttribute('aria-expanded', String(sections[name].dataset.collapsed !== 'true'));
+    } else {
+      title?.removeAttribute('tabindex');
     }
   };
 

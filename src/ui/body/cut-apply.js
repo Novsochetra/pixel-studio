@@ -14,7 +14,7 @@ function cutSaid(job, { parts, frames, left }) {
   const made = `${job.recut ? 'The cut now has' : 'Cut into'} ${parts} parts${frames > 1 ? `, in ${frames} frames` : ''}.`;
 
   return job.recut && left
-    ? `${made} What no part holds is back on ${leftoverLayer(frame)?.name ?? 'the art'} in this frame.`
+    ? `${made} What no part holds is back on ${leftoverLayer(frame)?.name ?? 'the art'}, in every frame it was in.`
     : `${made} Drag a part to pose it; its handle turns it.`;
 }
 

@@ -184,7 +184,10 @@ await poseBar.getByRole('button', { name: 'Back to posing' }).click();
 await page.waitForTimeout(150);
 await poseBar.getByRole('button', { name: 'Turn into pixels' }).click();
 await page.waitForTimeout(150);
-check((await poseBar.textContent()).includes('plain pixels'), 'a frame can become plain pixels');
+check(
+  (await poseBar.textContent()).includes('not posed'),
+  'a frame turned into pixels says it is not posed',
+);
 await poseBar.getByRole('button', { name: 'Pose the parts here' }).click();
 await page.waitForTimeout(150);
 check((await page.locator('#pose-part').count()) === 1, 'and be posed again');

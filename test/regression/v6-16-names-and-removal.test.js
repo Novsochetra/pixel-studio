@@ -181,3 +181,23 @@ test('a guide that follows a colour follows it to its new one, and back with und
   assert.equal(project.guides[0].colour, blue, 'one undo puts the art and the guide back');
   assert.equal(app.history.canUndo, false);
 });
+
+// Edit the cut, a head's hair unpainted: it came back on Art in the frame being edited, and was
+// gone from every other posed frame of the view, for good once saved
+test('pixels an edited cut no longer holds stay in every frame the parts drew', async () => {
+  const { cutCharacter } = await import('../unit/body-helpers.js');
+  const { applyCut } = await import('../../src/model/body/body.js');
+  const { createSprite, getPixel, pack, setPixel } = await import('../../src/model/sprite.js');
+  const { project, animation, front, rig, posed } = cutCharacter();
+  const leftover = createSprite(160, 160);
+  const green = pack(0, 200, 0);
+
+  setPixel(leftover, 5, 5, green);
+  applyCut(project, animation, { direction: 'south', frame: 1, rig, leftover });
+
+  assert.ok(posed >= 2, 'the cut posed more than one frame');
+
+  for (const frame of front.frames.slice(0, posed)) {
+    assert.equal(getPixel(frame.layers[0].sprite, 5, 5), green);
+  }
+});

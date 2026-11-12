@@ -69,7 +69,7 @@ function hint(job) {
   const frame = frameAt(state.project, { ...state.at, direction: job.direction, frame: job.frame });
   const stays = leftoverLayer(frame, job.layer?.key)?.name ?? 'the art';
   const unpainted = job.recut
-    ? `Pixels left unpainted go back to ${stays} in this frame.`
+    ? `Pixels left unpainted go back to ${stays}, in every frame the parts draw.`
     : `Pixels left unpainted stay on ${stays}.`;
 
   return `Paint each part, or loop it with the lasso; L and R are the picture's left and right. Drag a dot to move where a part turns. ${unpainted}`;

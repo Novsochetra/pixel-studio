@@ -108,7 +108,7 @@ function plainBar(app, state) {
   return [
     ...doFirst(
       state,
-      node('span', {}, `Frame ${state.at.frame + 1} is plain pixels.`),
+      node('span', {}, `Frame ${state.at.frame + 1} is not posed.`),
       node('button.btn.primary', { onclick: () => poseHere(app) }, 'Pose the parts here'),
     ),
     cutButton(app, 'Edit the cut…'),

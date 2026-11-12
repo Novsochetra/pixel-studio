@@ -65,21 +65,26 @@ function firstCut(entry, cut, { key, canvas }) {
   return posed.length;
 }
 
-// A part removed, or pixels unpainted, leave the parts: in the frame being edited they go back
-// to the art under the Body, where they stood when the view was cut. They were dropped instead.
+// A part removed, or pixels unpainted, leave the parts: they go back to the art under the Body,
+// where they stood when the view was cut, in every frame the parts drew. Put back in the frame
+// being edited alone, they were gone from every other frame of the view, for good once saved.
 function cutAgain(entry, cut, { key, canvas }) {
-  const bodies = entry.frames
-    .map((frame) => frame.layers.find((layer) => layer.key === key))
-    .filter((layer) => layer?.pose);
-  const art = leftoverLayer(entry.frames[cut.frame]);
+  const posed = entry.frames.filter((frame) =>
+    frame.layers.some((layer) => layer.key === key && layer.pose),
+  );
 
-  bodies.forEach((layer) => poseBody(layer, { rig: cut.rig, pose: layer.pose, canvas }));
+  for (const frame of posed) {
+    const body = frame.layers.find((layer) => layer.key === key);
+    const art = leftoverLayer(frame);
 
-  if (art && cut.leftover) {
-    paintOver(art.sprite, cut.leftover);
+    poseBody(body, { rig: cut.rig, pose: body.pose, canvas });
+
+    if (art && cut.leftover) {
+      paintOver(art.sprite, cut.leftover);
+    }
   }
 
-  return bodies.length;
+  return posed.length;
 }
 
 function putBody(frame, { name, key, canvas, above }) {

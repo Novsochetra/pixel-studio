@@ -29,6 +29,11 @@ check(
 );
 await page.screenshot({ path: `${shots}/touch-sizes-landscape.png` });
 
+// on a phone the dock opens a panel: a title that folds nothing takes no stop of the keys
+const titleStops = await page.locator('.section > h2[tabindex]').count();
+
+check(titleStops === 0, `a phone’s panel titles take no stop of the keys (${titleStops} do)`);
+
 // a tablet held wide has the desk's layout, under fingers
 await page.setViewportSize({ width: 1194, height: 834 });
 await page.waitForTimeout(600);

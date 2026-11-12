@@ -19,6 +19,7 @@ import { layoutSize, watchLayout } from './layout.js';
 import { watchPressesFromStart } from './after-press.js';
 import { watchSegmented } from './segmented-thumb.js';
 import { watchKeyboard } from './keyboard-room.js';
+import { keepSaveKey } from './keyboard.js';
 import { inWords } from '../model/told.js';
 import { watchView } from './view-kept.js';
 import { watchOtherTabs } from './other-tabs.js';
@@ -123,6 +124,7 @@ async function boot() {
 setUpApp();
 watchLayout();
 watchPressesFromStart();
+keepSaveKey();
 watchSegmented();
 watchKeyboard();
 // Safari on an iPhone shows a button's :active look, its give under the finger, only on a page
