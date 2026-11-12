@@ -58,6 +58,19 @@ function showResult(job, result, ref, alone) {
   job.result = sprite;
   job.report = result.report;
   job.accept.disabled = false;
+  readyForKeys(job.accept);
+}
+
+// The result ready, the keys go to Use when they were on nothing or on the window's ×: Enter
+// there closed the window and threw the clean away without a word. Someone typing a height is
+// left in the field.
+function readyForKeys(accept) {
+  const held = document.activeElement;
+  const idle = !held || held === document.body || held.matches?.('.sheet-close');
+
+  if (idle && accept.isConnected) {
+    accept.focus({ preventScroll: true });
+  }
 }
 
 // cleans the picture with the options asked for and shows it beside the reference

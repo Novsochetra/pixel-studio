@@ -7,6 +7,7 @@ import { handleSelectionKey } from './selection-keys.js';
 import { openShortcuts } from './shortcuts.js';
 import { resizeBrush } from '../editor/brush.js';
 import { handlePoseKey } from './body/pose-keys.js';
+import { handleAnimationKey } from './animation-keys.js';
 
 // inputs that take no text: after one is used, the tool keys and undo still work
 const NOT_TYPED_IN = new Set(['range', 'checkbox', 'radio', 'color', 'button', 'file']);
@@ -106,7 +107,7 @@ function onKey(app, event) {
     return;
   }
 
-  if (handleSelectionKey(app, event, key, command)) {
+  if (handleSelectionKey(app, event, key, command) || handleAnimationKey(app, event, command)) {
     return;
   }
 

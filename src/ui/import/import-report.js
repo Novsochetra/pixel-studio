@@ -44,11 +44,20 @@ export function reportText(report, { place, refHeight, refName, stands = 'feet' 
   const size = `${report.size[0]} × ${report.size[1]} px`;
   const where = place === 'feet' ? `, ${stands} on row ${report.feetRow}` : '';
 
+  // Matched, its colours become the reference's nearest: a blue the front had none of came out
+  // black, and only the first-run card had said so.
+  const colours = report.alone
+    ? null
+    : `Colours: drawn in the ${refName}'s, so the views match. A colour the ${refName} has none of becomes its nearest.`;
+
   return [
     `Grid: one art pixel = ${cellText(report.cell)} of the image`,
     report.alone ? aloneLine(report, place) : matchLine(report, refHeight, refName),
+    colours,
     `Result: ${size}${where}`,
-  ].join('\n');
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 export function artHeight(sprite) {

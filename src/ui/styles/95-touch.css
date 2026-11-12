@@ -131,9 +131,21 @@
     min-height: 40px;
   }
 
-  /* beside a view's name, in a column a phone keeps narrow: a finger high, not as wide */
+  /* beside a view's name, in a column a phone keeps narrow: a finger high, not as wide, with
+     room round it that takes the press, and the view's name a finger wide however short */
   :root[data-layout='compact'] .grid-view-more {
+    position: relative;
     width: 32px;
+  }
+
+  :root[data-layout='compact'] .grid-view-more::after {
+    content: '';
+    position: absolute;
+    inset: 0 -4px;
+  }
+
+  :root[data-layout='compact'] .grid-view {
+    min-width: 40px;
   }
 
   /* a preset's × is a finger wide, on the corner of its card */

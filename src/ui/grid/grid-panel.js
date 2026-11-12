@@ -1,4 +1,4 @@
-import { node, replace } from '../dom.js';
+import { node, replace, toast } from '../dom.js';
 import { gridBar } from './grid-bar.js';
 import { gridBody } from './rows.js';
 import { showsEveryView } from './views-menu.js';
@@ -52,6 +52,14 @@ function showOpenTab(el) {
   watchMore(strip);
 }
 
+// On a phone the panel with Pause is shut as often as not while the views play: a tap on them
+// stops them, and nothing said so
+function saysHowToStop(app) {
+  if (isPlaying(app) && app.store.state.layout === 'compact') {
+    toast('Playing. Tap the art to stop.');
+  }
+}
+
 export function mountGridPanel(app, { isShown, onPlayFrame }) {
   const el = node('section.grid-panel', { 'aria-label': 'Animation' });
   let shownPlaying = false;
@@ -76,12 +84,11 @@ export function mountGridPanel(app, { isShown, onPlayFrame }) {
       // a phone opens and shuts the whole panel from the dock, so it is never folded there
       const gridOpen = app.store.state.gridOpen || layout === 'compact';
       shownPlaying = isPlaying(app);
-      const onPlay = () => togglePlayback(app, { isShown, onFrame });
       el.classList.toggle('folded', !gridOpen);
       replace(
         el,
         layout === 'compact' ? panelGrab(app) : null,
-        gridBar(app, { playing: shownPlaying, onPlay }),
+        gridBar(app, { playing: shownPlaying, onPlay: app.togglePlay }),
         gridOpen ? gridBody(app, { all, playFrame: app.playback?.frame ?? null }) : null,
       );
       showOpenTab(el);
@@ -89,6 +96,11 @@ export function mountGridPanel(app, { isShown, onPlayFrame }) {
       shownAt = editing;
     });
 
+  // Play from its button or from Enter (animation-keys.js)
+  app.togglePlay = () => {
+    togglePlayback(app, { isShown, onFrame });
+    saysHowToStop(app);
+  };
   pullsShut(el, app);
 
   return { el, render };

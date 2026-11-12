@@ -52,6 +52,9 @@ const GROUPS = [
     'Frames and view',
     [
       [',  .', 'Previous, next frame'],
+      ['Enter', 'Play, pause'],
+      ['Alt N, Alt D', 'New frame at the end, duplicate this frame'],
+      ['Alt O', 'Onion skin on or off'],
       ['Alt ←  →', 'Move the selected frame earlier or later'],
       ['Arrows, Home, End', 'In the frames: walk the frames and views; on a tab: the tabs'],
       ['Shift F10, right-click', 'A tab’s menu: rename, duplicate, delete'],
@@ -70,6 +73,7 @@ const GROUPS = [
     'Everything',
     [
       ['⌘Z', 'Undo (frames, layers and animations too)'],
+      ['⌘S', 'Save now (the work saves itself as you go)'],
       ['⇧⌘Z or ⌘Y', 'Redo'],
       ['?', 'This list'],
     ],

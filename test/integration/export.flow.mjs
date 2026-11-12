@@ -65,6 +65,12 @@ check(
   Object.values(gifs).length === 3 && Object.values(gifs).every(isGif),
   'Animated GIFs saves a GIF per view',
 );
+// named south, east and north where the studio says Front, Side and Back
+check(
+  Object.keys(gifs).some((name) => name.endsWith('-front.gif')) &&
+    !Object.keys(gifs).some((name) => name.includes('south')),
+  `the GIFs are named by the view as the studio says it (${Object.keys(gifs).join(', ')})`,
+);
 const pack = readZip((await saved(button('Naga Eleven game pack'), 'pack.zip')).path);
 check(
   Object.keys(pack).some((name) => name.endsWith('sprites.pixel-clean.js')),

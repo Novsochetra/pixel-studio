@@ -41,7 +41,10 @@ const steps = (project, hands) => [
     `${CLEAN[hands]} ${isSingleView(project) ? 'Every frame' : 'Every view and frame'} is fitted to the first: same pixel size, place and colours.`,
   ],
   ['Fix: ', FIX[hands]],
-  ['Use: ', 'Download gives PNGs at both sizes, sprite sheets and GIFs for your game.'],
+  [
+    'Use: ',
+    'Download gives PNGs at the art’s own size and a big copy, sprite sheets and GIFs for your game.',
+  ],
 ];
 
 const cardOf = (project, gotIt) =>

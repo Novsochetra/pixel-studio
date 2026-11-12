@@ -7,6 +7,7 @@ import { spritePng } from '../io/images.js';
 import { zipFiles } from '../io/zip.js';
 import { saveFile } from './save-file.js';
 import { fileSlug } from './file-name.js';
+import { directionLabel } from '../model/project.js';
 import { saidWarning } from './export/export-summary.js';
 
 const encoder = new TextEncoder();
@@ -115,7 +116,8 @@ export async function saveGifs(state, settings) {
 
     for (const { direction, frames } of directionFrames(result, settings)) {
       files.push({
-        name: `${viewFileName(result, direction, '-')}.gif`,
+        // to watch, not for the game's data: named by the view as the studio says it (walk-side)
+        name: `${viewFileName(result, fileSlug(directionLabel(direction), direction), '-')}.gif`,
         data: encodeGif(
           frames.map((frame) => upscale(frame, scale)),
           delay,

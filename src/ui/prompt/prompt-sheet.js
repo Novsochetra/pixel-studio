@@ -133,6 +133,7 @@ function firstAsk(app, others) {
   const editing = others.includes(state.at.direction) ? state.at.direction : null;
   const last = app.promptAsked?.[state.project.id] ?? {};
 
+  // a copy: what this window changes is kept as it changes, not what the last one left
   return {
     task: last.task ?? (isSingleView(state.project) ? 'frame' : 'view'),
     pose: last.pose ?? '',
@@ -167,8 +168,9 @@ export function openChatgptSheet(app) {
   const ask = firstAsk(app, others);
   const redraw = (patch) => {
     Object.assign(ask, patch);
-    // kept for each project, so one looked at in between asks nothing of the other's
-    app.promptAsked = { ...app.promptAsked, [ask.project]: { ...ask } };
+    // Kept for each project, so one looked at in between asks nothing of the other's. The ask
+    // itself, not a copy: a pose typed last, with nothing changed after it, was lost.
+    app.promptAsked = { ...app.promptAsked, [ask.project]: ask };
     keepFocus(slot, () => draw(slot, state, ask, { close: sheet.close, redraw }));
   };
 

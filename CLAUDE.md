@@ -208,6 +208,12 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   (`playFold` in `inspector.js`).
 - Which views show their frames is one button that names them (`grid/views-menu.js`): "All
   views", or "Front only". An animation with one view has no such button.
+- The animation has keys of its own (`animation-keys.js`): Enter plays and pauses with the
+  keys on the page, Alt N and Alt D add and copy a frame, Alt O is onion skin, ⌘S saves at
+  once. Alt with a letter is read by `event.code`, as a Mac's Option types its own letter. A
+  phone that starts playing says a tap on the art stops it.
+- A window whose result is ready puts the keys on its main button when they were on nothing
+  or on its ×: Enter there threw a clean away.
 - A window open on a desk keeps its top where it opened and grows at its foot (`pinTop` in
   `sheet-pin.js`): centred, a window that drew itself again taller moved up under the pointer,
   and a double-click's second click landed on the field above. A phone's window rises from the
