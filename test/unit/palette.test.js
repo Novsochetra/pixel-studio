@@ -84,3 +84,12 @@ test('a first guess at the parts: one per family of shades, named by its hue', a
   );
   assert.equal(new Set(parts.flatMap((part) => part.colours)).size, colours.length);
 });
+
+// a GIMP palette was named after its file ("test"), not after its own Name: line
+test('a GIMP palette is named as it names itself', async () => {
+  const { paletteFileName } = await import('../../src/palette/palette.js');
+  const gpl = 'GIMP Palette\nName: Forest night\nColumns: 4\n#\n 10  20  30\tDark\n';
+
+  assert.equal(paletteFileName(gpl), 'Forest night');
+  assert.equal(paletteFileName('#112233 #445566'), null);
+});

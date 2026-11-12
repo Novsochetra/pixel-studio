@@ -125,3 +125,58 @@ test('an icon’s sprite sheet frame is its canvas, the art where it was drawn',
   assert.deepEqual(settings.artAnchor, { x: 16, y: 16 }, 'every pixel lands where it was drawn');
   assert.equal(presetsFor(project)[0][1], 'The canvas');
 });
+
+// "back" read inside "no-background" sent a front view to the back
+test('a picture’s view is read from whole words of its name', async () => {
+  const { namedDirection } = await import('../../src/ui/batch/batch-items.js');
+
+  assert.equal(namedDirection('knight-front-no-background.png'), 'south');
+  assert.equal(namedDirection('knight-back.png'), 'north');
+  assert.equal(namedDirection('knight_side_2.webp'), 'east');
+  assert.equal(namedDirection('back2.webp'), 'north');
+  assert.equal(namedDirection('sideways-inside.png'), null);
+  assert.equal(namedDirection('front-side-left.png'), 'south-west');
+  assert.equal(namedDirection('hero1.png'), null);
+});
+
+// taking a palette off was a step and adding one was not: undo passed over it
+test('a palette added is a step that undo takes off', async () => {
+  const { addPaletteStep } = await import('../../src/ui/palette-step.js');
+  const project = newProject({ kind: 'character' });
+  const app = appOf(project);
+  const had = project.palettes.length;
+
+  addPaletteStep(app, { id: 'p-new', name: 'Forest', colors: [1, 2] });
+  assert.equal(project.palettes.length, had + 1);
+
+  app.history.undo(project);
+  assert.equal(project.palettes.length, had);
+});
+
+// after Swap colours a guide that marked the top of the old blue marked nothing
+test('a guide that follows a colour follows it to its new one, and back with undo', async () => {
+  const { recolourLayers } = await import('../../src/ui/body/recolour.js');
+  const { pack, setPixel } = await import('../../src/model/sprite.js');
+  const project = newProject({ kind: 'character', width: 8, height: 8 });
+  const layer = project.animations[0].directions.south.frames[0].layers[0];
+  const [blue, green] = [pack(40, 60, 160), pack(0, 160, 0)];
+  const layers = new Map([[layer.id, layer]]);
+  const app = appOf(project);
+
+  app.history = new History((id) => layers.get(id));
+  app.saver.markLayers = () => {};
+  setPixel(layer.sprite, 2, 3, blue);
+  project.guides = [{ id: 'g', name: 'Waist', row: 3, rule: 'colour-top', colour: blue }];
+
+  recolourLayers(app, {
+    label: 'Swap',
+    layers: [layer],
+    mapping: { [blue]: green },
+    everywhere: true,
+  });
+  assert.equal(project.guides[0].colour, green);
+
+  app.history.undo(project);
+  assert.equal(project.guides[0].colour, blue, 'one undo puts the art and the guide back');
+  assert.equal(app.history.canUndo, false);
+});

@@ -1,15 +1,18 @@
 import { node, toast } from './dom.js';
 import { newId } from '../model/project.js';
-import { paletteFromPixels, parsePaletteText } from '../palette/palette.js';
+import { paletteFileName, paletteFromPixels, parsePaletteText } from '../palette/palette.js';
 import { decodeSprite } from '../io/images.js';
 import { EXAMPLE_HEX_CODES } from '../art/editor-colours.js';
 
+// the colours a file holds, and the name it gives itself (a GIMP palette's Name: line), if any
 async function colorsFromFile(file) {
   if (file.type.startsWith('image/')) {
-    return paletteFromPixels(await decodeSprite(file));
+    return { colors: paletteFromPixels(await decodeSprite(file)), name: null };
   }
 
-  return parsePaletteText(await file.text());
+  const text = await file.text();
+
+  return { colors: parsePaletteText(text), name: paletteFileName(text) };
 }
 
 function fileInput(add) {
@@ -21,7 +24,9 @@ function fileInput(add) {
       const chosen = event.target.files[0];
 
       if (chosen) {
-        add(await colorsFromFile(chosen).catch(() => []), chosen.name.replace(/\.[^.]+$/, ''));
+        const read = await colorsFromFile(chosen).catch(() => ({ colors: [], name: null }));
+
+        add(read.colors, read.name ?? chosen.name.replace(/\.[^.]+$/, ''));
       }
     },
   });

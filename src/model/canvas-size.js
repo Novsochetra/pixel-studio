@@ -68,11 +68,20 @@ function placeLayer(layer, rig, { canvas, shift }) {
   }
 }
 
+const within = (value, size) => Math.max(0, Math.min(size - 1, value));
+
+// A pin the smaller canvas has no room for stands at its nearest edge, as a guide does: off the
+// canvas it could be neither seen nor taken hold of.
 function placeFrame(frame, rig, place) {
   const [dx, dy] = place.shift;
+  const { width, height } = place.canvas;
 
   frame.layers.forEach((layer) => placeLayer(layer, rig, place));
-  frame.marks = frame.marks?.map((mark) => ({ ...mark, x: mark.x + dx, y: mark.y + dy }));
+  frame.marks = frame.marks?.map((mark) => ({
+    ...mark,
+    x: within(mark.x + dx, width),
+    y: within(mark.y + dy, height),
+  }));
 }
 
 // A copy of the project on a canvas of another size: every layer, pin and guide line moves with

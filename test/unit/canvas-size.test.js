@@ -109,3 +109,14 @@ test('a character cut into parts keeps its cut: the parts move, and a new pose l
     'animations that shared the cut still share it',
   );
 });
+
+// a canvas made smaller left a Head pin at y −20: not to be seen, nor taken hold of
+test('a pin the smaller canvas has no room for stands at its nearest edge', () => {
+  const project = newProject({ kind: 'character', width: 160, height: 160 });
+
+  project.animations[0].directions.south.frames[0].marks = [{ name: 'Head', x: 78, y: 40 }];
+  const smaller = withCanvasSize(project, { width: 100, height: 100 }, { x: 0.5, y: 1 });
+  const [pin] = smaller.animations[0].directions.south.frames[0].marks;
+
+  assert.deepEqual([pin.x, pin.y], [48, 0]);
+});

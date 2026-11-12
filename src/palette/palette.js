@@ -2,6 +2,13 @@ import { CLEAR, fromHex, getPixel, pack, setPixel, unpack } from '../model/sprit
 import { newId } from '../model/project.js';
 
 // Colours from text: a list of hex codes (Lospec .hex, a pasted list) or a GIMP .gpl palette.
+// the name a GIMP palette gives itself on its Name: line, or null
+export function paletteFileName(text) {
+  const named = /^GIMP Palette/i.test(text.trim()) && text.match(/^\s*Name:\s*(.+?)\s*$/im);
+
+  return named ? named[1] : null;
+}
+
 export function parsePaletteText(text) {
   const colors = [];
   const gpl = /^GIMP Palette/i.test(text.trim());

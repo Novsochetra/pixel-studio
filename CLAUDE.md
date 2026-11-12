@@ -290,6 +290,13 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
 - An icon's or an effect's sprite sheet frame is its canvas, the art where it was drawn ("The
   canvas" in the sheet's sizes): fitted to the art, its frame came out odd sizes, off centre.
 - A run of arrow-key nudges of layers with Move is one step to undo, as a selection's is.
+- Versions saved by hand in History are the last to go past the limit of 30; those kept on
+  their own (before a cleaning, a resize) go first (`versionsKept`).
+- A palette added is a step, as one taken off is (`addPaletteStep`). A guide that marks the top
+  of a colour follows that colour when it is swapped everywhere, in the same step
+  (`History.alsoSetting`). Pins, like guides, stay on a canvas made smaller.
+- A picture's view is read from whole words of its name (`namedDirection`): "back" inside
+  "background" is no view.
 - A download carries the project's name (`fileSlug(project.name)`), and art with one view names
   no view in its files (`downloadName`, `viewFileName`). A game's sprite sheet alone is named as
   the game's manifest names it (`sheetFile` in `export-sheet.js`): the window shows that path

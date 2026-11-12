@@ -1,5 +1,5 @@
 import { toast } from './dom.js';
-import { changeStructure, directionSprite, directionsInUse } from './actions.js';
+import { directionSprite, directionsInUse } from './actions.js';
 import { applyMapping } from '../palette/palette.js';
 import { newId } from '../model/project.js';
 import { viewName } from '../model/kinds.js';
@@ -8,6 +8,7 @@ import { spritePng } from '../io/images.js';
 import { zipFiles } from '../io/zip.js';
 import { saveFile } from './save-file.js';
 import { fileSlug } from './file-name.js';
+import { addPaletteStep } from './palette-step.js';
 
 export const slug = (text) => fileSlug(text, 'outfit');
 
@@ -38,8 +39,7 @@ export function keepAsSwap(app, mapping, name) {
   const { project } = app.store.state;
   const palette = { id: newId('p'), name, colors: [...new Set(Object.values(mapping))] };
 
-  project.palettes.push(palette);
   project.mappings[palette.id] = { ...mapping };
-  changeStructure(app, 'palettes');
+  addPaletteStep(app, palette);
   toast(`Kept as the "${name}" colour swap`);
 }

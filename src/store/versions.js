@@ -11,7 +11,29 @@ export async function listVersions(backend, keys = keysFor('')) {
   return (await backend.read(keys.versions))?.list ?? [];
 }
 
+// Past the limit the oldest go, the ones kept on their own (before a cleaning, a resize) first:
+// thirty imports pushed out a version someone had named and saved by hand, without a word.
+export function versionsKept(list) {
+  const over = list.length - KEEP;
+
+  if (over <= 0) {
+    return { kept: list, gone: [] };
+  }
+
+  // the list is newest first: the oldest kept on their own, then the oldest saved by hand
+  const oldestFirst = [...list].reverse();
+  const order = [
+    ...oldestFirst.filter((version) => !version.byHand),
+    ...oldestFirst.filter((version) => version.byHand),
+  ];
+  const gone = new Set(order.slice(0, over));
+
+  return { kept: list.filter((version) => !gone.has(version)), gone: [...gone] };
+}
+
+// `name`: the version's name, or { name, byHand } for one saved in History by hand
 export async function saveVersion(backend, project, name, keys = keysFor('')) {
+  const { name: wanted, byHand = false } = typeof name === 'string' ? { name } : name;
   const text = projectFileText(project);
   const id = newId('v');
   const chunks = Math.ceil(text.length / CHUNK);
@@ -24,16 +46,17 @@ export async function saveVersion(backend, project, name, keys = keysFor('')) {
 
   const earlier = await listVersions(backend, keys);
   const named = freeName(
-    name,
+    wanted,
     earlier.map((version) => version.name),
   );
-  const list = [{ id, name: named, savedAt: Date.now(), chunks, size: text.length }, ...earlier];
+  const entry = { id, name: named, savedAt: Date.now(), chunks, size: text.length, byHand };
+  const { kept, gone } = versionsKept([entry, ...earlier]);
 
-  for (const old of list.slice(KEEP)) {
+  for (const old of gone) {
     await deleteVersionChunks(backend, old, keys);
   }
 
-  await backend.write(keys.versions, { list: list.slice(0, KEEP) });
+  await backend.write(keys.versions, { list: kept });
 
   return id;
 }

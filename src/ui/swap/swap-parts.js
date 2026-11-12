@@ -5,6 +5,7 @@ import { paletteForm } from '../palette-form.js';
 import { makeReducedPalette } from './swap-mapping.js';
 import { paletteFromHexCodes } from '../../palette/palette.js';
 import { STARTER_PALETTES } from '../../art/starter-palettes.js';
+import { addPaletteStep } from '../palette-step.js';
 
 // The pieces of the swap sheet; job: { app, paletteId, previewOn, draw, close }.
 
@@ -91,9 +92,8 @@ function showAdded(job) {
 
 export function addPalette(job) {
   return paletteForm((added) => {
-    job.app.store.state.project.palettes.push(added);
+    addPaletteStep(job.app, added);
     job.paletteId = added.id;
-    changeStructure(job.app, 'palettes');
     showAdded(job);
   });
 }
@@ -102,9 +102,8 @@ export function addPalette(job) {
 export function starterPalettes(job) {
   const add = (starter) => {
     const palette = paletteFromHexCodes(starter.name, starter.colors);
-    job.app.store.state.project.palettes.push(palette);
+    addPaletteStep(job.app, palette);
     job.paletteId = palette.id;
-    changeStructure(job.app, 'palettes');
     showAdded(job);
   };
 

@@ -99,6 +99,15 @@ function afterHistory(app, step, back) {
     return;
   }
 
+  afterPixels(app, step, back);
+}
+
+const changesStructure = (step) =>
+  step.rigs.length ||
+  step.also?.length ||
+  step.changes.some(({ poses }) => poses.before !== poses.after);
+
+function afterPixels(app, step, back) {
   app.saver.markLayers(step.changes.map(({ id }) => id));
   showChanged(app, step);
 
@@ -106,11 +115,12 @@ function afterHistory(app, step, back) {
     moveSelection(app, step, back);
   }
 
-  if (step.rigs.length || step.changes.some(({ poses }) => poses.before !== poses.after)) {
+  if (changesStructure(step)) {
     app.saver.markStructure();
   }
 
-  app.store.touch('pixels');
+  // guides that followed a colour are drawn again with it
+  app.store.touch(step.also?.length ? 'project' : 'pixels');
 }
 
 // says what went back or came again, as the canvas alone may not show it (a frame elsewhere)

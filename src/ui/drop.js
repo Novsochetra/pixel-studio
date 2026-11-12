@@ -46,10 +46,12 @@ export function bindDrop(stage, app) {
       goTo(app, { ...place, layer: null });
     }
 
+    // with other files dropped beside it, the one picture is the one taken: the first file of
+    // all was, and a note dropped with a picture cleaned nothing
     if (files.length > 1) {
       openBatchSheet(app, files);
     } else {
-      take(event.dataTransfer.files[0]);
+      take(files[0] ?? event.dataTransfer.files[0]);
     }
   });
   document.addEventListener('paste', (event) => {

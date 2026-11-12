@@ -1,5 +1,6 @@
 // What a walk through the tools, importing and exporting met: a height typed taller than the
 // canvas, art on a canvas made taller, a layer nudged key after key, a tablet's Lasso bar.
+import { readFileSync } from 'node:fs';
 import { openStudio } from './harness.mjs';
 import {
   cleanReport,
@@ -20,8 +21,50 @@ const art = async () => {
   return { top: Number(top), bottom: Number(bottom) };
 };
 
+// a note dropped with a picture: the first file of all was taken, and nothing was cleaned
+await createProject(page, { kind: 'Character', name: 'Dropped', width: 64 });
+const both = await page.evaluateHandle(
+  ([bytes]) => {
+    const data = new DataTransfer();
+
+    data.items.add(new File(['notes'], 'notes.txt', { type: 'text/plain' }));
+    data.items.add(new File([new Uint8Array(bytes)], 'front.png', { type: 'image/png' }));
+
+    return data;
+  },
+  [[...readFileSync(`${images}/front.png`)]],
+);
+
+await page.dispatchEvent('#stage', 'drop', { dataTransfer: both });
+await cleanReport(page);
+check(
+  (await page.getByRole('button', { name: 'Use for Front' }).count()) === 1,
+  'a picture dropped with a note is the one cleaned',
+);
+await page.getByRole('button', { name: 'Cancel' }).click();
+await page.waitForTimeout(400);
+
+// two guides added one after the other were both "Guide", the second hidden under the first
+await openPanel(page, 'Guides');
+await page.getByRole('button', { name: /Add (a )?guide/ }).click();
+await page.getByRole('button', { name: /Add (a )?guide/ }).click();
+await page.waitForTimeout(200);
+const added = await page
+  .locator('.guide-row input[aria-label="Guide name"]')
+  .evaluateAll((fields) =>
+    fields.map((field) => field.value).filter((name) => name.startsWith('Guide')),
+  );
+
+check(
+  added.length === 2 && new Set(added).size === 2,
+  `two guides added have names of their own (${added.join(', ')})`,
+);
+
 // A height taller than the canvas has room for put the art's head above its top, cut off, and
 // the report said it was scaled to fit.
+await page.locator('button.wordmark').click();
+await page.waitForSelector('.sheet .projects-nav');
+await projectsPage(page, 'New project');
 await createProject(page, { kind: 'Character', name: 'Tall ask', width: 64 });
 await dropImage(page, `${images}/front.png`, 'front.png');
 await cleanReport(page);

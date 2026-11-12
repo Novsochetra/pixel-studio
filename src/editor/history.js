@@ -115,6 +115,20 @@ export class History {
     }
 
     step.rigs?.forEach((rig) => setRig(project, rig, side));
+    step.also?.forEach((setting) => {
+      project[setting.key] = structuredClone(setting[side]);
+    });
+  }
+
+  // A setting the step just recorded changed too (guides that follow a colour swapped): undone
+  // and made again with it, as one step. Two steps, one undo left the guides on a colour the
+  // art no longer had.
+  alsoSetting(key, before, after) {
+    const step = this.done.at(-1);
+
+    if (step) {
+      step.also = [...(step.also ?? []), { key, before, after }];
+    }
   }
 
   undo(project) {

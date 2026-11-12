@@ -46,5 +46,25 @@ export function recolourLayers(app, { label, layers, mapping, everywhere }) {
     }
   });
 
+  if (changed && everywhere) {
+    followColours(app, mapping);
+  }
+
   return { changed, flattened: changed && bodies.length > 0 };
+}
+
+// a guide that marks the top of a colour follows that colour to its new one, in the same step
+function followColours(app, mapping) {
+  const { project } = app.store.state;
+  const before = structuredClone(project.guides ?? []);
+  const after = before.map((guide) =>
+    guide.colour !== null && mapping[guide.colour] !== undefined
+      ? { ...guide, colour: mapping[guide.colour] }
+      : guide,
+  );
+
+  if (after.some((guide, i) => guide.colour !== before[i].colour)) {
+    project.guides = after;
+    app.history.alsoSetting('guides', before, structuredClone(after));
+  }
 }

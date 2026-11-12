@@ -6,14 +6,28 @@ import { actionRow, listGroup, switchRow } from './list-group.js';
 import { measureGuide, newGuide } from '../views/guides.js';
 import { viewName } from '../model/kinds.js';
 import { referenceOf } from '../model/reference.js';
+import { freeName } from '../model/free-name.js';
 
+// A new guide has a name of its own, and a row no other guide is on: two added one after the
+// other were both "Guide" on one row, the second hidden under the first.
 function addGuide(app) {
   const { state } = app.store;
   const ref = referenceSprite(state);
-  const guide = newGuide('Guide', 0, 'fixed');
+  const guides = state.project.guides ?? [];
+  const name = freeName(
+    'Guide',
+    guides.map((guide) => guide.name),
+  );
+  const rows = new Set(guides.map((guide) => guide.row));
+  let row = ref ? Math.floor(ref.height / 2) : 0;
 
-  guide.row = ref ? Math.floor(ref.height / 2) : 0;
-  changeGuides(app, 'Add guide', (guides) => guides.push(guide));
+  while (rows.has(row) && ref && row < ref.height - 1) {
+    row += 1;
+  }
+
+  const guide = newGuide(name, row, 'fixed');
+
+  changeGuides(app, 'Add guide', (list) => list.push(guide));
 }
 
 // every guide that checks the art moves to the row the reference view has it at

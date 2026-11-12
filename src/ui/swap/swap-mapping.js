@@ -1,9 +1,9 @@
 import { icon, node, toast } from '../dom.js';
-import { changeStructure } from '../actions.js';
 import { characterColors, characterCounts } from '../character-colours.js';
 import { newId } from '../../model/project.js';
 import { toHex } from '../../model/sprite.js';
 import { reducePalette } from '../../palette/reduce.js';
+import { addPaletteStep } from '../palette-step.js';
 
 // the group says which colour its buttons are for: sixteen rows of "Keep" said nothing of it
 function targetPicker(palette, { from, current }, onPick) {
@@ -64,8 +64,7 @@ export function makeReducedPalette(app, size) {
     name: `Character, ${size} colours`,
     colors: reducePalette(characterCounts(state), size),
   };
-  state.project.palettes.push(palette);
-  changeStructure(app, 'palettes');
+  addPaletteStep(app, palette);
 
   return palette;
 }

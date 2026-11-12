@@ -50,7 +50,13 @@ export function upsertEntry(index, project, prefix) {
 
   const old = index.list[at];
   const changed = old.name !== entry.name || old.about !== entry.about;
-  index.list[at] = changed || Date.now() - old.updatedAt > 60000 ? entry : old;
+  // The list is written again at most once a minute for the same project's edits, but at once
+  // when another project was edited since: then the order of Recent changes. Edits to three
+  // projects within a minute listed them in the wrong order.
+  const latest = index.list.every((other) => (other.updatedAt ?? 0) <= (old.updatedAt ?? 0));
+  const stale = Date.now() - old.updatedAt > 60000;
+
+  index.list[at] = changed || stale || !latest ? entry : old;
 
   return changed || index.list[at] !== old;
 }

@@ -117,6 +117,10 @@ const nameField = (onEnter) =>
     onkeydown: (event) => event.key === 'Enter' && onEnter(),
   });
 
+// saved in History by hand: kept past the versions kept on their own (versionsKept)
+const keepByHand = (app, typed) =>
+  keepVersion(app, { name: typed.trim() || `Version of ${when(Date.now())}`, byHand: true });
+
 export function openVersionsSheet(app) {
   const sheet = openSheet('History');
   const list = node('div.list-rows.version-list');
@@ -124,7 +128,7 @@ export function openVersionsSheet(app) {
   const where =
     app.backend.kind === 'none'
       ? 'Versions last until you close this page here.'
-      : 'Up to 30 versions are kept; the oldest go first.';
+      : 'Up to 30 versions are kept: the oldest go first, and those saved here by hand last.';
   const redraw = async () => {
     const versions = await listVersions(app.backend, app.keys);
     const rows = versions.map((entry) => row(app, entry, { redraw, close: sheet.close }));
@@ -141,7 +145,7 @@ export function openVersionsSheet(app) {
     }
   };
   const save = async () => {
-    const kept = await keepVersion(app, name.value.trim() || `Version of ${when(Date.now())}`);
+    const kept = await keepByHand(app, name.value);
 
     name.value = '';
     toast(kept ? 'Version saved' : 'The version could not be saved just now. Try again.');

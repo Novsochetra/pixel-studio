@@ -5,25 +5,36 @@ import { referenceOf } from '../../model/reference.js';
 import { isSingleView } from '../../model/kinds.js';
 import { clearPosedBody } from '../../model/body/body.js';
 
+// A view's word as a whole word, wherever it stands in the name: knight-back-2, backSide. Read
+// inside other words, "back" in "no-background" sent a front view to the back.
+const words = (...options) => new RegExp(`(?<![a-z])(?:${options.join('|')})(?![a-z])`, 'i');
+
 // most specific first: "south-west" must not be read as "south"
 const NAME_HINTS = [
-  ['north-west', /north.?west|back.?side.?left|left.?back.?side/i],
-  ['south-west', /south.?west|front.?side.?left|left.?front.?side/i],
-  ['west', /\bwest\b|side.?left|left.?side|\bleft\b/i],
-  ['north-east', /back.?side|north.?east|three.?quarter.?back/i],
-  ['south-east', /front.?side|south.?east|three.?quarter/i],
-  ['north', /back|north|rear/i],
-  ['east', /side|east|profile/i],
-  ['south', /front|south/i],
+  ['north-west', words('north.?west', 'back.?side.?left', 'left.?back.?side')],
+  ['south-west', words('south.?west', 'front.?side.?left', 'left.?front.?side')],
+  ['west', words('west', 'side.?left', 'left.?side', 'left')],
+  ['north-east', words('back.?side', 'north.?east', 'three.?quarter.?back')],
+  ['south-east', words('front.?side', 'south.?east', 'three.?quarter')],
+  ['north', words('back', 'north', 'rear')],
+  ['east', words('side', 'east', 'profile')],
+  ['south', words('front', 'south')],
 ];
+
+// the view a file's name says, without its extension, or null
+export function namedDirection(name) {
+  const stem = name.replace(/\.[a-z0-9]+$/i, '');
+
+  return NAME_HINTS.find(([, pattern]) => pattern.test(stem))?.[0] ?? null;
+}
 
 // the direction a file's name points at (side.webp, sochetra-back-2.png), else the first other view
 function guessDirection(name, animation, reference) {
-  const hit = NAME_HINTS.find(([, pattern]) => pattern.test(name));
+  const hit = namedDirection(name);
   const drawn = Object.keys(animation.directions);
 
-  return hit && drawn.includes(hit[0])
-    ? hit[0]
+  return hit && drawn.includes(hit)
+    ? hit
     : (drawn.find((direction) => direction !== reference) ?? drawn[0]);
 }
 

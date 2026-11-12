@@ -82,3 +82,55 @@ test('a version named as an earlier one is numbered', async () => {
     ['Another', 'Before the kit 2', 'Before the kit'],
   );
 });
+
+// thirty versions kept before cleanings and resizes pushed out one named and saved by hand
+test('versions saved by hand are the last to go past the limit', async () => {
+  const { versionsKept } = await import('../../src/store/versions.js');
+  const auto = (i) => ({ id: `a${i}`, name: `Before ${i}`, byHand: false });
+  const mine = { id: 'mine', name: 'My final art', byHand: true };
+  const list = [
+    ...Array.from({ length: 20 }, (_, i) => auto(i)),
+    mine,
+    ...Array.from({ length: 10 }, (_, i) => auto(20 + i)),
+  ];
+  const { kept, gone } = versionsKept(list);
+
+  assert.equal(kept.length, 30);
+  assert.ok(kept.includes(mine), 'the one saved by hand stays');
+  assert.deepEqual(
+    gone.map((version) => version.id),
+    ['a29'],
+    'the oldest kept on its own goes',
+  );
+
+  const allMine = Array.from({ length: 31 }, (_, i) => ({ id: `m${i}`, byHand: true }));
+
+  assert.deepEqual(
+    versionsKept(allMine).gone.map((version) => version.id),
+    ['m30'],
+    'with none kept on their own, the oldest goes',
+  );
+});
+
+// Chest, then Hero, then Grass edited within a minute: Recent listed Grass, Chest, Hero
+test('a project edited after another moves up the list at once', async () => {
+  const chest = { ...newProject({ name: 'Chest' }), id: 'chest' };
+  const hero = { ...newProject({ name: 'Hero' }), id: 'hero' };
+  const index = { list: [] };
+  const recent = () =>
+    [...index.list]
+      .sort((one, other) => other.updatedAt - one.updatedAt)
+      .map((entry) => entry.name);
+
+  const later = () => new Promise((done) => setTimeout(done, 5));
+
+  upsertEntry(index, hero, 'p-hero-');
+  await later();
+  upsertEntry(index, chest, 'p-chest-');
+  await later();
+  const said = upsertEntry(index, hero, 'p-hero-');
+
+  assert.equal(said, true, 'the list is to be written again');
+  assert.deepEqual(recent(), ['Hero', 'Chest']);
+  assert.equal(upsertEntry(index, hero, 'p-hero-'), false, 'the same project again, not yet');
+});
