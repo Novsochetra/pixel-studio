@@ -18,8 +18,9 @@ export function previewFigure(app, mapping) {
   );
 }
 
-export const showPreview = (job, mapping) =>
-  job.app.store.set({ swapPreview: job.previewOn ? mapping : null });
+// The canvas behind the window wears the swap too, as far as it shows round the window. It had
+// a switch, which did nothing to be seen on a phone, where the window covers the canvas.
+export const showPreview = (job, mapping) => job.app.store.set({ swapPreview: mapping });
 
 export function paletteChooser(job) {
   const { palettes } = job.app.store.state.project;
@@ -115,24 +116,4 @@ export function reduceButton(job) {
   const name = 'Make an 8-colour palette from the art';
 
   return node('button.btn', { title: name, 'aria-label': name, onclick: reduce }, 'From the art');
-}
-
-export function previewToggle(job, mapping) {
-  const change = (event) => {
-    job.previewOn = event.target.checked;
-    showPreview(job, mapping);
-  };
-
-  return node(
-    'label.toggle-row',
-    { for: 'swap-preview' },
-    node('span', {}, 'Also preview on the canvas behind'),
-    node('input.switch', {
-      type: 'checkbox',
-      role: 'switch',
-      id: 'swap-preview',
-      checked: job.previewOn,
-      onchange: change,
-    }),
-  );
 }

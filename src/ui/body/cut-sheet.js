@@ -14,6 +14,8 @@ import { makeCut } from './cut-apply.js';
 import { brushControls } from './cut-brush.js';
 import { keepingFocus } from './cut-focus.js';
 import { mayLeave, rememberPlan } from './cut-leave.js';
+import { changing, undoButtons, watchCutKeys } from './cut-undo.js';
+import { newSteps } from '../../model/body/cut-steps.js';
 
 const isArt = (layer) => layer.kind === 'art' && hasArt({ layers: [layer] });
 
@@ -31,7 +33,8 @@ function newJob(app) {
   const { state } = app.store;
   const { direction, frame } = state.at;
   const rig = rigOf(currentAnimation(state), direction);
-  const place = { app, direction, frame, tool: 'brush', brush: 2, erase: false };
+  const steps = newSteps();
+  const place = { app, direction, frame, steps, tool: 'brush', brush: 2, erase: false };
 
   if (rig) {
     const plan = planFromRig(rig, state.project.canvas);
@@ -103,9 +106,12 @@ function actions(job) {
 
 // the tools, the parts and the advice: the column that scrolls on a phone, beside the art on a desk
 function drawSide(side, job, change) {
+  const tools = brushControls(job, change);
+
+  tools.prepend(undoButtons(job));
   replace(
     side,
-    brushControls(job, change),
+    tools,
     partsList(job, change, guessButton(job, change)),
     node('p.hint', {}, hint(job)),
   );
@@ -128,7 +134,8 @@ export function openCutSheet(app) {
   // the window's own last child, so its buttons stay at the foot while the parts scroll
   const foot = node('div.sheet-actions');
   const mayClose = () => mayLeave(job, foot);
-  const sheet = openSheet(title, null, { wide: true, focusField: false, mayClose });
+  const stopKeys = watchCutKeys(job);
+  const sheet = openSheet(title, stopKeys, { wide: true, focusField: false, mayClose });
   const side = node('div.cut-side');
   const paints = node('p.hint.cut-paints');
   const draw = () => {
@@ -139,12 +146,12 @@ export function openCutSheet(app) {
   };
   const render = () => keepingFocus(sheet.body, draw);
   const art = cutCanvas(job, render);
-  const change = (edit) => {
-    edit();
+  const change = (edit) => changing(job, edit);
+
+  job.redraw = () => {
     render();
     art.redraw();
   };
-
   job.close = sheet.close;
   rememberPlan(job);
   sheet.body.classList.add('cut-window');

@@ -1,19 +1,20 @@
 const CONTROLS = 'button, input, select';
 
+// a button with a picture alone (Undo, Redo) is known by its name
+const wordsOf = (button) => button.getAttribute('aria-label') ?? button.textContent;
+
 // where the keys are: a part's row and which of its controls, or a button by its words
 function placeOf(control) {
   const row = control.closest('.cut-part');
 
   return row
     ? { part: row.dataset.part, index: [...row.querySelectorAll(CONTROLS)].indexOf(control) }
-    : { words: control.textContent };
+    : { words: wordsOf(control) };
 }
 
 function controlAt(body, place) {
   if (!place.part) {
-    return [...body.querySelectorAll('button')].find(
-      (button) => button.textContent === place.words,
-    );
+    return [...body.querySelectorAll('button')].find((button) => wordsOf(button) === place.words);
   }
 
   const row =

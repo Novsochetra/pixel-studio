@@ -46,12 +46,12 @@ function orderButtons(job, index, change) {
         disabled: index === last,
         onclick: () => move(1),
       },
-      '↑',
+      icon('chevron-up'),
     ),
     node(
       'button.btn.quiet.icon-only',
       { 'aria-label': 'Draw under the part below', disabled: index === 0, onclick: () => move(-1) },
-      '↓',
+      icon('chevron-down'),
     ),
   ];
 }

@@ -1,5 +1,6 @@
 import { projectFileText, readProjectFile } from './project-file.js';
 import { newId } from '../model/project.js';
+import { freeName } from '../model/free-name.js';
 import { keysFor } from './keys.js';
 
 // a stored document holds at most 256 KiB, so a big project is kept in pieces
@@ -21,10 +22,12 @@ export async function saveVersion(backend, project, name, keys = keysFor('')) {
     });
   }
 
-  const list = [
-    { id, name, savedAt: Date.now(), chunks, size: text.length },
-    ...(await listVersions(backend, keys)),
-  ];
+  const earlier = await listVersions(backend, keys);
+  const named = freeName(
+    name,
+    earlier.map((version) => version.name),
+  );
+  const list = [{ id, name: named, savedAt: Date.now(), chunks, size: text.length }, ...earlier];
 
   for (const old of list.slice(KEEP)) {
     await deleteVersionChunks(backend, old, keys);

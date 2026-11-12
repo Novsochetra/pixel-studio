@@ -10,7 +10,6 @@ import {
   addPalette,
   paletteRow,
   previewFigure,
-  previewToggle,
   reduceButton,
   showPreview,
   starterPalettes,
@@ -117,7 +116,6 @@ function drawMapping(job, palette) {
     job.slot,
     mappingHeader(job, palette, changed),
     node('div.compare', {}, node('div.map-table', {}, rows), previewFigure(app, mapping)),
-    previewToggle(job, mapping),
     node(
       'details',
       {},
@@ -144,7 +142,6 @@ export function openSwapSheet(app) {
     slot,
     close: sheet.close,
     paletteId: palettes.at(-1)?.id ?? null,
-    previewOn: true,
   };
 
   job.draw = () => {

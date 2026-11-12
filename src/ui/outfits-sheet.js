@@ -79,8 +79,8 @@ function partsSection(job) {
     'details',
     { open: job.partsOpen, ontoggle: remember },
     node('summary', {}, 'Which colours are which part'),
-    partsEditor(job.app, job.draw),
-    outfitNames(job.app, job.draw),
+    partsEditor(job.app, job.draw, job.taken),
+    outfitNames(job.app, job.draw, job.taken),
   );
 }
 
@@ -140,6 +140,7 @@ export function openOutfitsSheet(app) {
     slot,
     choice,
     close: sheet.close,
+    taken: {},
     partsOpen: !project.parts.some((part) => part.colours.length),
   };
 

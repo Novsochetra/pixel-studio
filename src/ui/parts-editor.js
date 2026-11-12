@@ -1,5 +1,5 @@
 import { icon, node } from './dom.js';
-import { askDelete } from './ask-delete.js';
+import { putBackRow, takeOff } from './put-back.js';
 import { changeStructure } from './actions.js';
 import { characterColors } from './character-colours.js';
 import { sharedColours } from '../palette/kits.js';
@@ -21,24 +21,15 @@ function colourChip(part, color, toggle) {
   });
 }
 
-function nameAndRemove(app, part, save) {
-  const { project } = app.store.state;
+function nameAndRemove(app, { part, taken }, save) {
   const rename = (event) => {
     part.name = event.target.value.trim() || part.name;
     save();
   };
   const remove = () => {
-    project.parts = project.parts.filter((other) => other !== part);
+    takeOff(app, { key: 'parts', item: part, taken });
     save();
   };
-
-  // undo does not reach the parts: the row asks before its part goes
-  const ask = (event) =>
-    askDelete(event.currentTarget.parentElement, {
-      question: `Remove ${part.name}?`,
-      word: 'Remove',
-      onDelete: remove,
-    });
 
   return node(
     'div.list-row',
@@ -50,13 +41,13 @@ function nameAndRemove(app, part, save) {
     }),
     node(
       'button.btn.quiet.icon-only',
-      { 'aria-label': `Remove ${part.name}`, title: 'Remove this part', onclick: ask },
+      { 'aria-label': `Remove ${part.name}`, title: 'Remove this part', onclick: remove },
       icon('close'),
     ),
   );
 }
 
-function partRow(app, part, colours, redraw) {
+function partRow(app, { part, colours, taken }, redraw) {
   const save = () => {
     changeStructure(app, 'parts');
     redraw();
@@ -71,7 +62,7 @@ function partRow(app, part, colours, redraw) {
   // a part is a group of rows, as a guide is: its name, then the colours it is drawn in
   const group = listGroup(
     {},
-    nameAndRemove(app, part, save),
+    nameAndRemove(app, { part, taken }, save),
     node(
       'div.list-row.target-picker',
       { style: { justifyContent: 'flex-start' } },
@@ -86,10 +77,11 @@ function partRow(app, part, colours, redraw) {
 
 // Which of the character's colours make up each part. An outfit recolours a part's colours
 // shade for shade, darkest to lightest.
-export function partsEditor(app, redraw) {
+export function partsEditor(app, redraw, taken) {
   const { project } = app.store.state;
   const colours = characterColors(app.store.state);
   const shared = sharedColours(project.parts);
+  const back = putBackRow(app, { key: 'parts', taken }, redraw);
   const add = () => {
     project.parts.push({
       id: newId('part'),
@@ -108,7 +100,8 @@ export function partsEditor(app, redraw) {
       {},
       'Name a part (a shirt, a cape, armour) and tick the colours it is drawn in. Shades of one colour belong in one part.',
     ),
-    project.parts.map((part) => partRow(app, part, colours, redraw)),
+    project.parts.map((part) => partRow(app, { part, colours, taken }, redraw)),
+    back ? listGroup({}, back) : null,
     node('div.group', {}, node('button.btn', { onclick: add }, 'Add a part')),
     shared.length
       ? node(

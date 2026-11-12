@@ -251,7 +251,12 @@ imports `io/`, or `clean/` or `art/` import anything outside themselves.
   goes, the same way everywhere: where the thing stood, a question with Delete and Keep
   (`askDelete` in `src/ui/ask-delete.js`; a project's card asks the same). What undo can bring
   back does not ask. A window holding work that is no step yet (the cut window's corrections)
-  asks the same way before it closes (`mayClose` in `openSheet`).
+  asks the same way before it closes (`mayClose` in `openSheet`), and takes its own changes
+  back while it is open (`cut-steps.js`, `cut-undo.js`): the editor's undo waits behind a window.
+- One of the project's named things taken off in a window (a part, an outfit) is a step
+  (`takeOff` in `src/ui/put-back.js`), and the window offers it back itself (`putBackRow`).
+- A project added and a version saved take a name nothing in their list has (`freeName`): a
+  copy made twice is "Hero copy" and "Hero copy 2".
 - A whole project put in the open one's place (a canvas of another size, a version gone back to)
   is one step too (`restoreProject`, `History.recordProject`): the undo history is kept across
   it, and undo swaps the project back (`swapProject`).

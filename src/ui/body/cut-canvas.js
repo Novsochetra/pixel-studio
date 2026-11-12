@@ -4,6 +4,7 @@ import { drawChecker } from '../checker.js';
 import { PART_COLOURS } from '../../art/editor-colours.js';
 import { linePoints } from '../../editor/paint.js';
 import { paintOwners, pivotsOf } from '../../model/body/cut-plan.js';
+import { keepStep, planCopy } from '../../model/body/cut-steps.js';
 import { drawLasso, lassoDrag } from './cut-lasso.js';
 import { viewBox } from './cut-view.js';
 
@@ -135,10 +136,12 @@ function pressOn(job, canvas, event) {
 export function cutCanvas(job, onChange) {
   const canvas = node('canvas.cut-canvas', { 'aria-label': 'The art, painted by part' });
   let drag = null;
+  let before = null;
 
   job.view = viewBox(job.source);
   canvas.addEventListener('pointerdown', (event) => {
     canvas.setPointerCapture(event.pointerId);
+    before = planCopy(job.plan);
     drag = pressOn(job, canvas, event);
     drawCut(canvas, job);
   });
@@ -152,6 +155,7 @@ export function cutCanvas(job, onChange) {
     if (drag) {
       drag.end?.();
       drag = null;
+      keepStep(job.steps, before, job.plan);
       drawCut(canvas, job);
       onChange();
     }

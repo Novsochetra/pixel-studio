@@ -12,6 +12,7 @@ import { allLayers, newId } from '../model/project.js';
 import { normalizeProject } from '../model/normalize.js';
 import { createSprite } from '../model/sprite.js';
 import { told } from '../model/told.js';
+import { freeName } from '../model/free-name.js';
 import { VIEW, keptView } from './view-kept.js';
 
 export function fillMissingSprites(project) {
@@ -138,6 +139,10 @@ export async function addProject(app, project) {
   const folder = folderOf(app.index, app.index.current);
 
   project.id = newId('p');
+  project.name = freeName(
+    project.name,
+    app.index.list.map((listed) => listed.name),
+  );
   fillMissingSprites(project);
   install(app, project, { prefix: prefixFor(project.id), save: 'all' });
   moveToFolder(app.index, project.id, folder);

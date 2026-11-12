@@ -67,3 +67,18 @@ test('shortcuts name ⌘ on a Mac and Ctrl elsewhere', async () => {
   assert.equal(keyNames('Redo (⇧⌘Z or ⌘Y)', true), 'Redo (⇧⌘Z or ⌘Y)');
   assert.equal(keyNames('Redo (⇧⌘Z or ⌘Y)', false), 'Redo (Ctrl+Shift+Z or Ctrl+Y)');
 });
+
+// "Before Cambodia home" kept twice was two rows of one name in History
+test('a version named as an earlier one is numbered', async () => {
+  const backend = memory();
+  const project = newProject({ name: 'Hero' });
+
+  await saveVersion(backend, project, 'Before the kit');
+  await saveVersion(backend, project, 'Before the kit');
+  await saveVersion(backend, project, 'Another');
+
+  assert.deepEqual(
+    (await listVersions(backend)).map((version) => version.name),
+    ['Another', 'Before the kit 2', 'Before the kit'],
+  );
+});

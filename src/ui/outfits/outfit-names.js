@@ -1,10 +1,9 @@
 import { icon, node } from '../dom.js';
-import { askDelete } from '../ask-delete.js';
+import { putBackRow, takeOff } from '../put-back.js';
 import { changeStructure } from '../actions.js';
 import { listGroup } from '../list-group.js';
 
-function outfitRow(app, outfit, redraw) {
-  const { project } = app.store.state;
+function outfitRow(app, { outfit, taken }, redraw) {
   const changed = () => {
     changeStructure(app, 'parts');
     redraw();
@@ -14,17 +13,9 @@ function outfitRow(app, outfit, redraw) {
     changed();
   };
   const remove = () => {
-    project.outfits = project.outfits.filter((other) => other !== outfit);
-    changed();
+    takeOff(app, { key: 'outfits', item: outfit, taken });
+    redraw();
   };
-
-  // undo does not reach the outfits: the row asks before its outfit goes
-  const ask = (event) =>
-    askDelete(event.currentTarget.parentElement, {
-      question: `Remove ${outfit.name}?`,
-      word: 'Remove',
-      onDelete: remove,
-    });
 
   return node(
     'div.list-row.guide-row',
@@ -36,22 +27,23 @@ function outfitRow(app, outfit, redraw) {
     }),
     node(
       'button.btn.quiet.icon-only',
-      { 'aria-label': `Remove ${outfit.name}`, onclick: ask },
+      { 'aria-label': `Remove ${outfit.name}`, onclick: remove },
       icon('close'),
     ),
   );
 }
 
 // the outfits kept with the project, to rename or remove
-export function outfitNames(app, redraw) {
+export function outfitNames(app, redraw, taken) {
   const { project } = app.store.state;
 
-  if (!project.outfits.length) {
+  if (!project.outfits.length && !taken.outfits) {
     return null;
   }
 
   return listGroup(
     { title: 'Your outfits' },
-    project.outfits.map((outfit) => outfitRow(app, outfit, redraw)),
+    project.outfits.map((outfit) => outfitRow(app, { outfit, taken }, redraw)),
+    putBackRow(app, { key: 'outfits', taken }, redraw),
   );
 }

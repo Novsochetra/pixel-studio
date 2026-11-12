@@ -1,5 +1,6 @@
 import { pinsOf, PIN_NAMES } from '../model/pins.js';
 import { PIN_COLOURS, PIN_RING } from '../art/editor-colours.js';
+import { labelPlaces } from './pin-labels.js';
 
 // one fixed colour per body part, so a pin is the same colour in every frame
 const colourOf = (name) => PIN_COLOURS[Math.max(0, PIN_NAMES.indexOf(name)) % PIN_COLOURS.length];
@@ -34,16 +35,24 @@ export function drawPins(context, frame, previous, scale) {
   context.globalAlpha = 1;
   context.font = '700 10px Silkscreen, ui-monospace, monospace';
 
-  for (const mark of pinsOf(frame)) {
+  const dots = pinsOf(frame).map((mark) => {
     const [x, y] = centre(mark, scale);
 
-    context.fillStyle = colourOf(mark.name);
+    return { name: mark.name.toUpperCase(), colour: colourOf(mark.name), x, y, radius };
+  });
+
+  for (const dot of dots) {
+    context.fillStyle = dot.colour;
     context.strokeStyle = PIN_RING;
     context.beginPath();
-    context.arc(x, y, radius, 0, Math.PI * 2);
+    context.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
     context.fill();
     context.stroke();
-    context.fillText(mark.name.toUpperCase(), x + radius + 3, y + 3);
+  }
+
+  for (const label of labelPlaces(dots, (name) => context.measureText(name).width)) {
+    context.fillStyle = dots.find((dot) => dot.name === label.name).colour;
+    context.fillText(label.name, label.x, label.y);
   }
 
   context.restore();
