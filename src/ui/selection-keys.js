@@ -72,8 +72,12 @@ function copy(app, cut) {
 
   app.clipboard = liftPixels(layer.sprite, state.selection);
 
-  if (cut) {
-    commit(app, 'Cut', [layer], () => eraseSelection(layer.sprite, state.selection));
+  // refused on a hidden layer, it says why: "Cut." over that said it had worked
+  if (
+    cut &&
+    commit(app, 'Cut', [layer], () => eraseSelection(layer.sprite, state.selection)) === null
+  ) {
+    return;
   }
 
   // the Copy button says so: the keys copied without a word, and nothing showed they had

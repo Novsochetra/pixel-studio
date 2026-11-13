@@ -117,6 +117,12 @@ check(
 );
 await keys('Shift+F');
 check((await said()).includes('Top is hidden'), 'nor flipped unseen');
+await keys('Meta+a', 'Meta+x');
+check(
+  (await said()).includes('Top is hidden') && (await painted()) === before,
+  'nor cut unseen, and the message says so, not "Cut."',
+);
+await keys('Escape');
 await page.getByRole('button', { name: 'Show Top', exact: true }).click();
 
 // after a click the status bar named the colour that had been there

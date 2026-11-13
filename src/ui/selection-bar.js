@@ -147,8 +147,11 @@ const copyAndDelete = (app) => [
 ];
 
 // Shown over the canvas while something is selected: turn, flip, copy, delete, let go.
+// A selection being drawn shows its bar as the finger lifts: shown mid-drag, the room the
+// stage keeps for it moved the canvas from under the finger on the shortest phones on their
+// side, and the box came out 26 pixels lower than drawn.
 export function renderSelectionBar(el, app) {
-  el.hidden = !app.store.state.selection;
+  el.hidden = !app.store.state.selection || (app.dragging && el.hidden);
 
   if (el.hidden) {
     // with the selection let go, the next loop starts a new one

@@ -115,3 +115,28 @@ export function shiftOnCanvas(pixels, { width, height }, [dx, dy]) {
     within(dy, -Math.min(...ys), height - 1 - Math.max(...ys)),
   ];
 }
+
+// A floating piece painted on takes what was painted: its own copy, put back at the next move,
+// threw strokes, an eraser's work and a swap's colours away. A clear cell of the piece, where
+// the art under it shows, takes a colour only where it now differs from that art.
+export function refloat(sprite, selection) {
+  const { piece, under } = selection?.floating ?? {};
+
+  if (!piece) {
+    return selection;
+  }
+
+  const was = new Map(under.map(({ x, y, color }) => [`${x},${y}`, color]));
+  let changed = false;
+  const now = piece.map((pixel) => {
+    const color = inside(sprite, pixel) ? getPixel(sprite, pixel.x, pixel.y) : pixel.color;
+    const shows = pixel.color === CLEAR && color === was.get(`${pixel.x},${pixel.y}`);
+    const kept = shows ? CLEAR : color;
+
+    changed ||= kept !== pixel.color;
+
+    return kept === pixel.color ? pixel : { ...pixel, color: kept };
+  });
+
+  return changed ? { ...selection, floating: { piece: now, under } } : selection;
+}

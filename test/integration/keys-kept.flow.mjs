@@ -204,5 +204,16 @@ check(
   `Enter on Delete layer leaves the keys on a control that deletes nothing (${await focused()})`,
 );
 await page.keyboard.press('Meta+z');
+await page.waitForTimeout(200);
+
+// with Move in hand the arrows move art, and Home and End in the list did nothing at all
+await page.keyboard.press('t');
+await page.locator('.layer-row').first().focus();
+await page.keyboard.press('End');
+await page.waitForTimeout(200);
+check(
+  (await page.locator('.layer-row').last().getAttribute('aria-current')) === 'true',
+  'with Move in hand, End in the layers goes to the bottom layer',
+);
 
 await finish();

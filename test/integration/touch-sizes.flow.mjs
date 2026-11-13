@@ -15,9 +15,19 @@ await page.keyboard.press('s');
 const art = await canvas.boundingBox();
 const at = (x, y) => [art.x + art.width * x, art.y + art.height * y];
 
+const still = await canvas.boundingBox();
+
 await touch('touchStart', [at(0.3, 0.3)]);
 await touch('touchMove', [at(0.5, 0.5)]);
 await touch('touchMove', [at(0.7, 0.7)]);
+await page.waitForTimeout(100);
+const midDrag = await canvas.boundingBox();
+
+// shown mid-drag, the bar's room moved the canvas from under the finger
+check(
+  Math.abs(midDrag.y - still.y) < 1,
+  `the canvas stays under the finger while a selection is drawn (moved ${Math.round(midDrag.y - still.y)}px)`,
+);
 await touch('touchEnd', []);
 await page.waitForTimeout(600);
 const bar = await page.locator('.selection-bar').boundingBox();

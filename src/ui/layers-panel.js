@@ -38,8 +38,9 @@ const leadsTo = (key, at, top) => ({ ArrowUp: at + 1, ArrowDown: at - 1, Home: t
 // and the bottom one. With Alt they move the layer there: a drag was the only way to, and the
 // keys had none. Home and End scrolled the panel from under the row instead.
 function onListKey(app, event, stack) {
-  // clicking a layer focuses its row, and the arrows must still move what the tool moves
-  if (arrowsMoveArt(app.store.state)) {
+  // clicking a layer focuses its row, and the arrows must still move what the tool moves; Home
+  // and End move nothing, and stay the list's
+  if (event.key.startsWith('Arrow') && arrowsMoveArt(app.store.state)) {
     return;
   }
 

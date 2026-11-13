@@ -19,6 +19,7 @@ import {
 import { frameAt } from '../model/project.js';
 import { suggestMapping } from '../palette/palette.js';
 import { toHex } from '../model/sprite.js';
+import { changeMapping, setTarget } from './swap/swap-changes.js';
 
 function layersFor(state, scope) {
   return scope === 'view'
@@ -41,35 +42,16 @@ function apply(job, mapping, scope) {
   job.close();
 }
 
-// the palette's mapping: each character colour and what it becomes, kept with the project
+// The palette's mapping: each character colour and what it becomes, kept with the project once
+// a choice is made in it. Suggested, it is not kept: kept as the window opened, outside any step,
+// it stayed in the project after undo took its palette away.
 function mappingFor(job, palette) {
   const { project } = job.app.store.state;
-  const colours = everyColour(job.app.store.state);
 
-  project.mappings[job.paletteId] ??= suggestMapping(colours, palette.colors);
-
-  return project.mappings[job.paletteId];
-}
-
-// A choice of what a colour becomes is kept with the project, so it is a step: undo passed over
-// it to the palette before, and redo brought the palette back with the choice in it.
-function changeMapping(job, label, change) {
-  const { app, paletteId } = job;
-  const { project } = app.store.state;
-  const before = structuredClone(project.mappings);
-
-  change(project.mappings, paletteId);
-  app.history.recordSetting(label, 'mappings', before, structuredClone(project.mappings));
-  app.saver.markStructure();
-  job.draw();
-}
-
-function setTarget(mapping, color, target) {
-  if (target === undefined) {
-    delete mapping[color];
-  } else {
-    mapping[color] = target;
-  }
+  return (
+    project.mappings[job.paletteId] ??
+    suggestMapping(everyColour(job.app.store.state), palette.colors)
+  );
 }
 
 function mappingHeader(job, palette) {
@@ -115,7 +97,7 @@ function drawMapping(job, palette) {
   const mapping = mappingFor(job, palette);
   const onChange = (color, target) =>
     changeMapping(job, `Swap ${toHex(color)}`, (mappings, id) =>
-      setTarget(mappings[id], color, target),
+      setTarget((mappings[id] ??= { ...mapping }), color, target),
     );
   const rows = mappingRows(app.store.state, palette, mapping, onChange);
 

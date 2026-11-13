@@ -6,6 +6,7 @@ import {
   floatPiece,
   moveFloating,
   moveLifted,
+  refloat,
   shiftOnCanvas,
 } from '../../src/editor/floating.js';
 import { applyTurn, startTurn } from '../../src/editor/selection-turn.js';
@@ -241,4 +242,23 @@ test('a quarter turn at the canvas edge comes back whole when it is turned back'
   assert.ok(count(sprite, RED) < 32, 'part of it is past the edge');
   applyTurn(sprite, there.turn, 0);
   assert.equal(count(sprite, RED), 32);
+});
+
+// Painted on as it floated, a moved piece threw the paint away at its next move: its own copy
+// was put back
+test('a floating piece painted on carries the paint, and leaves the art under its clear cells', () => {
+  const sprite = createSprite(16, 16);
+
+  square(sprite, [2, 2], 2, RED);
+  square(sprite, [8, 2], 4, BLUE);
+  const lifted = moveLifted(sprite, rectSelection(sprite, [1, 1], [4, 4]), [6, 0]);
+
+  setPixel(sprite, 8, 2, pack(255, 255, 255));
+  const painted = refloat(sprite, lifted);
+  const moved = moveFloating(sprite, painted, 0, 6);
+
+  assert.equal(getPixel(sprite, 8, 8), pack(255, 255, 255), 'the paint moves with the piece');
+  assert.equal(getPixel(sprite, 8, 2), BLUE, 'the art under it is put back');
+  assert.equal(count(sprite, BLUE), 16, 'and no art under its clear cells was taken along');
+  assert.equal(refloat(sprite, moved), moved, 'unpainted, it is left as it was');
 });

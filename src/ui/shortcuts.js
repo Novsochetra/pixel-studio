@@ -59,7 +59,10 @@ const GROUPS = [
       ['Arrows, Home, End', 'In the frames: walk the frames and views; on a tab: the tabs'],
       ['Shift F10, right-click', 'A tab’s menu: rename, duplicate, delete'],
       ['Enter, Shift F10', 'On a frame: its menu'],
-      ['↑  ↓, Home, End', 'In the layers: the layer above or below, the top or bottom one'],
+      [
+        '↑  ↓, Home, End',
+        'In the layers: the layer above or below (the arrows move art instead while it is selected or Move is in hand), the top or bottom one',
+      ],
       ['Alt ↑  ↓', 'Move the layer up or down'],
       ['F2', 'Rename the layer or the tab the keys are on'],
       ['+  −', 'Zoom'],

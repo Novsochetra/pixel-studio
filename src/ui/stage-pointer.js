@@ -8,6 +8,7 @@ import { touchIntent } from './touch-intent.js';
 import { keepToLock } from './palette-lock.js';
 import { bindBeside } from './stage-beside.js';
 import { withTaps } from './stage-taps.js';
+import { ownTouches } from './own-touches.js';
 import { getPixel, toHex } from '../model/sprite.js';
 
 export function pixelAt(canvas, event, scale) {
@@ -68,10 +69,18 @@ function showCursor(app, point) {
 
 // a mouse or a pen starts the tool at once; one finger waits to see whether it is half a pinch
 function press(app, view, event) {
+  // a drag is under way from its first draw: what the tool draws as it starts (a selection's
+  // first box) sees it
   const start = () => {
     view.intent = null;
+    app.dragging = true;
     view.session = pressSession(app, view, event);
     app.dragging = Boolean(view.session);
+
+    // a press done with at once (a colour picked out) shows the bar of what it selected
+    if (!view.session && app.store.state.selection) {
+      app.store.touch('selection');
+    }
   };
 
   view.intent?.drop();
@@ -114,15 +123,6 @@ function release(app, view, event) {
     if (ended && app.store.state.selection) {
       app.store.set({ lassoMode: 'new' });
     }
-  }
-}
-
-// Chromium on a phone takes a finger lifted while still moving for a fling, and swallows the next
-// tap as the one that stops it: Undo tapped right after a quick stroke did nothing. A touch on
-// the canvas is the studio's alone, and says so.
-function ownTouches(canvas) {
-  for (const kind of ['touchstart', 'touchmove']) {
-    canvas.addEventListener(kind, (event) => event.preventDefault(), { passive: false });
   }
 }
 

@@ -14,6 +14,7 @@ import { onLayoutChange } from './layout.js';
 import { saveOnLeaving } from './save-on-leaving.js';
 import { bindFieldKeys } from './field-keys.js';
 import { keepFocus } from './keep-focus.js';
+import { keepFloatingPainted } from './floating-kept.js';
 
 function drawChanged(draw, patch) {
   const keys = Object.keys(patch);
@@ -52,6 +53,7 @@ export function mountApp(app) {
     }
   });
 
+  keepFloatingPainted(app);
   Object.values(draw).forEach((drawPart) => drawPart());
 
   // the zoom that fills the window; a resize follows it unless another zoom was chosen
