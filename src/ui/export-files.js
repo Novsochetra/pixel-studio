@@ -8,7 +8,7 @@ import { zipFiles } from '../io/zip.js';
 import { saveFile } from './save-file.js';
 import { fileSlug } from './file-name.js';
 import { directionLabel } from '../model/project.js';
-import { saidWarning } from './export/export-summary.js';
+import { saidWarning } from '../export/said-warning.js';
 
 const encoder = new TextEncoder();
 // a download says whose it is: sprite-sheets.zip from two projects were told apart by nothing

@@ -122,4 +122,24 @@ const back = await box('.sheet');
 
 check(back.y + back.height >= screen - 1, 'and it goes back to the screen’s foot as they go');
 
+// On its side, the keys leave a strip: the window's title and buttons, held at its ends, took all
+// of it, and the field typed in was under Change the size
+await page.setViewportSize({ width: 658, height: 320 });
+await page.waitForTimeout(300);
+await page.locator('#canvas-width').focus();
+await keys(176);
+await page.waitForTimeout(300);
+const seen = await page.evaluate(() => {
+  const typedIn = document.querySelector('#canvas-width');
+  const { left, top, width, height } = typedIn.getBoundingClientRect();
+
+  return (
+    document.elementFromPoint(left + width / 2, top + height / 2) === typedIn && top + height <= 176
+  );
+});
+
+check(seen, 'on its side with the keys up, the field typed in is in sight, not under the buttons');
+await page.screenshot({ path: `${shots}/phone-side-keys-up.png` });
+await keys(320);
+
 await finish();

@@ -410,6 +410,17 @@
   animation: sheet-down var(--duration-fade) var(--ease) forwards;
 }
 
+/* A phone on its side with the keys up has a strip of screen left: a window's title and
+   buttons, held at its ends, took all of it, and the field was typed into under them. They
+   scroll with the rest there, so the field can be in sight. */
+@media (max-height: 499px) {
+  :root[data-layout='compact'][data-keys='up']
+    :is(.sheet, .sheet-out)
+    :is(.sheet-head, .sheet-actions) {
+    position: static;
+  }
+}
+
 /* as wide as the window, its sides too: in the gutters beside it, the focus ring of what
    scrolled under it showed */
 :root[data-layout='compact'] :is(.sheet, .sheet-out) > .sheet-actions:last-child,
@@ -647,6 +658,20 @@
   :root[data-layout='compact'] .dock-tab {
     flex: none;
     min-height: 44px;
+  }
+
+  /* the last tab or tool half past the screen's foot said nothing of the rest: a strip there
+     does, laid over the foot while more waits below */
+  :root[data-layout='compact'] :is(.dock, .rail)[data-below='true']::after {
+    content: '';
+    position: sticky;
+    z-index: 1;
+    bottom: -4px;
+    flex: none;
+    height: 28px;
+    margin-top: -28px;
+    background: linear-gradient(to bottom, transparent, var(--chrome));
+    pointer-events: none;
   }
 
   /* Too little height for a title and buttons that both stay put: the title scrolls with the

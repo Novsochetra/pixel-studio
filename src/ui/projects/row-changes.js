@@ -1,13 +1,15 @@
 import { node, replace, toast } from '../dom.js';
 import { addProject } from '../session.js';
-import { saveProjectList } from '../../store/projects.js';
+import { namesBesides, saveProjectList } from '../../store/projects.js';
+import { freeName } from '../../model/free-name.js';
 import { folderOf, moveToFolder } from '../../store/folders.js';
 import { readStored, renameStored } from '../../store/stored-project.js';
 import { readProjectFile, projectFileText } from '../../store/project-file.js';
 import { inWords } from '../../model/told.js';
 
-async function renameTo(job, project, name) {
+async function renameTo(job, project, typed) {
   const { backend, index } = job.app;
+  const name = typed && freeName(typed, namesBesides(index, project.id));
   const renamed =
     name && name !== project.name && (await renameStored(backend, project.entry, name));
 
@@ -38,9 +40,11 @@ export function renameOnRow(job, project, row) {
     ),
   );
   row.onkeydown = (event) => {
-    // Enter and Esc answer the row: Esc does not go on to close Projects
+    // Enter and Esc answer the row: Esc does not go on to close Projects. A name left as it was
+    // draws the row again at once, and the same Enter pressed its Open: the project was opened.
     if (event.key === 'Enter' || event.key === 'Escape') {
       event.stopPropagation();
+      event.preventDefault();
       event.key === 'Enter' ? save() : job.redraw();
     }
   };

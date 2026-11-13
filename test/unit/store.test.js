@@ -1,7 +1,8 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { keysFor, prefixFor } from '../../src/store/keys.js';
-import { upsertEntry } from '../../src/store/projects.js';
+import { namesBesides, upsertEntry } from '../../src/store/projects.js';
+import { freeName } from '../../src/model/free-name.js';
 
 // versions.js reaches PNG encoding through project-file.js; give it a stand-in for the browser
 globalThis.document = {
@@ -133,4 +134,18 @@ test('a project edited after another moves up the list at once', async () => {
   assert.equal(said, true, 'the list is to be written again');
   assert.deepEqual(recent(), ['Hero', 'Chest']);
   assert.equal(upsertEntry(index, hero, 'p-hero-'), false, 'the same project again, not yet');
+});
+
+// a project renamed to another's name made two of one name, which nothing could tell apart
+test('a project renamed takes a name no other project has, and may keep its own', () => {
+  const index = {
+    list: [
+      { id: 'a', name: 'Hero' },
+      { id: 'b', name: 'Hero 2' },
+    ],
+  };
+
+  assert.equal(freeName('Hero', namesBesides(index, 'b')), 'Hero 2');
+  assert.equal(freeName('Hero', namesBesides(index, 'a')), 'Hero');
+  assert.equal(freeName('Hero 2', namesBesides(index, 'c')), 'Hero 2 2');
 });

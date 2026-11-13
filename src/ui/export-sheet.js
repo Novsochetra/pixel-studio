@@ -3,7 +3,8 @@ import { openSheet } from './sheet.js';
 import { currentAnimation } from './actions.js';
 import { saveFile } from './save-file.js';
 import { presetSettings, presetsFor, sane } from './export-settings.js';
-import { saidWarning, summary } from './export/export-summary.js';
+import { summary } from './export/export-summary.js';
+import { saidWarning } from '../export/said-warning.js';
 import {
   formatButtons,
   manifestBlock,

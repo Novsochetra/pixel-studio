@@ -54,6 +54,17 @@ check(
     (await status(page)).includes('48×48 canvas'),
   'a width of 0 is refused and said, as any size no canvas can have',
 );
+
+// the big copy's scale was quietly made 1 or 32 from 0 or 99, where a size out of range was refused
+await page.fill('#project-width', '');
+await page.fill('#project-scale', '0');
+await page.getByRole('button', { name: 'Create', exact: true }).click();
+await page.waitForTimeout(300);
+check(
+  (await page.locator('.toast').textContent()).includes('scale is a whole number from 1 to 32') &&
+    (await status(page)).includes('48×48 canvas'),
+  'a big copy’s scale of 0 is refused and said, as a size is',
+);
 await page.keyboard.press('Escape');
 await page.waitForTimeout(300);
 

@@ -141,3 +141,7 @@ export async function deleteProjectData(backend, prefix) {
   await backend.remove(keys.portrait);
   await deleteAllVersions(backend, keys);
 }
+
+// the names of every project but this one: a name it takes is free of them (freeName)
+export const namesBesides = (index, id) =>
+  index.list.filter((entry) => entry.id !== id).map(({ name }) => name);

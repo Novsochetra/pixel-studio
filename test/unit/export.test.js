@@ -133,6 +133,23 @@ test('a sheet warns of views and frames not drawn yet', () => {
   assert.ok(!warnings.some((warning) => warning.startsWith('west')), 'a flipped row says nothing');
 });
 
+// The game pack's note said "idle: south: frame 2 is empty", where the window said Front
+test('the game pack’s note names the views as the studio does', async () => {
+  const { gamePack } = await import('../../src/export/game-pack.js');
+  const project = newProject({ kind: 'character', directionSet: 'four', width: 16, height: 16 });
+  const settings = {
+    frameWidth: 16,
+    frameHeight: 16,
+    anchorX: 8,
+    anchorY: 15,
+    includeMirrored: true,
+  };
+  const note = gamePack(project, settings, 16).texts.find(({ path }) => path.endsWith('.txt')).text;
+
+  assert.match(note, /Front is empty/);
+  assert.doesNotMatch(note, /\bsouth\b/);
+});
+
 // Play skipped a frame hidden from it, and the GIF and the sheet showed it, with no word of it
 test('the sheet says which frames are hidden from play and still in the files', async () => {
   const { setFrameHidden } = await import('../../src/model/frame-play.js');

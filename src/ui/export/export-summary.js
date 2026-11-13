@@ -1,17 +1,9 @@
 import { node } from '../dom.js';
 import { characterHeight } from '../export-settings.js';
+import { saidWarning } from '../../export/said-warning.js';
 import { viewName } from '../../model/kinds.js';
 
 const count = (number, word) => `${number} ${word}${number === 1 ? '' : 's'}`;
-
-// the sheet's warnings name a view as the game's data does (south): to a person it is said as
-// the studio says it everywhere else (Front, or Icon)
-export const saidWarning = (project, result, warning) =>
-  result.rows.reduce(
-    (text, row) =>
-      text.replace(new RegExp(`^${row.direction}\\b`), viewName(project, row.direction)),
-    warning,
-  );
 
 // what the sheet will be, and what is wrong with it, under its picture
 export function summary(result, animation, state) {

@@ -62,6 +62,15 @@ const sizeProblem = (sizes) =>
     ? null
     : `Width and height are whole numbers of art pixels from ${CANVAS_LIMITS.min} to ${CANVAS_LIMITS.max}. Leave one empty for the size this kind comes with.`;
 
+const SCALE_LIMITS = { min: 1, max: 32 };
+
+// The big copy's scale is told the same: 0, 99 and 2.5 were quietly made 1, 32 and 2, where a
+// size out of range was refused.
+const scaleProblem = (scale) =>
+  !scale.value.trim() || isWholeBetween(scale.value, SCALE_LIMITS)
+    ? null
+    : `The big copy's scale is a whole number from ${SCALE_LIMITS.min} to ${SCALE_LIMITS.max}. Leave it empty for this kind's.`;
+
 function laidOut({ name, width, height, scale }, sizes, directionsField) {
   return node(
     'div.start-fields',
@@ -103,13 +112,13 @@ export function projectFields() {
       directions.value = preset.directionSet;
       directionsField.hidden = preset.kind !== 'character';
     },
-    problem: () => sizeProblem([width, height]),
+    problem: () => sizeProblem([width, height]) ?? scaleProblem(scale),
     read: () => ({
       name: name.value.trim() || name.placeholder,
       // a field left empty takes the size the kind picked comes with
       width: sizeOr(width.value, usual.width),
       height: sizeOr(height.value, usual.height),
-      scale: wholeNumber(scale.value, { min: 1, max: 32 }),
+      scale: wholeNumber(scale.value.trim(), { ...SCALE_LIMITS, fallback: usual.scale }),
       directionSet: directions.value,
     }),
   };

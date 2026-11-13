@@ -2,6 +2,7 @@ import { icon, node, replace } from './dom.js';
 import { PANELS, openPanel } from './panels.js';
 import { panelHead } from './panel-sheet.js';
 import { toHex } from '../model/sprite.js';
+import { watchBelow } from './more-behind.js';
 
 const OWN_WAY_IN = ['colours', 'tools'];
 
@@ -79,6 +80,8 @@ export function renderDock(el, app) {
     panels.map((panel) => tab(app, panel, open)),
     moreButton(app, panels, open),
   );
+  // on the shortest phone on its side the last tab is past the screen's foot: a strip says so
+  watchBelow(el);
   // the top of each sheet, the frames' too, says which panel is open
   frame.querySelectorAll('.panel-grab').forEach((head) => replace(head, panelHead(app)));
 }

@@ -28,6 +28,7 @@ export function watchKeyboard() {
 
     up = covered;
     root.style.setProperty('--keyboard', `${covered}px`);
+    root.dataset.keys = covered ? 'up' : '';
 
     // the window is shorter now: the field being typed in stays in sight inside it
     if (covered) {

@@ -13,6 +13,8 @@ import { blankCopy } from '../../model/cast.js';
 import { projectFileText, readProjectFile } from '../../store/project-file.js';
 import { savePreset } from '../../store/presets.js';
 import { folderOf } from '../../store/folders.js';
+import { namesBesides } from '../../store/projects.js';
+import { freeName } from '../../model/free-name.js';
 import { inWords } from '../../model/told.js';
 
 const LIKE_THIS =
@@ -113,7 +115,12 @@ function renameField({ app, redraw }) {
       }
     },
     onchange: (event) => {
-      const name = event.target.value.trim() || project.name;
+      // a name another project has is numbered, as a copy's is: two of one name could not be
+      // told apart, in the list or in their downloads
+      const name = freeName(
+        event.target.value.trim() || project.name,
+        namesBesides(app.index, project.id),
+      );
 
       // drawn again only once the click that took the focus has landed on what it was for
       afterPress(() => {

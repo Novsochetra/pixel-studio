@@ -159,6 +159,17 @@ check(
     (await page.locator('.sheet').count()) === 1,
   'a project that is not open is renamed on its row, the open one left as it is',
 );
+
+// Enter with the name left as it was pressed the row's Open with the same key: the project was
+// opened and the window shut
+await page.locator('.project-row', { hasText: 'Renamed here' }).locator('.row-more').click();
+await page.getByRole('menuitem', { name: 'Rename', exact: true }).click();
+await page.keyboard.press('Enter');
+await page.waitForTimeout(600);
+check(
+  (await wordmark()) === leftOpen && (await page.locator('.sheet').count()) === 1,
+  'Enter on a name left as it was ends the rename, and opens nothing',
+);
 await page.locator('.project-row', { hasText: 'Renamed here' }).locator('.row-more').click();
 await page.getByRole('menuitem', { name: 'Duplicate', exact: true }).click();
 await page.waitForTimeout(1500);

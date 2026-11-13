@@ -1,4 +1,5 @@
 import { buildSheet } from './sheet.js';
+import { saidWarning } from './said-warning.js';
 
 export const GAME_FOLDER = 'apps/web/games/naga-eleven';
 
@@ -50,7 +51,8 @@ export function manifestSource(results, settings, standHeight) {
 export function gamePack(project, settings, standHeight) {
   const results = project.animations.map((animation) => buildSheet(project, animation, settings));
   const warnings = results.flatMap((result) =>
-    result.warnings.map((warning) => `${result.name}: ${warning}`),
+    // said as the studio says the views, as the window and the message said them
+    result.warnings.map((warning) => `${result.name}: ${saidWarning(project, result, warning)}`),
   );
   const readme = [
     'Pixel Clean Studio game pack',

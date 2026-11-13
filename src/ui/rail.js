@@ -2,6 +2,7 @@ import { node, icon, replace, toast } from './dom.js';
 import { toolName, toolSaid, toolsFor } from './tool-list.js';
 import { forHands } from './platform-keys.js';
 import { flipCurrent } from './actions.js';
+import { watchBelow } from './more-behind.js';
 
 // a finger has no pointer to hover for a tool's name: picking the tool says what it does
 function pickTool(app, tool) {
@@ -123,4 +124,5 @@ export function renderRail(el, app) {
 
   el.dataset.tool = state.tool;
   watchTurns(el);
+  watchBelow(el);
 }
