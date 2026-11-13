@@ -1,5 +1,5 @@
 import { node } from '../dom.js';
-import { frameCount } from '../../model/frames.js';
+import { frameCount, hasArt } from '../../model/frames.js';
 import { viewName } from '../../model/kinds.js';
 
 function viewPicker(item, project, animation) {
@@ -21,9 +21,21 @@ function viewPicker(item, project, animation) {
   );
 }
 
+// A frame that holds art says so: put there, the cleaned picture took the place of what was
+// drawn, and nothing in the row had said it would.
+function frameWords(animation, direction, index) {
+  const frame = animation.directions[direction]?.frames[index];
+
+  return frame && hasArt(frame) ? `Frame ${index + 1} · replaces its art` : `Frame ${index + 1}`;
+}
+
 function framePicker(item, animation) {
   const frames = Array.from({ length: frameCount(animation) }, (_, i) =>
-    node('option', { value: String(i), selected: item.placement === String(i) }, `Frame ${i + 1}`),
+    node(
+      'option',
+      { value: String(i), selected: item.placement === String(i) },
+      frameWords(animation, item.direction, i),
+    ),
   );
 
   return node(

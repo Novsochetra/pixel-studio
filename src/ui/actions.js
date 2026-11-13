@@ -139,7 +139,7 @@ export function settleAt(state) {
 
 // An undoable change to frames, layers or animations: `mutate` returns where to go after it.
 export function restructure(app, label, mutate) {
-  app.store.together(() => {
+  return app.store.together(() => {
     const { state } = app.store;
     const before = snapshotAnimations(state.project.animations);
     const from = placeOf(state);
@@ -154,6 +154,8 @@ export function restructure(app, label, mutate) {
     }
 
     app.store.touch('animations');
+
+    return changed;
   });
 }
 
@@ -196,11 +198,8 @@ export function replaceDirectionArt(app, { direction, frame }, sprite, label) {
 }
 
 // to another animation, view, frame or layer ({ animation, direction, frame, layer })
-export function goTo(app, place) {
-  const { state } = app.store;
-
-  goToSettled(app, settleAt({ ...state, at: { ...state.at, ...place } }));
-}
+export const goTo = (app, place) =>
+  goToSettled(app, settleAt({ ...app.store.state, at: { ...app.store.state.at, ...place } }));
 
 export const selectDirection = (app, direction) => goTo(app, { direction });
 

@@ -406,6 +406,19 @@
     inset: -2px -3px;
   }
 
+  /* each toggle's reach meets the next one's in the middle of the gap: over 4px, they took a
+     pixel of each other's, and on the narrowest phone each was 38px to press. Only between two
+     toggles: a wider gap everywhere sent the frame rate to a row of its own there. */
+  :root[data-layout='compact'] .grid-bar .icon-toggle + .icon-toggle {
+    margin-left: 2px;
+  }
+
+  /* The frame's menu is drawn small in its frame's corner on the shortest phones, and reaches
+     into the frame, not out of it, for a finger's 40px: the room out of it is the next frame's. */
+  :root[data-layout='compact'] .cell-more::after {
+    inset: -4px -4px -18px -18px;
+  }
+
   /* each button's reach meets the next one's in the middle of the gap: over a 2px gap, a press
      beside Undo was Redo's */
   :root[data-layout='compact'] .toolbar .group {

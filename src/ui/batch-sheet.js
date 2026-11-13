@@ -10,6 +10,8 @@ import { decodeImage } from '../io/images.js';
 import { isPose, referenceOf } from '../model/reference.js';
 import { placementOf, viewName } from '../model/kinds.js';
 import { inWords } from '../model/told.js';
+import { keepFocus } from './keep-focus.js';
+import { readyForKeys } from './import/import-run.js';
 
 // characters are matched to the reference, later frames keeping their own pixel size; anything
 // else is cleaned on its own and placed as its kind stands
@@ -131,20 +133,26 @@ async function cleanEach(state, items, { draw, accept, scales }) {
   }
 
   accept.disabled = !items.some((item) => item.sprite);
+  readyForKeys(accept);
 }
 
 function showBatch(app, files, leftOut) {
   const { state } = app.store;
   const animation = currentAnimation(state);
   const title = `Clean ${files.length === 1 ? '1 image' : `${files.length} images`}`;
-  const sheet = openSheet(title, null, { wide: true });
+  // the keys start on the window, and come to Use them all when the cleaning is done: on the
+  // first row, they fell to nothing as the rows were drawn again, and Tab then Enter closed the
+  // window and threw the cleaning away
+  const sheet = openSheet(title, null, { wide: true, focusField: 'window' });
   const list = node('div.view-list');
   const items = batchItems(state, files);
   const accept = node('button.btn.primary', { disabled: true }, 'Use them all');
   const draw = () =>
-    replace(
-      list,
-      items.map((item) => batchRow(item, state.project, animation)),
+    keepFocus(list, () =>
+      replace(
+        list,
+        items.map((item) => batchRow(item, state.project, animation)),
+      ),
     );
   const scales = { ...state.project.cleanScales };
   const run = () => cleanEach(state, items, { draw, accept, scales });

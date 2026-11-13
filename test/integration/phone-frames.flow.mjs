@@ -23,6 +23,46 @@ check(
 );
 await page.screenshot({ path: `${shots}/phone-frames-small.png` });
 
+// Drawn small to keep the rows, the frame's menu and the toggles beside the views took a
+// finger's press over 34 and 38px: walked out from each, a press is theirs over 40px (less
+// the pixel a walk of whole pixels loses)
+const shortReach = await page.evaluate(() => {
+  const reach = (control) => {
+    const drawn = control.getBoundingClientRect();
+    const mine = (x, y) => document.elementFromPoint(x, y)?.closest('button') === control;
+    const edges = { left: drawn.left, right: drawn.right, top: drawn.top, bottom: drawn.bottom };
+    const middle = () => [(edges.left + edges.right) / 2, (edges.top + edges.bottom) / 2];
+
+    while (mine(edges.left - 1, middle()[1])) {
+      edges.left -= 1;
+    }
+
+    while (mine(edges.right + 1, middle()[1])) {
+      edges.right += 1;
+    }
+
+    while (mine(middle()[0], edges.top - 1)) {
+      edges.top -= 1;
+    }
+
+    while (mine(middle()[0], edges.bottom + 1)) {
+      edges.bottom += 1;
+    }
+
+    return Math.min(edges.right - edges.left, edges.bottom - edges.top);
+  };
+
+  return [...document.querySelectorAll('.grid-bar .icon-toggle, .cell-more')]
+    .filter((control) => control.offsetParent)
+    .filter((control) => reach(control) < 39)
+    .map((control) => control.getAttribute('aria-label'));
+});
+
+check(
+  shortReach.length === 0,
+  `on the narrowest phone each toggle and frame menu is a finger's press (${shortReach.join(', ')})`,
+);
+
 // beside the frame rate the tabs had room for one short name: the rate is a row down here
 const strip = await box('.grid-tabs-bar');
 

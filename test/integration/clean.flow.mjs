@@ -139,6 +139,12 @@ await page.waitForFunction(
 await page.waitForFunction(() => !document.querySelector('.sheet .btn.primary').disabled, null, {
   timeout: 60000,
 });
+// the keys fell to nothing as the rows were drawn again, and Tab then Enter closed the window,
+// throwing the cleaning away: they come to Use them all when it is ready
+check(
+  (await page.evaluate(() => document.activeElement.textContent)) === 'Use them all',
+  'when the cleaning is done the keys are on Use them all',
+);
 await page.getByRole('button', { name: 'Use them all' }).click();
 await page.waitForTimeout(300);
 check(!(await page.locator('.sheet').count()), 'and are placed together');

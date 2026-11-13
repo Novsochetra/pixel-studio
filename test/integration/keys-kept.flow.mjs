@@ -39,6 +39,14 @@ check(
   Number(await page.inputValue('#fps')) === fps + 3,
   'three arrow presses on the frame rate are three steps',
 );
+// each arrow was a step of its own to undo: a run of them is one, as a run of nudges is
+await page.keyboard.press('Escape');
+await page.waitForTimeout(200);
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(150);
+check(Number(await page.inputValue('#fps')) === fps, 'and one undo takes the run of them back');
+await page.keyboard.press('Meta+Shift+z');
+await page.waitForTimeout(150);
 
 await page.locator('#rail button').nth(2).focus();
 await page.keyboard.press('Enter');
@@ -175,5 +183,26 @@ check(
   'the place picked for the art in Canvas size keeps the keys',
 );
 await page.keyboard.press('Escape');
+
+// Deleted with Enter, a layer handed the keys to the next layer's Delete: Enter after Enter
+// deleted layer after layer, nothing asked
+await page.getByRole('button', { name: 'New layer' }).click();
+await page.keyboard.press('Escape');
+await page.getByRole('button', { name: 'New layer' }).click();
+await page.keyboard.press('Escape');
+await page.locator('.layer-row').first().click();
+await page.keyboard.press('Escape');
+const layersBefore = await page.locator('.layer-row').count();
+
+await page.locator('.layer-bar button[aria-label^="Delete "]').focus();
+await page.keyboard.press('Enter');
+await page.waitForTimeout(200);
+check(
+  (await page.locator('.layer-row').count()) === layersBefore - 1 &&
+    !/^(Delete|Merge|Clear) /.test(await focused()) &&
+    (await focused()) !== 'the page',
+  `Enter on Delete layer leaves the keys on a control that deletes nothing (${await focused()})`,
+);
+await page.keyboard.press('Meta+z');
 
 await finish();

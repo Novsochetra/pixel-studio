@@ -48,9 +48,15 @@ function newLayer(app, active) {
 
 // An icon button; its name shows on hover and is read out. A phone has no hover: there the
 // button says what it does, in a word (`said`).
-function tool(iconName, name, onclick, { disabled = false, title = name, said = null } = {}) {
+// `acts`: it merges, clears or deletes, so the keys are never handed to it by a guess (keep-focus.js)
+function tool(
+  iconName,
+  name,
+  onclick,
+  { disabled = false, title = name, said = null, acts = false } = {},
+) {
   return node(
-    `button.btn.quiet${said ? '' : '.icon-only'}`,
+    `button.btn.quiet${said ? '' : '.icon-only'}${acts ? '.acts' : ''}`,
     { onclick, title, 'aria-label': name, disabled },
     icon(iconName),
     said,
@@ -84,12 +90,14 @@ function mergeTool(app, { active, group }, words) {
       disabled: !can,
       title: can ? undefined : 'Only layers of art that are shown merge: show them all first',
       said: words.merge && 'Merge',
+      acts: true,
     });
   }
 
   return tool('merge-down', 'Merge down into the layer below', () => mergeDownFrom(app, active), {
     disabled: !layerBelow(frameOf(app.store.state), active.key),
     said: words.merge,
+    acts: true,
   });
 }
 
@@ -125,10 +133,12 @@ function removeTools(app, group, words) {
     tool('eraser', `Clear ${named} in this frame`, () => clearLayers(app, group), {
       disabled: group.every((layer) => layer.kind === 'reference'),
       said: words.clear,
+      acts: true,
     }),
     tool('trash', `Delete ${named}`, () => deleteGroup(app, group), {
       title: `Delete ${named} from this frame`,
       said: words.trash,
+      acts: true,
     }),
   );
 }

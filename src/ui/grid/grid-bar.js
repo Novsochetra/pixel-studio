@@ -34,14 +34,24 @@ function toggle(app, { key, iconName, label, title, said = title }) {
   );
 }
 
+// A run of changes to the rate, one on another's heels (the arrows, key after key), is one step
+// to undo, as a run of nudges is: each arrow was a step of its own.
+const RATE_RUN_MS = 1000;
+
+// whether a change to the rate now goes on from the last one
+const inRateRun = (app) =>
+  app.history.nextUndo === 'Frame rate' &&
+  performance.now() - (app.rateChangedAt ?? -Infinity) < RATE_RUN_MS;
+
 function fpsField(app) {
   const animation = currentAnimation(app.store.state);
 
   // the frame rate is tuned while watching, so playing goes on at the new rate
   const setFps = (event) => {
     const playback = app.playback;
+    const run = inRateRun(app);
 
-    restructure(app, 'Frame rate', (draft) => {
+    const changed = restructure(app, 'Frame rate', (draft) => {
       // what cannot be read keeps the rate there was, not a rate nobody asked for
       currentAnimation(draft).fps = wholeNumber(event.target.value, {
         min: 1,
@@ -49,6 +59,12 @@ function fpsField(app) {
         fallback: animation.fps,
       });
     });
+
+    if (run && changed) {
+      app.history.joinLast();
+    }
+
+    app.rateChangedAt = performance.now();
 
     if (playback && !app.playback) {
       togglePlayback(app, playback);

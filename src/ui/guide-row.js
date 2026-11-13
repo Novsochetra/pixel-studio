@@ -111,7 +111,7 @@ export function guideRow(app, guide) {
       }),
       rowField(project, guide, update),
       node(
-        'button.btn.quiet.icon-only',
+        'button.btn.quiet.icon-only.acts',
         { 'aria-label': `Remove ${guide.name}`, title: 'Remove guide', onclick: remove },
         icon('close'),
       ),

@@ -281,7 +281,7 @@
      its end, with the chevron still in sight: cut by the button, it lost both its ends. */
   :root[data-layout='compact'] .views-pick {
     justify-content: flex-start;
-    max-width: calc(100% - 185px);
+    max-width: calc(100% - 189px);
   }
 
   :root[data-layout='compact'] .views-pick > span {

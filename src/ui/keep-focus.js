@@ -62,9 +62,26 @@ export function standIn(off) {
   return stand;
 }
 
-// Where the control stood is the last guess, and never a button that applies or deletes: the
-// keys came to rest on Apply to all, and the Enter meant for a palette recoloured every frame.
-const besides = (control) => (control?.matches('.primary, .danger') ? null : control);
+// A guess by where the control stood is never a button that applies or deletes (`.acts` marks a
+// quiet one): the keys came to rest on Apply to all, and the Enter meant for a palette recoloured
+// every frame; on the next layer's Delete, Enter after Enter deleted layer after layer.
+const ACTS = '.primary, .danger, .acts';
+
+// the control nearest where the one used stood that does no such thing
+function besides(controls, index) {
+  const safe = controls.filter((control) => !control.matches(ACTS));
+
+  return safe.length ? nearest(safe, controls, Math.min(index, controls.length - 1)) : null;
+}
+
+// The control standing where the one used stood, of its kind, unless it deleted (`place.acted`):
+// Play stands where it was as Pause, and keeps the keys, though it is the bar's main button.
+const inPlaceOf = (inPlace, { controls, place }) =>
+  controls.includes(inPlace) &&
+  inPlace.tagName === place.tag &&
+  !(place.acted && inPlace.matches('.acts'))
+    ? inPlace
+    : null;
 
 // the control now switched off that the keys were on: the one of its name, or the one in its
 // place when what it did named it anew (an outline's row, its count now 0)
@@ -86,7 +103,11 @@ function nowAt(place, root) {
 
   const within = (place.region && document.getElementById(place.region)) || root;
   const controls = focusables(within);
-  const named = controls.filter((control) => isNamed(control, place));
+  // a button that deleted is not found again by its name: two layers of one name, and Enter on
+  // the first's Delete went on to the second's
+  const named = controls.filter(
+    (control) => isNamed(control, place) && !(place.acted && control.matches('.acts')),
+  );
 
   if (named.length) {
     return nearest(named, controls, place.index);
@@ -99,19 +120,33 @@ function nowAt(place, root) {
     return standIn(off);
   }
 
-  return controls.includes(inPlace) && inPlace.tagName === place.tag
-    ? inPlace
-    : besides(controls[Math.min(place.index, controls.length - 1)]);
+  return inPlaceOf(inPlace, { controls, place }) ?? besides(controls, place.index);
 }
 
 // The bars are drawn again at every change, and the control that made the change goes with the
 // old ones: the keys are handed to the one now in its place, so Enter, the arrows and Tab go on
 // from there. Only for someone using the keys (:focus-visible): after a click the keys stay the
 // editor's own, and Space pans.
+// the button last pressed: one that deletes hands the keys on as it goes, never to its like
+let pressed = null;
+
+function watchPressed() {
+  if (pressed === null) {
+    pressed = undefined;
+    document.addEventListener(
+      'click',
+      ({ target }) => (pressed = target.closest?.('button')),
+      true,
+    );
+  }
+}
+
 export function keepFocus(root, draw) {
   const held = document.activeElement;
   const keeps = held && root.contains(held) && held.matches(':focus-visible') && !done.has(held);
-  const place = keeps ? placeOf(held, root) : null;
+  const place = keeps ? { ...placeOf(held, root), acted: held === pressed } : null;
+
+  watchPressed();
 
   draw();
 
