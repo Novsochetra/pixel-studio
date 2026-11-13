@@ -103,7 +103,8 @@ Where a file goes:
 
 `server/` is the studio's own server (Node 22, deployed on Railway: `docs/deploy-railway.md`): it
 sends `dist/` and keeps accounts and their saved work. `server/src/` holds `accounts/` (passwords,
-sessions, sign in), `docs/` (the saved documents, the browser's store keys), `files/` (the S3
+sessions, sign in, the Claude Code key), `docs/` (the saved documents, the browser's store keys),
+`mcp/` (MCP at `/mcp` on an account's projects), `files/` (the S3
 bucket of the layers' pictures), `db/` (Postgres, PGlite in memory without `DATABASE_URL`, and
 the migrations: a new table or column is a new migration, never a change to an old one), `http/`
 and `security/`; its tests are in `server/test/`, over PGlite and files in memory. The page
@@ -381,6 +382,15 @@ project file "Save project file" writes, with the studio's own plain logic (`src
 canvas there. A tool is `{ name, description, inputSchema, run }`; `run` returns what to say, and
 throws a sentence when it cannot, which the caller is told as the tool's result. A new thing a
 project can hold that Claude Code should reach gets a tool, and a test in `tools/mcp/test/`.
+
+The tools act on a shelf, where projects are kept (`toolsFor(shelf)` in `tools/mcp/tools.js`):
+files on this machine (`file-shelf.js`, over stdio), or an account's saved work on the studio's
+server (`server/src/mcp/account-shelf.js`, at `/mcp` over HTTP, the caller signed in by the key
+Projects → Claude Code makes). A tool that reads or writes a file of the caller's (`clean_image`,
+an `out`) is for the file shelf alone: on the server it is out of the caller's reach. The server
+writes a project as the page saves it (`project-docs.js`, as `src/store/saver.js`), so the page
+opens it; a new tool is on both shelves, and tested on the server too (`server/test/mcp-*.test.js`).
+The Docker image keeps `src/` and `tools/mcp/` for it.
 
 ## Testing
 

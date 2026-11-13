@@ -3,7 +3,10 @@
 /dist
 /shots
 /test
-/tools
+# the server's /mcp runs tools/mcp: the rest of tools/ is for building and checking
+/tools/*
+!/tools/mcp
+/tools/mcp/test
 /docs
 /fixtures
 /.railway

@@ -1,7 +1,5 @@
-import { existsSync } from 'node:fs';
-import { PATH, WHERE, schema, text } from './answers.js';
+import { WHERE, projectSchema, schema, text } from './answers.js';
 import { locate } from './locate.js';
-import { readProject, writeProject } from './project-files.js';
 import { leftOut, paintPixels, paintRows } from './text-grid.js';
 import { startAnimation } from '../../src/model/animations.js';
 import { addFrame, frameCount } from '../../src/model/frames.js';
@@ -11,31 +9,28 @@ import { addLayer } from '../../src/model/structure.js';
 import { CANVAS_LIMITS } from '../../src/model/canvas-size.js';
 import { freeName } from '../../src/model/free-name.js';
 
-// a change is read, made and written back: the file is the project
-function changed(path, change) {
-  const project = readProject(path);
+async function changed(shelf, args, change) {
+  const project = await shelf.read(args);
   const said = change(project);
 
-  writeProject(path, project);
+  await shelf.write(args, project);
 
   return [text(said)];
 }
 
-function create({ path, overwrite = false, kind = 'character', ...options }) {
-  if (existsSync(path) && !overwrite) {
-    throw new Error(`${path} is there already. Pass overwrite: true to start it again.`);
-  }
+async function create(shelf, { kind = 'character', name, width, height, ...where }) {
+  const project = newProject({ kind, name, width, height });
+  const at = await shelf.make(where, project);
 
-  const project = newProject({ kind, ...options });
-  const { width, height } = project.canvas;
-
-  writeProject(path, project);
-
-  return [text(`Made ${project.name}: ${project.kind}, ${width}×${height}, at ${path}`)];
+  return [
+    text(
+      `Made ${project.name}: ${project.kind}, ${project.canvas.width}×${project.canvas.height}, ${at}`,
+    ),
+  ];
 }
 
-function setPixels({ path, pixels, rows, palette, at, ...where }) {
-  return changed(path, (project) => {
+function setPixels(shelf, { pixels, rows, palette, at, ...where }) {
+  return changed(shelf, where, (project) => {
     const { layer } = locate(project, where);
     const count =
       (pixels ? paintPixels(layer.sprite, pixels) : 0) +
@@ -47,8 +42,8 @@ function setPixels({ path, pixels, rows, palette, at, ...where }) {
   });
 }
 
-function addFrameAfter({ path, copy = false, ...where }) {
-  return changed(path, (project) => {
+function addFrameAfter(shelf, { copy = false, ...where }) {
+  return changed(shelf, where, (project) => {
     const { animation, index } = locate(project, where);
     const after = where.frame ? index : frameCount(animation) - 1;
     const made = addFrame(project, animation, after, copy);
@@ -58,8 +53,8 @@ function addFrameAfter({ path, copy = false, ...where }) {
   });
 }
 
-function addLayerAbove({ path, name, ...where }) {
-  return changed(path, (project) => {
+function addLayerAbove(shelf, { name, ...where }) {
+  return changed(shelf, where, (project) => {
     const { frame } = locate(project, where);
     // a name the frame has already is numbered: two of one name, and a layer named was the first
     const free = freeName(
@@ -73,8 +68,8 @@ function addLayerAbove({ path, name, ...where }) {
   });
 }
 
-function addAnimation({ path, name, frames = 1, fps = 8 }) {
-  return changed(path, (project) => {
+function addAnimation(shelf, { name, frames = 1, fps = 8, ...where }) {
+  return changed(shelf, where, (project) => {
     const made = startAnimation(project, project.animations[0], { name, frames, fps });
 
     return `Made ${made.name}: ${frames} empty frames in each view, ${fps} fps`;
@@ -117,53 +112,58 @@ const ROWS = {
   },
 };
 
-export const EDIT_TOOLS = [
-  {
-    name: 'new_project',
-    description:
-      'Start a project file the studio can open ("Open a project file…"): a character, an object, tiles, an effect or an icon, with one empty frame.',
-    inputSchema: schema({
-      path: PATH,
+const run = (shelf, change) => (args) => change(shelf, args);
+
+const newProjectTool = (shelf) => ({
+  name: 'new_project',
+  description: `Start a project ${shelf.madeWhere}: a character, an object, tiles, an effect or an icon, with one empty frame.`,
+  inputSchema: schema(
+    {
+      ...shelf.makeArgs.properties,
       name: { type: 'string' },
       kind: { type: 'string', enum: Object.keys(KINDS), description: 'Default: character.' },
       width: { type: 'integer', ...SIDE },
       height: { type: 'integer', ...SIDE },
-      overwrite: { type: 'boolean' },
-    }),
-    run: create,
-  },
+    },
+    shelf.makeArgs.required,
+  ),
+  run: run(shelf, create),
+});
+
+export const editTools = (shelf) => [
+  newProjectTool(shelf),
   {
     name: 'set_pixels',
     description:
       'Draw on one layer of one frame: single pixels, rows of letters with a palette, or both. Read the frame first, and read it again after to see the result.',
-    inputSchema: schema({ path: PATH, ...WHERE, pixels: PIXELS, ...ROWS }),
-    run: setPixels,
+    inputSchema: projectSchema(shelf, { ...WHERE, pixels: PIXELS, ...ROWS }),
+    run: run(shelf, setPixels),
   },
   {
     name: 'add_frame',
     description:
       'A new frame in every view of an animation, after the frame named (default: at the end): empty, or a copy of that frame to change.',
-    inputSchema: schema({ path: PATH, ...WHERE, copy: { type: 'boolean' } }),
-    run: addFrameAfter,
+    inputSchema: projectSchema(shelf, { ...WHERE, copy: { type: 'boolean' } }),
+    run: run(shelf, addFrameAfter),
   },
   {
     name: 'add_layer',
     description: 'A new empty layer of art on top of one frame, to draw a part on its own.',
-    inputSchema: schema({ path: PATH, ...WHERE, name: { type: 'string' } }, ['path', 'name']),
-    run: addLayerAbove,
+    inputSchema: projectSchema(shelf, { ...WHERE, name: { type: 'string' } }, ['name']),
+    run: run(shelf, addLayerAbove),
   },
   {
     name: 'add_animation',
     description: 'A new animation with the project’s views, its frames empty.',
-    inputSchema: schema(
+    inputSchema: projectSchema(
+      shelf,
       {
-        path: PATH,
         name: { type: 'string' },
         frames: { type: 'integer', minimum: 1, maximum: 64 },
         fps: { type: 'integer', minimum: 1, maximum: 30 },
       },
-      ['path', 'name'],
+      ['name'],
     ),
-    run: addAnimation,
+    run: run(shelf, addAnimation),
   },
 ];

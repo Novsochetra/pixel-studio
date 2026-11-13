@@ -34,6 +34,17 @@
   border-bottom-left-radius: inherit;
 }
 
+/* a key is one long word: broken anywhere, all of it is in sight */
+.list-rows > textarea.input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  background: transparent;
+  resize: none;
+  word-break: break-all;
+}
+
 .list-row {
   position: relative;
   display: flex;

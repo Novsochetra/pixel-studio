@@ -1,8 +1,7 @@
 import { writeFileSync } from 'node:fs';
-import { PATH, WHERE, picture, schema, text } from './answers.js';
+import { WHERE, picture, projectSchema, text } from './answers.js';
 import { locate } from './locate.js';
 import { encodePng } from './png.js';
-import { readProject } from './project-files.js';
 import { asText, enlarged } from './text-grid.js';
 import { compositeFrame } from '../../src/model/composite.js';
 import { allLayers, directionLabel } from '../../src/model/project.js';
@@ -35,8 +34,7 @@ function coloursSaid(project) {
   return most.map(([color, count]) => `${toHex(color)} ×${count}`).join(', ') || 'none yet';
 }
 
-function describe({ path }) {
-  const project = readProject(path);
+function describe(project) {
   const { width, height } = project.canvas;
 
   return [
@@ -66,8 +64,8 @@ function gridSaid(sprite) {
   return text(`palette: ${legend.join(' ') || '(no colours)'}  .=clear\n${rows.join('\n')}`);
 }
 
-function readFrame({ path, as = 'both', out, ...where }) {
-  const sprite = spriteAt(readProject(path), where);
+function readFrame(project, { as = 'both', out, ...where }) {
+  const sprite = spriteAt(project, where);
 
   if (out) {
     writeFileSync(out, encodePng(sprite));
@@ -80,24 +78,28 @@ function readFrame({ path, as = 'both', out, ...where }) {
   ].filter(Boolean);
 }
 
-export const READ_TOOLS = [
+// a file written on the studio's server would be out of the caller's reach
+const OUT = {
+  out: { type: 'string', description: 'Also save the frame, at its own size, as this PNG.' },
+};
+
+export const readTools = (shelf) => [
   {
     name: 'describe_project',
     description:
-      'What a Pixel Clean Studio project file holds: its kind and canvas, each animation with its views, frame counts and layers, and its colours. Call this first.',
-    inputSchema: schema({ path: PATH }),
-    run: describe,
+      'What a Pixel Clean Studio project holds: its kind and canvas, each animation with its views, frame counts and layers, and its colours. Call this first.',
+    inputSchema: projectSchema(shelf, {}),
+    run: async (args) => describe(await shelf.read(args)),
   },
   {
     name: 'read_frame',
     description:
       'One frame of a project as a picture (enlarged, to look at) and as a grid of letters with their colours (exact, to edit from). Names a layer to read that layer alone; else the frame as it shows.',
-    inputSchema: schema({
-      path: PATH,
+    inputSchema: projectSchema(shelf, {
       ...WHERE,
       as: { type: 'string', enum: ['both', 'image', 'text'], description: 'Default: both.' },
-      out: { type: 'string', description: 'Also save the frame, at its own size, as this PNG.' },
+      ...(shelf.savesFiles ? OUT : {}),
     }),
-    run: readFrame,
+    run: async (args) => readFrame(await shelf.read(args), args),
   },
 ];

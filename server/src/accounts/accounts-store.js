@@ -43,7 +43,8 @@ export function createAccountsStore(database) {
   };
 }
 
-// a new password ends every session the old one began
+// a new password ends every session the old one began, and the key Claude Code was given: one
+// who had the account's password may have made it
 async function setPassword(database, email, passwordHash) {
   const { rows } = await database.query(
     'UPDATE users SET password_hash = $2 WHERE email = $1 RETURNING id::text',
@@ -52,6 +53,7 @@ async function setPassword(database, email, passwordHash) {
 
   if (rows[0]) {
     await database.query('DELETE FROM sessions WHERE user_id = $1', [rows[0].id]);
+    await database.query('DELETE FROM mcp_keys WHERE user_id = $1', [rows[0].id]);
   }
 
   return Boolean(rows[0]);

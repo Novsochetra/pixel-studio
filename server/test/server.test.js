@@ -28,7 +28,7 @@ test('migrations run once, and again find nothing to do', async (context) => {
 
   context.after(() => database.close());
 
-  assert.deepEqual(await migrate(database), ['0001_accounts', '0002_documents']);
+  assert.deepEqual(await migrate(database), ['0001_accounts', '0002_documents', '0003_mcp_keys']);
   assert.deepEqual(await migrate(database), []);
 });
 

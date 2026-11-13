@@ -158,6 +158,9 @@ moves to the bucket the next time its layer is saved.
 - In another browser (or a private window), sign in to the same account: the same project opens,
   stroke and all.
 - Projects (the name, top left) shows "Signed in as" and Sign out.
+- Claude Code reaches the account: Projects → Claude Code → **Make a key**, run the command it
+  gives, then ask Claude Code to "list my pixel studio projects". It lists them. The key is kept
+  as a hash in `mcp_keys` (migration `0003_mcp_keys`), and Turn off removes it.
 - From another site the API refuses: in the browser console on any other page,
   `fetch('https://<name>.up.railway.app/api/account', { method: 'POST' })` fails.
 
@@ -179,7 +182,8 @@ moves to the bucket the next time its layer is saved.
   It asks for the new password, sets it, and signs that account out everywhere. Tell them the new
   one.
 
-- **Deleting an account.** `DELETE FROM users WHERE email = '…';` takes its sessions and documents
+- **Deleting an account.** `DELETE FROM users WHERE email = '…';` takes its sessions, its
+  Claude Code key and documents
   with it. Its pictures stay in the bucket under `users/<id>/`: delete that folder in S3 too.
 
 ## The GitHub Pages copy

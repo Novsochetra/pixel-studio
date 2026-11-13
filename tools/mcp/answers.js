@@ -18,14 +18,12 @@ export const WHERE = {
   layer: { type: 'string', description: 'Layer name. Default: the top layer of art.' },
 };
 
-export const PATH = {
-  type: 'string',
-  description: 'Path of the project file, as the studio’s "Save project file" writes it (.json).',
-};
-
-export const schema = (properties, required = ['path']) => ({
+export const schema = (properties, required) => ({
   type: 'object',
   properties,
   required,
   additionalProperties: false,
 });
+
+export const projectSchema = (shelf, properties, required = []) =>
+  schema({ [shelf.ref.name]: shelf.ref.spec, ...properties }, [shelf.ref.name, ...required]);

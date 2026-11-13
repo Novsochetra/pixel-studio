@@ -170,3 +170,20 @@ Its tools:
 
 Ask Claude Code, for example, to "make a 32×32 icon of a gem in `gem.json` and export its sheet",
 then open `gem.json` in the studio to go on by hand.
+
+### On the studio's server: your account's projects
+
+The studio's own server (`server/`, on Railway) answers MCP at `/mcp`, on the projects saved in an
+account instead of files. In the studio: **Projects** → **Account** → **Claude Code** → **Make a
+key**. The window gives the command to run once, with the key in it:
+
+```bash
+claude mcp add --transport http --scope user pixel-studio https://<name>.up.railway.app/mcp --header "Authorization: Bearer psk_…"
+```
+
+The tools are the ones above, with `project` (a project's name) in place of `path`, and
+`list_projects` to start from. `export_sheet` hands the sheet back as a picture, and there is no
+`clean_image`: the server cannot read a file on your machine, so clean pictures in the studio.
+The studio reads a project from the server as it opens it: close the project in the studio while
+Claude Code changes it, or the studio saves over the change. A new key stops the last one, and
+**Turn off** stops it at once; a password set again stops it too.

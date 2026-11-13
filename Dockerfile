@@ -14,6 +14,9 @@ WORKDIR /app
 COPY --from=build /app/package.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/server ./server
+# /mcp edits saved projects with the studio's own plain logic and tools/mcp's tools
+COPY --from=build /app/src ./src
+COPY --from=build /app/tools/mcp ./tools/mcp
 COPY --from=build /app/dist ./dist
 USER node
 # node itself, not npm start, so the server hears Railway's SIGTERM

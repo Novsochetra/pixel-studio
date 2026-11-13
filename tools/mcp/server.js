@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { createInterface } from 'node:readline';
-import { answer } from './protocol.js';
+import { answer } from './local.js';
 
 // Claude Code starts this and talks to it over its input and output, a message a line
 // (.mcp.json at the repo's root names it). Nothing else may be written to the output.
 const lines = createInterface({ input: process.stdin });
 
-lines.on('line', (line) => {
+lines.on('line', async (line) => {
   if (!line.trim()) {
     return;
   }
@@ -14,7 +14,7 @@ lines.on('line', (line) => {
   let reply;
 
   try {
-    reply = answer(JSON.parse(line));
+    reply = await answer(JSON.parse(line));
   } catch {
     reply = { jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } };
   }

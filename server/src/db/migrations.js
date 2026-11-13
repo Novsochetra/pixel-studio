@@ -35,4 +35,17 @@ export const MIGRATIONS = [
       )`,
     ],
   },
+  {
+    name: '0003_mcp_keys',
+    statements: [
+      // One key an account, for Claude Code to reach its saved work through /mcp. Only a hash of
+      // it is kept, as a session's is: a copy of the table reaches no one's work.
+      `CREATE TABLE mcp_keys (
+        user_id bigint PRIMARY KEY REFERENCES users (id) ON DELETE CASCADE,
+        key_hash text NOT NULL UNIQUE,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        last_used_at timestamptz
+      )`,
+    ],
+  },
 ];

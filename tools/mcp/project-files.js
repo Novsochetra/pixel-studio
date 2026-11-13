@@ -6,7 +6,7 @@ import { projectStructure } from '../../src/store/load.js';
 
 const PREFIX = 'data:image/png;base64,';
 
-function spriteOf(dataUrl) {
+export function spriteOfUrl(dataUrl) {
   const { width, height, data } = decodePng(Buffer.from(dataUrl.slice(PREFIX.length), 'base64'));
 
   return { width, height, pixels: new Uint8ClampedArray(data) };
@@ -33,17 +33,19 @@ export function readProject(path) {
   for (const { layer } of allLayers(file.project)) {
     const png = file.pngs?.[layer.id];
 
-    layer.sprite = png ? spriteOf(png) : null;
+    layer.sprite = png ? spriteOfUrl(png) : null;
   }
 
   return joinCuts(file.project);
 }
 
+export const pngUrl = (sprite) => PREFIX + encodePng(sprite).toString('base64');
+
 export function writeProject(path, project) {
   const pngs = {};
 
   for (const { layer } of allLayers(project)) {
-    pngs[layer.id] = layer.sprite ? PREFIX + encodePng(layer.sprite).toString('base64') : null;
+    pngs[layer.id] = layer.sprite ? pngUrl(layer.sprite) : null;
   }
 
   const file = { kind: 'pixel-clean-studio', version: 1, project: projectStructure(project), pngs };
