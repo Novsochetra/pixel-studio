@@ -2,7 +2,6 @@ import { node, toast } from './dom.js';
 import { openSheet } from './sheet.js';
 import { currentAnimation, referenceSprite, replaceDirectionArt } from './actions.js';
 import { keepVersion } from './versions-sheet.js';
-import { undo } from './undo.js';
 import { optionFields } from './import/import-options.js';
 import { runClean, shaped } from './import/import-run.js';
 import { scalesAfter } from './import/view-scale.js';
@@ -12,6 +11,7 @@ import { viewName } from '../model/kinds.js';
 import { frameAt } from '../model/project.js';
 import { hasArt } from '../model/frames.js';
 import { inWords } from '../model/told.js';
+import { cancelGrowth } from './import/keep-size.js';
 
 const NOT_AN_IMAGE = 'This file is not an image the browser can open. Try PNG, WebP or JPEG.';
 
@@ -44,14 +44,6 @@ function cleansAlone(state, direction, frame) {
     direction === referenceOf(project) && frame === 0 && firstWithIt === currentAnimation(state);
 
   return isThePose || project.kind !== 'character' || !isPose(referenceSprite(state));
-}
-
-// The canvas made larger for a picture goes back as the window is cancelled: Cancel left it
-// at the new size, with nothing put on it. Not once something else has been done since.
-function cancelGrowth(app, { grew, used }) {
-  if (grew && !used && app.history.nextUndo === 'Canvas size') {
-    undo(app);
-  }
 }
 
 function accept(job, place) {

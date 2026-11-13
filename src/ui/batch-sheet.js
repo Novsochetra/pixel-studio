@@ -1,80 +1,16 @@
 import { node, replace, toast } from './dom.js';
-import { openSheet, previewCanvas } from './sheet.js';
-import { currentAnimation, referenceSprite } from './actions.js';
+import { openSheet } from './sheet.js';
+import { currentAnimation } from './actions.js';
 import { keepVersion } from './versions-sheet.js';
+import { keepFocus } from './keep-focus.js';
 import { batchItems, placeAll } from './batch/batch-items.js';
 import { batchRow } from './batch/batch-row.js';
-import { cleanAtViewScale, scaleOf, scalesAfter } from './import/view-scale.js';
-import { cleanImage } from '../io/cleaner.js';
+import { batchGrowOffer } from './batch/batch-grow.js';
+import { cleanEach } from './batch/batch-clean.js';
+import { cancelGrowth } from './import/keep-size.js';
 import { decodeImage } from '../io/images.js';
-import { isPose, referenceOf } from '../model/reference.js';
-import { placementOf, viewName } from '../model/kinds.js';
-import { inWords } from '../model/told.js';
-import { keepFocus } from './keep-focus.js';
-import { readyForKeys } from './import/import-run.js';
-
-// characters are matched to the reference, later frames keeping their own pixel size; anything
-// else is cleaned on its own and placed as its kind stands
-function cleanOptions(project, item) {
-  if (project.kind !== 'character') {
-    return { alone: true, ...placementOf(project) };
-  }
-
-  return { keepScale: item.placement !== '0' };
-}
-
-// With no reference drawn yet, the batch's own image of the reference view is cleaned first, and
-// the others are matched to it; otherwise each would come out at its own size.
-function referenceFirst(state, items) {
-  const own = items.find((item) => item.direction === referenceOf(state.project));
-
-  if (isPose(referenceSprite(state)) || !own) {
-    return items;
-  }
-
-  return [own, ...items.filter((item) => item !== own)];
-}
-
-const becomesReference = (state, item, ref) =>
-  !isPose(ref) && Boolean(item.sprite) && item.direction === referenceOf(state.project);
-
-function statusText(report) {
-  const scaled = report.scaled ? `, scaled ${report.scaled.fy.toFixed(2)}×` : '';
-
-  return `${report.size[0]}×${report.size[1]} px${scaled}`;
-}
-
-// scales: each view's scale so far, this picture's own added to it when it was matched
-async function cleanOne(state, item, { ref, scales }) {
-  try {
-    const image = await decodeImage(item.file);
-    const like = { width: ref.width, height: ref.height, data: ref.pixels };
-    const result = await cleanAtViewScale(
-      (asked) => cleanImage(image, like, asked),
-      // an empty reference, or a sketch of a few pixels, has nothing to match: the image is
-      // cleaned alone, as its kind stands
-      isPose(ref)
-        ? cleanOptions(state.project, item)
-        : { alone: true, ...placementOf(state.project) },
-      scaleOf(scales, item.direction),
-    );
-
-    Object.assign(scales, scalesAfter(scales, item.direction, result.report));
-    item.sprite = {
-      width: result.width,
-      height: result.height,
-      pixels: new Uint8ClampedArray(result.pixels),
-    };
-    item.result = previewCanvas(item.sprite, state.project.guides, 1);
-    item.status = node('span.hint', {}, statusText(result.report));
-  } catch (error) {
-    item.status = node(
-      'span.hint',
-      { style: { color: 'var(--bad)' } },
-      `Could not clean: ${inWords(error, 'this picture could not be read')}`,
-    );
-  }
-}
+import { referenceOf } from '../model/reference.js';
+import { viewName } from '../model/kinds.js';
 
 function hintText(state) {
   const fill = `each view's images fill frames from frame ${state.at.frame + 1} on, in the order of their names.`;
@@ -120,63 +56,91 @@ export async function openBatchSheet(app, files) {
   }
 }
 
-// each image cleaned in turn, the list drawn again as each is done
-async function cleanEach(state, items, { draw, accept, scales }) {
-  let ref = referenceSprite(state);
+function drawRows(job) {
+  const animation = currentAnimation(job.state);
 
-  for (const item of referenceFirst(state, items)) {
-    item.status = node('span.hint', {}, 'Cleaning…');
-    draw();
-    await cleanOne(state, item, { ref, scales });
-    ref = becomesReference(state, item, ref) ? item.sprite : ref;
-    draw();
-  }
+  keepFocus(job.list, () =>
+    replace(
+      job.list,
+      job.items.map((item) => batchRow(item, job.state.project, animation)),
+    ),
+  );
+}
 
-  accept.disabled = !items.some((item) => item.sprite);
-  readyForKeys(accept);
+function runBatch(job) {
+  const { app, items, outcome } = job;
+
+  return cleanEach(job.state, items, job).then(() =>
+    replace(job.offer, batchGrowOffer(app, items, { outcome, cleanAgain: () => cleanAgain(job) })),
+  );
+}
+
+// on the larger canvas, every picture is cleaned again from the start
+function cleanAgain(job) {
+  job.items.forEach((item) => Object.assign(item, { sprite: null, result: null, status: null }));
+  job.scales = { ...job.app.store.state.project.cleanScales };
+  job.accept.disabled = true;
+  replace(job.offer);
+  job.draw();
+  runBatch(job);
+}
+
+function acceptAll(job) {
+  const { app, files, items } = job;
+
+  job.outcome.used = true;
+  keepVersion(app, `Before cleaning ${files.length} images`);
+  // before the step, so it is saved with it
+  app.store.state.project.cleanScales = job.scales;
+  placeAll(
+    app,
+    items.filter((item) => item.sprite),
+  );
+  toast('Cleaned images placed. A version from just before is in History.');
+  job.sheet.close();
 }
 
 function showBatch(app, files, leftOut) {
   const { state } = app.store;
-  const animation = currentAnimation(state);
   const title = `Clean ${files.length === 1 ? '1 image' : `${files.length} images`}`;
+  const outcome = { grew: false, used: false };
   // the keys start on the window, and come to Use them all when the cleaning is done: on the
   // first row, they fell to nothing as the rows were drawn again, and Tab then Enter closed the
   // window and threw the cleaning away
-  const sheet = openSheet(title, null, { wide: true, focusField: 'window' });
-  const list = node('div.view-list');
-  const items = batchItems(state, files);
-  const accept = node('button.btn.primary', { disabled: true }, 'Use them all');
-  const draw = () =>
-    keepFocus(list, () =>
-      replace(
-        list,
-        items.map((item) => batchRow(item, state.project, animation)),
-      ),
-    );
-  const scales = { ...state.project.cleanScales };
-  const run = () => cleanEach(state, items, { draw, accept, scales });
-
-  accept.addEventListener('click', () => {
-    keepVersion(app, `Before cleaning ${files.length} images`);
-    // before the step, so it is saved with it
-    app.store.state.project.cleanScales = scales;
-    placeAll(
-      app,
-      items.filter((item) => item.sprite),
-    );
-    toast('Cleaned images placed. A version from just before is in History.');
-    sheet.close();
+  const sheet = openSheet(title, () => cancelGrowth(app, outcome), {
+    wide: true,
+    focusField: 'window',
   });
+  const job = {
+    app,
+    state,
+    files,
+    outcome,
+    sheet,
+    list: node('div.view-list'),
+    offer: node('div'),
+    items: batchItems(state, files),
+    accept: node('button.btn.primary', { disabled: true }, 'Use them all'),
+    scales: { ...state.project.cleanScales },
+  };
+
+  job.draw = () => drawRows(job);
+  job.accept.addEventListener('click', () => acceptAll(job));
   // the browser's own append writes a null out as the word: only what is there is appended
   sheet.body.append(
     ...[
       node('p.hint', {}, hintText(state)),
       leftOut ? node('p.hint', {}, leftOutText(leftOut)) : null,
-      list,
-      node('div.sheet-actions', {}, node('button.btn', { onclick: sheet.close }, 'Cancel'), accept),
+      job.offer,
+      job.list,
+      node(
+        'div.sheet-actions',
+        {},
+        node('button.btn', { onclick: sheet.close }, 'Cancel'),
+        job.accept,
+      ),
     ].filter(Boolean),
   );
-  draw();
-  run();
+  job.draw();
+  runBatch(job);
 }
