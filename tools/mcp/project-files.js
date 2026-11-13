@@ -12,10 +12,19 @@ function spriteOf(dataUrl) {
   return { width, height, pixels: new Uint8ClampedArray(data) };
 }
 
+// a file that is not JSON at all is not a project, said as one that is JSON of another kind
+function parsed(words) {
+  try {
+    return JSON.parse(words);
+  } catch {
+    return null;
+  }
+}
+
 // The file the studio's "Save project file" writes and "Open a project file…" reads: the project's
 // structure, with each layer's pixels as a PNG data URL (src/store/project-file.js).
 export function readProject(path) {
-  const file = JSON.parse(readFileSync(path, 'utf8'));
+  const file = parsed(readFileSync(path, 'utf8'));
 
   if (file?.kind !== 'pixel-clean-studio' || !Array.isArray(file.project?.animations)) {
     throw new Error(`${path} is not a Pixel Clean Studio project file.`);

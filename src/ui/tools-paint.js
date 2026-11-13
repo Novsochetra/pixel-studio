@@ -1,6 +1,6 @@
 import { CLEAR, cloneSprite, getPixel, setPixel, toHex } from '../model/sprite.js';
 import { brushPixels, canPaint, floodFill, linePoints, replaceColor } from '../editor/paint.js';
-import { shadeFamilies, shiftShade } from '../palette/families.js';
+import { shadeRamps, shiftShade } from '../palette/families.js';
 import { Stroke } from '../editor/stroke.js';
 import { topLayerAt } from '../model/layer-ops.js';
 import { frameAt } from '../model/project.js';
@@ -123,7 +123,7 @@ export function shade(app, point, darker) {
   const { state } = app.store;
   const layer = currentLayer(state);
   const before = cloneSprite(layer.sprite);
-  const families = shadeFamilies(characterColors(state));
+  const families = shadeRamps(characterColors(state));
   const touched = new Set();
   let last = null;
   const step = ([x, y]) => {

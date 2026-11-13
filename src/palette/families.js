@@ -56,6 +56,41 @@ export function shadeFamilies(colors) {
   );
 }
 
+const RAMP_STEP = 12;
+const isGrey = ({ saturation, light }) => saturation < 0.15 || light < 0.08;
+
+// hues in order, a new ramp where the next is further than a step away; the two ends join
+// across red when they are near
+function hueRuns(coloured) {
+  const sorted = [...coloured].sort((first, second) => first.hue - second.hue);
+  const runs = [];
+
+  sorted.forEach((entry, i) => {
+    const near = i > 0 && entry.hue - sorted[i - 1].hue <= RAMP_STEP;
+
+    near ? runs.at(-1).push(entry) : runs.push([entry]);
+  });
+
+  if (runs.length > 1 && 360 - runs.at(-1).at(-1).hue + runs[0][0].hue <= RAMP_STEP) {
+    runs[0].unshift(...runs.pop());
+  }
+
+  return runs;
+}
+
+// The ramps the light and dark brush steps along, dark to light: each colour joined to the
+// colour of hue nearest it. Joined to a family's first colour within 28°, the shirt's reds and
+// the skin's browns were one ramp, and Darker shades turned skin into shirt red.
+export function shadeRamps(colors) {
+  const all = colors.map((color) => ({ color, ...hsl(color) }));
+  const greys = all.filter(isGrey);
+  const runs = hueRuns(all.filter((entry) => !isGrey(entry)));
+
+  return [...runs, ...(greys.length ? [greys] : [])].map((run) =>
+    run.map(({ color }) => color).sort((first, second) => luminance(first) - luminance(second)),
+  );
+}
+
 // the next lighter (step 1) or darker (step -1) shade of the colour's family, or the colour itself
 export function shiftShade(color, families, step) {
   const family = families.find((candidate) => candidate.includes(color));

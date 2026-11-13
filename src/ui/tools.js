@@ -26,12 +26,17 @@ function pick(app, [x, y]) {
       ? getPixel(compositeFrame(frameAt(state.project, state.at), width, height), x, y)
       : own;
 
-  if (color !== CLEAR) {
-    app.store.set({
-      color,
-      tool: app.store.state.tool === 'picker' ? 'pencil' : app.store.state.tool,
-    });
+  // a clear pixel picked did nothing, and said nothing
+  if (color === CLEAR) {
+    toast('Nothing is drawn there: pick a colour from the art.');
+
+    return null;
   }
+
+  app.store.set({
+    color,
+    tool: app.store.state.tool === 'picker' ? 'pencil' : app.store.state.tool,
+  });
 
   return null;
 }

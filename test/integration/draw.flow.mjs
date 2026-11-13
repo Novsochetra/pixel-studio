@@ -209,6 +209,15 @@ check(
 );
 check((await pixels('#3d7fe0')).length === 8, 'and the art is as it was');
 
+// the picker on a clear pixel did nothing, and said nothing
+await page.keyboard.press('i');
+await page.mouse.click(...(await at(2, 2)));
+await page.waitForTimeout(150);
+check(
+  (await page.locator('.toast').textContent()).startsWith('Nothing is drawn there'),
+  'the colour picker on a clear pixel says there is nothing to pick',
+);
+
 // Enter twice in the field while the change was under way made a second step that changed
 // nothing: the first undo seemed to do nothing
 await page.getByRole('button', { name: /canvas$/ }).click();

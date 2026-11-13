@@ -15,7 +15,7 @@ function animationSaid(animation) {
   const views = Object.entries(animation.directions).map(([direction, { frames }]) => {
     const layers = frames[0].layers.map(layerSaid).join(', ');
 
-    return `    ${directionLabel(direction)} (${direction}): ${frames.length} frames; layers bottom to top: ${layers}`;
+    return `    ${directionLabel(direction)} (${direction}): ${frames.length} frame${frames.length === 1 ? '' : 's'}; layers bottom to top: ${layers}`;
   });
 
   return [`  ${animation.name}, ${animation.fps} fps`, ...views].join('\n');

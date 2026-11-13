@@ -81,3 +81,14 @@ export function enlarged(sprite, longSide = 384) {
 
   return { width, height, pixels };
 }
+
+const outside = ({ width, height }, { x, y }) => x < 0 || y < 0 || x >= width || y >= height;
+
+// the pixels asked for that fall off the canvas: left out, they were left out without a word
+export function leftOut(sprite, { pixels = [], rows = [], at = { x: 0, y: 0 } }) {
+  const marks = rows.flatMap((row, y) =>
+    [...row].flatMap((mark, x) => (mark === ' ' ? [] : [{ x: at.x + x, y: at.y + y }])),
+  );
+
+  return [...pixels, ...marks].filter((point) => outside(sprite, point)).length;
+}

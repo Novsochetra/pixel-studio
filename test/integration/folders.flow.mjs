@@ -82,6 +82,11 @@ check(
     (await page.getByText('Nothing in this folder yet').count()) === 1,
   'the new folder opens, saying how to put projects in it',
 );
+// opened on its own empty page, none of the projects to put in it were in sight
+check(
+  (await page.getByRole('button', { name: /^Move .+ to Naga Eleven$/ }).count()) > 0,
+  'and offers the projects to put in it, there on its page',
+);
 await goTo('All projects');
 await row('Sochetra').dragTo(place('Naga Eleven'));
 await page.waitForTimeout(200);

@@ -2,12 +2,14 @@ import { existsSync } from 'node:fs';
 import { PATH, WHERE, schema, text } from './answers.js';
 import { locate } from './locate.js';
 import { readProject, writeProject } from './project-files.js';
-import { paintPixels, paintRows } from './text-grid.js';
+import { leftOut, paintPixels, paintRows } from './text-grid.js';
 import { startAnimation } from '../../src/model/animations.js';
 import { addFrame, frameCount } from '../../src/model/frames.js';
 import { KINDS } from '../../src/model/kinds.js';
 import { newProject } from '../../src/model/new-project.js';
 import { addLayer } from '../../src/model/structure.js';
+import { CANVAS_LIMITS } from '../../src/model/canvas-size.js';
+import { freeName } from '../../src/model/free-name.js';
 
 // a change is read, made and written back: the file is the project
 function changed(path, change) {
@@ -38,8 +40,10 @@ function setPixels({ path, pixels, rows, palette, at, ...where }) {
     const count =
       (pixels ? paintPixels(layer.sprite, pixels) : 0) +
       (rows ? paintRows(layer.sprite, { rows, palette, at }) : 0);
+    const off = leftOut(layer.sprite, { pixels, rows, at });
+    const { width, height } = layer.sprite;
 
-    return `${count} pixels changed on ${layer.name}`;
+    return `${count} pixel${count === 1 ? '' : 's'} changed on ${layer.name}${off ? `; ${off} outside the ${width}×${height} canvas were left out` : ''}`;
   });
 }
 
@@ -57,10 +61,15 @@ function addFrameAfter({ path, copy = false, ...where }) {
 function addLayerAbove({ path, name, ...where }) {
   return changed(path, (project) => {
     const { frame } = locate(project, where);
+    // a name the frame has already is numbered: two of one name, and a layer named was the first
+    const free = freeName(
+      name,
+      frame.layers.map((each) => each.name),
+    );
 
-    addLayer(project, frame, { name });
+    addLayer(project, frame, { name: free });
 
-    return `${name} is the top layer of that frame: ${frame.layers.map((each) => each.name).join(', ')}`;
+    return `${free} is the top layer of that frame: ${frame.layers.map((each) => each.name).join(', ')}`;
   });
 }
 
@@ -71,6 +80,9 @@ function addAnimation({ path, name, frames = 1, fps = 8 }) {
     return `Made ${made.name}: ${frames} empty frames in each view, ${fps} fps`;
   });
 }
+
+// the sizes the studio opens a canvas at: 1 to 512 let through files it could not open
+const SIDE = { minimum: CANVAS_LIMITS.min, maximum: CANVAS_LIMITS.max };
 
 const PIXELS = {
   type: 'array',
@@ -114,8 +126,8 @@ export const EDIT_TOOLS = [
       path: PATH,
       name: { type: 'string' },
       kind: { type: 'string', enum: Object.keys(KINDS), description: 'Default: character.' },
-      width: { type: 'integer', minimum: 1, maximum: 512 },
-      height: { type: 'integer', minimum: 1, maximum: 512 },
+      width: { type: 'integer', ...SIDE },
+      height: { type: 'integer', ...SIDE },
       overwrite: { type: 'boolean' },
     }),
     run: create,

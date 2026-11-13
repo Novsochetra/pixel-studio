@@ -2,6 +2,7 @@ import { node } from '../dom.js';
 import { forHands } from '../platform-keys.js';
 import { placeHead } from './place-head.js';
 import { projectRow } from './project-row.js';
+import { folderFill } from './folder-fill.js';
 import { EVERY_PROJECT, projectsIn } from '../../store/browse.js';
 
 const UNREADABLE =
@@ -10,7 +11,9 @@ const ALONE =
   'Your other projects show here, each with its own views, animations, colours and history. For the next one of its kind, "… like this" under This project sets one up as this one is, with nothing drawn.';
 const EMPTY_FOLDER = `Nothing in this folder yet. Pick "Move to folder…" in a project’s ⋯ menu${forHands(', or drag a project onto the folder', '')}.`;
 
-function emptyHint({ app, view }, entries) {
+function emptyHint(job, entries) {
+  const { app, view } = job;
+
   if (app.index.unreadable) {
     return node('p.hint', {}, UNREADABLE);
   }
@@ -23,7 +26,7 @@ function emptyHint({ app, view }, entries) {
     return entries.length > 1 ? null : node('p.hint', {}, ALONE);
   }
 
-  return entries.length ? null : node('p.hint', {}, EMPTY_FOLDER);
+  return entries.length ? null : [node('p.hint', {}, EMPTY_FOLDER), folderFill(job, view.place)];
 }
 
 // inside one folder, its name on every row would only repeat the heading

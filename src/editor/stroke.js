@@ -18,6 +18,8 @@ export class Stroke {
     this.before = cloneSprite(sprite);
     this.path = [];
     this.last = null;
+    // how often the stroke has passed over each pixel
+    this.passes = new Map();
   }
 
   add(x, y) {
@@ -33,6 +35,7 @@ export class Stroke {
   place(point) {
     paintPoint(this.sprite, point, this.color, this.options);
     this.path.push(point);
+    this.passes.set(point.join(), (this.passes.get(point.join()) ?? 0) + 1);
 
     if (this.cleans && this.path.length >= 3) {
       this.removeCorner();
@@ -42,12 +45,21 @@ export class Stroke {
   removeCorner() {
     const [first, second, third] = this.path.slice(-3);
 
-    if (isDiagonal(first, third) && isBeside(first, second) && isBeside(second, third)) {
+    if (!(isDiagonal(first, third) && isBeside(first, second) && isBeside(second, third))) {
+      return;
+    }
+
+    const passes = this.passes.get(second.join());
+
+    // A corner the stroke had drawn before, coming back onto its own line, stays: put back as
+    // it was before the stroke, it punched a hole in that line.
+    if (passes === 1) {
       for (const [x, y] of mirrored(second[0], second[1], this.options.symmetry)) {
         setPixel(this.sprite, x, y, getPixel(this.before, x, y));
       }
-
-      this.path.splice(this.path.length - 2, 1);
     }
+
+    this.passes.set(second.join(), passes - 1);
+    this.path.splice(this.path.length - 2, 1);
   }
 }
