@@ -79,6 +79,69 @@ check(
   'and is left as it was when the fold is done',
 );
 
+// The fold's height was led as the height inside its padding: a section grew by it as it began
+// to shut and snapped by it at the end. Pressed again as it played, it snapped; and with the
+// panel scrolled, the title pressed jumped from under the pointer.
+const foldFrames = async (press) => {
+  await page.evaluate(() => {
+    window.foldFrames = [];
+
+    const tick = () => {
+      const title = document.querySelector('.section[data-name="outline"] > h2');
+
+      window.foldFrames.push({
+        height: title.parentElement.offsetHeight,
+        top: title.getBoundingClientRect().top,
+      });
+
+      if (window.foldFrames.length < 40) {
+        requestAnimationFrame(tick);
+      }
+    };
+
+    requestAnimationFrame(tick);
+  });
+  await press();
+  await page.waitForTimeout(800);
+
+  return page.evaluate(() => window.foldFrames);
+};
+const pressTitle = async () => {
+  const title = await section('outline').locator('h2').boundingBox();
+
+  await page.mouse.click(title.x + 30, title.y + title.height / 2);
+};
+const steps = (frames) =>
+  frames.slice(1).map((frame, i) => Math.abs(frame.height - frames[i].height));
+const opened = await foldFrames(pressTitle);
+const closed = await foldFrames(pressTitle);
+const reversed = await foldFrames(async () => {
+  await pressTitle();
+  await page.waitForTimeout(60);
+  await pressTitle();
+});
+
+check(
+  Math.max(...opened.map(({ height }) => height)) <= opened.at(-1).height + 1 &&
+    Math.max(...closed.map(({ height }) => height)) <= closed[0].height + 1,
+  'a fold neither overshoots nor snaps at its ends',
+);
+// a fold's own steps are up to some 70px a frame; turned back by a snap, one was 186px
+check(
+  Math.max(...steps(reversed)) < 100,
+  `pressed again as it plays, it turns back from where it stood (largest step ${Math.max(...steps(reversed))}px)`,
+);
+await section('outline').locator('h2').click();
+await page.waitForTimeout(500);
+await page.locator('#inspector').evaluate((panel) => (panel.scrollTop = 120));
+await page.waitForTimeout(100);
+const scrolledFold = await foldFrames(pressTitle);
+
+check(
+  Math.abs(scrolledFold.at(-1).top - scrolledFold[0].top) <= 1,
+  'with the panel scrolled, the title pressed stays under the pointer',
+);
+
 // "This view" and "All views" named no view, and stood there with one view to show
 const pick = page.locator('.views-pick');
 const rows = () => page.locator('.grid-row[data-direction]').count();

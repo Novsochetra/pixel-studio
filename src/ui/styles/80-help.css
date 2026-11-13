@@ -79,9 +79,18 @@ kbd {
   display: none;
 }
 
+/* Its height is led from what offsetHeight measured, padding and border in: led as the height
+   inside them, the section grew by them as it started to shut, and snapped by them at the end. */
 .section.folding {
+  box-sizing: border-box;
   overflow: hidden;
   transition: height var(--duration-normal) var(--ease-standard);
+}
+
+/* A section folded above what is in sight moved the panel's scroll to keep that in place: the
+   title just pressed went from under the pointer. */
+:root:not([data-layout='compact']) .inspector {
+  overflow-anchor: none;
 }
 
 .section > h2 {

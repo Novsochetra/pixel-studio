@@ -15,17 +15,25 @@ const FOLDED_AT_FIRST = ['outline', 'guides'];
 // on a phone the dock opens and shuts a panel: its title folds nothing
 const foldsFromTitle = () => document.documentElement.dataset.layout !== 'compact';
 
+// what ends a fold still playing, so a click in the middle of it starts from where it stands
+const endFold = new WeakMap();
+
 // The fold plays out, the section's height led from where it was to where it will be: shut at
-// once, its rows vanished and the sections under it jumped up.
+// once, its rows vanished and the sections under it jumped up. A click while it plays starts the
+// next fold from the height it has reached: measured with that height still set, it snapped.
 function playFold(section, change) {
   const from = section.offsetHeight;
+  const panel = section.parentElement;
+  const scrolled = panel.scrollTop;
 
+  endFold.get(section)?.();
   change();
 
   const to = section.offsetHeight;
   const done = (event) => {
     if (!event || (event.target === section && event.propertyName === 'height')) {
       section.removeEventListener('transitionend', done);
+      endFold.delete(section);
       section.classList.remove('folding');
       section.style.height = '';
     }
@@ -33,6 +41,10 @@ function playFold(section, change) {
 
   section.classList.add('folding');
   section.style.height = `${from}px`;
+  // measured shut for a moment, the panel was too short for its scroll, which the browser cut
+  // back: the title pressed jumped from under the pointer. It shrinks with the fold instead.
+  panel.scrollTop = scrolled;
+  endFold.set(section, () => done());
 
   // nothing moves for someone who asked for less motion, and then no transition ends
   if (from === to || parseFloat(getComputedStyle(section).transitionDuration) === 0) {
