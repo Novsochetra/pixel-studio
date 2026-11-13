@@ -44,3 +44,32 @@ export function characterCounts(state) {
 export function characterColors(state) {
   return characterCounts(state).map(({ color }) => color);
 }
+
+function addColours(totals, sprite) {
+  for (const { color, count } of sprite ? colorCounts(sprite) : []) {
+    totals.set(color, (totals.get(color) ?? 0) + count);
+  }
+}
+
+function addAnimation(totals, state, animation) {
+  const at = { ...state, at: { ...state.at, animation: animation.id } };
+
+  for (const [direction, { frames }] of Object.entries(animation.directions)) {
+    frames.forEach((frame, index) => addColours(totals, artSprite(at, direction, index)));
+  }
+}
+
+// Every colour drawn anywhere in the project, most used first: what a swap applied everywhere
+// changes. Listed from the open frame alone, a colour drawn only in another frame or animation
+// could not be swapped, though Apply to all recoloured them.
+export function everyColourCount(state) {
+  const totals = new Map();
+
+  state.project.animations.forEach((animation) => addAnimation(totals, state, animation));
+
+  return [...totals.entries()]
+    .sort((first, second) => second[1] - first[1])
+    .map(([color, count]) => ({ color, count }));
+}
+
+export const everyColour = (state) => everyColourCount(state).map(({ color }) => color);

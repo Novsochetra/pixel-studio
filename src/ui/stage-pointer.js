@@ -5,6 +5,7 @@ import { twoFingerSession } from './pinch.js';
 import { stopPlayback } from './grid/playback.js';
 import { playsAllViews } from './play-all-views.js';
 import { touchIntent } from './touch-intent.js';
+import { keepToLock } from './palette-lock.js';
 import { bindBeside } from './stage-beside.js';
 import { withTaps } from './stage-taps.js';
 import { getPixel, toHex } from '../model/sprite.js';
@@ -52,6 +53,7 @@ function pressSession(app, view, event) {
   }
 
   canvas.setPointerCapture(event.pointerId);
+  keepToLock(app);
 
   return startTool(app, pixelAt(canvas, event, app.store.state.zoom), event);
 }

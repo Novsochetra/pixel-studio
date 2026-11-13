@@ -154,6 +154,20 @@ test('a palette added is a step that undo takes off', async () => {
   assert.equal(project.palettes.length, had);
 });
 
+// a kit kept as a swap twice was two palettes of one name, which the list could not tell apart
+test('a palette added takes a name no other palette has', async () => {
+  const { addPaletteStep } = await import('../../src/ui/palette-step.js');
+  const project = newProject({ kind: 'character' });
+  const app = appOf(project);
+
+  addPaletteStep(app, { id: 'p-1', name: 'Cambodia home', colors: [1] });
+  addPaletteStep(app, { id: 'p-2', name: 'Cambodia home', colors: [1] });
+  assert.deepEqual(
+    project.palettes.slice(-2).map(({ name }) => name),
+    ['Cambodia home', 'Cambodia home 2'],
+  );
+});
+
 // after Swap colours a guide that marked the top of the old blue marked nothing
 test('a guide that follows a colour follows it to its new one, and back with undo', async () => {
   const { recolourLayers } = await import('../../src/ui/body/recolour.js');

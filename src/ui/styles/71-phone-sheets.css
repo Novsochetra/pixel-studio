@@ -13,6 +13,14 @@
     background: var(--stage);
   }
 
+  /* With the on-screen keys up (keyboard-room.js) the app keeps their height at its foot: the
+     stage gives way, and a panel's field typed in stands above them. Under them, a guide's name
+     was typed unseen. */
+  :root[data-layout='compact'] .app {
+    box-sizing: border-box;
+    padding-bottom: var(--keyboard, 0px);
+  }
+
   /* glass over the stage, as the bars of the phone's own system are */
   :root[data-layout='compact'] :is(.rail, .dock-tab[data-panel='colours'], .dock-more) {
     border: 0;

@@ -2,7 +2,7 @@
 // the colour in hand, and the panels. A panel is a sheet that rises over the screen's foot; the
 // row at its top picks another panel, and it is pulled down by its bar or shut by its ×.
 import { fingers, openStudio } from './harness.mjs';
-import { openExample } from './studio.mjs';
+import { openDock, openExample } from './studio.mjs';
 
 const { page, context, check, finish, shots } = await openStudio({ device: 'Pixel 7' });
 await openExample(page);
@@ -198,5 +198,26 @@ check(
   `with a sheet up the selection’s bar stands under the canvas, not over it (${Math.round(bar.top)} under ${Math.round(under.bottom)})`,
 );
 await page.screenshot({ path: `${shots}/phone-sheet-selection.png` });
+
+// A panel's field stayed under the on-screen keys: no test can raise them, so the part of the
+// page in sight is made as short as they leave it (as phone-turned.flow.mjs does).
+await page.keyboard.press('Escape');
+await openDock(page, 'Guides');
+await page.locator('.guide-row input[aria-label="Guide name"]').last().focus();
+const screenHeight = page.viewportSize().height;
+const inSight = Math.round(screenHeight * 0.58);
+
+await page.evaluate((shown) => {
+  Object.defineProperty(window.visualViewport, 'height', { get: () => shown, configurable: true });
+  window.visualViewport.dispatchEvent(new window.Event('resize'));
+}, inSight);
+await page.waitForTimeout(300);
+const typedIn = await page.evaluate(() => document.activeElement.getBoundingClientRect().bottom);
+
+check(
+  typedIn <= inSight,
+  `with the keys up, a panel's field typed in stands above them (${Math.round(typedIn)} of ${inSight})`,
+);
+await page.screenshot({ path: `${shots}/phone-sheet-keys-up.png` });
 
 await finish();

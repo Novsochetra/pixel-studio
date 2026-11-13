@@ -7,6 +7,7 @@ import { toHex } from '../model/sprite.js';
 import { wholeNumber } from '../model/numbers.js';
 import { afterPress } from './after-press.js';
 import { fieldRow } from './list-group.js';
+import { freeName } from '../model/free-name.js';
 
 function checks(app, guide) {
   const { state } = app.store;
@@ -81,6 +82,15 @@ function rowField(project, guide, update) {
 }
 
 // one guide, a group of its own: its name and row, what it marks, and how far off each view is
+
+// A name typed that another guide has is numbered, as a new guide's is: two guides of one name
+// had two Remove buttons of one name.
+function freeGuideName(project, guide, typed) {
+  const others = project.guides.filter((other) => other !== guide).map(({ name }) => name);
+
+  return freeName(typed.trim() || 'Guide', others);
+}
+
 export function guideRow(app, guide) {
   const { project } = app.store.state;
   const update = updater(app, guide);
@@ -97,7 +107,7 @@ export function guideRow(app, guide) {
         value: guide.name,
         'aria-label': 'Guide name',
         id: `guide-name-${guide.id}`,
-        onchange: (event) => update({ name: event.target.value || 'Guide' }),
+        onchange: (event) => update({ name: freeGuideName(project, guide, event.target.value) }),
       }),
       rowField(project, guide, update),
       node(

@@ -115,3 +115,10 @@ export function applyMapping(sprite, mapping) {
 export function paletteFromHexCodes(name, hexCodes) {
   return { id: newId('p'), name, colors: hexCodes.map(fromHex) };
 }
+
+// Under palette lock, the colour to paint with: the one in hand while it is allowed, else the
+// allowed colour nearest it. A swap took the colour in hand out of the art, and the lock, which
+// looked only as it was switched on, let it be painted back.
+export function lockedColor(color, allowed) {
+  return !allowed.length || allowed.includes(color) ? color : nearestColor(color, allowed);
+}

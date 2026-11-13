@@ -118,7 +118,9 @@ const sizeOf = ({ width, height }, canvas) => ({
 async function changeSize(app, { fields, job, sheet }, button) {
   const { canvas } = app.store.state.project;
 
-  if (refuses(fields)) {
+  // Enter pressed twice in the field while the first change was under way made a second step,
+  // which changed nothing: only the button said a change was running
+  if (button.disabled || refuses(fields)) {
     return;
   }
 

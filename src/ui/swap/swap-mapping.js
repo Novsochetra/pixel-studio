@@ -1,5 +1,6 @@
 import { icon, node, toast } from '../dom.js';
-import { characterColors, characterCounts } from '../character-colours.js';
+import { everyColour, everyColourCount } from '../character-colours.js';
+import { oneStop } from '../one-stop.js';
 import { newId } from '../../model/project.js';
 import { toHex } from '../../model/sprite.js';
 import { reducePalette } from '../../palette/reduce.js';
@@ -7,7 +8,7 @@ import { addPaletteStep } from '../palette-step.js';
 
 // the group says which colour its buttons are for: sixteen rows of "Keep" said nothing of it
 function targetPicker(palette, { from, current }, onPick) {
-  return node(
+  const group = node(
     'div.target-picker',
     { role: 'group', 'aria-label': `What ${toHex(from)} becomes` },
     node(
@@ -29,18 +30,18 @@ function targetPicker(palette, { from, current }, onPick) {
       }),
     ),
   );
+
+  return oneStop(group);
 }
 
 // one row per character colour: the colour, how much of it there is, and what it becomes
 export function mappingRows(state, palette, mapping, onChange) {
-  const counts = new Map(characterCounts(state).map((entry) => [entry.color, entry.count]));
-
-  return characterColors(state).map((color) =>
+  return everyColourCount(state).map(({ color, count }) =>
     node(
       'div.map-row',
       {},
       node('span.swatch', { style: { background: toHex(color) }, 'aria-hidden': 'true' }),
-      node('span.mono', {}, toHex(color), node('span.hint', {}, ` · ${counts.get(color)} px`)),
+      node('span.mono', {}, toHex(color), node('span.hint', {}, ` · ${count} px`)),
       icon('arrow-right'),
       targetPicker(palette, { from: color, current: mapping[color] }, (target) =>
         onChange(color, target),
@@ -53,7 +54,7 @@ export function mappingRows(state, palette, mapping, onChange) {
 export function makeReducedPalette(app, size) {
   const { state } = app.store;
 
-  if (!characterColors(state).length) {
+  if (!everyColour(state).length) {
     toast('The art has no colours yet. Clean or draw a view first.');
 
     return null;
@@ -62,7 +63,7 @@ export function makeReducedPalette(app, size) {
   const palette = {
     id: newId('p'),
     name: `Character, ${size} colours`,
-    colors: reducePalette(characterCounts(state), size),
+    colors: reducePalette(everyColourCount(state), size),
   };
   addPaletteStep(app, palette);
 

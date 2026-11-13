@@ -4,7 +4,7 @@ import { openSheet } from './sheet.js';
 import { keepFocus } from './keep-focus.js';
 import { allArtLayers } from './actions.js';
 import { recolourLayers } from './body/recolour.js';
-import { characterColors } from './character-colours.js';
+import { everyColour } from './character-colours.js';
 import { mappingRows } from './swap/swap-mapping.js';
 import { paletteStart } from './swap/swap-start.js';
 import { swapSaid } from './swap/swap-said.js';
@@ -18,6 +18,7 @@ import {
 } from './swap/swap-parts.js';
 import { frameAt } from '../model/project.js';
 import { suggestMapping } from '../palette/palette.js';
+import { toHex } from '../model/sprite.js';
 
 function layersFor(state, scope) {
   return scope === 'view'
@@ -43,11 +44,24 @@ function apply(job, mapping, scope) {
 // the palette's mapping: each character colour and what it becomes, kept with the project
 function mappingFor(job, palette) {
   const { project } = job.app.store.state;
-  const colours = characterColors(job.app.store.state);
+  const colours = everyColour(job.app.store.state);
 
   project.mappings[job.paletteId] ??= suggestMapping(colours, palette.colors);
 
   return project.mappings[job.paletteId];
+}
+
+// A choice of what a colour becomes is kept with the project, so it is a step: undo passed over
+// it to the palette before, and redo brought the palette back with the choice in it.
+function changeMapping(job, label, change) {
+  const { app, paletteId } = job;
+  const { project } = app.store.state;
+  const before = structuredClone(project.mappings);
+
+  change(project.mappings, paletteId);
+  app.history.recordSetting(label, 'mappings', before, structuredClone(project.mappings));
+  app.saver.markStructure();
+  job.draw();
 }
 
 function setTarget(mapping, color, target) {
@@ -58,14 +72,12 @@ function setTarget(mapping, color, target) {
   }
 }
 
-function mappingHeader(job, palette, changed) {
+function mappingHeader(job, palette) {
   const { app } = job;
-  const suggest = () => {
-    const colours = characterColors(app.store.state);
-
-    app.store.state.project.mappings[job.paletteId] = suggestMapping(colours, palette.colors);
-    changed();
-  };
+  const suggest = () =>
+    changeMapping(job, 'Suggest nearest', (mappings, id) => {
+      mappings[id] = suggestMapping(everyColour(app.store.state), palette.colors);
+    });
 
   return node(
     'div.compare',
@@ -101,19 +113,15 @@ function applyButtons(job, mapping) {
 function drawMapping(job, palette) {
   const { app } = job;
   const mapping = mappingFor(job, palette);
-  const changed = () => {
-    app.saver.markStructure();
-    job.draw();
-  };
-  const onChange = (color, target) => {
-    setTarget(mapping, color, target);
-    changed();
-  };
+  const onChange = (color, target) =>
+    changeMapping(job, `Swap ${toHex(color)}`, (mappings, id) =>
+      setTarget(mappings[id], color, target),
+    );
   const rows = mappingRows(app.store.state, palette, mapping, onChange);
 
   replace(
     job.slot,
-    mappingHeader(job, palette, changed),
+    mappingHeader(job, palette),
     node('div.compare', {}, node('div.map-table', {}, rows), previewFigure(app, mapping)),
     node(
       'details',

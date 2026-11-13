@@ -1,4 +1,6 @@
-import { node } from './dom.js';
+import { node, toast } from './dom.js';
+import { characterColors } from './character-colours.js';
+import { lockedColor } from '../palette/palette.js';
 import { toHex } from '../model/sprite.js';
 import { fieldRow, listGroup, switchRow } from './list-group.js';
 
@@ -42,13 +44,33 @@ function paintOverField(app, colors) {
   );
 }
 
+const allowedBy = (state, colors) => [
+  ...colors,
+  ...(state.project.palettes ?? []).flatMap((palette) => palette.colors),
+];
+
+// as a stroke starts: the art or its palettes may have changed since the lock was switched on
+export function keepToLock(app) {
+  const { state } = app.store;
+
+  if (!state.paletteLock) {
+    return;
+  }
+
+  const color = lockedColor(state.color, allowedBy(state, characterColors(state)));
+
+  if (color !== state.color) {
+    app.store.set({ color });
+    toast(
+      `Palette lock: ${toHex(state.color)} is in neither the art nor its palettes now: ${toHex(color)} is in hand`,
+    );
+  }
+}
+
 // Palette lock, and what a stroke paints over
 export function lockGroup(app, colors) {
   const { state } = app.store;
-  const allowed = [
-    ...colors,
-    ...(state.project.palettes ?? []).flatMap((palette) => palette.colors),
-  ];
+  const allowed = allowedBy(state, colors);
   const lock = (on) =>
     app.store.set({
       paletteLock: on,

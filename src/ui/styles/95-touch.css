@@ -248,7 +248,7 @@
 
   /* a line that opens what is under it: tall enough to land on */
   summary {
-    min-height: 36px;
+    min-height: 40px;
   }
 
   .rail .btn[data-key]::after {

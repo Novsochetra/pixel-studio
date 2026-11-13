@@ -60,6 +60,21 @@ check(
   `two guides added have names of their own (${added.join(', ')})`,
 );
 
+// renamed to another guide's name, there were two of one name, each with its Remove button
+const lastName = page.locator('.guide-row input[aria-label="Guide name"]').last();
+
+await lastName.fill(added[0]);
+await lastName.press('Tab');
+await page.waitForTimeout(200);
+const names = await page
+  .locator('.guide-row input[aria-label="Guide name"]')
+  .evaluateAll((fields) => fields.map((field) => field.value));
+
+check(
+  new Set(names).size === names.length,
+  `a guide renamed to another's name is numbered (${names.join(', ')})`,
+);
+
 // The canvas size window said art outside a smaller canvas is cut off, and showed none of it:
 // it shows the frame on the canvas asked for, as it is typed
 await page.locator('#canvas-size-link').click();

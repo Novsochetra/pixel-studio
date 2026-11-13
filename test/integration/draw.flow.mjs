@@ -209,6 +209,25 @@ check(
 );
 check((await pixels('#3d7fe0')).length === 8, 'and the art is as it was');
 
+// Enter twice in the field while the change was under way made a second step that changed
+// nothing: the first undo seemed to do nothing
+await page.getByRole('button', { name: /canvas$/ }).click();
+await page.fill('#canvas-width', '50');
+await page.locator('#canvas-width').evaluate((input) => {
+  for (let i = 0; i < 2; i++) {
+    input.dispatchEvent(new globalThis.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  }
+});
+await page.waitForSelector('.sheet', { state: 'detached' });
+await page.waitForTimeout(300);
+await page.keyboard.press('Escape');
+await page.keyboard.press('Meta+z');
+await page.waitForTimeout(300);
+check(
+  (await status(page)).includes('48×40 canvas'),
+  'Enter pressed twice changes the size once: one undo takes it back',
+);
+
 // Sorted by how much each was used, the art's swatches changed places at a stroke, and the
 // colour under the finger was another one at its next press.
 const swatchOrder = () =>
