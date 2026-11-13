@@ -10,7 +10,10 @@ import { createMemoryFiles } from '../src/files/memory-files.js';
 function distFolder() {
   const root = mkdtempSync(join(tmpdir(), 'studio-dist-'));
 
-  writeFileSync(join(root, 'index.html'), '<!doctype html><title>Pixel Clean</title>');
+  writeFileSync(
+    join(root, 'index.html'),
+    '<!doctype html><meta charset="utf-8"><title>Pixel Clean</title>',
+  );
 
   return root;
 }

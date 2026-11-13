@@ -23,23 +23,30 @@ test('on Railway with no Postgres it refuses to start, and never shows the URL',
   );
 });
 
-test('migrations run once, and again find nothing to do', async () => {
+test('migrations run once, and again find nothing to do', async (context) => {
   const database = await createPgliteDatabase();
+
+  context.after(() => database.close());
 
   assert.deepEqual(await migrate(database), ['0001_accounts', '0002_documents']);
   assert.deepEqual(await migrate(database), []);
-  await database.close();
 });
 
-test('the page is sent, its health said, and nothing outside its folder', async () => {
+test('the page is sent, its health said, and nothing outside its folder', async (context) => {
   const server = await startServer();
+
+  context.after(() => server.close());
   const page = await fetch(`${server.base}/`);
   const health = await fetch(`${server.base}/api/health`);
   const outside = await fetch(`${server.base}/%2e%2e/package.json`);
 
   assert.equal(page.status, 200);
   assert.match(page.headers.get('content-type'), /text\/html/);
+  assert.match(
+    await page.text(),
+    /<meta name="studio-server" content="accounts">/,
+    'marked as ours',
+  );
   assert.deepEqual(await health.json(), { ok: true });
   assert.equal(outside.status, 404);
-  await server.close();
 });

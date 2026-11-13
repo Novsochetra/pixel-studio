@@ -5,7 +5,9 @@ import { askToSignIn } from './sign-in-screen.js';
 // nobody is), or null where the page has no such server
 // `asking`: called as the sign-in shows, for what was on the screen to give way
 export async function ownerOfWork({ asking }) {
-  const account = await accountOnServer();
+  // the studio's server marks the page it sends (server/src/static-files.js)
+  const onServer = document.querySelector('meta[name="studio-server"]');
+  const account = onServer && (await accountOnServer());
 
   if (!account) {
     return null;

@@ -86,8 +86,10 @@ test('another site cannot call the API with its visitor’s cookie', async () =>
   assert.equal(answer.status, 403);
 });
 
-test('signing in is limited to ten tries a minute for one email', async () => {
+test('signing in is limited to ten tries a minute for one email', async (context) => {
   const fresh = await startServer();
+
+  context.after(() => fresh.close());
   const browser = visitor(fresh.base);
   const tries = [];
 
@@ -102,6 +104,5 @@ test('signing in is limited to ten tries a minute for one email', async () => {
     );
   }
 
-  await fresh.close();
   assert.deepEqual(tries.slice(-2), [401, 429]);
 });

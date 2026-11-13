@@ -27,6 +27,16 @@ function fileOf(root, pathname) {
     : null;
 }
 
+// The page asks about accounts only where this mark says this server sent it: served by anything
+// else (GitHub Pages, a file, claude.ai) a request for /api/account was a 404 in its console.
+const MARK = '<meta name="studio-server" content="accounts">';
+// build/build.py leaves out <head>, as HTML may: the mark follows the charset, which comes first
+const CHARSET = '<meta charset="utf-8">';
+const marked = (path, body) =>
+  extname(path) === '.html'
+    ? Buffer.from(String(body).replace(CHARSET, `${CHARSET}${MARK}`))
+    : body;
+
 // The built page (dist/, from build/build.py) and what goes with it: the manifest, the icons and
 // the offline worker.
 export function createStaticFiles(root) {
@@ -41,7 +51,7 @@ export function createStaticFiles(root) {
     sendBody(response, {
       status: 200,
       contentType: TYPES[extname(path)],
-      body,
+      body: marked(path, body),
       headers: { 'Cache-Control': cacheOf(path) },
     });
   };

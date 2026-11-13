@@ -12,6 +12,12 @@ const openProjects = async () => {
 
 check(await page.locator('.start-screen').isVisible(), 'a first visit opens on the start screen');
 check(
+  !(await page.evaluate(() =>
+    performance.getEntriesByType('resource').some((entry) => entry.name.includes('/api/')),
+  )),
+  'a page not sent by the studio’s server asks it nothing (GitHub Pages, a file)',
+);
+check(
   (await page.getByRole('radio').count()) === 6,
   'it offers five kinds and the Naga Eleven preset',
 );
