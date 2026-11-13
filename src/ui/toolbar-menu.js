@@ -7,6 +7,7 @@ import { canInstall, installApp } from './install-app.js';
 import { FILTERS } from './toolbar-parts.js';
 import { hasKeyboard } from './platform-keys.js';
 import { paste } from './selection-keys.js';
+import { signOutAndLeave } from './account/owner.js';
 
 // with no keyboard this is the only way to paste; Copy is on the selection's own bar
 const pasteEntry = (app) => ['Paste', () => paste(app), { disabled: !app.clipboard?.length }];
@@ -49,6 +50,8 @@ function moreEntries(app) {
       hasKeyboard() ? ['Keyboard shortcuts…', () => openShortcuts(app.store.state.project)] : null,
       canInstall() ? ['Install app', () => installApp()] : null,
     ].filter(Boolean),
+    // on the studio's own server: the account the work is kept in, and the way out of it
+    app.backend.owner ? [[`Sign out of ${app.backend.owner.email}`, signOutAndLeave]] : [],
   ];
 
   return groups

@@ -10,12 +10,20 @@ const SAVE_TEXT = {
   error: 'Not saved',
 };
 
+const onServer = (state) => String(state.storage).startsWith('server:');
+
 export function saveText(state) {
-  const where =
-    { account: 'to your account', browser: 'in this browser', none: '' }[state.storage] ?? '';
+  const where = onServer(state)
+    ? 'to your account'
+    : ({ account: 'to your account', browser: 'in this browser', none: '' }[state.storage] ?? '');
 
   if (state.storage === 'none') {
     return 'Not saved: download a project file to keep your work';
+  }
+
+  // kept in this browser, and sent to the account when the server answers again
+  if (onServer(state) && state.serverAway && state.saveStatus === 'saved') {
+    return 'Saved on this device: not yet sent to your account';
   }
 
   return state.saveStatus === 'saved' ? `Saved ${where}` : (SAVE_TEXT[state.saveStatus] ?? '');

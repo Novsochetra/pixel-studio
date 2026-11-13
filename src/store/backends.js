@@ -1,3 +1,8 @@
+import { browserStorage } from './left-unsaved.js';
+import { serverBackend } from './server-backend.js';
+import { syncedBackend } from './synced-backend.js';
+import { waitingKeys } from './waiting-keys.js';
+
 // Where the project is kept: the viewer's private space in the artifact's store when the page
 // runs on claude.ai signed in, otherwise this browser's IndexedDB, otherwise nowhere.
 
@@ -81,9 +86,10 @@ function committed(database, change) {
   return done;
 }
 
-async function browserBackend() {
+// `name`: the store's own, one for each account signed in on the studio's server
+async function browserBackend(name = 'pixel-clean-studio') {
   try {
-    const open = indexedDB.open('pixel-clean-studio', 1);
+    const open = indexedDB.open(name, 1);
 
     open.onupgradeneeded = () => open.result.createObjectStore('docs');
     const database = await request(open);
@@ -122,7 +128,37 @@ function memoryBackend() {
   };
 }
 
-export async function openBackend() {
+// An account on the studio's own server: its work there, and a copy in this browser of its own,
+// so two accounts signed in here in turn never see each other's.
+async function serverWork(owner) {
+  const local = (await browserBackend(`pixel-clean-studio-u-${owner.id}`)) ?? memoryBackend();
+  const backend = syncedBackend({
+    owner,
+    kind: `server:${owner.id}`,
+    server: serverBackend(),
+    local: { ...local, writeAll: local.writeAll ?? writeEach(local) },
+    waiting: waitingKeys(browserStorage(), owner.id),
+  });
+
+  // what the last visit could not send, and what waits as the network comes back
+  backend.sendWaiting();
+  addEventListener('online', () => backend.sendWaiting());
+
+  return backend;
+}
+
+const writeEach = (local) => async (entries) => {
+  for (const [key, data] of entries) {
+    await local.write(key, data);
+  }
+};
+
+// `owner`: the account signed in on the studio's server, or null where the page has none
+export async function openBackend(owner = null) {
+  if (owner) {
+    return serverWork(owner);
+  }
+
   let account = null;
 
   try {

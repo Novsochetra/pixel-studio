@@ -14,6 +14,7 @@ import { openLineUp } from './line-up-sheet.js';
 import { projectPages } from './project-pages.js';
 import { EVERY_PROJECT, knownPlace } from '../../store/browse.js';
 import { addFolder, folderOf } from '../../store/folders.js';
+import { accountGroup } from '../account/account-group.js';
 
 const SORT_KEY = 'pixel-clean-projects-sort';
 
@@ -127,7 +128,7 @@ export function openProjectsSheet(app) {
 
   // the new project's form is open on its own page and shut off it
   const book = projectPages(
-    { all: [browseBar(job), parts.browser], this: [parts.current] },
+    { all: [browseBar(job), parts.browser, accountGroup(app)], this: [parts.current] },
     (page) => {
       const section = sheet.body.querySelector('.start-section');
 

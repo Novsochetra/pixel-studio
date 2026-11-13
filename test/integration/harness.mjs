@@ -82,13 +82,15 @@ export async function fingers(context, page) {
 }
 
 // The page on a fresh browser profile, with its errors collected and a list of checks that fail
-// the flow. args: [url, images, shots].
+// the flow. args: [url, images, shots]; a flow with a server of its own gives its `address`.
 export async function openStudio({
   device = null,
   viewport = { width: 1440, height: 960 },
   initScript = null,
+  address = null,
 } = {}) {
-  const [url, images, shots] = process.argv.slice(2);
+  const [given, images, shots] = process.argv.slice(2);
+  const url = address ?? given;
 
   mkdirSync(shots, { recursive: true });
   const browser = await engine.launch();

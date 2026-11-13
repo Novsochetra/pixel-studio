@@ -8,6 +8,7 @@ import { sampleProject } from './sample.js';
 import { showStartScreen } from './start/start-screen.js';
 import { showOpening } from './opening-screen.js';
 import { openBackend } from '../store/backends.js';
+import { ownerOfWork } from './account/owner.js';
 import { browserStorage, restoreLeftUnsaved } from '../store/left-unsaved.js';
 import { readIndex } from '../store/projects.js';
 import { deletePreset, readPresets } from '../store/presets.js';
@@ -30,10 +31,14 @@ async function startEditor(backend, index, { project, prefix, save }) {
   const store = createStore({
     ...startingState(project),
     storage: backend.kind,
+    serverAway: Boolean(backend.away),
     layout: layoutSize(),
     panel: null,
   });
   const app = { store, backend, index };
+
+  // the toolbar says when work is kept here and not yet on the studio's server
+  backend.onAway &&= (away) => store.set({ serverAway: away });
 
   app.findLayer = (id) =>
     [...allLayers(store.state.project)].find(({ layer }) => layer.id === id)?.layer ?? null;
@@ -90,8 +95,9 @@ function startScreenHandlers(backend, index, closeScreen) {
   };
 }
 
-async function openWork() {
-  const backend = await openBackend();
+async function openWork(opening) {
+  const owner = await ownerOfWork({ asking: () => opening.close() });
+  const backend = await openBackend(owner);
 
   // before anything is read: a stroke the last visit left unsaved is in the work it opens
   await restoreLeftUnsaved(browserStorage(), backend).catch(() => false);
@@ -114,7 +120,7 @@ async function boot() {
   const opening = showOpening();
 
   try {
-    await openWork();
+    await openWork(opening);
     opening.close();
   } catch (error) {
     opening.fail(error);

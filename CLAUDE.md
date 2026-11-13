@@ -6,15 +6,18 @@ any game. One page, built from `src/` by `build/build.py`. The rules are the fig
 
 ## Commands
 
-| Command          | What it runs                                                             |
-| ---------------- | ------------------------------------------------------------------------ |
-| `npm run serve`  | builds the page and serves it on http://localhost:8811/wrapped.html      |
-| `npm run check`  | lint, format check, unit and regression tests, the build, every flow     |
-| `npm run lint`   | ESLint (`eslint.config.js`, local rules in `tools/eslint-rules/`)        |
-| `npm run format` | Prettier, writes files                                                   |
-| `npm test`       | the unit and regression tests, and the tests of `tools/` (`node --test`) |
-| `npm run build`  | `dist/index.html`; the build refuses import cycles and missing exports   |
-| `npm run mcp`    | the MCP server Claude Code edits project files through (`.mcp.json`)     |
+| Command                 | What it runs                                                               |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `npm run serve`         | builds the page and serves it on http://localhost:8811/wrapped.html        |
+| `npm run dev`           | builds the page and runs the server (accounts, Postgres in memory) on 8811 |
+| `npm run db:migrate`    | applies new migrations to the Postgres at `DATABASE_URL`                   |
+| `npm run storage:check` | puts, reads and removes one small file in the S3 bucket                    |
+| `npm run check`         | lint, format check, unit and regression tests, the build, every flow       |
+| `npm run lint`          | ESLint (`eslint.config.js`, local rules in `tools/eslint-rules/`)          |
+| `npm run format`        | Prettier, writes files                                                     |
+| `npm test`              | the unit and regression tests, the tests of `tools/` and of `server/`      |
+| `npm run build`         | `dist/index.html`; the build refuses import cycles and missing exports     |
+| `npm run mcp`           | the MCP server Claude Code edits project files through (`.mcp.json`)       |
 
 ## Coding
 
@@ -97,6 +100,17 @@ Where a file goes:
 2. It reads or writes saved work: `store/`.
 3. It reads or writes a file format, or needs the browser's canvas or images: `io/`.
 4. Everything else is plain logic in the folder of what it is about.
+
+`server/` is the studio's own server (Node 22, deployed on Railway: `docs/deploy-railway.md`): it
+sends `dist/` and keeps accounts and their saved work. `server/src/` holds `accounts/` (passwords,
+sessions, sign in), `docs/` (the saved documents, the browser's store keys), `files/` (the S3
+bucket of the layers' pictures), `db/` (Postgres, PGlite in memory without `DATABASE_URL`, and
+the migrations: a new table or column is a new migration, never a change to an old one), `http/`
+and `security/`; its tests are in `server/test/`, over PGlite and files in memory. The page
+reaches it only through `src/store/` (`server-account.js`, `server-backend.js`), and works
+without it: `accountOnServer()` is null where there is no server (a file, GitHub Pages, claude.ai)
+and the work stays in the browser. With one, work is saved here first and then sent
+(`synced-backend.js`), and a save that does not land waits to be sent again.
 
 No catch-all folders (`helpers/`, `utils/`, `constants/`): a constant lives with its owner.
 `test/unit/layout.test.js` holds `src/` to these folders and fails when anything outside `ui/`

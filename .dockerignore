@@ -1,0 +1,10 @@
+/.git
+/node_modules
+/dist
+/shots
+/test
+/tools
+/docs
+/fixtures
+/.railway
+**/__pycache__

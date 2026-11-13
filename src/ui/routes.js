@@ -5,6 +5,7 @@ export const ROUTES = {
     'showGrid',
     'saveStatus',
     'storage',
+    'serverAway',
     'pixels',
     'project',
     'viewFilter',

@@ -61,8 +61,9 @@ export function encodePng({ width, height, pixels }) {
 
 function chunksOf(file) {
   const chunks = {};
+  let at = SIGNATURE.length;
 
-  for (let at = SIGNATURE.length; at < file.length; ) {
+  while (at < file.length) {
     const length = file.readUInt32BE(at);
     const type = file.toString('ascii', at + 4, at + 8);
     const data = file.subarray(at + 8, at + 8 + length);

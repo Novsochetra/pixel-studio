@@ -1,21 +1,35 @@
 {
   "name": "pixel-clean-studio",
-  "version": "6.16.0",
+  "version": "6.17.0",
+  "engines": {
+    "node": ">=22"
+  },
   "private": true,
   "type": "module",
   "scripts": {
     "build": "python3 build/build.py",
     "serve": "python3 build/build.py && python3 test/wrap.py && python3 -m http.server 8811 --directory dist",
+    "start": "node server/src/main.js",
+    "dev": "python3 build/build.py && node server/src/main.js",
+    "db:migrate": "node server/src/db/migrate-cli.js",
+    "storage:check": "node server/src/files/check-cli.js",
+    "account:password": "node server/src/accounts/password-cli.js",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "node --test test/unit/*.test.js test/regression/*.test.js tools/*/test/*.test.js",
+    "test": "node --test test/unit/*.test.js test/regression/*.test.js tools/*/test/*.test.js server/test/*.test.js",
     "test:flows": "bash test/run-all.sh",
     "mcp": "node tools/mcp/server.js",
     "check": "bash test/run-all.sh"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
     "eslint": "^10.1.0",
     "playwright": "^1.48.0",
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.1",
+    "railway": "^3.17.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1168.0",
+    "pg": "^8.23.1"
   }
 }

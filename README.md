@@ -1,7 +1,9 @@
 # Pixel Clean Studio
 
 Turns AI-made "fake" pixel art into true pixel art, then lets you edit, animate and export it for
-any game. Everything runs in the browser; the build makes one self-contained HTML page.
+any game. Everything runs in the browser; the build makes one self-contained HTML page. Served by
+its own server (`server/`, deployed on Railway), the studio has accounts: work is saved to the
+account, in Postgres and S3, and opens on any device signed in to it.
 
 - **Start**: pick what you are making (a character, an object, tiles, an effect, an icon) or a game
   preset such as Naga Eleven; save any project as a preset of your own.
@@ -65,6 +67,16 @@ npm run serve
 
 Then open http://localhost:8811/wrapped.html. Outside claude.ai the page saves to the browser.
 
+With accounts, as on Railway (Node 22):
+
+```bash
+npm run dev
+```
+
+Then open http://localhost:8811/ and sign in. With no `DATABASE_URL` the accounts and work are
+kept in a Postgres in memory, gone when the server stops. Deploying it, with Postgres and the S3
+bucket: `docs/deploy-railway.md`.
+
 ## Install it as an app
 
 It is published at https://novsochetra.github.io/pixel-studio/ by
@@ -113,6 +125,9 @@ to the phone's layout on a real one before calling it done.
 - `src/ui/`: the page, one folder per feature (`grid/`, `start/`, `import/`, …);
   `src/ui/page.html` is its shell and `src/ui/styles/` its stylesheets, tokens first
 - `src/art/`: colours painted as pixel art
+- `server/`: the server that sends the page and keeps accounts and their work (`server/src/`:
+  `accounts/`, `docs/` the saved documents, `files/` the S3 bucket, `db/` Postgres and its
+  migrations, `http/`, `security/`), with its tests in `server/test/`
 - `build/build.py`: joins the modules into one page and refuses import cycles, missing exports and
   calls to functions that were never imported
 - `test/unit/`, `test/integration/`, `test/regression/`: see `CLAUDE.md`
