@@ -52,10 +52,12 @@
   display: none;
 }
 
-/* Cutting into parts: the art, painted by part, beside the list of parts. */
+/* Cutting into parts: the art, painted by part, beside the list of parts. The art's column is
+   the room it is fitted to (cut-view.js): as wide as the art, the parts jumped sideways at
+   each zoom. */
 .cut-layout {
   display: grid;
-  grid-template-columns: minmax(0, auto) minmax(300px, 1fr);
+  grid-template-columns: 456px minmax(300px, 1fr);
   gap: 16px;
   align-items: start;
 }
@@ -76,10 +78,22 @@
   touch-action: none;
 }
 
-/* under the art, what the next stroke does */
+/* under the art, what the next stroke does, and Zoom to part beside it */
+.cut-under {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+  margin-top: 4px;
+}
+
 .cut-paints {
-  margin: 4px 0 0;
-  text-align: center;
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cut-side {
@@ -240,10 +254,27 @@
   }
 }
 
-/* a phone held wide has no height for the art above the parts: it stands beside them */
+/* A phone held wide has no height for the art above the parts: it stands beside them, and what
+   it paints and Zoom to part beside it, where under it they ran past its card. */
 @media (max-width: 860px) and (max-height: 499px) {
   .cut-layout {
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
+  }
+
+  .cut-art {
+    grid-auto-flow: column;
+    align-content: center;
+  }
+
+  .cut-under {
+    flex-direction: column;
+    margin: 0 0 0 6px;
+  }
+
+  .cut-paints {
+    max-width: 6em;
+    white-space: normal;
+    text-align: center;
   }
 }

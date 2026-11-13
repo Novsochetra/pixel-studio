@@ -15,7 +15,7 @@ await page.waitForTimeout(400);
 
 // the colours under the captions: a checkerboard and the guides alone are a handful
 const coloursShown = await page
-  .locator('.sheet canvas[aria-label="The views side by side"]')
+  .locator('.sheet canvas[aria-label^="The views side by side"]')
   .evaluate((canvas) => {
     const { data } = canvas.getContext('2d').getImageData(0, 30, canvas.width, canvas.height - 30);
     const colours = new Set();
@@ -31,6 +31,11 @@ check(
   coloursShown > 8,
   `on an empty frame the kit’s preview still shows the character (${coloursShown} colours)`,
 );
+const said = await page
+  .locator('.sheet canvas[aria-label^="The views side by side"]')
+  .getAttribute('aria-label');
+
+check(said.includes('side · frame 1'), `and says which frame each view shows (“${said}”)`);
 await page.screenshot({ path: `${shots}/kits-preview-empty-frame.png` });
 
 await finish();

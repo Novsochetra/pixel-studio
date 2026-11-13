@@ -55,7 +55,9 @@ export function renderStatus(el, app) {
         ? `sprite ${box.right - box.left}×${box.bottom - box.top}, rows ${box.top}–${box.bottom - 1}`
         : 'empty',
     ),
-    node('span', {}, coloursSaid(colorCounts(sprite).length)),
+    // an empty frame's "empty" says it: 0 colours beside the panel's, which offers the art's from
+    // another frame, read as a contradiction
+    box ? node('span', {}, coloursSaid(colorCounts(sprite).length)) : null,
     node('span', {}, cursor ? `x ${cursor.x}, y ${cursor.y} · ${colourUnder(state, cursor)}` : ''),
     hasKeyboard() ? node('span.status-help', {}, 'Press ? for shortcuts') : null,
   );

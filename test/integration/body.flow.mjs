@@ -215,11 +215,26 @@ await page.waitForTimeout(200);
 check((await page.locator('#pose-part').count()) === 1, 'the pose is kept for the next visit');
 check((await picture()) === beforeVisit, 'and so is what was drawn on the part');
 
+await page.selectOption('#pose-part', { label: 'Foot L' });
+await page.waitForTimeout(150);
 await poseBar.getByRole('button', { name: 'Edit the cut…' }).click();
 await page.waitForTimeout(300);
 check(
   (await page.locator('.sheet h3').textContent()).includes('Edit the cut of Front'),
   'the cut can be edited again',
+);
+check(
+  (await page.locator('.cut-part.picked input').inputValue()) === 'Foot L',
+  'starting on the part being posed, where it started on the top one',
+);
+check(
+  await page.locator('.cut-part.picked').evaluate((row) => {
+    const box = row.getBoundingClientRect();
+    const list = row.closest('.cut-side, [role="list"]').getBoundingClientRect();
+
+    return box.top >= list.top - 1 && box.bottom <= list.bottom + 1;
+  }),
+  'with its row in sight',
 );
 await page.locator('.sheet .btn.primary').click();
 await page.waitForTimeout(300);

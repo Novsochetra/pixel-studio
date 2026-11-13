@@ -1,10 +1,16 @@
 import { icon, node } from '../dom.js';
 import { openMenu } from '../menu.js';
 import { openCutSheet } from './cut-sheet.js';
-import { resetPose, setPart, turnIntoPixels } from './pose-actions.js';
+import { drawOn, resetPose, setPart, turnIntoPixels } from './pose-actions.js';
 
 function poseEntries(app, picked) {
-  const part = picked ? [[`Reset ${picked.name}`, () => setPart(app, picked, null)], null] : [];
+  const part = picked
+    ? [
+        ['Draw on part', () => drawOn(app)],
+        [`Reset ${picked.name}`, () => setPart(app, picked, null)],
+        null,
+      ]
+    : [];
 
   return [
     ...part,
@@ -23,7 +29,7 @@ export function poseMore(app, picked) {
     {
       id: 'pose-more',
       'aria-label': 'More for the pose',
-      title: 'Reset, turn into pixels, edit the cut',
+      title: 'Draw on the part, reset, turn into pixels, edit the cut',
       onclick: (event) =>
         openMenu(event.currentTarget, poseEntries(app, picked), { align: 'right' }),
     },

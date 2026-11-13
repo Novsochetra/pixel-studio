@@ -4,7 +4,8 @@ const DESK = { width: 440, height: 420 };
 const MARGIN = 3;
 
 // The room the art may take: beside the parts on a desk; on a phone above them, or beside them
-// when it is held wide, and no more than leaves the parts their share of the screen. Shrunk by
+// when it is held wide (what it paints and Zoom to part beside it, 87-body.css), and no more than
+// leaves the parts their share of the screen. Shrunk by
 // the stylesheet instead, the art was squashed and the brush painted beside the finger.
 function roomFor({ innerWidth, innerHeight }) {
   if (innerWidth > 860) {
@@ -12,8 +13,8 @@ function roomFor({ innerWidth, innerHeight }) {
   }
 
   return innerHeight < 500
-    ? { width: innerWidth * 0.4 - 40, height: innerHeight - 190 }
-    : { width: Math.min(DESK.width, innerWidth - 72), height: innerHeight * 0.34 };
+    ? { width: innerWidth * 0.4 - 140, height: innerHeight - 210 }
+    : { width: Math.min(DESK.width, innerWidth - 72), height: innerHeight * 0.34 - 20 };
 }
 
 // the part of the art that has pixels, with a margin, and how many times its size it is shown;

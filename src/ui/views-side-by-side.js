@@ -70,9 +70,13 @@ export function viewsSideBySide(state, scale, options = {}) {
   context.fillStyle = cssVar('--stage');
   context.fillRect(0, 0, canvas.width, canvas.height);
 
+  const captions = [];
+
   directions.forEach((direction, i) => {
     const x = i * (width * scale + GAP);
     const frame = frameShown(state, direction, options);
+
+    captions.push(caption(state, direction, frame).toLowerCase());
 
     context.save();
     context.translate(x, CAPTION);
@@ -82,6 +86,9 @@ export function viewsSideBySide(state, scale, options = {}) {
     context.fillStyle = cssVar('--label');
     context.fillText(caption(state, direction, frame), x, 18, width * scale);
   });
+
+  // what each view shows is drawn on the picture: said to someone who cannot see it too
+  canvas.setAttribute('aria-label', `The views side by side: ${captions.join(', ')}`);
 
   return canvas;
 }

@@ -13,6 +13,14 @@ export function poseTarget(state) {
   };
 }
 
+// a part picked is on the Body, so the Pencil draws on it whichever layer was being edited
+export const onBody = (app) => ({
+  ...app.store.state.at,
+  layer: poseTarget(app.store.state).body.key,
+});
+
+export const drawOn = (app) => app.store.set({ tool: 'pencil', at: onBody(app) });
+
 // one part's pose changed: change is part of { x, y, angle }, or null to put it back at rest
 export function withPart(pose, id, change) {
   const parts = { ...pose.parts, [id]: { ...partPose(pose, id), ...change } };

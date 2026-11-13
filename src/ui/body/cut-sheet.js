@@ -12,7 +12,7 @@ import { cutSource, leftoverLayer, rigOf } from '../../model/body/body.js';
 import { cutCanvas } from './cut-canvas.js';
 import { partsList } from './cut-list.js';
 import { makeCut } from './cut-apply.js';
-import { brushControls } from './cut-brush.js';
+import { brushControls, zoomSwitch } from './cut-brush.js';
 import { keepingFocus } from './cut-focus.js';
 import { mayLeave, rememberPlan } from './cut-leave.js';
 import { changing, undoButtons, watchCutKeys } from './cut-undo.js';
@@ -27,8 +27,13 @@ function cutFrom(state) {
   return isArt(chosen) ? chosen : frameAt(state.project, state.at).layers.find(isArt);
 }
 
-// the part picked to paint first is the top one, first in the list, so it is in sight
-const withTopPicked = (job) => ({ ...job, selected: job.plan.parts.length - 1 });
+// The part picked to paint first is the one being posed, so Zoom to part frames it; else the
+// top one, first in the list, so it is in sight.
+function withTopPicked(job, posing = null) {
+  const posed = job.plan.parts.findIndex((part) => part.id === posing);
+
+  return { ...job, selected: posed >= 0 ? posed : job.plan.parts.length - 1 };
+}
 
 function newJob(app) {
   const { state } = app.store;
@@ -40,7 +45,7 @@ function newJob(app) {
   if (rig) {
     const plan = planFromRig(rig, state.project.canvas);
 
-    return withTopPicked({ ...place, plan, source: plan.source, recut: true });
+    return withTopPicked({ ...place, plan, source: plan.source, recut: true }, state.piece);
   }
 
   const layer = cutFrom(state);
@@ -121,6 +126,12 @@ function drawSide(side, job, change) {
   watchBelow(side.querySelector('[role="list"]'));
 }
 
+function titleOf(app, job) {
+  const view = viewName(app.store.state.project, job.direction);
+
+  return job.recut ? `Edit the cut of ${view}` : `Cut ${view} into parts`;
+}
+
 export function openCutSheet(app) {
   const job = newJob(app);
 
@@ -130,18 +141,16 @@ export function openCutSheet(app) {
     return;
   }
 
-  const view = viewName(app.store.state.project, job.direction);
-  const title = job.recut ? `Edit the cut of ${view}` : `Cut ${view} into parts`;
   // the window's own last child, so its buttons stay at the foot while the parts scroll
   const foot = node('div.sheet-actions');
   const mayClose = () => mayLeave(job, foot);
   const stopKeys = watchCutKeys(job);
-  const sheet = openSheet(title, stopKeys, { wide: true, focusField: false, mayClose });
+  const sheet = openSheet(titleOf(app, job), stopKeys, { wide: true, focusField: false, mayClose });
   const side = node('div.cut-side');
-  const paints = node('p.hint.cut-paints');
+  const under = node('div.cut-under');
   const draw = () => {
     drawSide(side, job, change);
-    paints.textContent = strokeSays(job);
+    replace(under, node('p.hint.cut-paints', {}, strokeSays(job)), zoomSwitch(job, change));
     foot.classList.remove('asking');
     replace(foot, actions(job));
   };
@@ -159,8 +168,10 @@ export function openCutSheet(app) {
   rememberPlan(job);
   sheet.body.classList.add('cut-window');
   sheet.body.append(
-    node('div.cut-layout', {}, node('div.cut-art', {}, art.canvas, paints), side),
+    node('div.cut-layout', {}, node('div.cut-art', {}, art.canvas, under), side),
     foot,
   );
   render();
+  // started on the part being posed, its row may be far down the list
+  side.querySelector('.cut-part.picked')?.scrollIntoView({ block: 'nearest' });
 }

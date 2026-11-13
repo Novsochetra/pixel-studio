@@ -100,8 +100,14 @@ const shape = () =>
     return { tall: box.height / box.width, wide: box.width };
   });
 const wholeArt = await shape();
+const zoomAt = await page.getByRole('button', { name: 'Zoom to part' }).boundingBox();
 
-await page.locator('.cut-brush').getByRole('button', { name: 'Zoom to part' }).tap();
+check(
+  zoomAt.x >= 0 && zoomAt.x + zoomAt.width <= 412,
+  'Zoom to part is in sight, where it was two scrolls along the tools’ row',
+);
+
+await page.locator('.cut-art').getByRole('button', { name: 'Zoom to part' }).tap();
 await page.waitForTimeout(300);
 const zoomed = await shape();
 
@@ -118,10 +124,13 @@ await touch('touchMove', [[close.x + close.width * 0.8, close.y + close.height *
 await touch('touchEnd', []);
 await page.waitForTimeout(250);
 check((await sizes()).join() !== beforeZoomedStroke, 'and a stroke there paints the part');
-await page.locator('.cut-brush').getByRole('button', { name: 'Zoom to part' }).tap();
+// Chromium makes no click of the first tap after a driven stroke, wherever it lands
+await page
+  .locator('.cut-art')
+  .getByRole('button', { name: 'Zoom to part' })
+  .evaluate((button) => button.click());
 await page.waitForTimeout(300);
 check((await shape()).tall > 1.5, 'and pressed again it shows the whole art');
-await page.waitForTimeout(1500);
 await page.locator('.sheet').getByRole('button', { name: 'Undo', exact: true }).tap();
 await page.locator('.sheet .btn.primary').tap();
 await page.waitForTimeout(800);
@@ -131,13 +140,17 @@ check(firstControl.x >= 0, 'the Pose bar starts at its first control, the rest a
 // another bar opened where the last one was scrolled to, its part picker off the screen
 await page.selectOption('#pose-part', { index: 1 });
 await page.waitForTimeout(200);
+// with a part picked, the menu of what else a pose can do was a scroll past the screen's edge
+const moreAt = await page.getByRole('button', { name: 'More for the pose' }).boundingBox();
+check(
+  moreAt.x + moreAt.width <= 412,
+  `with a part picked the Pose bar’s ⋯ is on the screen (its right at ${Math.round(moreAt.x + moreAt.width)}px)`,
+);
 await page.locator('.pose-bar').evaluate((bar) => {
   bar.scrollLeft = bar.scrollWidth;
 });
-await page
-  .locator('.pose-bar')
-  .getByRole('button', { name: 'Draw on part' })
-  .evaluate((button) => button.click());
+await page.getByRole('button', { name: 'More for the pose' }).evaluate((button) => button.click());
+await page.getByRole('menuitem', { name: 'Draw on part' }).tap();
 await page.waitForTimeout(300);
 const drawingBar = await page.locator('.pose-bar').evaluate((bar) => ({
   scrolled: bar.scrollLeft,
@@ -165,5 +178,32 @@ const tab = await page.locator('.grid-tab[aria-selected="true"]').evaluate((open
 });
 check(tab.whole && tab.inside, 'with the phone on its side the open tab shows its whole name');
 await page.screenshot({ path: `${shots}/body-phone-landscape.png` });
+
+// the shortest phone on its side: the art ran past its card, its caption under the buttons
+await page.setViewportSize({ width: 658, height: 320 });
+await page.waitForTimeout(400);
+await page.keyboard.press('Escape');
+await page
+  .locator('[aria-label^="Pose"]')
+  .first()
+  .evaluate((button) => button.click());
+await page.getByRole('button', { name: 'More for the pose' }).evaluate((button) => button.click());
+await page.getByRole('menuitem', { name: 'Edit the cut…' }).tap();
+await page.waitForTimeout(600);
+const inCard = await page.evaluate(() => {
+  const card = document.querySelector('.cut-art').getBoundingClientRect();
+  const drawn = document.querySelector('.cut-canvas').getBoundingClientRect();
+  const said = document.querySelector('.cut-paints').getBoundingClientRect();
+  const buttons = document.querySelector('.sheet .sheet-actions').getBoundingClientRect();
+
+  return (
+    drawn.bottom <= card.bottom + 0.5 &&
+    said.bottom <= card.bottom + 0.5 &&
+    card.bottom <= buttons.top
+  );
+});
+
+check(inCard, 'on the shortest phone on its side the art and what it paints stay in their card');
+await page.screenshot({ path: `${shots}/body-phone-short-cut.png` });
 
 await finish();
