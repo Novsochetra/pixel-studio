@@ -390,6 +390,11 @@ Projects → Claude Code makes). A tool that reads or writes a file of the calle
 an `out`) is for the file shelf alone: on the server it is out of the caller's reach. The server
 writes a project as the page saves it (`project-docs.js`, as `src/store/saver.js`), so the page
 opens it; a new tool is on both shelves, and tested on the server too (`server/test/mcp-*.test.js`).
+A tool's writes on the server are told to the account's open pages (`server/src/docs/changes.js`,
+`/api/changes`), and a page with that project open takes the tool's project in place of its own
+as one step to undo (`src/ui/tool-changes.js`), so the person watches it draw and never saves
+over it. The page asks for that stream with POST: the offline worker leaves `/api/` alone now,
+but an earlier build's worker kept every GET whole, and a stream never ends.
 The Docker image keeps `src/` and `tools/mcp/` for it.
 
 ## Testing

@@ -184,6 +184,7 @@ claude mcp add --transport http --scope user pixel-studio https://<name>.up.rail
 The tools are the ones above, with `project` (a project's name) in place of `path`, and
 `list_projects` to start from. `export_sheet` hands the sheet back as a picture, and there is no
 `clean_image`: the server cannot read a file on your machine, so clean pictures in the studio.
-The studio reads a project from the server as it opens it: close the project in the studio while
-Claude Code changes it, or the studio saves over the change. A new key stops the last one, and
+Keep the project open in the studio, signed in to the same account, to watch Claude Code (or
+Codex, or any MCP client with the key) draw: the server tells the page each change
+(`/api/changes`), and the page shows it at once, as one step Undo takes back. A new key stops the last one, and
 **Turn off** stops it at once; a password set again stops it too.

@@ -3,6 +3,8 @@ import { accountRoutes } from './accounts/accounts-api.js';
 import { createAccountsStore } from './accounts/accounts-store.js';
 import { mcpKeyRoutes } from './accounts/mcp-key-api.js';
 import { createMcpKeysStore } from './accounts/mcp-keys-store.js';
+import { changesRoutes } from './docs/changes-api.js';
+import { createChanges } from './docs/changes.js';
 import { docsRoutes } from './docs/docs-api.js';
 import { createDocsStore } from './docs/docs-store.js';
 import { healthRoutes } from './health.js';
@@ -16,7 +18,7 @@ import { createStaticFiles } from './static-files.js';
 // ten tries a minute at signing in or up, from one address or for one email
 const signInLimiter = () => createRateLimiter({ limit: 10, windowMs: 60000 });
 
-function apiRoutes({ database, files, trustProxy, secureCookies, limiter, logError }) {
+function apiRoutes({ database, files, changes, trustProxy, secureCookies, limiter, logError }) {
   const accounts = createAccountsStore(database);
   const docs = createDocsStore(database, files);
   const keys = createMcpKeysStore(database);
@@ -26,7 +28,8 @@ function apiRoutes({ database, files, trustProxy, secureCookies, limiter, logErr
     ...accountRoutes({ accounts, limiter, trustProxy, secure: secureCookies }),
     ...mcpKeyRoutes({ accounts, keys }),
     ...docsRoutes({ accounts, docs }),
-    ...mcpRoutes({ keys, docs, logError }),
+    ...changesRoutes({ accounts, changes }),
+    ...mcpRoutes({ keys, docs, changes, logError }),
   ];
 }
 
@@ -51,10 +54,11 @@ async function dispatch({ request, response, routes, serveStatic }) {
 
 // options: { database, files, distRoot, trustProxy, secureCookies, limiter, logError }
 export function createStudioServer({ distRoot, logError = console.error, ...options }) {
-  const routes = apiRoutes({ limiter: signInLimiter(), logError, ...options });
+  const changes = createChanges();
+  const routes = apiRoutes({ limiter: signInLimiter(), changes, logError, ...options });
   const serveStatic = createStaticFiles(distRoot);
 
-  return http.createServer((request, response) => {
+  const server = http.createServer((request, response) => {
     dispatch({ request, response, routes, serveStatic }).catch((error) => {
       logError(error);
 
@@ -65,4 +69,9 @@ export function createStudioServer({ distRoot, logError = console.error, ...opti
       }
     });
   });
+
+  // a page following its work holds its request open: close() would wait on it for ever
+  server.endStreams = changes.endAll;
+
+  return server;
 }

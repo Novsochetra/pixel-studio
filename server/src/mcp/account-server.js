@@ -25,10 +25,10 @@ const listTool = (shelf) => ({
   run: async () => [text(listSaid(await shelf.list()))],
 });
 
-// The page reads a project from the server as it opens it, and saves the whole of it as it is
-// edited: a tab with the project open saves over what a tool changed.
+// A page open on the account follows each change a tool makes and shows it at once; a page with
+// no way to the server (no network) still saves over it as it comes back.
 const INSTRUCTIONS =
-  'Tools for the projects saved in one Pixel Clean Studio account. Start with list_projects, then describe_project; read_frame before and after set_pixels. The studio shows a change the next time the project is opened: tell the user to close the project in the studio while you edit it, or the studio saves over your change.';
+  'Tools for the projects saved in one Pixel Clean Studio account. Start with list_projects, then describe_project; read_frame before and after set_pixels. A studio signed in to this account with the project open shows each change at once, so the user can watch you draw. Draw in small steps (a part, an outline, a shade at a time) rather than one huge set_pixels, so they see it take shape. Each change is one step they can undo.';
 
 export function accountServer(backend) {
   const shelf = accountShelf(backend);

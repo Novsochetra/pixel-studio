@@ -23,7 +23,7 @@ const UNREACHABLE = 'Your saved work could not be reached just now. Try again in
 
 // The database's and the bucket's own words are for the server's log: a tool's caller is told
 // a sentence, as a page is.
-function accountBackend({ docs, logError }, userId) {
+function accountBackend({ docs, logError }, { userId, touched }) {
   const said =
     (work) =>
     async (...args) => {
@@ -37,9 +37,11 @@ function accountBackend({ docs, logError }, userId) {
 
   return {
     read: said((key) => docs.read(userId, key)),
-    write: said((key, data) => docs.writeAll(userId, [[key, data]])),
-    writeAll: said((entries) => docs.writeAll(userId, entries)),
-    remove: said((key) => docs.remove(userId, key)),
+    write: said((key, data) => docs.writeAll(userId, [[key, data]]).then(() => touched.add(key))),
+    writeAll: said((entries) =>
+      docs.writeAll(userId, entries).then(() => entries.forEach(([key]) => touched.add(key))),
+    ),
+    remove: said((key) => docs.remove(userId, key).then(() => touched.add(key))),
   };
 }
 
@@ -69,8 +71,14 @@ async function mcp(request, response, deps) {
     return sendError(response, body);
   }
 
-  const answer = mcpAnswerer(accountServer(accountBackend(deps, user.id)));
+  const touched = new Set();
+  const answer = mcpAnswerer(accountServer(accountBackend(deps, { userId: user.id, touched })));
   const replies = await answersTo([body.value].flat(), answer);
+
+  // told once the whole request is done: a page that read a project half written showed it so
+  if (touched.size) {
+    deps.changes.tell(user.id, { by: 'tool', keys: [...touched] });
+  }
 
   if (!replies.length) {
     response.writeHead(202, BASE_HEADERS);
@@ -81,7 +89,7 @@ async function mcp(request, response, deps) {
   return sendJson(response, { json: Array.isArray(body.value) ? replies : replies[0] });
 }
 
-// deps: { keys, docs, logError }
+// deps: { keys, docs, changes, logError }
 export const mcpRoutes = (deps) => [
   route('/mcp', { POST: (request, response) => mcp(request, response, deps) }),
 ];

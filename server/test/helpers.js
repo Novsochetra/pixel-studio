@@ -39,7 +39,13 @@ export async function startServer(options = {}) {
     base,
     files,
     database,
-    close: () => new Promise((done) => server.close(done)).then(() => database.close()),
+    close: () => {
+      const closed = new Promise((done) => server.close(done));
+
+      server.endStreams();
+
+      return closed.then(() => database.close());
+    },
   };
 }
 

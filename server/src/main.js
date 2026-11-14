@@ -20,6 +20,7 @@ server.listen(config.port, config.host, () => {
 // database go.
 function shutDown() {
   server.close(() => database.close());
+  server.endStreams();
   server.closeIdleConnections();
 }
 

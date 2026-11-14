@@ -24,6 +24,7 @@ import { keepSaveKey } from './keyboard.js';
 import { inWords } from '../model/told.js';
 import { watchView } from './view-kept.js';
 import { watchOtherTabs } from './other-tabs.js';
+import { followTools } from './tool-changes.js';
 
 // the editor, opened on one project; `save` as install() takes it
 async function startEditor(backend, index, { project, prefix, save }) {
@@ -47,6 +48,7 @@ async function startEditor(backend, index, { project, prefix, save }) {
   mountApp(app);
   watchView(app);
   app.otherTabs = watchOtherTabs(app);
+  followTools(app);
 
   // a project made or opened here is written at once, as adding one in the editor is
   if (save === 'all') {
